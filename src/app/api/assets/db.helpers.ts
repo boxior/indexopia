@@ -2,6 +2,8 @@ import {readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
 import getAssets from "@/app/api/assets/getAssets";
 import moment from "moment/moment";
 import getAssetHistory from "@/app/api/assets/getAssetHistory";
+import {DbItems} from "@/app/api/assets/db.types";
+import {Asset, AssetHistory, NormalizedAssetHistory, NormalizedAssets} from "@/utils/types/general.types";
 
 const ASSETS_FOLDER_PATH = "/db/assets";
 const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
@@ -63,4 +65,41 @@ const handleGetAllAssetsHistories = async () => {
             await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
         }
     }
+};
+
+export const normalizeAssets = async (): Promise<NormalizedAssets> => {
+    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
+    const assetsList = assets?.data ?? [];
+
+    const normalizedAssets: NormalizedAssets = {};
+
+    for (const asset of assetsList) {
+        if (asset.id) {
+            normalizedAssets[asset.id] = asset;
+        }
+    }
+
+    return normalizedAssets;
+};
+
+export const normalizeAssetsHistory = async (): Promise<NormalizedAssetHistory> => {
+    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
+    const assetsList = assets?.data ?? [];
+
+    const normalizedAssetHistory: NormalizedAssetHistory = {};
+
+    for (const asset of assetsList) {
+        if (asset.id) {
+            const history = (await readJsonFile(
+                `asset_${asset.id}_history`,
+                {},
+                ASSETS_HISTORY_FOLDER_PATH
+            )) as DbItems<AssetHistory>;
+            const historyList = history?.data ?? [];
+
+            normalizedAssetHistory[asset.id] = historyList;
+        }
+    }
+
+    return normalizedAssetHistory;
 };
