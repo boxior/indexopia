@@ -2,6 +2,8 @@ import {promises as fs} from "fs";
 import {uniqBy} from "lodash";
 import {RecordWithId} from "@/utils/types/general.types";
 import {ENV_VARIABLES} from "@/env";
+import path from "path";
+
 /**
  * This file is useful to test locally jsons.
  */
@@ -119,3 +121,39 @@ export const getIfExistJsonItemInArray = async (id: string, fileName: string, fo
         return false;
     }
 };
+
+/**
+ * Processes all files in a folder and applies a callback to their content.
+ *
+ * @param folderPath - Absolute or relative path to the folder
+ * @param callback - A callback function that processes each file's content
+ */
+export async function processFilesInFolder<T extends Record<string, unknown>>(
+    folderPath: string | undefined = "/db",
+    callback: (json: T, fileName: string) => void
+): Promise<void> {
+    try {
+        // Resolve the absolute path of the folder
+        const filesPath = `${process.cwd()}${folderPath}`;
+
+        // Read all entries in the folder
+        const files: string[] = await fs.readdir(filesPath);
+
+        // Iterate over the files
+        for (const file of files) {
+            const filePath: string = path.join(filesPath, file);
+
+            // Check if the entry is a file and not a directory
+            const stat = await fs.lstat(filePath);
+            if (stat.isFile()) {
+                // Read the file contents
+                const content: T = (await readJsonFile(file, {} as T, filesPath)) as T;
+
+                // Call the callback function with file content and name
+                callback(content, file);
+            }
+        }
+    } catch (error) {
+        console.error("Error processing files in folder:", error);
+    }
+}
