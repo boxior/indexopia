@@ -40,8 +40,10 @@ const handleGetAssetHistory = async ({id}: {id: string}) => {
     const end = moment().valueOf();
 
     const newData = await getAssetHistory({
+        interval: "d1",
+        start,
+        end,
         id,
-        params: {interval: "d1", start, end},
     });
 
     const newList = (newData as any).data ?? [];
