@@ -28,51 +28,84 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Asset, AssetHistory, NormalizedAssetHistory} from "@/utils/types/general.types";
 
-const data: Asset[] = [
+const data: Payment[] = [
     {
-        id: "bitcoin",
-        rank: "1",
-        symbol: "BTC",
-        name: "Bitcoin",
-        supply: "19825181.0000000000000000",
-        maxSupply: "21000000.0000000000000000",
-        marketCapUsd: "1925275466470.2756778983560402",
-        volumeUsd24Hr: "3258694900.2738844391393532",
-        priceUsd: "97112.6299664187518842",
-        changePercent24Hr: "-0.5596263726513635",
-        vwap24Hr: "97457.6771885174285351",
-        explorer: "https://blockchain.info/",
+        id: "m5gr84i9",
+        amount: 316,
+        status: "success",
+        email: "ken99@yahoo.com",
+    },
+    {
+        id: "3u1reuv4",
+        amount: 242,
+        status: "success",
+        email: "Abe45@gmail.com",
+    },
+    {
+        id: "derv1ws0",
+        amount: 837,
+        status: "processing",
+        email: "Monserrat44@gmail.com",
+    },
+    {
+        id: "5kma53ae",
+        amount: 874,
+        status: "success",
+        email: "Silas22@gmail.com",
+    },
+    {
+        id: "bhqecj4p",
+        amount: 721,
+        status: "failed",
+        email: "carmella@hotmail.com",
     },
 ];
 
-const get24H% = (history: AssetHistory[]) => {
-    const
-}
+export type Payment = {
+    id: string;
+    amount: number;
+    status: "pending" | "processing" | "success" | "failed";
+    email: string;
+};
 
-const columns: ColumnDef<Asset>[] = [
+const columns: ColumnDef<Payment>[] = [
     {
-        accessorKey: "order",
-        header: "#",
+        id: "select",
+        header: ({table}) => (
+            <Checkbox
+                checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+                onCheckedChange={value => table.toggleAllPageRowsSelected(!!value)}
+                aria-label="Select all"
+            />
+        ),
+        cell: ({row}) => (
+            <Checkbox
+                checked={row.getIsSelected()}
+                onCheckedChange={value => row.toggleSelected(!!value)}
+                aria-label="Select row"
+            />
+        ),
+        enableSorting: false,
+        enableHiding: false,
+    },
+    {
+        accessorKey: "status",
+        header: "Status",
         cell: ({row}) => <div className="capitalize">{row.getValue("status")}</div>,
     },
     {
-        accessorKey: "index",
-        header: "Index",
-        cell: ({row}) => <div className="capitalize">{row.getValue("status")}</div>,
+        accessorKey: "email",
+        header: ({column}) => {
+            return (
+                <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
+                    Email
+                    <ArrowUpDown />
+                </Button>
+            );
+        },
+        cell: ({row}) => <div className="lowercase">{row.getValue("email")}</div>,
     },
-    {
-        accessorKey: "assets",
-        header: "Assets",
-        cell: ({row}) => <div className="lowercase">{row.getValue("name")}</div>,
-    },
-    {
-        accessorKey: "assets",
-        header: "24h%",
-        cell: ({row}) => <div className="lowercase">{row.getValue("name")}</div>,
-    },
-
     {
         accessorKey: "amount",
         header: () => <div className="text-right">Amount</div>,
