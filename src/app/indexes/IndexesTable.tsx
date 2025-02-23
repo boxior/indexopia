@@ -29,6 +29,7 @@ import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import moment from "moment";
 import {renderProfitNumber} from "@/utils/heleprs/ui/renderProfitNumber.helper";
+import {ReactNode} from "react";
 
 export default function IndexesTable({data}: {data: Index[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -40,7 +41,7 @@ export default function IndexesTable({data}: {data: Index[]}) {
         {
             accessorKey: "rank",
             header: "#",
-            cell: ({row}) => <div className="capitalize">{row.getValue("rank")}</div>,
+            cell: ({row}) => <div className="capitalize">{row.index + 1}</div>,
         },
         {
             accessorKey: "name",
@@ -164,6 +165,7 @@ export default function IndexesTable({data}: {data: Index[]}) {
                             .getAllColumns()
                             .filter(column => column.getCanHide())
                             .map(column => {
+                                console.log("column", column);
                                 return (
                                     <DropdownMenuCheckboxItem
                                         key={column.id}
@@ -171,7 +173,7 @@ export default function IndexesTable({data}: {data: Index[]}) {
                                         checked={column.getIsVisible()}
                                         onCheckedChange={value => column.toggleVisibility(!!value)}
                                     >
-                                        {column.id}
+                                        {(column.columnDef.header as ReactNode) ?? column.id}
                                     </DropdownMenuCheckboxItem>
                                 );
                             })}
@@ -219,10 +221,6 @@ export default function IndexesTable({data}: {data: Index[]}) {
                 </Table>
             </div>
             <div className="flex items-center justify-end space-x-2 py-4">
-                <div className="flex-1 text-sm text-muted-foreground">
-                    {table.getFilteredSelectedRowModel().rows.length} of {table.getFilteredRowModel().rows.length}{" "}
-                    row(s) selected.
-                </div>
                 <div className="space-x-2">
                     <Button
                         variant="outline"
