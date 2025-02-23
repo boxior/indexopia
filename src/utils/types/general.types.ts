@@ -31,6 +31,7 @@ export enum IndexId {
     TOP_5 = "top5",
     TOP_10 = "top10",
     TOP_30 = "top30",
+    TOP_50 = "top50",
 }
 export interface Index {
     id: IndexId;
