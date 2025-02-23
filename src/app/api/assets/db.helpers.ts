@@ -3,13 +3,13 @@ import getAssets from "@/app/api/assets/getAssets";
 import moment from "moment/moment";
 import getAssetHistory from "@/app/api/assets/getAssetHistory";
 import {DbItems} from "@/app/api/assets/db.types";
-import {Asset, AssetHistory, NormalizedAssetHistory, NormalizedAssets} from "@/utils/types/general.types";
+import {Asset, AssetHistory, Index, NormalizedAssetHistory, NormalizedAssets} from "@/utils/types/general.types";
 
-const ASSETS_FOLDER_PATH = "/db/assets";
-const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
+export const ASSETS_FOLDER_PATH = "/db/assets";
+export const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const handleGetAllAssets = async () => {
+export const handleGetAllAssets = async () => {
     const fileName = "assets";
 
     const prevData = await readJsonFile(fileName, {}, ASSETS_FOLDER_PATH);
@@ -27,17 +27,25 @@ const handleGetAllAssets = async () => {
     return await handleGetAllAssets();
 };
 
-const handleGetAssetHistory = async ({id}: {id: string}) => {
+export const handleGetAssetHistory = async ({id}: {id: string}) => {
     const fileName = `asset_${id}_history`;
     const oldData = await readJsonFile(fileName, {}, ASSETS_HISTORY_FOLDER_PATH);
     const oldList = (oldData as any)?.data ?? [];
 
+    let start = moment().utc().startOf("day").add(-11, "year").add(-1, "day").valueOf();
     if (oldList.length > 0) {
-        return;
+        start = moment(oldList[oldList.length - 1].time)
+            .utc()
+            .startOf("day")
+            .add(1, "day")
+            .valueOf();
     }
 
-    const start = moment().add(-11, "year").add(1, "minute").valueOf();
-    const end = moment().valueOf();
+    const end = moment().utc().startOf("day").valueOf();
+
+    if (start === end) {
+        return;
+    }
 
     const newData = await getAssetHistory({
         interval: "d1",
@@ -52,13 +60,13 @@ const handleGetAssetHistory = async ({id}: {id: string}) => {
         return;
     }
 
-    await writeJsonFile(fileName, {data: newList}, ASSETS_HISTORY_FOLDER_PATH);
+    await writeJsonFile(fileName, {data: [...oldList, ...newList]}, ASSETS_HISTORY_FOLDER_PATH);
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const handleGetAllAssetsHistories = async () => {
+export const handleGetAllAssetsHistories = async (upToRank: number | undefined = 50) => {
     const assets = await readJsonFile("assets", {}, ASSETS_FOLDER_PATH);
-    const assetsList = (assets as any)?.data ?? [];
+    const assetsList = ((assets as any)?.data ?? []).slice(0, upToRank);
 
     for (const asset of assetsList) {
         try {
@@ -104,4 +112,151 @@ export const normalizeAssetsHistory = async (): Promise<NormalizedAssetHistory> 
     }
 
     return normalizedAssetHistory;
+};
+
+export type HistoryOverview = {
+    days1: number;
+    days7: number;
+    total: number;
+};
+export const getAssetHistoryOverview = async (
+    id: string,
+    historyListProp?: AssetHistory[]
+): Promise<HistoryOverview> => {
+    const history = historyListProp
+        ? {data: historyListProp}
+        : ((await readJsonFile(`asset_${id}_history`, {}, ASSETS_HISTORY_FOLDER_PATH)) as DbItems<AssetHistory>);
+
+    const historyList = history?.data ?? [];
+
+    const lastDay = moment().utc().startOf("day").add(-1, "day").valueOf();
+    const lastDayItem = historyList.find(item => item.time === lastDay);
+    const oneDayAgo = historyList.find(
+        item => item.time === moment(lastDay).utc().startOf("day").add(-1, "day").valueOf()
+    );
+    const sevenDaysAgo = historyList.find(
+        item => item.time === moment(lastDay).utc().startOf("day").add(-7, "day").utc().valueOf()
+    );
+
+    const days1Profit = Number(lastDayItem?.priceUsd) - Number(oneDayAgo?.priceUsd);
+    const days1ProfitPercent = days1Profit / Number(oneDayAgo?.priceUsd);
+
+    const days7Profit = Number(lastDayItem?.priceUsd) - Number(sevenDaysAgo?.priceUsd);
+    const days7ProfitPercent = days7Profit / Number(sevenDaysAgo?.priceUsd);
+
+    const totalProfit = Number(lastDayItem?.priceUsd) - Number(historyList[0]?.priceUsd);
+    const totalProfitPercent = totalProfit / Number(historyList[0]?.priceUsd);
+
+    return {
+        days1: days1ProfitPercent,
+        days7: days7ProfitPercent,
+        total: totalProfitPercent,
+    };
+};
+
+export const getTopAssets = async (limit: number): Promise<Asset[]> => {
+    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
+    const assetsList = assets?.data ?? [];
+
+    return assetsList.slice(0, limit);
+};
+
+export const getIndexHistoryOverview = async (
+    index: Omit<Index, "historyOverview" | "startTime">
+): Promise<{historyOverview: HistoryOverview; startTime: number | null}> => {
+    // Read all assets
+    const indexAssets = index.assets;
+
+    // Initialize cumulative performance variables
+    let days1 = 0;
+    let days7 = 0;
+    let total = 0;
+
+    // Track valid asset count for averaging
+    let validAssetCount = 0;
+
+    const {histories, startTime} = await fetchAssetHistoriesWithSmallestRange(indexAssets.map(asset => asset.id));
+
+    for (const asset of indexAssets) {
+        try {
+            const assetHistoryOverview = await getAssetHistoryOverview(asset.id, histories[asset.id]);
+
+            // Accumulate changes
+            days1 += assetHistoryOverview.days1;
+            days7 += assetHistoryOverview.days7;
+            total += assetHistoryOverview.total;
+
+            validAssetCount += 1;
+        } catch (error) {
+            console.error(`Failed to calculate history overview for asset ${asset.id}`, error);
+            continue; // Skip assets with errors
+        }
+    }
+
+    // If no valid assets exist in the index, return zeros
+    if (validAssetCount === 0) {
+        return {
+            historyOverview: {days1: 0, days7: 0, total: 0},
+            startTime: null,
+        };
+    }
+
+    const historyOverview = {
+        days1: days1 / validAssetCount,
+        days7: days7 / validAssetCount,
+        total: total / validAssetCount,
+    };
+
+    console.log("historyOverview", historyOverview);
+    // Calculate averages
+    return {
+        historyOverview,
+        startTime,
+    };
+};
+
+export const fetchAssetHistoriesWithSmallestRange = async (
+    assetIds: string[]
+): Promise<{histories: Record<string, AssetHistory[]>; startTime: number | null}> => {
+    const histories: Record<string, AssetHistory[]> = {};
+    let minStartTime: number | null = null;
+    let minStartTimeAsset: string | null = null;
+
+    // Step 1: Read the history for each asset and find the range's minimum start time
+    for (const assetId of assetIds) {
+        const historyFileName = `asset_${assetId}_history`;
+        try {
+            const historyData = (await readJsonFile(
+                historyFileName,
+                {},
+                ASSETS_HISTORY_FOLDER_PATH
+            )) as DbItems<AssetHistory>;
+            const historyList = historyData?.data ?? [];
+
+            if (!historyList.length) {
+                histories[assetId] = []; // No data for this asset
+                continue;
+            }
+
+            // Infer start time and update the global minimum
+            const assetStartTime = Math.min(...historyList.map(item => item.time));
+            minStartTime = minStartTime === null ? assetStartTime : Math.max(minStartTime, assetStartTime); // Take the later start time
+            histories[assetId] = historyList;
+            minStartTimeAsset =
+                minStartTime === null ? assetId : minStartTime === assetStartTime ? assetId : minStartTimeAsset;
+        } catch (error) {
+            console.error(`Error reading history for asset ID ${assetId}:`, error);
+            histories[assetId] = []; // Handle error gracefully
+        }
+    }
+
+    // Step 2: Filter each asset's history to the minimum time range found
+    if (minStartTime !== null) {
+        const minStartTimeFormatted = moment(minStartTime).utc().startOf("day").valueOf();
+        for (const assetId of assetIds) {
+            histories[assetId] = histories[assetId].filter(item => item.time >= minStartTimeFormatted);
+        }
+    }
+    console.log("minStartTimeAsset", minStartTimeAsset);
+    return {histories, startTime: minStartTime};
 };
