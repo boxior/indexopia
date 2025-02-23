@@ -32,7 +32,8 @@ export const handleGetAssetHistory = async ({id}: {id: string}) => {
     const oldData = await readJsonFile(fileName, {}, ASSETS_HISTORY_FOLDER_PATH);
     const oldList = (oldData as any)?.data ?? [];
 
-    let start = moment().utc().startOf("day").add(-11, "year").add(-1, "day").valueOf();
+    let start = moment().utc().startOf("day").add(-11, "year").add(1, "day").valueOf();
+
     if (oldList.length > 0) {
         start = moment(oldList[oldList.length - 1].time)
             .utc()

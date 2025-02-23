@@ -39,3 +39,8 @@ export interface Index {
     historyOverview: HistoryOverview;
     startTime: number | null;
 }
+
+export enum MomentFormat {
+    DATE = "YYYY-MM-DD",
+    DATE_TIME = "YYYY-MM-DD HH:mm",
+}
