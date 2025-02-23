@@ -3,7 +3,6 @@ import {handleGetAllAssets, handleGetAllAssetsHistories, handleGetAssetHistory} 
 export default async function Home() {
     try {
         //
-        await handleGetAssetHistory({id: "bittensor"});
     } catch (err) {
         console.log("ERRRORRRRR", JSON.parse(JSON.stringify(err)));
     }
