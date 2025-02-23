@@ -1,3 +1,5 @@
+import {HistoryOverview} from "@/app/api/assets/db.helpers";
+
 export type RecordWithId = Record<string, unknown> & {id: string};
 
 export interface Asset {
@@ -24,3 +26,16 @@ export interface AssetHistory {
 export type NormalizedAssets = Record<Asset["id"], Asset>;
 
 export type NormalizedAssetHistory = Record<Asset["id"], AssetHistory[]>;
+
+export enum IndexId {
+    TOP_5 = "top5",
+    TOP_10 = "top10",
+    TOP_30 = "top30",
+}
+export interface Index {
+    id: IndexId;
+    name: string;
+    assets: Asset[];
+    historyOverview: HistoryOverview;
+    startTime: number | null;
+}
