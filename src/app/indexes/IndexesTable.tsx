@@ -24,10 +24,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Index, MomentFormat} from "@/utils/types/general.types";
+import {Asset, Index, MomentFormat} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
-import {renderSafelyNumber} from "@/utils/heleprs/renderSavelyNumber.helper";
+import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import moment from "moment";
+import {renderProfitNumber} from "@/utils/heleprs/ui/renderProfitNumber.helper";
 
 export default function IndexesTable({data}: {data: Index[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -49,7 +50,11 @@ export default function IndexesTable({data}: {data: Index[]}) {
         {
             accessorKey: "assets",
             header: "Assets",
-            cell: ({row}) => <div className="lowercase">{row.getValue("name")}</div>,
+            cell: ({row}) => (
+                <div className="capitalize">
+                    {(row.getValue("assets") as Asset[]).map(asset => asset.name).join(", ")}
+                </div>
+            ),
         },
         {
             id: "historyOverview_24h",
@@ -57,7 +62,11 @@ export default function IndexesTable({data}: {data: Index[]}) {
             header: "24h %",
             cell: ({row}) => {
                 const value = row.getValue("historyOverview_24h") as number;
-                return <div className="lowercase">{renderSafelyNumber(value, NumeralFormat.PERCENT)}</div>; // Safely handle null/undefined
+                return (
+                    <div className={`lowercase ${value < 0 ? "text-red-500" : "text-green-500"}`}>
+                        {renderSafelyNumber(value, NumeralFormat.PERCENT)}
+                    </div>
+                ); // Safely handle null/undefined
             },
         },
         {
@@ -66,7 +75,11 @@ export default function IndexesTable({data}: {data: Index[]}) {
             header: "7d %",
             cell: ({row}) => {
                 const value = row.getValue("historyOverview_7d") as number;
-                return <div className="lowercase">{renderSafelyNumber(value, NumeralFormat.PERCENT)}</div>; // Safely render the value
+                return (
+                    <div className={`lowercase ${value < 0 ? "text-red-500" : "text-green-500"}`}>
+                        {renderSafelyNumber(value, NumeralFormat.PERCENT)}
+                    </div>
+                ); // Safely render the value
             },
         },
         {
@@ -75,7 +88,11 @@ export default function IndexesTable({data}: {data: Index[]}) {
             header: "Total %",
             cell: ({row}) => {
                 const value = row.getValue("historyOverview_total") as number;
-                return <div className="lowercase">{renderSafelyNumber(value, NumeralFormat.PERCENT)}</div>; // Format and handle null/undefined
+                return (
+                    <div className={`lowercase ${value < 0 ? "text-red-500" : "text-green-500"}`}>
+                        {renderSafelyNumber(value, NumeralFormat.PERCENT)}
+                    </div>
+                ); // Format and handle null/undefined
             },
         },
         {
@@ -167,8 +184,10 @@ export default function IndexesTable({data}: {data: Index[]}) {
                         {table.getHeaderGroups().map(headerGroup => (
                             <TableRow key={headerGroup.id}>
                                 {headerGroup.headers.map(header => {
+                                    const className = header.id === "assets" ? "w-1/4" : "";
+
                                     return (
-                                        <TableHead key={header.id}>
+                                        <TableHead key={header.id} className={className}>
                                             {header.isPlaceholder
                                                 ? null
                                                 : flexRender(header.column.columnDef.header, header.getContext())}
