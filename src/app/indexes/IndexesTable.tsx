@@ -13,7 +13,7 @@ import {
     getSortedRowModel,
     useReactTable,
 } from "@tanstack/react-table";
-import {ChevronDown} from "lucide-react";
+import {ArrowDown, ArrowUp, ChevronDown} from "lucide-react";
 
 import {Button} from "@/components/ui/button";
 import {
@@ -28,7 +28,6 @@ import {Asset, Index, MomentFormat} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import moment from "moment";
-import {renderProfitNumber} from "@/utils/heleprs/ui/renderProfitNumber.helper";
 import {ReactNode} from "react";
 
 export default function IndexesTable({data}: {data: Index[]}) {
@@ -36,6 +35,29 @@ export default function IndexesTable({data}: {data: Index[]}) {
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
+
+    const renderColumnSortedHeader =
+        (header: ReactNode): ColumnDef<Index>["header"] =>
+        ({column}) => {
+            const sorted = column.getIsSorted();
+
+            return (
+                <Button
+                    className={"p-0"}
+                    variant="ghost"
+                    onClick={() => {
+                        // Toggle sorting between asc, desc, and false
+                        if (sorted === "asc")
+                            column.toggleSorting(true); // Set to desc
+                        else if (sorted === "desc")
+                            column.clearSorting(); // Reset to unsorted
+                        else column.toggleSorting(false); // Set to asc
+                    }}
+                >
+                    {header} {sorted === false ? null : sorted === "asc" ? <ArrowUp /> : <ArrowDown />}
+                </Button>
+            );
+        };
 
     const columns: ColumnDef<Index>[] = [
         {
@@ -45,8 +67,18 @@ export default function IndexesTable({data}: {data: Index[]}) {
         },
         {
             accessorKey: "name",
-            header: "Index",
             cell: ({row}) => <div className="capitalize">{row.getValue("name")}</div>,
+            header: renderColumnSortedHeader("Index"),
+            sortingFn: (rowA, rowB) => {
+                /** Extract the numeric value from the "Index" string */
+                const rankA = parseInt(rowA.original.name.replace("Index ", ""));
+                const rankB = parseInt(rowB.original.name.replace("Index ", ""));
+                /** Perform a numerical comparison */
+                return rankA - rankB;
+            },
+            meta: {
+                text: "Index",
+            },
         },
         {
             accessorKey: "assets",
@@ -60,7 +92,6 @@ export default function IndexesTable({data}: {data: Index[]}) {
         {
             id: "historyOverview_24h",
             accessorFn: row => row.historyOverview?.days1, // Ensure this resolves correctly
-            header: "24h %",
             cell: ({row}) => {
                 const value = row.getValue("historyOverview_24h") as number;
                 return (
@@ -69,11 +100,14 @@ export default function IndexesTable({data}: {data: Index[]}) {
                     </div>
                 ); // Safely handle null/undefined
             },
+            header: renderColumnSortedHeader("24h %"),
+            meta: {
+                text: "24h %",
+            },
         },
         {
             id: "historyOverview_7d",
             accessorFn: row => row.historyOverview?.days7, // Access only the needed value
-            header: "7d %",
             cell: ({row}) => {
                 const value = row.getValue("historyOverview_7d") as number;
                 return (
@@ -82,11 +116,14 @@ export default function IndexesTable({data}: {data: Index[]}) {
                     </div>
                 ); // Safely render the value
             },
+            header: renderColumnSortedHeader("7d %"),
+            meta: {
+                text: "7d %",
+            },
         },
         {
             id: "historyOverview_total",
             accessorFn: row => row.historyOverview?.total, // Ensure total resolves correctly
-            header: "Total %",
             cell: ({row}) => {
                 const value = row.getValue("historyOverview_total") as number;
                 return (
@@ -95,13 +132,20 @@ export default function IndexesTable({data}: {data: Index[]}) {
                     </div>
                 ); // Format and handle null/undefined
             },
+            header: renderColumnSortedHeader("Total %"),
+            meta: {
+                text: "Total %",
+            },
         },
         {
             accessorKey: "startTime",
-            header: "Start from",
             cell: ({row}) => {
                 const value = row.getValue("startTime") as number;
                 return <div className="lowercase">{moment(value).utc().startOf("day").format(MomentFormat.DATE)}</div>; // Format and handle null/undefined
+            },
+            header: renderColumnSortedHeader("Start from"),
+            meta: {
+                text: "Start from",
             },
         },
         {
@@ -122,6 +166,9 @@ export default function IndexesTable({data}: {data: Index[]}) {
 
                 // Combine the outputs
                 return <div className="lowercase">{`${years}${months}${days}`.trim() || "0 days"}</div>;
+            },
+            meta: {
+                text: "Duration",
             },
         },
     ];
@@ -165,7 +212,7 @@ export default function IndexesTable({data}: {data: Index[]}) {
                             .getAllColumns()
                             .filter(column => column.getCanHide())
                             .map(column => {
-                                console.log("column", column);
+                                console.log("column.meta", column.columnDef.meta);
                                 return (
                                     <DropdownMenuCheckboxItem
                                         key={column.id}
@@ -173,7 +220,7 @@ export default function IndexesTable({data}: {data: Index[]}) {
                                         checked={column.getIsVisible()}
                                         onCheckedChange={value => column.toggleVisibility(!!value)}
                                     >
-                                        {(column.columnDef.header as ReactNode) ?? column.id}
+                                        {(column.columnDef.meta as {text: ReactNode})?.text ?? column.id}
                                     </DropdownMenuCheckboxItem>
                                 );
                             })}
