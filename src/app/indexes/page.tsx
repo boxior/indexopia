@@ -10,25 +10,25 @@ export default async function IndexesPage() {
 
     const top5Index: Omit<Index, "historyOverview" | "startTime"> = {
         id: IndexId.TOP_5,
-        name: "Rank 5",
+        name: "Index 5",
         assets: top5Assets,
     };
 
     const top10Index: Omit<Index, "historyOverview" | "startTime"> = {
         id: IndexId.TOP_10,
-        name: "Rank 10",
+        name: "Index 10",
         assets: top10Assets,
     };
 
     const top30Index: Omit<Index, "historyOverview" | "startTime"> = {
         id: IndexId.TOP_30,
-        name: "Rank 30",
+        name: "Index 30",
         assets: top30Assets,
     };
 
     const top50Index: Omit<Index, "historyOverview" | "startTime"> = {
         id: IndexId.TOP_50,
-        name: "Rank 50",
+        name: "Index 50",
         assets: top50Assets,
     };
 
