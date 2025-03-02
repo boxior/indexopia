@@ -39,9 +39,16 @@ export interface Index {
     assets: Asset[];
     historyOverview: HistoryOverview;
     startTime: number | null;
+    history: AssetHistory[];
 }
 
+/**
+ * @link https://momentjscom.readthedocs.io/en/latest/moment/04-displaying/01-format/
+ */
 export enum MomentFormat {
     DATE = "YYYY-MM-DD",
     DATE_TIME = "YYYY-MM-DD HH:mm",
+    DAY_FULL = "dddd, MMMM Do YYYY",
+    DAY_SHORT = "ddd, MMM Do",
+    TIME = "HH:mm",
 }

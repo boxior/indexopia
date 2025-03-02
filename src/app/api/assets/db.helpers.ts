@@ -1,10 +1,9 @@
 import {readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
 import getAssets from "@/app/api/assets/getAssets";
-import moment from "moment/moment";
 import getAssetHistory from "@/app/api/assets/getAssetHistory";
 import {DbItems} from "@/app/api/assets/db.types";
 import {Asset, AssetHistory, Index, NormalizedAssetHistory, NormalizedAssets} from "@/utils/types/general.types";
-
+import momentTimeZone from "moment-timezone";
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
 
@@ -27,25 +26,25 @@ export const handleGetAllAssets = async () => {
     return await handleGetAllAssets();
 };
 
-export const handleGetAssetHistory = async ({id}: {id: string}) => {
+export const handleGetAssetHistory = async ({id}: {id: string}): Promise<AssetHistory[]> => {
     const fileName = `asset_${id}_history`;
     const oldData = await readJsonFile(fileName, {}, ASSETS_HISTORY_FOLDER_PATH);
-    const oldList = (oldData as any)?.data ?? [];
+    const oldList = fulfillAssetHistory((oldData as any)?.data ?? []);
 
-    let start = moment().utc().startOf("day").add(-11, "year").add(1, "day").valueOf();
+    let start = momentTimeZone.tz("UTC").startOf("day").add(-11, "year").add(1, "day").valueOf();
 
     if (oldList.length > 0) {
-        start = moment(oldList[oldList.length - 1].time)
-            .utc()
+        start = momentTimeZone
+            .tz(oldList[oldList.length - 1].time, "UTC")
             .startOf("day")
             .add(1, "day")
             .valueOf();
     }
 
-    const end = moment().utc().startOf("day").valueOf();
+    const end = momentTimeZone.tz("UTC").startOf("day").valueOf();
 
     if (start === end) {
-        return;
+        return oldList;
     }
 
     const newData = await getAssetHistory({
@@ -58,10 +57,59 @@ export const handleGetAssetHistory = async ({id}: {id: string}) => {
     const newList = (newData as any).data ?? [];
 
     if (newList.length === 0) {
-        return;
+        return oldList;
     }
 
-    await writeJsonFile(fileName, {data: [...oldList, ...newList]}, ASSETS_HISTORY_FOLDER_PATH);
+    const data = fulfillAssetHistory([...oldList, ...newList]);
+    await writeJsonFile(fileName, {data}, ASSETS_HISTORY_FOLDER_PATH);
+
+    return data;
+};
+
+const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
+    // Early return if the history is empty or has only one entry
+    if (history.length <= 1) {
+        return history;
+    }
+
+    // Sort the history array by time in ascending order to handle out-of-order data
+    const sortedHistory = [...history].sort((a, b) => a.time - b.time);
+
+    const fulfilledHistory: AssetHistory[] = [sortedHistory[0]];
+
+    // Iterate through sorted history and detect gaps
+    for (let i = 1; i < sortedHistory.length; i++) {
+        const previous = fulfilledHistory[fulfilledHistory.length - 1];
+        const current = sortedHistory[i];
+
+        // Get the UTC start of the day for current and previous entries
+        const previousDayStart = momentTimeZone.tz(previous.time, "UTC").startOf("day");
+        const currentDayStart = momentTimeZone.tz(current.time, "UTC").startOf("day");
+
+        // Calculate the difference in days
+        let dayDifference = currentDayStart.diff(previousDayStart, "days");
+
+        // Fill gaps with cloned entries
+        while (dayDifference > 1) {
+            const newEntry = {...previous}; // Clone the previous record
+            const nextDay = previousDayStart.add(1, "day"); // Move to the next day
+
+            // Update the time and date fields
+            newEntry.time = nextDay.valueOf();
+            newEntry.date = nextDay.toISOString();
+
+            // Add the new entry to the fulfilled history
+            fulfilledHistory.push(newEntry);
+
+            // Decrease the day difference counter
+            dayDifference--;
+        }
+
+        // Add the current entry to the fulfilled history
+        fulfilledHistory.push(current);
+    }
+
+    return fulfilledHistory;
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -130,13 +178,13 @@ export const getAssetHistoryOverview = async (
 
     const historyList = history?.data ?? [];
 
-    const lastDay = moment().utc().startOf("day").add(-1, "day").valueOf();
+    const lastDay = momentTimeZone.tz("UTC").startOf("day").add(-1, "day").valueOf();
     const lastDayItem = historyList.find(item => item.time === lastDay);
     const oneDayAgo = historyList.find(
-        item => item.time === moment(lastDay).utc().startOf("day").add(-1, "day").valueOf()
+        item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-1, "day").valueOf()
     );
     const sevenDaysAgo = historyList.find(
-        item => item.time === moment(lastDay).utc().startOf("day").add(-7, "day").utc().valueOf()
+        item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-7, "day").valueOf()
     );
 
     const days1Profit = Number(lastDayItem?.priceUsd) - Number(oneDayAgo?.priceUsd);
@@ -221,9 +269,8 @@ export const fetchAssetHistoriesWithSmallestRange = async (
 ): Promise<{histories: Record<string, AssetHistory[]>; startTime: number | null}> => {
     const histories: Record<string, AssetHistory[]> = {};
     let minStartTime: number | null = null;
-    let minStartTimeAsset: string | null = null;
 
-    // Step 1: Read the history for each asset and find the range's minimum start time
+    // Step 1: Read the history for each asset and determine the smallest start time
     for (const assetId of assetIds) {
         const historyFileName = `asset_${assetId}_history`;
         try {
@@ -239,25 +286,64 @@ export const fetchAssetHistoriesWithSmallestRange = async (
                 continue;
             }
 
-            // Infer start time and update the global minimum
+            // Determine this asset's start time and update the global minimum
             const assetStartTime = Math.min(...historyList.map(item => item.time));
-            minStartTime = minStartTime === null ? assetStartTime : Math.max(minStartTime, assetStartTime); // Take the later start time
+            // const assetStartTime = historyList[0].time;
+            minStartTime = minStartTime === null ? assetStartTime : Math.max(minStartTime, assetStartTime); // Take the latest overlapping start time
+
             histories[assetId] = historyList;
-            minStartTimeAsset =
-                minStartTime === null ? assetId : minStartTime === assetStartTime ? assetId : minStartTimeAsset;
         } catch (error) {
             console.error(`Error reading history for asset ID ${assetId}:`, error);
             histories[assetId] = []; // Handle error gracefully
         }
     }
 
-    // Step 2: Filter each asset's history to the minimum time range found
+    // Step 2: Filter each asset's history to align with the minimum start time found
     if (minStartTime !== null) {
-        const minStartTimeFormatted = moment(minStartTime).utc().startOf("day").valueOf();
+        const filteredStartTime = momentTimeZone.tz(minStartTime, "UTC").startOf("day").valueOf();
         for (const assetId of assetIds) {
-            histories[assetId] = histories[assetId].filter(item => item.time >= minStartTimeFormatted);
+            histories[assetId] = histories[assetId].filter(item => item.time >= filteredStartTime);
         }
     }
-    console.log("minStartTimeAsset", minStartTimeAsset);
+
     return {histories, startTime: minStartTime};
 };
+
+export const getIndexHistory = async (index: Omit<Index, "historyOverview" | "startTime">): Promise<AssetHistory[]> => {
+    const {histories, startTime} = await fetchAssetHistoriesWithSmallestRange(index.assets.map(asset => asset.id));
+    await writeJsonFile("hisotires_record", histories, "/db/history_records");
+    return mergeAssetHistories(Object.values(histories));
+};
+
+function mergeAssetHistories(histories: AssetHistory[][]): AssetHistory[] {
+    if (histories.length === 0 || histories[0].length === 0) {
+        return [];
+    }
+
+    const arrayLength = histories[0].length;
+
+    const merged: AssetHistory[] = [];
+
+    if (!histories.every(history => history.length === arrayLength)) {
+        throw new Error("All histories must have the same length");
+    }
+
+    for (let i = 0; i < arrayLength; i++) {
+        const currentElements = histories.map(historyArray => historyArray[i]);
+
+        // Since we assume time and date are the same across arrays, pick them from the first array
+        const {time, date} = currentElements[0];
+
+        const averagePrice = (
+            currentElements.reduce((sum, asset) => sum + parseFloat(asset.priceUsd), 0) / currentElements.length
+        ).toFixed(20); // Ensure a fixed precision for the result
+
+        merged.push({
+            time,
+            date,
+            priceUsd: averagePrice,
+        });
+    }
+
+    return merged;
+}
