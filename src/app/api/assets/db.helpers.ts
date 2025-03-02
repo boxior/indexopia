@@ -7,8 +7,7 @@ import momentTimeZone from "moment-timezone";
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
 
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const handleGetAllAssets = async () => {
+export const handleGetAllAssets = async (): Promise<unknown> => {
     const fileName = "assets";
 
     const prevData = await readJsonFile(fileName, {}, ASSETS_FOLDER_PATH);
@@ -256,7 +255,6 @@ export const getIndexHistoryOverview = async (
         total: total / validAssetCount,
     };
 
-    console.log("historyOverview", historyOverview);
     // Calculate averages
     return {
         historyOverview,
