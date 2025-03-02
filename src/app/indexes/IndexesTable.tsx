@@ -29,12 +29,15 @@ import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import moment from "moment";
 import {ReactNode} from "react";
+import {IndexPreviewAreaChart} from "@/app/indexes/IndexPreviewAreaChart";
 
 export default function IndexesTable({data}: {data: Index[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
+
+    console.log("data", data);
 
     const renderColumnSortedHeader =
         (header: ReactNode): ColumnDef<Index>["header"] =>
@@ -119,6 +122,22 @@ export default function IndexesTable({data}: {data: Index[]}) {
             header: renderColumnSortedHeader("7d %"),
             meta: {
                 text: "7d %",
+            },
+        },
+        {
+            id: "historyOverview_7d_chart",
+            accessorFn: row => row.historyOverview?.days7, // Access only the needed value
+            cell: ({row}) => {
+                const value = row.getValue("historyOverview_7d") as number;
+                return (
+                    <div className={`lowercase ${value < 0 ? "text-red-500" : "text-green-500"}`}>
+                        <IndexPreviewAreaChart row={row} />
+                    </div>
+                ); // Safely render the value
+            },
+            header: renderColumnSortedHeader("7d Chart"),
+            meta: {
+                text: "7d Chart",
             },
         },
         {

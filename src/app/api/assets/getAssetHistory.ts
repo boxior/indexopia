@@ -1,6 +1,7 @@
 import axios from "axios";
 import {setQueryParams} from "@/utils/heleprs/setQueryParams.helper";
 import {ENV_VARIABLES} from "@/env";
+import {omit} from "lodash";
 
 export type GetAssetHistoryParams = {
     interval: string; // point-in-time interval, e.g. m1, m5, m15, m30, h1, h2, h6, h12, d1
@@ -11,11 +12,12 @@ export type GetAssetHistoryParams = {
 
 export default async function getAssetHistory(params: GetAssetHistoryParams) {
     try {
-        const strUrl = setQueryParams(`${ENV_VARIABLES.COINCAP_API_URL}/assets/${params.id}/history`, params);
+        const strUrl = setQueryParams(
+            `${ENV_VARIABLES.COINCAP_API_URL}/assets/${params.id}/history/?apiKey=${ENV_VARIABLES.COINCAP_API_KEY}`,
+            omit(params, "id")
+        );
 
-        return await axios
-            .get(strUrl, {headers: {authorization: `Bearer ${ENV_VARIABLES.COINCAP_API_KEY}`}})
-            .then(res => res.data);
+        return await axios.get(strUrl).then(res => res.data);
     } catch (error) {
         console.log(error);
         throw error;
