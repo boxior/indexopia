@@ -1,12 +1,16 @@
-"use client";
-
-import React, {useState} from "react";
+import React from "react";
 import {MultiSelect} from "@/components/custom-ui/multiselect";
 import {Asset} from "@/utils/types/general.types";
 
-export function AddCustomIndexAssets({assets}: {assets: Asset[]}) {
-    const [selectedFrameworks, setSelectedFrameworks] = useState<string[]>(["react", "angular"]);
-
+export function AddCustomIndexAssets({
+    assets,
+    selectedFrameworks,
+    setSelectedFrameworks,
+}: {
+    assets: Asset[];
+    selectedFrameworks: string[];
+    setSelectedFrameworks: (value: string[]) => void;
+}) {
     const options = assets.map(item => ({value: item.id, label: item.name}));
 
     return (
@@ -16,7 +20,7 @@ export function AddCustomIndexAssets({assets}: {assets: Asset[]}) {
             options={options}
             onValueChange={setSelectedFrameworks}
             value={selectedFrameworks}
-            placeholder="Select Assets"
+            placeholder="Select Assets..."
             variant="inverted"
             animation={2}
             maxCount={3}

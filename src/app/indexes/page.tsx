@@ -1,3 +1,5 @@
+"use server";
+
 import IndexesTable from "@/app/indexes/components/IndexesTable";
 import {getCachedTopAssets, getIndex} from "@/app/api/assets/db.helpers";
 import {IndexId} from "@/utils/types/general.types";
