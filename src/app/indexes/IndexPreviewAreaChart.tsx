@@ -1,12 +1,11 @@
 "use client";
 
-import {TrendingUp} from "lucide-react";
-import {Area, AreaChart, CartesianGrid, XAxis} from "recharts";
+import {Area, AreaChart, CartesianGrid} from "recharts";
 
-import {Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle} from "@/components/ui/card";
-import {ChartConfig, ChartContainer, ChartTooltip, ChartTooltipContent} from "@/components/ui/chart";
+import {ChartConfig, ChartContainer, ChartTooltip} from "@/components/ui/chart";
 import moment from "moment";
-import {Index, MomentFormat} from "@/utils/types/general.types";
+import {ChartData, Index, MomentFormat} from "@/utils/types/general.types";
+import {IndexPreviewAreaChartTooltip} from "@/app/indexes/indexPreviewAreaChartTooltip";
 
 const chartConfig = {
     price: {
@@ -16,7 +15,7 @@ const chartConfig = {
 } satisfies ChartConfig;
 
 export function IndexPreviewAreaChart({index}: {index: Index}) {
-    const chartData = index.history.slice(-7).map(item => ({
+    const chartData: ChartData[] = index.history.slice(-7).map(item => ({
         date: moment(item.time).format(MomentFormat.DAY_FULL),
         price: parseFloat(item.priceUsd),
     }));
@@ -32,10 +31,7 @@ export function IndexPreviewAreaChart({index}: {index: Index}) {
                 }}
             >
                 <CartesianGrid vertical={false} />
-                <ChartTooltip
-                    cursor={false}
-                    content={<ChartTooltipContent indicator="line" className={"capitalize"} />}
-                />
+                <ChartTooltip cursor={false} content={<IndexPreviewAreaChartTooltip />} />
                 <Area
                     dataKey="price"
                     type="natural"

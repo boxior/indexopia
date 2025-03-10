@@ -23,6 +23,11 @@ export interface AssetHistory {
     date: string; // "date": "2018-07-10T00:00:00.000Z"
 }
 
+export type ChartData = {
+    date: string;
+    price: number;
+};
+
 export type NormalizedAssets = Record<Asset["id"], Asset>;
 
 export type NormalizedAssetHistory = Record<Asset["id"], AssetHistory[]>;
