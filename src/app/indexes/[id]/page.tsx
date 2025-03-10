@@ -12,7 +12,7 @@ export default async function IndexPage(props: ServerPageProps<IndexId>) {
     return (
         <div className={"flex flex-col gap-4"}>
             <div className="flex gap-4">
-                <Card className={"flex-1"}>
+                <Card className={"flex-1 p-2"}>
                     <IndexOverview index={index} />
                 </Card>
                 <Card className="size-2/4 ">
