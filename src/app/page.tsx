@@ -7,7 +7,7 @@ export default async function Home() {
         // await handleGetAllAssetsHistories();
         // await handleGetAssetHistory({id: "binance-coin"});
     } catch (err) {
-        console.log("ERRRORRRRR", JSON.parse(JSON.stringify(err)));
+        console.log(err);
     }
 
     return <div>Home page</div>;
