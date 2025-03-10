@@ -5,11 +5,11 @@ import {Area, AreaChart, CartesianGrid} from "recharts";
 import {ChartConfig, ChartContainer, ChartTooltip} from "@/components/ui/chart";
 import moment from "moment";
 import {ChartData, Index, MomentFormat} from "@/utils/types/general.types";
-import {IndexPreviewAreaChartTooltip} from "@/app/indexes/components/indexPreviewAreaChartTooltip";
+import {IndexPreviewChartTooltip} from "@/app/indexes/components/indexPreviewChartTooltip";
 import {getChartColor} from "@/app/indexes/helpers";
 
-export function IndexPreviewAreaChart({index}: {index: Index}) {
-    const chartData: ChartData[] = index.history.slice(-7).map(item => ({
+export function IndexChart({index}: {index: Index}) {
+    const chartData: ChartData[] = index.history.map(item => ({
         date: moment(item.time).format(MomentFormat.DAY_FULL),
         price: parseFloat(item.priceUsd),
     }));
@@ -31,7 +31,7 @@ export function IndexPreviewAreaChart({index}: {index: Index}) {
                 }}
             >
                 <CartesianGrid vertical={false} />
-                <ChartTooltip cursor={false} content={<IndexPreviewAreaChartTooltip />} />
+                <ChartTooltip cursor={false} content={<IndexPreviewChartTooltip />} />
                 <Area
                     dataKey="price"
                     type="natural"

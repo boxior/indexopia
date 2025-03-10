@@ -15,7 +15,11 @@ export interface Asset {
     changePercent24Hr: string; // "-0.5596263726513635"
     vwap24Hr: string; // "97457.6771885174285351"
     explorer: string; // "https://blockchain.info/"
+    history?: AssetHistory[];
+    historyOverview?: HistoryOverview;
 }
+
+export type AssetWithHistory = Asset & {history: AssetHistory[]; historyOverview: HistoryOverview};
 
 export interface AssetHistory {
     priceUsd: string; // "priceUsd": "0.52126034102192210769",
@@ -38,10 +42,11 @@ export enum IndexId {
     TOP_30 = "top30",
     TOP_50 = "top50",
 }
-export interface Index {
+
+export interface Index<A = Asset> {
     id: IndexId;
     name: string;
-    assets: Asset[];
+    assets: A[];
     historyOverview: HistoryOverview;
     startTime: number | null;
     history: AssetHistory[];
