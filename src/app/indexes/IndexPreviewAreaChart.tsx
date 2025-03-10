@@ -15,15 +15,11 @@ const chartConfig = {
     },
 } satisfies ChartConfig;
 
-export function IndexPreviewAreaChart({row}: {row: Index}) {
-    const chartData = [
-        {date: moment().format(MomentFormat.DAY_FULL), price: 186},
-        {date: moment().add(1, "day").format(MomentFormat.DAY_FULL), price: 305},
-        {date: moment().add(2, "day").format(MomentFormat.DAY_FULL), price: 237},
-        {date: moment().add(3, "day").format(MomentFormat.DAY_FULL), price: 73},
-        {date: moment().add(4, "day").format(MomentFormat.DAY_FULL), price: 209},
-        {date: moment().add(5, "day").format(MomentFormat.DAY_FULL), price: 214},
-    ];
+export function IndexPreviewAreaChart({index}: {index: Index}) {
+    const chartData = index.history.slice(-7).map(item => ({
+        date: moment(item.time).format(MomentFormat.DAY_FULL),
+        price: parseFloat(item.priceUsd),
+    }));
 
     return (
         <ChartContainer config={chartConfig}>

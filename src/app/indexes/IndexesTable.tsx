@@ -126,12 +126,12 @@ export default function IndexesTable({data}: {data: Index[]}) {
         },
         {
             id: "historyOverview_7d_chart",
-            accessorFn: row => row.historyOverview?.days7, // Access only the needed value
+            accessorFn: index => index,
             cell: ({row}) => {
-                const value = row.getValue("historyOverview_7d") as number;
+                const index = row.getValue("historyOverview_7d_chart") as Index;
                 return (
-                    <div className={`lowercase ${value < 0 ? "text-red-500" : "text-green-500"}`}>
-                        <IndexPreviewAreaChart row={row} />
+                    <div className={`lowercase ${index.historyOverview.days7 < 0 ? "text-red-500" : "text-green-500"}`}>
+                        <IndexPreviewAreaChart index={index} />
                     </div>
                 ); // Safely render the value
             },
