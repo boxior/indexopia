@@ -156,3 +156,37 @@ export async function processFilesInFolder<T extends Record<string, unknown>>(
         console.error("Error processing files in folder:", error);
     }
 }
+
+export async function processAllFilesInFolder<T extends Record<string, unknown>>(
+    folderPath: string | undefined = "/db"
+): Promise<T[]> {
+    try {
+        // Resolve the absolute path of the folder
+        const filesPath = `${process.cwd()}${folderPath}`;
+
+        // Read all entries in the folder
+        const files: string[] = await fs.readdir(filesPath);
+
+        const promises: Promise<T>[] = [];
+
+        // Iterate over the files
+        for (const file of files) {
+            const filePath: string = path.join(filesPath, file);
+
+            // Check if the entry is a file and not a directory
+            const stat = await fs.lstat(filePath);
+            if (stat.isFile()) {
+                const fileName = path.parse(file).name;
+
+                const promise = readJsonFile(fileName, {} as T, folderPath) as Promise<T>;
+
+                promises.push(promise);
+            }
+        }
+
+        return Promise.all(promises);
+    } catch (error) {
+        console.error("Error processing files in folder:", error);
+        throw error;
+    }
+}

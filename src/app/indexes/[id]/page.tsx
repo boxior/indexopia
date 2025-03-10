@@ -18,8 +18,7 @@ export default async function IndexPage(props: ServerPageProps<IndexId>) {
                 const customIndex = (await readJsonFile(`${params.id}`, {}, INDEXES_FOLDER_PATH)) as CustomIndex;
 
                 return (await getCustomIndex({
-                    assetsIds: customIndex.assetsIds,
-                    name: customIndex.name,
+                    id: customIndex.id,
                     withAssetHistory: true,
                 })) as Index<AssetWithHistory>;
             }

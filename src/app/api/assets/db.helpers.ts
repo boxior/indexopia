@@ -1,10 +1,11 @@
-import {readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
+import {processAllFilesInFolder, readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
 import getAssets from "@/app/api/assets/getAssets";
 import getAssetHistory from "@/app/api/assets/getAssetHistory";
 import {DbItems} from "@/app/api/assets/db.types";
 import {
     Asset,
     AssetHistory,
+    AssetWithHistory,
     CustomIndex,
     Index,
     IndexId,
@@ -407,15 +408,14 @@ export async function getIndex(id: IndexId, withAssetHistory: boolean | undefine
 }
 
 export async function getCustomIndex({
-    assetsIds,
+    id,
     withAssetHistory = false,
-    name,
 }: {
-    assetsIds: string[];
-    name: string;
+    id: string;
     withAssetHistory?: boolean;
 }): Promise<Index> {
-    let assets: Asset[] = await getCachedAssets(assetsIds);
+    const customIndex = (await readJsonFile(id, {}, INDEXES_FOLDER_PATH)) as CustomIndex;
+    let assets: Asset[] = await getCachedAssets(customIndex.assetsIds);
 
     if (withAssetHistory) {
         const assetsHistories: {data: AssetHistory[]}[] = await Promise.all(
@@ -439,8 +439,8 @@ export async function getCustomIndex({
     }
 
     const index: Omit<Index, "historyOverview" | "startTime"> = {
-        id: randomUUID(),
-        name,
+        id: customIndex.id,
+        name: customIndex.name,
         assets,
         history: [],
     };
@@ -453,4 +453,12 @@ export async function getCustomIndex({
         startTime,
         history: await getIndexHistory(index),
     };
+}
+
+export async function getCustomIndexes(): Promise<Index<AssetWithHistory>[]> {
+    const cachedCustomIndexes = (await processAllFilesInFolder("/db/indexes")) as unknown as CustomIndex[];
+
+    return Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id, withAssetHistory: true}))) as Promise<
+        Index<AssetWithHistory>[]
+    >;
 }
