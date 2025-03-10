@@ -33,7 +33,6 @@ export async function readJsonFile(fileName: string, fallback: unknown = [], fol
 }
 
 export async function writeJsonFile<T>(fileName: string, data: T, folderPath: string | undefined = "/db") {
-    console.log("ENV_VARIABLES.MY_ENV", ENV_VARIABLES.MY_ENV);
     if (ENV_VARIABLES.MY_ENV !== "local") {
         return;
     }

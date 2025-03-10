@@ -37,8 +37,6 @@ export default function IndexesTable({data}: {data: Index[]}) {
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
 
-    console.log("data", data);
-
     const renderColumnSortedHeader =
         (header: ReactNode): ColumnDef<Index>["header"] =>
         ({column}) => {
@@ -231,7 +229,6 @@ export default function IndexesTable({data}: {data: Index[]}) {
                             .getAllColumns()
                             .filter(column => column.getCanHide())
                             .map(column => {
-                                console.log("column.meta", column.columnDef.meta);
                                 return (
                                     <DropdownMenuCheckboxItem
                                         key={column.id}
