@@ -31,8 +31,9 @@ import {ReactNode} from "react";
 import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
 import Link from "next/link";
+import {AddCustomIndex} from "@/app/indexes/AddCustom/AddCustomIndex";
 
-export default function IndexesTable({data}: {data: Index[]}) {
+export default function IndexesTable({data, assets}: {data: Index[]; assets: Asset[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -213,6 +214,7 @@ export default function IndexesTable({data}: {data: Index[]}) {
                     onChange={event => table.getColumn("name")?.setFilterValue(event.target.value)}
                     className="max-w-sm"
                 />
+                <AddCustomIndex assets={assets} />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="ml-auto">
@@ -238,6 +240,7 @@ export default function IndexesTable({data}: {data: Index[]}) {
                     </DropdownMenuContent>
                 </DropdownMenu>
             </div>
+
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
