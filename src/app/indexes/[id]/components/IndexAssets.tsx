@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Asset, Index, MomentFormat} from "@/utils/types/general.types";
+import {AssetWithHistory, Index, MomentFormat} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import moment from "moment";
@@ -32,14 +32,14 @@ import {ReactNode} from "react";
 import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
 import {getChartColorClassname} from "@/app/indexes/helpers";
 
-export default function IndexesTable({data}: {data: Index[]}) {
+export function IndexAssets({index}: {index: Index<AssetWithHistory>}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
 
     const renderColumnSortedHeader =
-        (header: ReactNode): ColumnDef<Index>["header"] =>
+        (header: ReactNode): ColumnDef<AssetWithHistory>["header"] =>
         ({column}) => {
             const sorted = column.getIsSorted();
 
@@ -61,35 +61,19 @@ export default function IndexesTable({data}: {data: Index[]}) {
             );
         };
 
-    const columns: ColumnDef<Index>[] = [
+    const columns: ColumnDef<AssetWithHistory>[] = [
         {
             accessorKey: "rank",
             header: "#",
-            cell: ({row}) => <div className="capitalize">{row.index + 1}</div>,
+            cell: ({row}) => <div className="capitalize">{row.getValue("rank")}</div>,
         },
         {
             accessorKey: "name",
             cell: ({row}) => <div className="capitalize">{row.getValue("name")}</div>,
-            header: renderColumnSortedHeader("Index"),
-            sortingFn: (rowA, rowB) => {
-                /** Extract the numeric value from the "Index" string */
-                const rankA = parseInt(rowA.original.name.replace("Index ", ""));
-                const rankB = parseInt(rowB.original.name.replace("Index ", ""));
-                /** Perform a numerical comparison */
-                return rankA - rankB;
-            },
+            header: renderColumnSortedHeader("Name"),
             meta: {
-                text: "Index",
+                text: "Name",
             },
-        },
-        {
-            accessorKey: "assets",
-            header: "Assets",
-            cell: ({row}) => (
-                <div className="capitalize">
-                    {(row.getValue("assets") as Asset[]).map(asset => asset.name).join(", ")}
-                </div>
-            ),
         },
         {
             id: "historyOverview_24h",
@@ -127,11 +111,11 @@ export default function IndexesTable({data}: {data: Index[]}) {
             id: "historyOverview_7d_chart",
             accessorFn: index => index,
             cell: ({row}) => {
-                const index = row.getValue("historyOverview_7d_chart") as Index;
+                const asset = row.getValue("historyOverview_7d_chart") as AssetWithHistory;
 
                 return (
-                    <div className={`lowercase ${getChartColorClassname(index.historyOverview.days7)}`}>
-                        <IndexPreviewChart history={index.history} />
+                    <div className={`lowercase ${getChartColorClassname(asset.historyOverview.days7)}`}>
+                        <IndexPreviewChart history={asset.history} />
                     </div>
                 ); // Safely render the value
             },
@@ -193,7 +177,7 @@ export default function IndexesTable({data}: {data: Index[]}) {
     ];
 
     const table = useReactTable({
-        data,
+        data: index.assets,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,

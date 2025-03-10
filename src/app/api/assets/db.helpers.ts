@@ -2,8 +2,16 @@ import {readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
 import getAssets from "@/app/api/assets/getAssets";
 import getAssetHistory from "@/app/api/assets/getAssetHistory";
 import {DbItems} from "@/app/api/assets/db.types";
-import {Asset, AssetHistory, Index, NormalizedAssetHistory, NormalizedAssets} from "@/utils/types/general.types";
+import {
+    Asset,
+    AssetHistory,
+    Index,
+    IndexId,
+    NormalizedAssetHistory,
+    NormalizedAssets,
+} from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
+import {ASSET_COUNT_BY_INDEX_ID, INDEX_NAME_BY_INDEX_ID} from "@/utils/constants/general.constants";
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
 
@@ -346,4 +354,45 @@ function mergeAssetHistories(histories: AssetHistory[][]): AssetHistory[] {
     }
 
     return merged;
+}
+
+export async function getIndex(id: IndexId, withAssetHistory: boolean | undefined = false): Promise<Index> {
+    let assets: Asset[] = await getTopAssets(ASSET_COUNT_BY_INDEX_ID[id]);
+
+    if (withAssetHistory) {
+        const assetsHistories: {data: AssetHistory[]}[] = await Promise.all(
+            assets.map(
+                asset =>
+                    readJsonFile(`asset_${asset.id}_history`, {}, ASSETS_HISTORY_FOLDER_PATH) as unknown as {
+                        data: AssetHistory[];
+                    }
+            )
+        );
+
+        const assetsHistoriesOverviews: HistoryOverview[] = await Promise.all(
+            assets.map((asset, index) => getAssetHistoryOverview(asset.id, assetsHistories[index].data))
+        );
+
+        assets = assets.map((asset, index) => ({
+            ...asset,
+            history: assetsHistories[index].data,
+            historyOverview: assetsHistoriesOverviews[index],
+        }));
+    }
+
+    const index: Omit<Index, "historyOverview" | "startTime"> = {
+        id,
+        name: INDEX_NAME_BY_INDEX_ID[id],
+        assets,
+        history: [],
+    };
+
+    const {historyOverview, startTime} = await getIndexHistoryOverview(index);
+
+    return {
+        ...index,
+        historyOverview,
+        startTime,
+        history: await getIndexHistory(index),
+    };
 }
