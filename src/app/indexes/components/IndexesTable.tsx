@@ -24,13 +24,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Asset, Index, MomentFormat} from "@/utils/types/general.types";
+import {Asset, Index} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
-import moment from "moment";
 import {ReactNode} from "react";
 import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
-import {getChartColorClassname} from "@/app/indexes/helpers";
+import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
+import Link from "next/link";
 
 export default function IndexesTable({data}: {data: Index[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -69,7 +69,11 @@ export default function IndexesTable({data}: {data: Index[]}) {
         },
         {
             accessorKey: "name",
-            cell: ({row}) => <div className="capitalize">{row.getValue("name")}</div>,
+            cell: ({row}) => (
+                <Link className="capitalize underline" href={`/indexes/${row.original.id}`}>
+                    {row.getValue("name")}
+                </Link>
+            ),
             header: renderColumnSortedHeader("Index"),
             sortingFn: (rowA, rowB) => {
                 /** Extract the numeric value from the "Index" string */
@@ -159,8 +163,9 @@ export default function IndexesTable({data}: {data: Index[]}) {
         {
             accessorKey: "startTime",
             cell: ({row}) => {
-                const value = row.getValue("startTime") as number;
-                return <div className="lowercase">{moment(value).utc().startOf("day").format(MomentFormat.DATE)}</div>; // Format and handle null/undefined
+                const startTime = row.getValue("startTime") as number;
+
+                return <div className="lowercase">{getIndexStartFromLabel(startTime)}</div>; // Format and handle null/undefined
             },
             header: renderColumnSortedHeader("Start from"),
             meta: {
@@ -172,19 +177,7 @@ export default function IndexesTable({data}: {data: Index[]}) {
             cell: ({row}) => {
                 const startTime = row.getValue("startTime") as number;
 
-                // Calculate the duration difference in days
-                const now = moment().utc().startOf("day");
-                const start = moment(startTime).utc().startOf("day");
-                const duration = moment.duration(now.diff(start)); // Create a moment duration
-
-                // Break down the duration into years, months, and days
-                const years = duration.years() > 0 ? `${duration.years()} year${duration.years() > 1 ? "s" : ""} ` : "";
-                const months =
-                    duration.months() > 0 ? `${duration.months()} month${duration.months() > 1 ? "s" : ""} ` : "";
-                const days = duration.days() > 0 ? `${duration.days()} day${duration.days() > 1 ? "s" : ""}` : "";
-
-                // Combine the outputs
-                return <div className="lowercase">{`${years}${months}${days}`.trim() || "0 days"}</div>;
+                return <div className="lowercase">{getIndexDurationLabel(startTime)}</div>;
             },
             meta: {
                 text: "Duration",

@@ -62,3 +62,8 @@ export enum MomentFormat {
     DAY_SHORT = "ddd, MMM Do",
     TIME = "HH:mm",
 }
+
+export type ServerPageProps<ID extends string = string> = {
+    params: Promise<{id: ID}>;
+    searchParams: Promise<{[key: string]: string | string[] | undefined}>;
+};

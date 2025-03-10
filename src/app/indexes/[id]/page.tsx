@@ -1,12 +1,13 @@
-import {AssetWithHistory, Index, IndexId} from "@/utils/types/general.types";
+import {AssetWithHistory, Index, IndexId, ServerPageProps} from "@/utils/types/general.types";
 import {IndexChart} from "@/app/indexes/[id]/components/IndexChart";
 import {IndexAssets} from "@/app/indexes/[id]/components/IndexAssets";
 import {getIndex} from "@/app/api/assets/db.helpers";
 import {Card} from "@/components/ui/card";
 import {IndexOverview} from "@/app/indexes/[id]/components/IndexOverview";
 
-export default async function IndexPage() {
-    const index = (await getIndex(IndexId.TOP_5, true)) as Index<AssetWithHistory>;
+export default async function IndexPage(props: ServerPageProps<IndexId>) {
+    const params = await props.params;
+    const index = (await getIndex(params.id, true)) as Index<AssetWithHistory>;
 
     return (
         <div className={"flex flex-col gap-4"}>
