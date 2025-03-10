@@ -12,6 +12,7 @@ import {
 } from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 import {ASSET_COUNT_BY_INDEX_ID, INDEX_NAME_BY_INDEX_ID} from "@/utils/constants/general.constants";
+import {randomUUID} from "node:crypto";
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
 
@@ -210,11 +211,16 @@ export const getAssetHistoryOverview = async (
     };
 };
 
-export const getTopAssets = async (limit: number): Promise<Asset[]> => {
+export const getCachedTopAssets = async (limit: number): Promise<Asset[]> => {
     const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
     const assetsList = assets?.data ?? [];
 
     return assetsList.slice(0, limit);
+};
+
+export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
+    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
+    return (assets?.data ?? []).filter(asset => ids.includes(asset.id));
 };
 
 export const getIndexHistoryOverview = async (
@@ -316,7 +322,7 @@ export const fetchAssetHistoriesWithSmallestRange = async (
 };
 
 export const getIndexHistory = async (index: Omit<Index, "historyOverview" | "startTime">): Promise<AssetHistory[]> => {
-    const {histories, startTime} = await fetchAssetHistoriesWithSmallestRange(index.assets.map(asset => asset.id));
+    const {histories} = await fetchAssetHistoriesWithSmallestRange(index.assets.map(asset => asset.id));
 
     await writeJsonFile(`histories_record_${index.id}`, histories, "/db/history_records");
 
@@ -357,7 +363,7 @@ function mergeAssetHistories(histories: AssetHistory[][]): AssetHistory[] {
 }
 
 export async function getIndex(id: IndexId, withAssetHistory: boolean | undefined = false): Promise<Index> {
-    let assets: Asset[] = await getTopAssets(ASSET_COUNT_BY_INDEX_ID[id]);
+    let assets: Asset[] = await getCachedTopAssets(ASSET_COUNT_BY_INDEX_ID[id]);
 
     if (withAssetHistory) {
         const assetsHistories: {data: AssetHistory[]}[] = await Promise.all(
@@ -383,6 +389,55 @@ export async function getIndex(id: IndexId, withAssetHistory: boolean | undefine
     const index: Omit<Index, "historyOverview" | "startTime"> = {
         id,
         name: INDEX_NAME_BY_INDEX_ID[id],
+        assets,
+        history: [],
+    };
+
+    const {historyOverview, startTime} = await getIndexHistoryOverview(index);
+
+    return {
+        ...index,
+        historyOverview,
+        startTime,
+        history: await getIndexHistory(index),
+    };
+}
+
+export async function getCustomIndex({
+    ids,
+    withAssetHistory = false,
+    name,
+}: {
+    ids: string[];
+    name: string;
+    withAssetHistory?: boolean;
+}): Promise<Index> {
+    let assets: Asset[] = await getCachedAssets(ids);
+
+    if (withAssetHistory) {
+        const assetsHistories: {data: AssetHistory[]}[] = await Promise.all(
+            assets.map(
+                asset =>
+                    readJsonFile(`asset_${asset.id}_history`, {}, ASSETS_HISTORY_FOLDER_PATH) as unknown as {
+                        data: AssetHistory[];
+                    }
+            )
+        );
+
+        const assetsHistoriesOverviews: HistoryOverview[] = await Promise.all(
+            assets.map((asset, index) => getAssetHistoryOverview(asset.id, assetsHistories[index].data))
+        );
+
+        assets = assets.map((asset, index) => ({
+            ...asset,
+            history: assetsHistories[index].data,
+            historyOverview: assetsHistoriesOverviews[index],
+        }));
+    }
+
+    const index: Omit<Index, "historyOverview" | "startTime"> = {
+        id: randomUUID(),
+        name,
         assets,
         history: [],
     };
