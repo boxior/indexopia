@@ -30,6 +30,7 @@ import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import moment from "moment";
 import {ReactNode} from "react";
 import {IndexPreviewAreaChart} from "@/app/indexes/IndexPreviewAreaChart";
+import {getChartColorClassname} from "@/app/indexes/helpers";
 
 export default function IndexesTable({data}: {data: Index[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -96,7 +97,7 @@ export default function IndexesTable({data}: {data: Index[]}) {
             cell: ({row}) => {
                 const value = row.getValue("historyOverview_24h") as number;
                 return (
-                    <div className={`lowercase ${value < 0 ? "text-red-500" : "text-green-500"}`}>
+                    <div className={`lowercase ${getChartColorClassname(value)}`}>
                         {renderSafelyNumber(value, NumeralFormat.PERCENT)}
                     </div>
                 ); // Safely handle null/undefined
@@ -112,7 +113,7 @@ export default function IndexesTable({data}: {data: Index[]}) {
             cell: ({row}) => {
                 const value = row.getValue("historyOverview_7d") as number;
                 return (
-                    <div className={`lowercase ${value < 0 ? "text-red-500" : "text-green-500"}`}>
+                    <div className={`lowercase ${getChartColorClassname(value)}`}>
                         {renderSafelyNumber(value, NumeralFormat.PERCENT)}
                     </div>
                 ); // Safely render the value
@@ -127,8 +128,9 @@ export default function IndexesTable({data}: {data: Index[]}) {
             accessorFn: index => index,
             cell: ({row}) => {
                 const index = row.getValue("historyOverview_7d_chart") as Index;
+
                 return (
-                    <div className={`lowercase ${index.historyOverview.days7 < 0 ? "text-red-500" : "text-green-500"}`}>
+                    <div className={`lowercase ${getChartColorClassname(index.historyOverview.days7)}`}>
                         <IndexPreviewAreaChart index={index} />
                     </div>
                 ); // Safely render the value
@@ -144,7 +146,7 @@ export default function IndexesTable({data}: {data: Index[]}) {
             cell: ({row}) => {
                 const value = row.getValue("historyOverview_total") as number;
                 return (
-                    <div className={`lowercase ${value < 0 ? "text-red-500" : "text-green-500"}`}>
+                    <div className={`lowercase ${getChartColorClassname(value)}`}>
                         {renderSafelyNumber(value, NumeralFormat.PERCENT)}
                     </div>
                 ); // Format and handle null/undefined
