@@ -52,6 +52,12 @@ export interface Index<A = Asset> {
     history: AssetHistory[];
 }
 
+export interface CustomIndex {
+    id: string;
+    name: string;
+    assetsIds: string[];
+}
+
 /**
  * @link https://momentjscom.readthedocs.io/en/latest/moment/04-displaying/01-format/
  */

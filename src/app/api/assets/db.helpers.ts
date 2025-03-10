@@ -5,6 +5,7 @@ import {DbItems} from "@/app/api/assets/db.types";
 import {
     Asset,
     AssetHistory,
+    CustomIndex,
     Index,
     IndexId,
     NormalizedAssetHistory,
@@ -13,7 +14,9 @@ import {
 import momentTimeZone from "moment-timezone";
 import {ASSET_COUNT_BY_INDEX_ID, INDEX_NAME_BY_INDEX_ID} from "@/utils/constants/general.constants";
 import {randomUUID} from "node:crypto";
+
 export const ASSETS_FOLDER_PATH = "/db/assets";
+export const INDEXES_FOLDER_PATH = "/db/indexes";
 export const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
 
 export const handleGetAllAssets = async (): Promise<unknown> => {
@@ -404,15 +407,15 @@ export async function getIndex(id: IndexId, withAssetHistory: boolean | undefine
 }
 
 export async function getCustomIndex({
-    ids,
+    assetsIds,
     withAssetHistory = false,
     name,
 }: {
-    ids: string[];
+    assetsIds: string[];
     name: string;
     withAssetHistory?: boolean;
 }): Promise<Index> {
-    let assets: Asset[] = await getCachedAssets(ids);
+    let assets: Asset[] = await getCachedAssets(assetsIds);
 
     if (withAssetHistory) {
         const assetsHistories: {data: AssetHistory[]}[] = await Promise.all(
