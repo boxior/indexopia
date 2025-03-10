@@ -309,7 +309,9 @@ export const fetchAssetHistoriesWithSmallestRange = async (
 
 export const getIndexHistory = async (index: Omit<Index, "historyOverview" | "startTime">): Promise<AssetHistory[]> => {
     const {histories, startTime} = await fetchAssetHistoriesWithSmallestRange(index.assets.map(asset => asset.id));
-    await writeJsonFile("hisotires_record", histories, "/db/history_records");
+
+    await writeJsonFile("histories_record", histories, "/db/history_records");
+
     return mergeAssetHistories(Object.values(histories));
 };
 
