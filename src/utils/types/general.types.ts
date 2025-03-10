@@ -44,7 +44,7 @@ export enum IndexId {
 }
 
 export interface Index<A = Asset> {
-    id: IndexId;
+    id: IndexId | string;
     name: string;
     assets: A[];
     historyOverview: HistoryOverview;
