@@ -29,7 +29,7 @@ import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import moment from "moment";
 import {ReactNode} from "react";
-import {IndexPreviewAreaChart} from "@/app/indexes/IndexPreviewAreaChart";
+import {IndexPreviewAreaChart} from "@/app/indexes/components/IndexPreviewAreaChart";
 import {getChartColorClassname} from "@/app/indexes/helpers";
 
 export default function IndexesTable({data}: {data: Index[]}) {

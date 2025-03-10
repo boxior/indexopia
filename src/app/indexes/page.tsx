@@ -1,4 +1,4 @@
-import IndexesTable from "@/app/indexes/IndexesTable";
+import IndexesTable from "@/app/indexes/components/IndexesTable";
 import {
     getAssetHistoryOverview,
     getIndexHistory,
