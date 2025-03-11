@@ -440,7 +440,7 @@ export async function getCustomIndex({
     withAssetHistory?: boolean;
 }): Promise<Index> {
     const customIndex = (await readJsonFile(id, {}, INDEXES_FOLDER_PATH)) as CustomIndex;
-    let assets: Asset[] = await getCachedAssets(customIndex.assetsIds);
+    let assets: Asset[] = await getCachedAssets(customIndex.assets.map(asset => asset.id));
 
     if (withAssetHistory) {
         const assetsHistories: {data: AssetHistory[]}[] = await Promise.all(
@@ -465,7 +465,7 @@ export async function getCustomIndex({
 
     assets = assets.map((asset, index) => ({
         ...asset,
-        portion: customIndex.assetsPortions[index],
+        portion: customIndex.assets.find(a => a.id === asset.id)?.portion ?? 0,
     }));
 
     const index: Omit<Index, "historyOverview" | "startTime"> = {
