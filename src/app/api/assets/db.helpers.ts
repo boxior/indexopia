@@ -14,7 +14,6 @@ import {
 } from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 import {ASSET_COUNT_BY_INDEX_ID, INDEX_NAME_BY_INDEX_ID} from "@/utils/constants/general.constants";
-import {randomUUID} from "node:crypto";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
@@ -233,47 +232,52 @@ export const getIndexHistoryOverview = async (
     // Read all assets
     const indexAssets = index.assets;
 
-    // Initialize cumulative performance variables
-    let days1 = 0;
-    let days7 = 0;
-    let total = 0;
-
-    // Track valid asset count for averaging
-    let validAssetCount = 0;
-
-    const {histories, startTime} = await fetchAssetHistoriesWithSmallestRange(indexAssets.map(asset => asset.id));
-
-    for (const asset of indexAssets) {
-        try {
-            const assetHistoryOverview = await getAssetHistoryOverview(asset.id, histories[asset.id]);
-
-            // Accumulate changes
-            days1 += assetHistoryOverview.days1;
-            days7 += assetHistoryOverview.days7;
-            total += assetHistoryOverview.total;
-
-            validAssetCount += 1;
-        } catch (error) {
-            console.error(`Failed to calculate history overview for asset ${asset.id}`, error);
-            continue; // Skip assets with errors
-        }
-    }
-
-    // If no valid assets exist in the index, return zeros
-    if (validAssetCount === 0) {
+    if (indexAssets.length === 0) {
         return {
             historyOverview: {days1: 0, days7: 0, total: 0},
             startTime: null,
         };
     }
 
+    // Extract portions from the index assets
+    const portions = indexAssets.map(asset => asset.portion ?? 0);
+
+    // Ensure portions sum to 100%
+    const portionSum = portions.reduce((sum, portion) => sum + portion, 0);
+    if (Math.abs(portionSum - 100) > 1e-8) {
+        throw new Error("Asset portions must sum to 100%");
+    }
+
+    const {histories, startTime} = await fetchAssetHistoriesWithSmallestRange(indexAssets.map(asset => asset.id));
+
+    // Initialize cumulative weighted performance variables
+    let weightedDays1 = 0;
+    let weightedDays7 = 0;
+    let weightedTotal = 0;
+
+    for (const asset of indexAssets) {
+        try {
+            const assetHistoryOverview = await getAssetHistoryOverview(asset.id, histories[asset.id]);
+
+            const weight = asset.portion ?? 0 / 100; // Convert portion to weight
+
+            // Accumulate weighted values
+            weightedDays1 += assetHistoryOverview.days1 * weight;
+            weightedDays7 += assetHistoryOverview.days7 * weight;
+            weightedTotal += assetHistoryOverview.total * weight;
+        } catch (error) {
+            console.error(`Failed to calculate history overview for asset ${asset.id}`, error);
+            continue; // Skip assets with errors
+        }
+    }
+
     const historyOverview = {
-        days1: days1 / validAssetCount,
-        days7: days7 / validAssetCount,
-        total: total / validAssetCount,
+        days1: weightedDays1,
+        days7: weightedDays7,
+        total: weightedTotal,
     };
 
-    // Calculate averages
+    // Return the weighted results
     return {
         historyOverview,
         startTime,
@@ -328,23 +332,35 @@ export const fetchAssetHistoriesWithSmallestRange = async (
 export const getIndexHistory = async (index: Omit<Index, "historyOverview" | "startTime">): Promise<AssetHistory[]> => {
     const {histories} = await fetchAssetHistoriesWithSmallestRange(index.assets.map(asset => asset.id));
 
+    const portions = index.assets.map(asset => asset.portion ?? 0);
     await writeJsonFile(`histories_record_${index.id}`, histories, "/db/history_records");
 
-    return mergeAssetHistories(Object.values(histories));
+    return mergeAssetHistories(Object.values(histories), portions);
 };
 
-function mergeAssetHistories(histories: AssetHistory[][]): AssetHistory[] {
+function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): AssetHistory[] {
     if (histories.length === 0 || histories[0].length === 0) {
         return [];
     }
 
+    if (histories.length !== portions.length) {
+        throw new Error("The number of histories must match the number of portions");
+    }
+
+    // Ensure all portions sum to 100%
+    const portionSum = portions.reduce((sum, portion) => sum + portion, 0);
+    if (Math.abs(portionSum - 100) > 1e-8) {
+        throw new Error("Portions must sum up to 100%");
+    }
+
     const arrayLength = histories[0].length;
 
-    const merged: AssetHistory[] = [];
-
+    // Ensure all histories have the same length
     if (!histories.every(history => history.length === arrayLength)) {
         throw new Error("All histories must have the same length");
     }
+
+    const merged: AssetHistory[] = [];
 
     for (let i = 0; i < arrayLength; i++) {
         const currentElements = histories.map(historyArray => historyArray[i]);
@@ -352,14 +368,18 @@ function mergeAssetHistories(histories: AssetHistory[][]): AssetHistory[] {
         // Since we assume time and date are the same across arrays, pick them from the first array
         const {time, date} = currentElements[0];
 
-        const averagePrice = (
-            currentElements.reduce((sum, asset) => sum + parseFloat(asset.priceUsd), 0) / currentElements.length
-        ).toFixed(20); // Ensure a fixed precision for the result
+        // Compute the weighted average price based on portions
+        const weightedAveragePrice = currentElements
+            .reduce((sum, asset, index) => {
+                const weight = portions[index] / 100; // Convert portion to a multiplier
+                return sum + parseFloat(asset.priceUsd) * weight;
+            }, 0)
+            .toFixed(20); // Ensure fixed precision
 
         merged.push({
             time,
             date,
-            priceUsd: averagePrice,
+            priceUsd: weightedAveragePrice,
         });
     }
 
@@ -389,6 +409,11 @@ export async function getIndex(id: IndexId, withAssetHistory: boolean | undefine
             historyOverview: assetsHistoriesOverviews[index],
         }));
     }
+
+    assets = assets.map((asset, index) => ({
+        ...asset,
+        portion: Math.trunc(100 / ASSET_COUNT_BY_INDEX_ID[id]),
+    }));
 
     const index: Omit<Index, "historyOverview" | "startTime"> = {
         id,
@@ -437,6 +462,11 @@ export async function getCustomIndex({
             historyOverview: assetsHistoriesOverviews[index],
         }));
     }
+
+    assets = assets.map((asset, index) => ({
+        ...asset,
+        portion: customIndex.assetsPortions[index],
+    }));
 
     const index: Omit<Index, "historyOverview" | "startTime"> = {
         id: customIndex.id,
