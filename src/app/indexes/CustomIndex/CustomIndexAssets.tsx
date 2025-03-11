@@ -2,7 +2,7 @@ import React from "react";
 import {MultiSelect} from "@/components/custom-ui/multiselect";
 import {Asset} from "@/utils/types/general.types";
 
-export function AddCustomIndexAssets({
+export function CustomIndexAssets({
     assets,
     assetsIds,
     onChangeMultiselect,
@@ -19,7 +19,7 @@ export function AddCustomIndexAssets({
             className="col-span-3"
             options={options}
             onValueChange={onChangeMultiselect}
-            value={assetsIds}
+            defaultValue={assetsIds}
             placeholder="Select Assets..."
             variant="inverted"
             animation={2}

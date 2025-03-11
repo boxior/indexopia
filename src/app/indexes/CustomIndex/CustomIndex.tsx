@@ -2,11 +2,11 @@
 
 import {Button} from "@/components/ui/button";
 import {Dialog} from "@/components/ui/dialog";
-import {Asset} from "@/utils/types/general.types";
+import {Asset, CustomIndexType} from "@/utils/types/general.types";
 import {useState} from "react";
-import {AddCustomIndexDialog} from "@/app/indexes/AddCustom/AddCustomIndexDialog";
+import {CustomIndexDialog} from "@/app/indexes/CustomIndex/CustomIndexDialog";
 
-export function AddCustomIndex({assets}: {assets: Asset[]}) {
+export function CustomIndex({assets, customIndex}: {assets: Asset[]; customIndex?: CustomIndexType}) {
     const [open, setOpen] = useState<boolean>(false);
 
     const onOpenChange = (bool: boolean) => {
@@ -24,9 +24,9 @@ export function AddCustomIndex({assets}: {assets: Asset[]}) {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <Button variant="outline" onClick={openDialog}>
-                Add Index
+                {`${customIndex ? "Edit" : "Create"} Custom Index ${customIndex ? `(${customIndex.name})` : ""}`}
             </Button>
-            <AddCustomIndexDialog assets={assets} closeDialog={closeDialog} />
+            {open && <CustomIndexDialog assets={assets} closeDialog={closeDialog} customIndex={customIndex} />}
         </Dialog>
     );
 }
