@@ -1,17 +1,17 @@
-import {AddAsset, Asset} from "@/utils/types/general.types";
+import {CustomIndexAsset, Asset} from "@/utils/types/general.types";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {ChangeEventHandler} from "react";
 
 const MAX_PORTION = 100;
 
-export function AddCustomIndexAssetsPortions({
+export function CustomIndexAssetsPortions({
     assets,
     selectedAssets,
     onChangeAssetPortion,
 }: {
     assets: Asset[];
-    selectedAssets: AddAsset[];
+    selectedAssets: CustomIndexAsset[];
     onChangeAssetPortion: (id: string, portion: number) => void;
 }) {
     const handleChangePortion =

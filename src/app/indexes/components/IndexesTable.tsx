@@ -24,14 +24,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Asset, CustomIndex, Index} from "@/utils/types/general.types";
+import {Asset, Index} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode} from "react";
 import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
 import Link from "next/link";
-import {AddCustomIndex} from "@/app/indexes/AddCustom/AddCustomIndex";
+import {CustomIndex} from "@/app/indexes/CustomIndex/CustomIndex";
 
 export default function IndexesTable({data, assets}: {data: Index[]; assets: Asset[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -214,7 +214,7 @@ export default function IndexesTable({data, assets}: {data: Index[]; assets: Ass
                     onChange={event => table.getColumn("name")?.setFilterValue(event.target.value)}
                     className="max-w-sm"
                 />
-                <AddCustomIndex assets={assets} />
+                <CustomIndex assets={assets} />
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="ml-auto">

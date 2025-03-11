@@ -1,28 +1,38 @@
 import {DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
-import {AddCustomIndexAssets} from "@/app/indexes/AddCustom/AddCustomIndexAssets";
-import {AddCustomIndexAssetsPortions} from "@/app/indexes/AddCustom/AddCustomIndexAssetsPortions";
+import {CustomIndexAssets} from "@/app/indexes/CustomIndex/CustomIndexAssets";
+import {CustomIndexAssetsPortions} from "@/app/indexes/CustomIndex/CustomIndexAssetsPortions";
 import {Button} from "@/components/ui/button";
 import {useState} from "react";
-import {AddAsset, Asset} from "@/utils/types/general.types";
+import {CustomIndexAsset, Asset, CustomIndexType} from "@/utils/types/general.types";
 import {saveCustomIndex} from "@/app/indexes/[id]/actions";
 import {generateUuid} from "@/utils/heleprs/generateUuid.helper";
 
-export function AddCustomIndexDialog({assets, closeDialog}: {assets: Asset[]; closeDialog: () => void}) {
-    const [selectedAssets, setSelectedAssets] = useState<AddAsset[]>([]);
-    const [name, setName] = useState<string>("");
+export function CustomIndexDialog({
+    assets,
+    closeDialog,
+    customIndex,
+}: {
+    assets: Asset[];
+    closeDialog: () => void;
+    customIndex?: CustomIndexType;
+}) {
+    const [selectedAssets, setSelectedAssets] = useState<CustomIndexAsset[]>(customIndex?.assets ?? []);
+    const [name, setName] = useState<string>(customIndex?.name ?? "");
 
     const handleSave = async () => {
-        await saveCustomIndex({id: generateUuid(), name, assets: selectedAssets});
+        await saveCustomIndex({id: customIndex?.id ?? generateUuid(), name, assets: selectedAssets});
         closeDialog();
+
+        customIndex && window.location.reload();
     };
 
     const handleChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
         setName(e.target.value);
     };
 
-    const handleChangeMultiselect = (value: AddAsset["id"][]) => {
+    const handleChangeMultiselect = (value: CustomIndexAsset["id"][]) => {
         setSelectedAssets(
             value.map(id => {
                 const selectedAsset = selectedAssets.find(item => item.id === id);
@@ -46,8 +56,8 @@ export function AddCustomIndexDialog({assets, closeDialog}: {assets: Asset[]; cl
     return (
         <DialogContent className="w-full max-w-lg">
             <DialogHeader>
-                <DialogTitle>Add Index</DialogTitle>
-                <DialogDescription>Create your custom Index</DialogDescription>
+                <DialogTitle>{`${customIndex ? "Edit" : "Create"} Custom Index ${customIndex ? `(${customIndex.name})` : ""}`}</DialogTitle>
+                <DialogDescription>{`${customIndex ? "" : "Create your custom Index"}`}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -66,7 +76,7 @@ export function AddCustomIndexDialog({assets, closeDialog}: {assets: Asset[]; cl
                     <Label htmlFor="assets" className="text-right">
                         Assets
                     </Label>
-                    <AddCustomIndexAssets
+                    <CustomIndexAssets
                         assets={assets}
                         assetsIds={selectedAssets.map(item => item.id)}
                         onChangeMultiselect={handleChangeMultiselect}
@@ -76,7 +86,7 @@ export function AddCustomIndexDialog({assets, closeDialog}: {assets: Asset[]; cl
                     <Label htmlFor="assets" className="text-right">
                         Assets Portions
                     </Label>
-                    <AddCustomIndexAssetsPortions
+                    <CustomIndexAssetsPortions
                         assets={assets}
                         selectedAssets={selectedAssets}
                         onChangeAssetPortion={handleChangeAssetPortion}

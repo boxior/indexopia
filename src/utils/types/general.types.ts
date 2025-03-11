@@ -20,7 +20,7 @@ export interface Asset {
     portion?: number; // portion of Index
 }
 
-export type AddAsset = Pick<Required<Asset>, "id" | "portion">;
+export type CustomIndexAsset = Pick<Required<Asset>, "id" | "portion">;
 
 export type AssetWithHistory = Asset & {history: AssetHistory[]; historyOverview: HistoryOverview};
 
@@ -55,10 +55,10 @@ export interface Index<A = Asset> {
     history: AssetHistory[];
 }
 
-export interface CustomIndex {
+export interface CustomIndexType {
     id: string;
     name: string;
-    assets: AddAsset[];
+    assets: CustomIndexAsset[];
 }
 
 /**

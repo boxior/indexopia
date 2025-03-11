@@ -13,3 +13,5 @@ export const INDEX_NAME_BY_INDEX_ID: Record<IndexId, string> = {
     [IndexId.TOP_25]: "Index 25",
     [IndexId.TOP_50]: "Index 50",
 };
+
+export const MAX_ASSET_COUNT = 50;

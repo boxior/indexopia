@@ -6,14 +6,14 @@ import {
     Asset,
     AssetHistory,
     AssetWithHistory,
-    CustomIndex,
+    CustomIndexType,
     Index,
     IndexId,
     NormalizedAssetHistory,
     NormalizedAssets,
 } from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
-import {ASSET_COUNT_BY_INDEX_ID, INDEX_NAME_BY_INDEX_ID} from "@/utils/constants/general.constants";
+import {ASSET_COUNT_BY_INDEX_ID, INDEX_NAME_BY_INDEX_ID, MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
@@ -124,7 +124,7 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const handleGetAllAssetsHistories = async (upToRank: number | undefined = 50) => {
+export const handleGetAllAssetsHistories = async (upToRank: number | undefined = MAX_ASSET_COUNT) => {
     const assets = await readJsonFile("assets", {}, ASSETS_FOLDER_PATH);
     const assetsList = ((assets as any)?.data ?? []).slice(0, upToRank);
 
@@ -439,7 +439,7 @@ export async function getCustomIndex({
     id: string;
     withAssetHistory?: boolean;
 }): Promise<Index> {
-    const customIndex = (await readJsonFile(id, {}, INDEXES_FOLDER_PATH)) as CustomIndex;
+    const customIndex = (await readJsonFile(id, {}, INDEXES_FOLDER_PATH)) as CustomIndexType;
     let assets: Asset[] = await getCachedAssets(customIndex.assets.map(asset => asset.id));
 
     if (withAssetHistory) {
@@ -486,7 +486,7 @@ export async function getCustomIndex({
 }
 
 export async function getCustomIndexes(): Promise<Index<AssetWithHistory>[]> {
-    const cachedCustomIndexes = (await processAllFilesInFolder("/db/indexes")) as unknown as CustomIndex[];
+    const cachedCustomIndexes = (await processAllFilesInFolder("/db/indexes")) as unknown as CustomIndexType[];
 
     return Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id, withAssetHistory: true}))) as Promise<
         Index<AssetWithHistory>[]
