@@ -4,12 +4,12 @@ import {Asset} from "@/utils/types/general.types";
 
 export function AddCustomIndexAssets({
     assets,
-    selectedFrameworks,
-    setSelectedFrameworks,
+    assetsIds,
+    onChangeMultiselect,
 }: {
     assets: Asset[];
-    selectedFrameworks: string[];
-    setSelectedFrameworks: (value: string[]) => void;
+    assetsIds: string[];
+    onChangeMultiselect: (value: string[]) => void;
 }) {
     const options = assets.map(item => ({value: item.id, label: item.name}));
 
@@ -18,8 +18,8 @@ export function AddCustomIndexAssets({
             id={"assets"}
             className="col-span-3"
             options={options}
-            onValueChange={setSelectedFrameworks}
-            value={selectedFrameworks}
+            onValueChange={onChangeMultiselect}
+            value={assetsIds}
             placeholder="Select Assets..."
             variant="inverted"
             animation={2}
