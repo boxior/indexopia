@@ -24,10 +24,9 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {AssetWithHistory, Index, MomentFormat} from "@/utils/types/general.types";
+import {AssetWithHistory, Index} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
-import moment from "moment";
 import {ReactNode} from "react";
 import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
 import {getChartColorClassname} from "@/app/indexes/helpers";
@@ -64,8 +63,11 @@ export function IndexAssets({index}: {index: Index<AssetWithHistory>}) {
     const columns: ColumnDef<AssetWithHistory>[] = [
         {
             accessorKey: "rank",
-            header: "#",
+            header: renderColumnSortedHeader("Rank"),
             cell: ({row}) => <div className="capitalize">{row.getValue("rank")}</div>,
+            meta: {
+                text: "Rank",
+            },
         },
         {
             accessorKey: "name",
@@ -149,40 +151,6 @@ export function IndexAssets({index}: {index: Index<AssetWithHistory>}) {
             header: renderColumnSortedHeader("Portion"),
             meta: {
                 text: "Portion",
-            },
-        },
-        {
-            accessorKey: "startTime",
-            cell: ({row}) => {
-                const value = row.getValue("startTime") as number;
-                return <div className="lowercase">{moment(value).utc().startOf("day").format(MomentFormat.DATE)}</div>; // Format and handle null/undefined
-            },
-            header: renderColumnSortedHeader("Start from"),
-            meta: {
-                text: "Start from",
-            },
-        },
-        {
-            header: "Duration",
-            cell: ({row}) => {
-                const startTime = row.getValue("startTime") as number;
-
-                // Calculate the duration difference in days
-                const now = moment().utc().startOf("day");
-                const start = moment(startTime).utc().startOf("day");
-                const duration = moment.duration(now.diff(start)); // Create a moment duration
-
-                // Break down the duration into years, months, and days
-                const years = duration.years() > 0 ? `${duration.years()} year${duration.years() > 1 ? "s" : ""} ` : "";
-                const months =
-                    duration.months() > 0 ? `${duration.months()} month${duration.months() > 1 ? "s" : ""} ` : "";
-                const days = duration.days() > 0 ? `${duration.days()} day${duration.days() > 1 ? "s" : ""}` : "";
-
-                // Combine the outputs
-                return <div className="lowercase">{`${years}${months}${days}`.trim() || "0 days"}</div>;
-            },
-            meta: {
-                text: "Duration",
             },
         },
     ];
