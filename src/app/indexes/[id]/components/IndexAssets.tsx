@@ -141,6 +141,17 @@ export function IndexAssets({index}: {index: Index<AssetWithHistory>}) {
             },
         },
         {
+            accessorKey: "portion",
+            cell: ({row}) => {
+                const portion = row.getValue("portion") as number;
+                return <div className="lowercase">{`${portion}%`}</div>; // Format and handle null/undefined
+            },
+            header: renderColumnSortedHeader("Portion"),
+            meta: {
+                text: "Portion",
+            },
+        },
+        {
             accessorKey: "startTime",
             cell: ({row}) => {
                 const value = row.getValue("startTime") as number;

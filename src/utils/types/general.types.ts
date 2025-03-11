@@ -17,6 +17,7 @@ export interface Asset {
     explorer: string; // "https://blockchain.info/"
     history?: AssetHistory[];
     historyOverview?: HistoryOverview;
+    portion?: number; // portion of Index
 }
 
 export type AssetWithHistory = Asset & {history: AssetHistory[]; historyOverview: HistoryOverview};
@@ -39,7 +40,7 @@ export type NormalizedAssetHistory = Record<Asset["id"], AssetHistory[]>;
 export enum IndexId {
     TOP_5 = "top5",
     TOP_10 = "top10",
-    TOP_30 = "top30",
+    TOP_25 = "top25",
     TOP_50 = "top50",
 }
 
@@ -56,6 +57,7 @@ export interface CustomIndex {
     id: string;
     name: string;
     assetsIds: string[];
+    assetsPortions: number[];
 }
 
 /**
