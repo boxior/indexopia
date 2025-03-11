@@ -259,7 +259,7 @@ export const getIndexHistoryOverview = async (
         try {
             const assetHistoryOverview = await getAssetHistoryOverview(asset.id, histories[asset.id]);
 
-            const weight = asset.portion ?? 0 / 100; // Convert portion to weight
+            const weight = (asset.portion ?? 0) / 100; // Convert portion to weight
 
             // Accumulate weighted values
             weightedDays1 += assetHistoryOverview.days1 * weight;
