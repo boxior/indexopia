@@ -13,7 +13,7 @@ import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
 export default async function IndexPage(props: ServerPageProps<IndexId>) {
     const params = await props.params;
     const assets = await getCachedTopAssets(MAX_ASSET_COUNT);
-    const customIndex = (await readJsonFile(`${params.id}`, {}, INDEXES_FOLDER_PATH)) as CustomIndexType | undefined;
+    const customIndex = (await readJsonFile(`${params.id}`, null, INDEXES_FOLDER_PATH)) as CustomIndexType | undefined;
 
     const index = await (async () => {
         switch (true) {
@@ -32,7 +32,7 @@ export default async function IndexPage(props: ServerPageProps<IndexId>) {
 
     return (
         <div className={"flex flex-col gap-4"}>
-            <CustomIndex assets={assets} customIndex={customIndex} />
+            {customIndex && <CustomIndex assets={assets} customIndex={customIndex} />}
             <div className="flex gap-4">
                 <Card className={"flex-1 p-2"}>
                     <IndexOverview index={index} />
