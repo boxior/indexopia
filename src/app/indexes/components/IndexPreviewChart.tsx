@@ -21,7 +21,7 @@ export function IndexPreviewChart({history}: {history: AssetHistory[]}) {
     } satisfies ChartConfig;
 
     return (
-        <ChartContainer config={chartConfig}>
+        <ChartContainer config={chartConfig} className={"h-20"}>
             <AreaChart
                 accessibilityLayer
                 data={chartData}
