@@ -10,6 +10,11 @@ const compat = new FlatCompat({
 });
 
 const eslintConfig = [
+    {
+        ignores: [
+            "**/*", // Ignore all files by default
+        ],
+    },
     ...compat.extends("next/core-web-vitals", "next/typescript"),
     {
         // Specify files to lint only in the `/src` folder
@@ -18,9 +23,6 @@ const eslintConfig = [
         rules: {
             "@typescript-eslint/no-explicit-any": "warn", // Set 'any' as a warning instead of an error
         },
-    },
-    {
-        ignorePatterns: ["**/*"], // Ignore everything outside
     },
 ];
 
