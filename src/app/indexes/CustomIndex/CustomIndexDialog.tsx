@@ -25,7 +25,7 @@ export function CustomIndexDialog({
         await saveCustomIndex({id: customIndex?.id ?? generateUuid(), name, assets: selectedAssets});
         closeDialog();
 
-        customIndex && window.location.reload();
+        !customIndex && window.location.reload();
     };
 
     const handleChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
