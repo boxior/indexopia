@@ -1,16 +1,15 @@
 import {promises as fs} from "fs";
 import {uniqBy} from "lodash";
 import {RecordWithId} from "@/utils/types/general.types";
-import {ENV_VARIABLES} from "@/env";
 import path from "path";
 
 /**
  * This file is useful to test locally jsons.
  */
 export async function readJsonFile(fileName: string, fallback: unknown = [], folderPath: string | undefined = "/db") {
-    if (ENV_VARIABLES.MY_ENV !== "local") {
-        return;
-    }
+    // if (ENV_VARIABLES.MY_ENV !== "local") {
+    //     return;
+    // }
 
     try {
         const filePath = `${process.cwd()}${folderPath}`;
@@ -33,9 +32,9 @@ export async function readJsonFile(fileName: string, fallback: unknown = [], fol
 }
 
 export async function writeJsonFile<T>(fileName: string, data: T, folderPath: string | undefined = "/db") {
-    if (ENV_VARIABLES.MY_ENV !== "local") {
-        return;
-    }
+    // if (ENV_VARIABLES.MY_ENV !== "local") {
+    //     return;
+    // }
 
     try {
         // Convert JavaScript object to JSON string
@@ -52,9 +51,9 @@ export async function writeJsonFile<T>(fileName: string, data: T, folderPath: st
 }
 
 export const createFolderIfNotExists = async (folderPath: string) => {
-    if (ENV_VARIABLES.MY_ENV !== "local") {
-        return;
-    }
+    // if (ENV_VARIABLES.MY_ENV !== "local") {
+    //     return;
+    // }
 
     try {
         // Check if the folder exists
@@ -66,9 +65,9 @@ export const createFolderIfNotExists = async (folderPath: string) => {
 };
 
 export const readJsonItemFromArray = async (id: RecordWithId["id"], fileName: string, folderPath?: string) => {
-    if (ENV_VARIABLES.MY_ENV !== "local") {
-        return;
-    }
+    // if (ENV_VARIABLES.MY_ENV !== "local") {
+    //     return;
+    // }
 
     try {
         const items = (await readJsonFile(fileName, [], folderPath)) as RecordWithId[];
@@ -85,9 +84,9 @@ export const writeJsonItemToArray = async (
     folderPath?: string,
     forceUnique: boolean | undefined = false
 ) => {
-    if (ENV_VARIABLES.MY_ENV !== "local") {
-        return;
-    }
+    // if (ENV_VARIABLES.MY_ENV !== "local") {
+    //     return;
+    // }
 
     try {
         const items = (await readJsonFile(fileName, [], folderPath)) as RecordWithId[];
@@ -108,9 +107,9 @@ export const writeJsonItemToArray = async (
 };
 
 export const getIfExistJsonItemInArray = async (id: string, fileName: string, folderPath?: string) => {
-    if (ENV_VARIABLES.MY_ENV !== "local") {
-        return;
-    }
+    // if (ENV_VARIABLES.MY_ENV !== "local") {
+    //     return;
+    // }
 
     try {
         const items = (await readJsonFile(fileName, [], folderPath)) as {id: string}[];
