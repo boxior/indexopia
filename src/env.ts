@@ -20,7 +20,7 @@ export const ENV_VARIABLES: EnvVariables = {
     COINCAP_PRO_API_URL: process.env.COINCAP_PRO_API_URL ?? "",
     COINCAP_PRO_API_KEY: process.env.COINCAP_PRO_API_KEY ?? "",
     ALPHA_VANTAGE_API_KEY: process.env.ALPHA_VANTAGE_API_KEY ?? "",
-    DEV_API_KEY: process.env.NEXT_PUBLIC_DEV_API_KEY ?? "",
+    DEV_API_KEY: process.env.DEV_API_KEY ?? "",
 };
 
 console.log("ENV_VARIABLES", ENV_VARIABLES);

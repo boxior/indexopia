@@ -5,7 +5,7 @@ import {ENV_VARIABLES} from "@/env";
 import {redirect} from "next/navigation";
 import {DEV_AUTH_NAME, DEV_AUTH_PATH} from "@/utils/constants/general.constants";
 
-const DEV_API_KEY = ENV_VARIABLES.NEXT_PUBLIC_DEV_API_KEY;
+const DEV_API_KEY = ENV_VARIABLES.DEV_API_KEY;
 
 export async function devAuth(apiKey: string) {
     "use server";
