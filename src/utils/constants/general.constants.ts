@@ -15,3 +15,7 @@ export const INDEX_NAME_BY_INDEX_ID: Record<IndexId, string> = {
 };
 
 export const MAX_ASSET_COUNT = 50;
+
+export const DEV_AUTH_NAME = "dev-auth";
+
+export const DEV_AUTH_PATH = `/${DEV_AUTH_NAME}`;

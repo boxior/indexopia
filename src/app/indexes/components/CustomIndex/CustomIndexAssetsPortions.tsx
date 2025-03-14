@@ -24,7 +24,7 @@ export function CustomIndexAssetsPortions({
 
     return (
         <div className="col-span-3 gap-4">
-            {selectedAssets.map(({id: assetId, portion}, index) => {
+            {selectedAssets.map(({id: assetId, portion}) => {
                 const asset = assets.find(item => item.id === assetId);
 
                 return (
