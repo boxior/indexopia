@@ -31,7 +31,7 @@ import {ReactNode} from "react";
 import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
 import Link from "next/link";
-import {CustomIndex} from "@/app/indexes/CustomIndex/CustomIndex";
+import {CustomIndex} from "@/app/indexes/components/CustomIndex/CustomIndex";
 
 export default function IndexesTable({data, assets}: {data: Index[]; assets: Asset[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);

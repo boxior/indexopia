@@ -1,8 +1,8 @@
 import {DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
-import {CustomIndexAssets} from "@/app/indexes/CustomIndex/CustomIndexAssets";
-import {CustomIndexAssetsPortions} from "@/app/indexes/CustomIndex/CustomIndexAssetsPortions";
+import {CustomIndexAssets} from "@/app/indexes/components/CustomIndex/CustomIndexAssets";
+import {CustomIndexAssetsPortions} from "@/app/indexes/components/CustomIndex/CustomIndexAssetsPortions";
 import {Button} from "@/components/ui/button";
 import {useState} from "react";
 import {CustomIndexAsset, Asset, CustomIndexType} from "@/utils/types/general.types";

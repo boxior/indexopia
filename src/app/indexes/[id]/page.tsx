@@ -7,7 +7,7 @@ import {IndexOverview} from "@/app/indexes/[id]/components/IndexOverview";
 import {getIsDefaultIndex} from "@/app/indexes/helpers";
 import {readJsonFile} from "@/utils/heleprs/fs.helpers";
 import * as React from "react";
-import {CustomIndex} from "@/app/indexes/CustomIndex/CustomIndex";
+import {CustomIndex} from "@/app/indexes/components/CustomIndex/CustomIndex";
 import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
 
 export default async function IndexPage(props: ServerPageProps<IndexId>) {
