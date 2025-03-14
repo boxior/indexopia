@@ -19,6 +19,15 @@
             }
         ],
         "paths": {
+            "@numeral": ["./src/utils/numeral"],
+            "@ui": ["./src/components/ui/*"],
+            "@custom-ui": ["./src/components/custom-ui/*"],
+            "@constants": ["./src/utils/constants/*"],
+            "@helpers": ["./src/utils/helpers/*"],
+            "@types": ["./src/utils/types/*"],
+            "@utils": ["./src/utils/*"],
+            "@api": ["./src/app/api/*"],
+            "@indexes": ["./src/app/indexes/*"],
             "@/*": ["./src/*"]
         }
     },
