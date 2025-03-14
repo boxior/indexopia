@@ -16,7 +16,7 @@ export function IndexPreviewChart({history}: {history: AssetHistory[]}) {
 
     const chartConfig = {
         price: {
-            color: getChartColor(chartData[chartData.length - 1].price - chartData[0].price),
+            color: getChartColor(chartData[chartData.length - 1]?.price - chartData[0]?.price),
         },
     } satisfies ChartConfig;
 
