@@ -1,7 +1,7 @@
 import {AssetWithHistory, CustomIndexType, Index, IndexId, ServerPageProps} from "@/utils/types/general.types";
 import {IndexChart} from "@/app/indexes/[id]/components/IndexChart";
 import {IndexAssets} from "@/app/indexes/[id]/components/IndexAssets";
-import {getCachedTopAssets, getCustomIndex, getIndex, INDEXES_FOLDER_PATH} from "@/app/api/assets/db.helpers";
+import {getCachedTopAssets, getCustomIndex, getIndex, INDEXES_FOLDER_PATH} from "@/app/db/db.helpers";
 import {Card} from "@/components/ui/card";
 import {IndexOverview} from "@/app/indexes/[id]/components/IndexOverview";
 import {getIsDefaultIndex} from "@/app/indexes/helpers";

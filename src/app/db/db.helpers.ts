@@ -1,7 +1,7 @@
 import {processAllFilesInFolder, readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
-import getAssets from "@/app/api/assets/getAssets";
-import getAssetHistory from "@/app/api/assets/getAssetHistory";
-import {DbItems} from "@/app/api/assets/db.types";
+import getAssets from "@/app/actions/assets/getAssets";
+import getAssetHistory from "@/app/actions/assets/getAssetHistory";
+import {DbItems} from "@/app/db/db.types";
 import {
     Asset,
     AssetHistory,
@@ -214,11 +214,15 @@ export const getAssetHistoryOverview = async (
     };
 };
 
-export const getCachedTopAssets = async (limit: number): Promise<Asset[]> => {
+export const getCachedTopAssets = async (limit: number, withHistory: boolean | undefined = false): Promise<Asset[]> => {
     const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
-    const assetsList = assets?.data ?? [];
+    let assetsList = (assets?.data ?? []).slice(0, limit);
 
-    return assetsList.slice(0, limit);
+    if (withHistory) {
+        assetsList = await getAssetsHistories(assetsList);
+    }
+
+    return assetsList;
 };
 
 export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
@@ -387,28 +391,7 @@ function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): A
 }
 
 export async function getIndex(id: IndexId, withAssetHistory: boolean | undefined = false): Promise<Index> {
-    let assets: Asset[] = await getCachedTopAssets(ASSET_COUNT_BY_INDEX_ID[id]);
-
-    if (withAssetHistory) {
-        const assetsHistories: {data: AssetHistory[]}[] = await Promise.all(
-            assets.map(
-                asset =>
-                    readJsonFile(`asset_${asset.id}_history`, {}, ASSETS_HISTORY_FOLDER_PATH) as unknown as {
-                        data: AssetHistory[];
-                    }
-            )
-        );
-
-        const assetsHistoriesOverviews: HistoryOverview[] = await Promise.all(
-            assets.map((asset, index) => getAssetHistoryOverview(asset.id, assetsHistories[index].data))
-        );
-
-        assets = assets.map((asset, index) => ({
-            ...asset,
-            history: assetsHistories[index].data,
-            historyOverview: assetsHistoriesOverviews[index],
-        }));
-    }
+    let assets: Asset[] = await getCachedTopAssets(ASSET_COUNT_BY_INDEX_ID[id], withAssetHistory);
 
     assets = assets.map((asset, index) => ({
         ...asset,
@@ -443,24 +426,7 @@ export async function getCustomIndex({
     let assets: Asset[] = await getCachedAssets(customIndex.assets.map(asset => asset.id));
 
     if (withAssetHistory) {
-        const assetsHistories: {data: AssetHistory[]}[] = await Promise.all(
-            assets.map(
-                asset =>
-                    readJsonFile(`asset_${asset.id}_history`, {}, ASSETS_HISTORY_FOLDER_PATH) as unknown as {
-                        data: AssetHistory[];
-                    }
-            )
-        );
-
-        const assetsHistoriesOverviews: HistoryOverview[] = await Promise.all(
-            assets.map((asset, index) => getAssetHistoryOverview(asset.id, assetsHistories[index].data))
-        );
-
-        assets = assets.map((asset, index) => ({
-            ...asset,
-            history: assetsHistories[index].data,
-            historyOverview: assetsHistoriesOverviews[index],
-        }));
+        assets = await getAssetsHistories(assets);
     }
 
     assets = assets.map((asset, index) => ({
@@ -491,4 +457,25 @@ export async function getCustomIndexes(): Promise<Index<AssetWithHistory>[]> {
     return Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id, withAssetHistory: true}))) as Promise<
         Index<AssetWithHistory>[]
     >;
+}
+
+async function getAssetsHistories(assets: Asset[]) {
+    const assetsHistories: {data: AssetHistory[]}[] = await Promise.all(
+        assets.map(
+            asset =>
+                readJsonFile(`asset_${asset.id}_history`, {}, ASSETS_HISTORY_FOLDER_PATH) as unknown as {
+                    data: AssetHistory[];
+                }
+        )
+    );
+
+    const assetsHistoriesOverviews: HistoryOverview[] = await Promise.all(
+        assets.map((asset, index) => getAssetHistoryOverview(asset.id, assetsHistories[index].data))
+    );
+
+    return assets.map((asset, index) => ({
+        ...asset,
+        history: assetsHistories[index].data,
+        historyOverview: assetsHistoriesOverviews[index],
+    }));
 }
