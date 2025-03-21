@@ -2,16 +2,31 @@
 
 import IndexesTable from "@/app/indexes/components/IndexesTable";
 import {getCachedTopAssets, getCustomIndexes, getIndex, handleGetAllAssetsHistories} from "@/app/db/db.helpers";
-import {IndexId} from "@/utils/types/general.types";
+import {DefaultIndexBy, IndexId} from "@/utils/types/general.types";
 import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
-import {getMostProfitableIndexAll} from "@/utils/heleprs/getMostProfitableIndexAssetsAll.helper";
+import {handleGetDefaultIndexFromScratch} from "@/utils/heleprs/handleGetDefaultIndexFromScratch.helper";
+import moment from "moment";
 
 export default async function IndexesPage() {
     await handleGetAllAssetsHistories();
 
-    const inputAssets = await getCachedTopAssets(10, true);
-    const outputAssets = getMostProfitableIndexAll(inputAssets, 3);
-    console.log("outputAssets", outputAssets);
+    const outputAssets = await handleGetDefaultIndexFromScratch({
+        topAssetsCount: 5,
+        upToNumber: 3,
+        defaultIndexBy: DefaultIndexBy.RANK_AND_PROFIT,
+        startTime: moment().subtract(3, "year").valueOf(),
+    });
+
+    console.log(
+        "outputAssets",
+        outputAssets.map(asset => ({
+            id: asset.id,
+            name: asset.name,
+            portion: asset.portion,
+            rank: asset.rank,
+            profit: asset.profit,
+        }))
+    );
 
     const data = await Promise.all(Object.values(IndexId).map(id => getIndex(id)));
     const customIndexes = await getCustomIndexes();

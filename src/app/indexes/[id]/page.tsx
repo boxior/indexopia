@@ -1,4 +1,10 @@
-import {AssetWithHistory, CustomIndexType, Index, IndexId, ServerPageProps} from "@/utils/types/general.types";
+import {
+    AssetWithHistoryAndOverview,
+    CustomIndexType,
+    Index,
+    IndexId,
+    ServerPageProps,
+} from "@/utils/types/general.types";
 import {IndexChart} from "@/app/indexes/[id]/components/IndexChart";
 import {IndexAssets} from "@/app/indexes/[id]/components/IndexAssets";
 import {getCachedTopAssets, getCustomIndex, getIndex, INDEXES_FOLDER_PATH} from "@/app/db/db.helpers";
@@ -18,14 +24,14 @@ export default async function IndexPage(props: ServerPageProps<IndexId>) {
     const index = await (async () => {
         switch (true) {
             case getIsDefaultIndex(params.id):
-                return (await getIndex(params.id, true)) as Index<AssetWithHistory>;
+                return (await getIndex(params.id, true)) as Index<AssetWithHistoryAndOverview>;
             default: {
                 const customIndex = (await readJsonFile(`${params.id}`, {}, INDEXES_FOLDER_PATH)) as CustomIndexType;
 
                 return (await getCustomIndex({
                     id: customIndex.id,
                     withAssetHistory: true,
-                })) as Index<AssetWithHistory>;
+                })) as Index<AssetWithHistoryAndOverview>;
             }
         }
     })();

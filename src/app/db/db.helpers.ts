@@ -5,7 +5,7 @@ import {DbItems} from "@/app/db/db.types";
 import {
     Asset,
     AssetHistory,
-    AssetWithHistory,
+    AssetWithHistoryAndOverview,
     CustomIndexType,
     Index,
     IndexId,
@@ -451,11 +451,11 @@ export async function getCustomIndex({
     };
 }
 
-export async function getCustomIndexes(): Promise<Index<AssetWithHistory>[]> {
+export async function getCustomIndexes(): Promise<Index<AssetWithHistoryAndOverview>[]> {
     const cachedCustomIndexes = (await processAllFilesInFolder("/db/indexes")) as unknown as CustomIndexType[];
 
     return Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id, withAssetHistory: true}))) as Promise<
-        Index<AssetWithHistory>[]
+        Index<AssetWithHistoryAndOverview>[]
     >;
 }
 

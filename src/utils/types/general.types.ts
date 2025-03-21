@@ -20,9 +20,18 @@ export interface Asset {
     portion?: number; // portion of Index
 }
 
+export enum DefaultIndexBy {
+    RANK = "rank",
+    RANK_AND_PROFIT = "rankAndProfit",
+}
+
+export type AssetWithProfit = Asset & {profit: number};
+
 export type CustomIndexAsset = Pick<Required<Asset>, "id" | "portion">;
 
-export type AssetWithHistory = Asset & {history: AssetHistory[]; historyOverview: HistoryOverview};
+export type AssetWithHistory = Asset & {history: AssetHistory[]};
+
+export type AssetWithHistoryAndOverview = Asset & {history: AssetHistory[]; historyOverview: HistoryOverview};
 
 export interface AssetHistory {
     priceUsd: string; // "priceUsd": "0.52126034102192210769",

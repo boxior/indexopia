@@ -1,7 +1,7 @@
 {
   "message": "Request failed with status code 429",
   "name": "AxiosError",
-  "stack": "AxiosError: Request failed with status code 429\n    at My (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/chunks/991.js:5:109901)\n    at IncomingMessage.<anonymous> (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/chunks/991.js:7:9448)\n    at IncomingMessage.emit (node:events:531:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at bP.request (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/chunks/991.js:7:21242)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async c (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/chunks/211.js:5:12504)\n    at async y (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/chunks/211.js:5:13166)\n    at async b (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/chunks/211.js:5:13742)\n    at async u (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/app/indexes/page.js:2:5689)",
+  "stack": "AxiosError: Request failed with status code 429\n    at settle (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/chunks/ssr/node_modules_axios_lib_56feb8._.js:2538:16)\n    at IncomingMessage.handleStreamEnd (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/chunks/ssr/node_modules_axios_lib_56feb8._.js:3172:179)\n    at IncomingMessage.emit (node:events:531:35)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)\n    at Axios.request (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/chunks/ssr/node_modules_axios_lib_56feb8._.js:4058:49)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async getAssetHistory (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/chunks/ssr/[root of the server]__6e5e6e._.js:367:16)\n    at async handleGetAssetHistory (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/chunks/ssr/[root of the server]__6e5e6e._.js:498:21)\n    at async handleGetAllAssetsHistories (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/chunks/ssr/[root of the server]__6e5e6e._.js:562:13)\n    at async IndexesPage (/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.next/server/chunks/ssr/[root of the server]__6e5e6e._.js:952:5)",
   "config": {
     "transitional": {
       "silentJSONParsing": true,
@@ -31,7 +31,7 @@
       "Accept-Encoding": "gzip, compress, deflate, br"
     },
     "method": "get",
-    "url": "https://api.coincap.io/v2/assets/bitcoin-cash/history/?apiKey=387669ae-38f8-4d3c-bbaa-0eb2aadff2d4&interval=d1&start=1741910400000&end=1741996800000"
+    "url": "https://api.coincap.io/v2/assets/near-protocol/history/?apiKey=387669ae-38f8-4d3c-bbaa-0eb2aadff2d4&interval=d1&start=1742428800000&end=1742515200000"
   },
   "code": "ERR_BAD_REQUEST",
   "status": 429
