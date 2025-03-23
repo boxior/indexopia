@@ -27,6 +27,8 @@ export enum DefaultIndexBy {
 
 export type AssetWithProfit = Asset & {profit: number};
 
+export type AssetWithMaxDrawDown = Asset & {maxDrawDown: {value: number; startTime: string; endTime: string}};
+
 export type CustomIndexAsset = Pick<Required<Asset>, "id" | "portion">;
 
 export type AssetWithHistory = Asset & {history: AssetHistory[]};

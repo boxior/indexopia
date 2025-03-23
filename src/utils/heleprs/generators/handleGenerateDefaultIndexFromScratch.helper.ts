@@ -1,8 +1,8 @@
-import {handleGetAssetsForIndex} from "@/utils/heleprs/handleGetAssetsForIndex.helper";
-import {handleGenerateDefaultIndex} from "@/utils/heleprs/handleGenerateDefaultIndex.helper";
+import {handleGetAssetsForIndex} from "@/utils/heleprs/generators/handleGetAssetsForIndex.helper";
+import {handleGenerateDefaultIndex} from "@/utils/heleprs/generators/handleGenerateDefaultIndex.helper";
 import {DefaultIndexBy} from "@/utils/types/general.types";
 
-export const handleGetDefaultIndexFromScratch = async ({
+export const handleGenerateDefaultIndexFromScratch = async ({
     topAssetsCount,
     upToNumber,
     defaultIndexBy,

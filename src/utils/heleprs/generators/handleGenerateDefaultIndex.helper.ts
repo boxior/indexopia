@@ -1,7 +1,7 @@
 import {Asset, DefaultIndexBy} from "@/utils/types/general.types";
-import {getMostProfitableAssets} from "@/utils/heleprs/getMostProfitableIndexAssets.helper";
-import {getIndexAssetsWithPortionsByRankAndProfit} from "@/utils/heleprs/getIndexAssetsWithPortionsByRankAndProfit.helper";
-import {getIndexAssetsWithPortionsByRank} from "@/utils/heleprs/getIndexAssetsWithPortionsByRank.helper";
+import {getMostProfitableAssets} from "@/utils/heleprs/generators/getMostProfitableIndexAssets.helper";
+import {getIndexAssetsWithPortionsByRankAndProfit} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankAndProfit.helper";
+import {getIndexAssetsWithPortionsByRank} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRank.helper";
 
 export function handleGenerateDefaultIndex(props: {
     assets: Asset[];
