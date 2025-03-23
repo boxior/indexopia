@@ -54,22 +54,19 @@ function getMaxDrawDownWithTimeRange(history: AssetHistory[]): {
 }
 
 /**
- * Finds top N assets with the least maximum drawdown during a specific time range.
+ * Sort assets with the least maximum drawdown during a specific time range.
  * Also calculates the time range of the maximum drawdown for each asset.
  * @param assets - Array of Assets with history data.
- * @param upToNumber - Maximum number of Assets to return.
  * @param startTime - Start of the period (optional).
  * @param endTime - End of the period (optional).
  * @returns Array of Assets sorted by max drawdown in ascending order.
  */
-export function getLessLossesIndexAssets({
+export function sortLessMaxDrawDownIndexAssets({
     assets,
-    upToNumber,
     startTime: startTimeProp,
     endTime: endTimeProp,
 }: {
     assets: Asset[];
-    upToNumber: number;
     startTime?: number | string | Date;
     endTime?: number | string | Date;
 }): Array<AssetWithMaxDrawDown> {
@@ -107,8 +104,5 @@ export function getLessLossesIndexAssets({
     });
 
     // Sort assets by max drawdown in ascending order (smallest max drawdown first)
-    const sortedAssets = assetsWithMaxDrawDown.sort((a, b) => a.maxDrawDown.value - b.maxDrawDown.value);
-
-    // Return the top N assets with the least max drawdown
-    return sortedAssets.slice(0, upToNumber);
+    return assetsWithMaxDrawDown.toSorted((a, b) => a.maxDrawDown.value - b.maxDrawDown.value);
 }

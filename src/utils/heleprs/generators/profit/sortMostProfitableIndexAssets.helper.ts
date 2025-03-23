@@ -2,21 +2,18 @@ import {Asset, AssetWithProfit} from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 
 /**
- * Helper function to find the top N most profitable assets within a specific time range.
+ * Helper function to sort most profitable assets within a specific time range.
  * @param assets - Array of Assets with history data.
- * @param upToNumber - Maximum number of Assets to return.
  * @param startTime - Start of the period (timestamp or date).
  * @param endTime - End of the period (timestamp or date).
  * @returns Array of the most profitable Assets.
  */
-export function getMostProfitableAssets({
+export function sortMostProfitableAssets({
     assets,
-    upToNumber,
     startTime: startTimeProp,
     endTime: endTimeProp,
 }: {
     assets: Asset[];
-    upToNumber: number;
     startTime?: number | string | Date;
     endTime?: number | string | Date;
 }): AssetWithProfit[] {
@@ -56,8 +53,5 @@ export function getMostProfitableAssets({
         .filter(asset => asset.profit !== 0);
 
     // Sort assets by profit in descending order
-    const sortedAssets = assetsWithProfit.sort((a, b) => b.profit - a.profit);
-
-    // Return the top N assets
-    return sortedAssets.slice(0, upToNumber);
+    return assetsWithProfit.toSorted((a, b) => b.profit - a.profit);
 }
