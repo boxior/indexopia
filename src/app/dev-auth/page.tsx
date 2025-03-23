@@ -6,7 +6,7 @@ export default async function DevAuthPage() {
     const isDevAuth = await devAuthCheck();
 
     if (isDevAuth) {
-        redirect("/");
+        redirect("/indexes");
     }
 
     return <DevAuthDialog />;
