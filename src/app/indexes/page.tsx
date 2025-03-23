@@ -1,13 +1,11 @@
 "use server";
 
 import IndexesTable from "@/app/indexes/components/IndexesTable";
-import {getCachedTopAssets, getCustomIndexes, getIndex, handleGetAllAssetsHistories} from "@/app/db/db.helpers";
+import {getCachedTopAssets, getCustomIndexes, getIndex} from "@/app/db/db.helpers";
 import {IndexId} from "@/utils/types/general.types";
 import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
 
 export default async function IndexesPage() {
-    await handleGetAllAssetsHistories();
-
     const data = await Promise.all(Object.values(IndexId).map(id => getIndex(id)));
     const customIndexes = await getCustomIndexes();
     const assets = await getCachedTopAssets(MAX_ASSET_COUNT);

@@ -1,4 +1,4 @@
-import {Asset, AssetWithProfit} from "@/utils/types/general.types";
+import {AssetWithHistory, AssetWithProfit} from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 
 /**
@@ -13,10 +13,10 @@ export function sortMostProfitableAssets({
     startTime: startTimeProp,
     endTime: endTimeProp,
 }: {
-    assets: Asset[];
+    assets: AssetWithHistory[];
     startTime?: number | string | Date;
     endTime?: number | string | Date;
-}): AssetWithProfit[] {
+}): (AssetWithProfit & AssetWithHistory)[] {
     const startTime = momentTimeZone.tz(startTimeProp ?? assets[0].history?.[0]?.time, "UTC").valueOf();
     const endTime = momentTimeZone
         .tz(endTimeProp ?? assets[0].history?.[(assets[0].history?.length ?? 0) - 1]?.time, "UTC")

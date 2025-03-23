@@ -1,13 +1,14 @@
-import {fetchAssetHistoriesWithSmallestRange, getCachedTopAssets} from "@/app/db/db.helpers";
+import {getAssetHistoriesWithSmallestRange, getCachedTopAssets} from "@/app/db/db.helpers";
 import {AssetWithHistory} from "@/utils/types/general.types";
+import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
 
 export const handleGetAssetsForIndex = async ({
-    topAssetsCount = 50,
+    topAssetsCount = MAX_ASSET_COUNT,
 }: {
     topAssetsCount?: number;
 }): Promise<AssetWithHistory[]> => {
     const inputAssets = await getCachedTopAssets(topAssetsCount);
-    const {histories} = await fetchAssetHistoriesWithSmallestRange(inputAssets.map(a => a.id));
+    const {histories} = await getAssetHistoriesWithSmallestRange(inputAssets.map(a => a.id));
 
     return inputAssets.map(a => ({...a, history: histories[a.id]}));
 };

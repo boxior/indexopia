@@ -1,4 +1,4 @@
-import {AssetWithProfit} from "@/utils/types/general.types";
+import {Asset, CustomIndexAsset} from "@/utils/types/general.types";
 
 /**
  * Helper function to assign a portion to each asset based on its rank.
@@ -8,7 +8,7 @@ import {AssetWithProfit} from "@/utils/types/general.types";
  * @param assets - Array of Assets with rank data.
  * @returns Array of Assets with the calculated portion.
  */
-export function getIndexAssetsWithPortionsByRank(assets: AssetWithProfit[]): AssetWithProfit[] {
+export function getIndexAssetsWithPortionsByRank(assets: Asset[]): CustomIndexAsset[] {
     // Parse ranks and sort assets by their rank (ascending order)
     const sortedAssets = assets.toSorted((a, b) => parseInt(a.rank, 10) - parseInt(b.rank, 10));
 

@@ -252,7 +252,7 @@ export const getIndexHistoryOverview = async (
         throw new Error("Asset portions must sum to 100%");
     }
 
-    const {histories, startTime} = await fetchAssetHistoriesWithSmallestRange(indexAssets.map(asset => asset.id));
+    const {histories, startTime} = await getAssetHistoriesWithSmallestRange(indexAssets.map(asset => asset.id));
 
     // Initialize cumulative weighted performance variables
     let weightedDays1 = 0;
@@ -288,7 +288,7 @@ export const getIndexHistoryOverview = async (
     };
 };
 
-export const fetchAssetHistoriesWithSmallestRange = async (
+export const getAssetHistoriesWithSmallestRange = async (
     assetIds: string[]
 ): Promise<{histories: Record<string, AssetHistory[]>; startTime: number | null}> => {
     const histories: Record<string, AssetHistory[]> = {};
@@ -334,7 +334,7 @@ export const fetchAssetHistoriesWithSmallestRange = async (
 };
 
 export const getIndexHistory = async (index: Omit<Index, "historyOverview" | "startTime">): Promise<AssetHistory[]> => {
-    const {histories} = await fetchAssetHistoriesWithSmallestRange(index.assets.map(asset => asset.id));
+    const {histories} = await getAssetHistoriesWithSmallestRange(index.assets.map(asset => asset.id));
 
     const portions = index.assets.map(asset => asset.portion ?? 0);
     await writeJsonFile(`histories_record_${index.id}`, histories, "/db/history_records");
@@ -393,7 +393,7 @@ function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): A
 export async function getIndex(id: IndexId, withAssetHistory: boolean | undefined = false): Promise<Index> {
     let assets: Asset[] = await getCachedTopAssets(ASSET_COUNT_BY_INDEX_ID[id], withAssetHistory);
 
-    assets = assets.map((asset, index) => ({
+    assets = assets.map(asset => ({
         ...asset,
         portion: Math.trunc(100 / ASSET_COUNT_BY_INDEX_ID[id]),
     }));

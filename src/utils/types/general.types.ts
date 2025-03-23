@@ -25,6 +25,12 @@ export enum DefaultIndexBy {
     RANK_AND_PROFIT = "rankAndProfit",
 }
 
+export enum DefaultIndexSortBy {
+    PROFIT = "profit",
+    MAX_DRAW_DOWN = "maxDrawDown",
+    OPTIMAL = "optimal",
+}
+
 export type AssetWithProfit = Asset & {profit: number};
 
 export type AssetWithMaxDrawDown = Asset & {maxDrawDown: {value: number; startTime: string; endTime: string}};

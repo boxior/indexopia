@@ -1,4 +1,4 @@
-import {Asset, AssetHistory, AssetWithMaxDrawDown} from "@/utils/types/general.types";
+import {AssetHistory, AssetWithHistory, AssetWithMaxDrawDown} from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 
 /**
@@ -66,7 +66,7 @@ export function sortLessMaxDrawDownIndexAssets({
     startTime: startTimeProp,
     endTime: endTimeProp,
 }: {
-    assets: Asset[];
+    assets: AssetWithHistory[];
     startTime?: number | string | Date;
     endTime?: number | string | Date;
 }): Array<AssetWithMaxDrawDown> {
