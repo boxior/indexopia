@@ -6,11 +6,7 @@ import {
 import {DefaultIndexBy, DefaultIndexSortBy} from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 
-// TODO:
-// Make start/end time workable
-// Correct Optimal logic
 export async function DefaultCustomIndex() {
-    console.log("START_TIME", momentTimeZone.tz("UTC").subtract(3, "year").valueOf());
     const props: SaveDefaultCustomIndexProps = {
         topAssetsCount: 5,
         upToNumber: 5,

@@ -307,7 +307,7 @@ export const getAssetHistoriesWithSmallestRange = async ({
     endTime?: number;
 }): Promise<{histories: Record<string, AssetHistory[]>; startTime?: number; endTime?: number}> => {
     const histories: Record<string, AssetHistory[]> = {};
-    startTime && console.log("----startTime", new Date(startTime).toISOString());
+
     let minStartTime: number | null = startTime ?? null;
     let maxEndTime: number | null = endTime ?? null;
 
