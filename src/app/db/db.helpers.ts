@@ -20,6 +20,7 @@ import {
     OMIT_ASSETS_IDS,
 } from "@/utils/constants/general.constants";
 import {pick} from "lodash";
+import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
@@ -237,7 +238,7 @@ export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
 };
 
 export const getIndexHistoryOverview = async (
-    index: Omit<Index, "historyOverview">
+    index: Omit<Index, "historyOverview" | "maxDrawDown">
 ): Promise<{historyOverview: HistoryOverview; startTime?: number}> => {
     // Read all assets
     const indexAssets = index.assets;
@@ -361,7 +362,9 @@ export const getAssetHistoriesWithSmallestRange = async ({
     return {histories, startTime: minStartTime ?? undefined, endTime: maxEndTime ?? undefined};
 };
 
-export const getIndexHistory = async (index: Omit<Index, "historyOverview">): Promise<AssetHistory[]> => {
+export const getIndexHistory = async (
+    index: Omit<Index, "historyOverview" | "maxDrawDown">
+): Promise<AssetHistory[]> => {
     const {histories} = await getAssetHistoriesWithSmallestRange({
         assetIds: index.assets.map(asset => asset.id),
         startTime: index.startTime,
@@ -430,7 +433,7 @@ export async function getIndex(id: IndexId, withAssetHistory: boolean | undefine
         portion: Math.trunc(100 / ASSET_COUNT_BY_INDEX_ID[id]),
     }));
 
-    const index: Omit<Index, "historyOverview" | "startTime"> = {
+    const index: Omit<Index, "historyOverview" | "maxDrawDown"> = {
         id,
         name: INDEX_NAME_BY_INDEX_ID[id],
         assets,
@@ -438,12 +441,14 @@ export async function getIndex(id: IndexId, withAssetHistory: boolean | undefine
     };
 
     const {historyOverview, startTime} = await getIndexHistoryOverview(index);
+    const indexHistory = await getIndexHistory(index);
 
     return {
         ...index,
         historyOverview,
         startTime,
-        history: await getIndexHistory(index),
+        history: indexHistory,
+        maxDrawDown: getMaxDrawDownWithTimeRange(indexHistory),
     };
 }
 
@@ -466,7 +471,7 @@ export async function getCustomIndex({
         portion: customIndex.assets.find(a => a.id === asset.id)?.portion ?? 0,
     }));
 
-    const index: Omit<Index, "historyOverview" | "startTime"> = {
+    const index: Omit<Index, "historyOverview" | "maxDrawDown"> = {
         ...pick(customIndex, ["id", "name", "startTime", "endTime"]),
         assets,
         history: [],
@@ -474,11 +479,15 @@ export async function getCustomIndex({
 
     const {historyOverview, startTime} = await getIndexHistoryOverview(index);
 
+    const indexHistory = await getIndexHistory(index);
+    const maxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
+
     return {
         ...index,
         historyOverview,
         startTime,
-        history: await getIndexHistory(index),
+        history: indexHistory,
+        maxDrawDown,
     };
 }
 

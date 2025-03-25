@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Asset, Index} from "@/utils/types/general.types";
+import {Asset, Index, MaxDrawDown} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode} from "react";
@@ -143,6 +143,23 @@ export default function IndexesTable({data, assets}: {data: Index[]; assets: Ass
             header: renderColumnSortedHeader("7d Chart"),
             meta: {
                 text: "7d Chart",
+            },
+        },
+        {
+            id: "maxDrawDown_value",
+            accessorFn: row => row.maxDrawDown.value, // Ensure maxDrawDown resolves correctly
+            cell: ({row}) => {
+                const maxDrawDownValue = row.getValue("maxDrawDown_value") as MaxDrawDown["value"];
+                console.log("maxDrawDown_value", maxDrawDownValue);
+                return (
+                    <div className={`lowercase ${getChartColorClassname(maxDrawDownValue)}`}>
+                        {renderSafelyNumber(maxDrawDownValue / 100, NumeralFormat.PERCENT)}
+                    </div>
+                ); // Format and handle null/undefined
+            },
+            header: renderColumnSortedHeader("Max DrawDown %"),
+            meta: {
+                text: "Max DrawDown %",
             },
         },
         {

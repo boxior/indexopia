@@ -49,6 +49,12 @@ export interface AssetHistory {
     date: string; // "date": "2018-07-10T00:00:00.000Z"
 }
 
+export interface MaxDrawDown {
+    value: number;
+    startTime: string;
+    endTime: string;
+}
+
 export type ChartData = {
     date: string;
     price: number;
@@ -71,6 +77,7 @@ export interface Index<A = Asset> {
     assets: A[];
     historyOverview: HistoryOverview;
     history: AssetHistory[];
+    maxDrawDown: MaxDrawDown;
     startTime?: number;
     endTime?: number;
 }

@@ -1,4 +1,4 @@
-import {AssetHistory, AssetWithHistory, AssetWithMaxDrawDown} from "@/utils/types/general.types";
+import {AssetHistory, AssetWithHistory, AssetWithMaxDrawDown, MaxDrawDown} from "@/utils/types/general.types";
 
 /**
  * Calculates the maximum drawdown (largest drop in profit/percentage) in the asset's price history.
@@ -6,11 +6,7 @@ import {AssetHistory, AssetWithHistory, AssetWithMaxDrawDown} from "@/utils/type
  * @param history - Array of historical price data for an asset.
  * @returns Object containing the max drawdown and its associated time range.
  */
-function getMaxDrawDownWithTimeRange(history: AssetHistory[]): {
-    value: number;
-    startTime: string;
-    endTime: string;
-} {
+export function getMaxDrawDownWithTimeRange(history: AssetHistory[]): MaxDrawDown {
     if (!history || history.length < 2) {
         // Not enough data to calculate drawdowns
         return {value: 0, startTime: "", endTime: ""};
