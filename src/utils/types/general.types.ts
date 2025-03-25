@@ -22,7 +22,7 @@ export interface Asset {
 
 export enum DefaultIndexBy {
     RANK = "rank",
-    RANK_AND_PROFIT = "rankAndProfit",
+    RANK_AND_EXTRA = "rankAndExtra",
 }
 
 export enum DefaultIndexSortBy {
@@ -34,6 +34,8 @@ export enum DefaultIndexSortBy {
 export type AssetWithProfit = Asset & {profit: number};
 
 export type AssetWithMaxDrawDown = Asset & {maxDrawDown: {value: number; startTime: string; endTime: string}};
+
+export type AssetWithProfitAndMaxDrawDown = AssetWithProfit & AssetWithMaxDrawDown;
 
 export type CustomIndexAsset = Pick<Required<Asset>, "id" | "portion">;
 
@@ -68,14 +70,17 @@ export interface Index<A = Asset> {
     name: string;
     assets: A[];
     historyOverview: HistoryOverview;
-    startTime: number | null;
     history: AssetHistory[];
+    startTime?: number;
+    endTime?: number;
 }
 
 export interface CustomIndexType {
     id: string;
     name: string;
     assets: CustomIndexAsset[];
+    startTime?: number;
+    endTime?: number;
 }
 
 /**

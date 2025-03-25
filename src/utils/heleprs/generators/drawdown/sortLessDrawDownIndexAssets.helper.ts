@@ -1,5 +1,4 @@
 import {AssetHistory, AssetWithHistory, AssetWithMaxDrawDown} from "@/utils/types/general.types";
-import momentTimeZone from "moment-timezone";
 
 /**
  * Calculates the maximum drawdown (largest drop in profit/percentage) in the asset's price history.
@@ -57,28 +56,12 @@ function getMaxDrawDownWithTimeRange(history: AssetHistory[]): {
  * Sort assets with the least maximum drawdown during a specific time range.
  * Also calculates the time range of the maximum drawdown for each asset.
  * @param assets - Array of Assets with history data.
- * @param startTime - Start of the period (optional).
- * @param endTime - End of the period (optional).
  * @returns Array of Assets sorted by max drawdown in ascending order.
  */
-export function sortLessMaxDrawDownIndexAssets({
-    assets,
-    startTime: startTimeProp,
-    endTime: endTimeProp,
-}: {
-    assets: AssetWithHistory[];
-    startTime?: number | string | Date;
-    endTime?: number | string | Date;
-}): Array<AssetWithMaxDrawDown> {
+export function sortLessMaxDrawDownIndexAssets({assets}: {assets: AssetWithHistory[]}): Array<AssetWithMaxDrawDown> {
     if (!assets || assets.length === 0) {
         return [];
     }
-
-    // Define the time range
-    const startTime = momentTimeZone.tz(startTimeProp ?? assets[0]?.history?.[0]?.time, "UTC").valueOf();
-    const endTime = momentTimeZone
-        .tz(endTimeProp ?? assets[0]?.history?.[(assets[0]?.history?.length ?? 0) - 1]?.time, "UTC")
-        .valueOf();
 
     // Process each asset to calculate max drawdown and its associated time range
     const assetsWithMaxDrawDown = assets.map(asset => {
@@ -86,19 +69,8 @@ export function sortLessMaxDrawDownIndexAssets({
             return {...asset, maxDrawDown: {value: 0, startTime: "", endTime: ""}}; // Default if no history
         }
 
-        // Filter the history data within the specified time range
-        const filteredHistory = asset.history.filter(entry => {
-            const time = new Date(entry.time).getTime();
-            return time >= startTime && time <= endTime;
-        });
-
-        if (filteredHistory.length < 2) {
-            // Not enough data to calculate max drawdown
-            return {...asset, maxDrawDown: {value: 0, startTime: "", endTime: ""}};
-        }
-
         // Calculate the max drawdown and its time range for the filtered history
-        const maxDrawDown = getMaxDrawDownWithTimeRange(filteredHistory);
+        const maxDrawDown = getMaxDrawDownWithTimeRange(asset.history);
 
         return {...asset, maxDrawDown};
     });

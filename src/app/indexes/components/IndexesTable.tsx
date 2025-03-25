@@ -215,6 +215,7 @@ export default function IndexesTable({data, assets}: {data: Index[]; assets: Ass
                     className="max-w-sm"
                 />
                 <CustomIndex assets={assets} />
+
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                         <Button variant="outline" className="ml-auto">
