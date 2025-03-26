@@ -32,6 +32,7 @@ import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
 import {getChartColorClassname} from "@/app/indexes/helpers";
 
 export function IndexAssets({index}: {index: Index<AssetWithHistoryAndOverview>}) {
+    console.log("index", index);
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});

@@ -9,6 +9,7 @@ import * as React from "react";
 
 export default async function IndexesPage() {
     const defaultIndexes = await Promise.all(Object.values(IndexId).map(id => getIndex(id)));
+    // const defaultIndexes = [await getIndex(IndexId.TOP_10)];
     const customIndexes = await getCustomIndexes();
     const assets = await getCachedTopAssets(MAX_ASSET_COUNT);
 

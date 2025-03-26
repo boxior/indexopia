@@ -239,7 +239,7 @@ export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
 
 export const getIndexHistoryOverview = async (
     index: Omit<Index, "historyOverview" | "maxDrawDown">
-): Promise<{historyOverview: HistoryOverview; startTime?: number}> => {
+): Promise<{historyOverview: HistoryOverview; assets: AssetWithHistoryAndOverview[]; startTime?: number}> => {
     // Read all assets
     const indexAssets = index.assets;
 
@@ -247,6 +247,7 @@ export const getIndexHistoryOverview = async (
         return {
             historyOverview: {days1: 0, days7: 0, total: 0},
             startTime: undefined,
+            assets: [],
         };
     }
 
@@ -269,6 +270,8 @@ export const getIndexHistoryOverview = async (
     let weightedDays7 = 0;
     let weightedTotal = 0;
 
+    let assetsWithHistory: AssetWithHistoryAndOverview[] = [];
+
     for (const asset of indexAssets) {
         try {
             const assetHistoryOverview = await getAssetHistoryOverview(asset.id, histories[asset.id]);
@@ -279,6 +282,8 @@ export const getIndexHistoryOverview = async (
             weightedDays1 += assetHistoryOverview.days1 * weight;
             weightedDays7 += assetHistoryOverview.days7 * weight;
             weightedTotal += assetHistoryOverview.total * weight;
+
+            assetsWithHistory.push({...asset, historyOverview: assetHistoryOverview, history: histories[asset.id]});
         } catch (error) {
             console.error(`Failed to calculate history overview for asset ${asset.id}`, error);
             continue; // Skip assets with errors
@@ -295,6 +300,7 @@ export const getIndexHistoryOverview = async (
     return {
         historyOverview,
         startTime,
+        assets: assetsWithHistory,
     };
 };
 
@@ -440,11 +446,12 @@ export async function getIndex(id: IndexId, withAssetHistory: boolean | undefine
         history: [],
     };
 
-    const {historyOverview, startTime} = await getIndexHistoryOverview(index);
+    const {historyOverview, startTime, assets: assetsWithHistories} = await getIndexHistoryOverview(index);
     const indexHistory = await getIndexHistory(index);
 
     return {
         ...index,
+        assets: assetsWithHistories,
         historyOverview,
         startTime,
         history: indexHistory,
@@ -477,13 +484,14 @@ export async function getCustomIndex({
         history: [],
     };
 
-    const {historyOverview, startTime} = await getIndexHistoryOverview(index);
+    const {historyOverview, startTime, assets: assetsWithHistories} = await getIndexHistoryOverview(index);
 
     const indexHistory = await getIndexHistory(index);
     const maxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
     return {
         ...index,
+        assets: assetsWithHistories,
         historyOverview,
         startTime,
         history: indexHistory,
@@ -534,7 +542,7 @@ async function getAssetsHistories({
 
     return assets.map((asset, index) => ({
         ...asset,
-        history: assetsHistories[index].data,
+        history: filteredAssetsHistories[index].data,
         historyOverview: assetsHistoriesOverviews[index],
     }));
 }
