@@ -6,6 +6,7 @@ import {
     Asset,
     AssetHistory,
     AssetWithHistoryAndOverview,
+    AssetWithHistoryOverviewAndPortion,
     CustomIndexType,
     Index,
     IndexId,
@@ -221,15 +222,9 @@ export const getAssetHistoryOverview = async (
     };
 };
 
-export const getCachedTopAssets = async (limit: number, withHistory: boolean | undefined = false): Promise<Asset[]> => {
+export const getCachedTopAssets = async (limit: number): Promise<Asset[]> => {
     const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
-    let assetsList = filterAssetsByOmitIds(assets?.data ?? [], limit);
-
-    if (withHistory) {
-        assetsList = await getAssetsHistories({assets: assetsList});
-    }
-
-    return assetsList;
+    return filterAssetsByOmitIds(assets?.data ?? [], limit);
 };
 
 export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
@@ -238,17 +233,13 @@ export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
 };
 
 export const getIndexHistoryOverview = async (
-    index: Omit<Index, "historyOverview" | "maxDrawDown">
-): Promise<{historyOverview: HistoryOverview; assets: AssetWithHistoryAndOverview[]; startTime?: number}> => {
+    index: Omit<Index<AssetWithHistoryAndOverview>, "historyOverview" | "maxDrawDown">
+): Promise<HistoryOverview> => {
     // Read all assets
     const indexAssets = index.assets;
 
     if (indexAssets.length === 0) {
-        return {
-            historyOverview: {days1: 0, days7: 0, total: 0},
-            startTime: undefined,
-            assets: [],
-        };
+        return {days1: 0, days7: 0, total: 0};
     }
 
     // Extract portions from the index assets
@@ -260,21 +251,14 @@ export const getIndexHistoryOverview = async (
         throw new Error("Asset portions must sum to 100%");
     }
 
-    const {histories, startTime} = await getAssetHistoriesWithSmallestRange({
-        assetIds: indexAssets.map(asset => asset.id),
-        ...pick(index, ["startTime", "endTime"]),
-    });
-
     // Initialize cumulative weighted performance variables
     let weightedDays1 = 0;
     let weightedDays7 = 0;
     let weightedTotal = 0;
 
-    let assetsWithHistory: AssetWithHistoryAndOverview[] = [];
-
     for (const asset of indexAssets) {
         try {
-            const assetHistoryOverview = await getAssetHistoryOverview(asset.id, histories[asset.id]);
+            const assetHistoryOverview = asset.historyOverview;
 
             const weight = (asset.portion ?? 0) / 100; // Convert portion to weight
 
@@ -282,25 +266,16 @@ export const getIndexHistoryOverview = async (
             weightedDays1 += assetHistoryOverview.days1 * weight;
             weightedDays7 += assetHistoryOverview.days7 * weight;
             weightedTotal += assetHistoryOverview.total * weight;
-
-            assetsWithHistory.push({...asset, historyOverview: assetHistoryOverview, history: histories[asset.id]});
         } catch (error) {
             console.error(`Failed to calculate history overview for asset ${asset.id}`, error);
-            continue; // Skip assets with errors
         }
     }
 
-    const historyOverview = {
+    // Return the weighted results
+    return {
         days1: weightedDays1,
         days7: weightedDays7,
         total: weightedTotal,
-    };
-
-    // Return the weighted results
-    return {
-        historyOverview,
-        startTime,
-        assets: assetsWithHistory,
     };
 };
 
@@ -352,10 +327,6 @@ export const getAssetHistoriesWithSmallestRange = async ({
         }
     }
 
-    // // Step 2: Apply optional startTime and endTime to further filter the range
-    // const finalStartTime = startTime !== undefined ? Math.max(minStartTime ?? 0, startTime) : minStartTime;
-    // const finalEndTime = endTime !== undefined ? Math.min(maxEndTime ?? Infinity, endTime) : maxEndTime;
-
     // Step 3: Filter each asset's history to align with the calculated range
     for (const assetId of assetIds) {
         histories[assetId] = histories[assetId].filter(item => {
@@ -369,18 +340,14 @@ export const getAssetHistoriesWithSmallestRange = async ({
 };
 
 export const getIndexHistory = async (
-    index: Omit<Index, "historyOverview" | "maxDrawDown">
+    index: Omit<Index<AssetWithHistoryAndOverview>, "historyOverview" | "maxDrawDown">
 ): Promise<AssetHistory[]> => {
-    const {histories} = await getAssetHistoriesWithSmallestRange({
-        assetIds: index.assets.map(asset => asset.id),
-        startTime: index.startTime,
-        endTime: index.endTime,
-    });
-
     const portions = index.assets.map(asset => asset.portion ?? 0);
-    await writeJsonFile(`histories_record_${index.id}`, histories, "/db/history_records");
 
-    return mergeAssetHistories(Object.values(histories), portions);
+    return mergeAssetHistories(
+        index.assets.map(a => a.history),
+        portions
+    );
 };
 
 function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): AssetHistory[] {
@@ -431,69 +398,92 @@ function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): A
     return merged;
 }
 
-export async function getIndex(id: IndexId, withAssetHistory: boolean | undefined = false): Promise<Index> {
-    let assets: Asset[] = await getCachedTopAssets(ASSET_COUNT_BY_INDEX_ID[id], withAssetHistory);
+export async function getIndex({
+    id,
+    startTime: startTimeProp,
+    endTime: endTimeProp,
+}: {
+    id: IndexId;
+    startTime?: number;
+    endTime?: number;
+}): Promise<Index> {
+    let assets: Asset[] = await getCachedTopAssets(ASSET_COUNT_BY_INDEX_ID[id]);
+
+    const {
+        assets: assetsWithHistories,
+        startTime,
+        endTime,
+    } = await getAssetsWithHistories({
+        assets,
+        startTime: startTimeProp,
+        endTime: endTimeProp,
+    });
+
+    assets = assetsWithHistories;
 
     assets = assets.map(asset => ({
         ...asset,
         portion: Math.trunc(100 / ASSET_COUNT_BY_INDEX_ID[id]),
     }));
 
-    const index: Omit<Index, "historyOverview" | "maxDrawDown"> = {
+    const index: Omit<Index<AssetWithHistoryAndOverview>, "historyOverview" | "maxDrawDown"> = {
         id,
         name: INDEX_NAME_BY_INDEX_ID[id],
-        assets,
+        assets: assets as AssetWithHistoryOverviewAndPortion[],
         history: [],
     };
 
-    const {historyOverview, startTime, assets: assetsWithHistories} = await getIndexHistoryOverview(index);
+    const indexHistoryOverview = await getIndexHistoryOverview(index);
     const indexHistory = await getIndexHistory(index);
 
     return {
         ...index,
-        assets: assetsWithHistories,
-        historyOverview,
+        assets,
         startTime,
+        endTime,
         history: indexHistory,
+        historyOverview: indexHistoryOverview,
         maxDrawDown: getMaxDrawDownWithTimeRange(indexHistory),
     };
 }
 
-export async function getCustomIndex({
-    id,
-    withAssetHistory = false,
-}: {
-    id: string;
-    withAssetHistory?: boolean;
-}): Promise<Index> {
+export async function getCustomIndex({id}: {id: string}): Promise<Index> {
     const customIndex = (await readJsonFile(id, {}, INDEXES_FOLDER_PATH)) as CustomIndexType;
     let assets: Asset[] = await getCachedAssets(customIndex.assets.map(asset => asset.id));
 
-    if (withAssetHistory) {
-        assets = await getAssetsHistories({assets, startTime: customIndex.startTime, endTime: customIndex.endTime});
-    }
+    const {
+        assets: assetsWithHistories,
+        startTime,
+        endTime,
+    } = await getAssetsWithHistories({
+        assets,
+        ...pick(customIndex, ["startTime", "endTime"]),
+    });
+
+    assets = assetsWithHistories;
 
     assets = assets.map((asset, index) => ({
         ...asset,
         portion: customIndex.assets.find(a => a.id === asset.id)?.portion ?? 0,
     }));
 
-    const index: Omit<Index, "historyOverview" | "maxDrawDown"> = {
+    const index: Omit<Index<AssetWithHistoryAndOverview>, "historyOverview" | "maxDrawDown"> = {
         ...pick(customIndex, ["id", "name", "startTime", "endTime"]),
-        assets,
+        assets: assets as AssetWithHistoryOverviewAndPortion[],
         history: [],
     };
 
-    const {historyOverview, startTime, assets: assetsWithHistories} = await getIndexHistoryOverview(index);
+    const indexHistoryOverview = await getIndexHistoryOverview(index);
 
     const indexHistory = await getIndexHistory(index);
     const maxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
     return {
         ...index,
-        assets: assetsWithHistories,
-        historyOverview,
+        assets,
         startTime,
+        endTime,
+        historyOverview: indexHistoryOverview,
         history: indexHistory,
         maxDrawDown,
     };
@@ -502,12 +492,12 @@ export async function getCustomIndex({
 export async function getCustomIndexes(): Promise<Index<AssetWithHistoryAndOverview>[]> {
     const cachedCustomIndexes = (await processAllFilesInFolder("/db/indexes")) as unknown as CustomIndexType[];
 
-    return Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id, withAssetHistory: true}))) as Promise<
+    return Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id}))) as Promise<
         Index<AssetWithHistoryAndOverview>[]
     >;
 }
 
-async function getAssetsHistories({
+async function getAssetsWithHistories({
     assets,
     startTime: startTimeProp,
     endTime: endTimeProp,
@@ -515,36 +505,26 @@ async function getAssetsHistories({
     assets: Asset[];
     startTime?: number;
     endTime?: number;
-}): Promise<Asset[]> {
-    const assetsHistories: {data: AssetHistory[]}[] = await Promise.all(
-        assets.map(
-            asset =>
-                readJsonFile(`asset_${asset.id}_history`, {}, ASSETS_HISTORY_FOLDER_PATH) as unknown as {
-                    data: AssetHistory[];
-                }
-        )
-    );
-
-    const startTime = startTimeProp ?? Math.min(...assetsHistories.map(assetHistory => assetHistory.data[0].time));
-    const endTime =
-        endTimeProp ??
-        Math.max(...assetsHistories.map(assetHistory => assetHistory.data[assetHistory.data.length - 1].time));
-
-    const filteredAssetsHistories = assetsHistories.map(assetHistory => {
-        return {
-            data: assetHistory.data.filter(item => item.time >= startTime && item.time <= endTime),
-        };
+}): Promise<{assets: AssetWithHistoryAndOverview[]; startTime?: number; endTime?: number}> {
+    const {histories, startTime, endTime} = await getAssetHistoriesWithSmallestRange({
+        assetIds: assets.map(asset => asset.id),
+        startTime: startTimeProp,
+        endTime: endTimeProp,
     });
 
     const assetsHistoriesOverviews: HistoryOverview[] = await Promise.all(
-        assets.map((asset, index) => getAssetHistoryOverview(asset.id, filteredAssetsHistories[index].data))
+        assets.map(asset => getAssetHistoryOverview(asset.id, histories[asset.id]))
     );
 
-    return assets.map((asset, index) => ({
-        ...asset,
-        history: filteredAssetsHistories[index].data,
-        historyOverview: assetsHistoriesOverviews[index],
-    }));
+    return {
+        assets: assets.map((asset, index) => ({
+            ...asset,
+            history: histories[asset.id],
+            historyOverview: assetsHistoriesOverviews[index],
+        })),
+        startTime,
+        endTime,
+    };
 }
 
 function filterAssetsByOmitIds(assets: Asset[], limit: number): Asset[] {

@@ -24,13 +24,12 @@ export default async function IndexPage(props: ServerPageProps<IndexId>) {
     const index = await (async () => {
         switch (true) {
             case getIsDefaultIndex(params.id):
-                return (await getIndex(params.id, true)) as Index<AssetWithHistoryAndOverview>;
+                return (await getIndex({id: params.id})) as Index<AssetWithHistoryAndOverview>;
             default: {
                 const customIndex = (await readJsonFile(`${params.id}`, {}, INDEXES_FOLDER_PATH)) as CustomIndexType;
 
                 return (await getCustomIndex({
                     id: customIndex.id,
-                    withAssetHistory: true,
                 })) as Index<AssetWithHistoryAndOverview>;
             }
         }

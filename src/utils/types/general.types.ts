@@ -43,6 +43,12 @@ export type AssetWithHistory = Asset & {history: AssetHistory[]};
 
 export type AssetWithHistoryAndOverview = Asset & {history: AssetHistory[]; historyOverview: HistoryOverview};
 
+export type AssetWithHistoryOverviewAndPortion = Asset & {
+    history: AssetHistory[];
+    historyOverview: HistoryOverview;
+    portion: number;
+};
+
 export interface AssetHistory {
     priceUsd: string; // "priceUsd": "0.52126034102192210769",
     time: number; // "time": 1531180800000,

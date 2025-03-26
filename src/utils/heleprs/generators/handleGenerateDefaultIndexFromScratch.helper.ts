@@ -8,8 +8,8 @@ export const handleGenerateDefaultIndexFromScratch = async ({
     upToNumber,
     defaultIndexBy,
     defaultIndexSortBy,
-    startTime,
-    endTime,
+    startTime: startTimeProp,
+    endTime: endTimeProp,
 }: {
     topAssetsCount?: number;
     upToNumber?: number;
@@ -17,13 +17,21 @@ export const handleGenerateDefaultIndexFromScratch = async ({
     defaultIndexSortBy?: DefaultIndexSortBy;
     startTime?: number;
     endTime?: number;
-}): Promise<CustomIndexAsset[]> => {
-    const assets = await handleGetAssetsForIndex({topAssetsCount, startTime, endTime});
-
-    return handleGenerateDefaultIndex({
-        assets,
-        upToNumber: upToNumber ?? topAssetsCount ?? MAX_ASSET_COUNT,
-        defaultIndexBy,
-        defaultIndexSortBy,
+}): Promise<{assets: CustomIndexAsset[]; startTime?: number; endTime?: number}> => {
+    const {assets, startTime, endTime} = await handleGetAssetsForIndex({
+        topAssetsCount,
+        startTime: startTimeProp,
+        endTime: endTimeProp,
     });
+
+    return {
+        assets: handleGenerateDefaultIndex({
+            assets,
+            upToNumber: upToNumber ?? topAssetsCount ?? MAX_ASSET_COUNT,
+            defaultIndexBy,
+            defaultIndexSortBy,
+        }),
+        startTime,
+        endTime,
+    };
 };

@@ -14,14 +14,14 @@ export type SaveDefaultCustomIndexProps = {
 };
 export const handleSaveDefaultCustomIndex = async (props: SaveDefaultCustomIndexProps) => {
     "use server";
-    const assets = await handleGenerateDefaultIndexFromScratch(props);
+    const {assets, startTime, endTime} = await handleGenerateDefaultIndexFromScratch(props);
 
     const generatedId = generateUuid();
     await saveCustomIndex({
         id: `default_${props.defaultIndexBy}_${props.defaultIndexSortBy}_${generatedId}`,
         name: `Default by ${props.defaultIndexBy} and ${props.defaultIndexSortBy} (${generatedId})`,
-        startTime: props.startTime,
-        endTime: props.endTime,
+        startTime,
+        endTime,
         assets: assets.map(a => pick(a, ["id", "portion"])),
     });
 };
