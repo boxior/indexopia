@@ -6,7 +6,6 @@ import {
     Asset,
     AssetHistory,
     AssetWithHistoryAndOverview,
-    AssetWithHistoryOverviewAndPortion,
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
     CustomIndexType,
     Index,
@@ -435,8 +434,9 @@ export async function getIndex({
         history: [],
     };
 
-    const indexHistoryOverview = await getIndexHistoryOverview(index);
     const indexHistory = await getIndexHistory(index);
+    const indexHistoryOverview = await getIndexHistoryOverview(index);
+    const indexMaxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
     return {
         ...index,
@@ -445,7 +445,7 @@ export async function getIndex({
         endTime,
         history: indexHistory,
         historyOverview: indexHistoryOverview,
-        maxDrawDown: getMaxDrawDownWithTimeRange(indexHistory),
+        maxDrawDown: indexMaxDrawDown,
     };
 }
 
@@ -480,28 +480,25 @@ export async function getCustomIndex({
         history: [],
     };
 
-    const indexHistoryOverview = await getIndexHistoryOverview(index);
-
     const indexHistory = await getIndexHistory(index);
-    const maxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
+    const indexHistoryOverview = await getIndexHistoryOverview(index);
+    const indexMaxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
     return {
         ...index,
         assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
         startTime,
         endTime,
-        historyOverview: indexHistoryOverview,
         history: indexHistory,
-        maxDrawDown,
+        historyOverview: indexHistoryOverview,
+        maxDrawDown: indexMaxDrawDown,
     };
 }
 
-export async function getCustomIndexes(): Promise<Index<AssetWithHistoryAndOverview>[]> {
+export async function getCustomIndexes(): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>[]> {
     const cachedCustomIndexes = (await processAllFilesInFolder("/db/indexes")) as unknown as CustomIndexType[];
 
-    return Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id}))) as Promise<
-        Index<AssetWithHistoryAndOverview>[]
-    >;
+    return Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id})));
 }
 
 async function getAssetsWithHistories({

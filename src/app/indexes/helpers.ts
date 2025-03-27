@@ -28,6 +28,6 @@ export const getIndexDurationLabel = (startTime: number) => {
     return `${years}${months}${days}`.trim() || "0 days";
 };
 
-export const getIsDefaultIndex = (id: string) => {
+export const getIsTopIndex = (id: string) => {
     return Object.values(IndexId).includes(id as IndexId);
 };
