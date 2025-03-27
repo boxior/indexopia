@@ -51,5 +51,5 @@ export async function handleDevAuthRedirect() {
         return redirect(DEV_AUTH_PATH);
     }
 
-    return redirect("/");
+    return redirect("/indexes");
 }

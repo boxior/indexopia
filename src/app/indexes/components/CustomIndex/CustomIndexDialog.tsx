@@ -22,7 +22,11 @@ export function CustomIndexDialog({
     const [name, setName] = useState<string>(customIndex?.name ?? "");
 
     const handleSave = async () => {
-        await saveCustomIndex({id: customIndex?.id ?? generateUuid(), name, assets: selectedAssets});
+        await saveCustomIndex({
+            id: customIndex?.id ?? generateUuid(),
+            name,
+            assets: selectedAssets,
+        });
         closeDialog();
 
         !customIndex && window.location.reload();
