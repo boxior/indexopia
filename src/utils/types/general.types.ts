@@ -17,6 +17,7 @@ export interface Asset {
     explorer: string; // "https://blockchain.info/"
     history?: AssetHistory[];
     historyOverview?: HistoryOverview;
+    maxDrawDown?: MaxDrawDown;
     portion?: number; // portion of Index
 }
 
@@ -47,6 +48,13 @@ export type AssetWithHistoryOverviewAndPortion = Asset & {
     history: AssetHistory[];
     historyOverview: HistoryOverview;
     portion: number;
+};
+
+export type AssetWithHistoryOverviewPortionAndMaxDrawDown = Asset & {
+    history: AssetHistory[];
+    historyOverview: HistoryOverview;
+    portion: number;
+    maxDrawDown: MaxDrawDown;
 };
 
 export interface AssetHistory {
@@ -93,7 +101,6 @@ export interface CustomIndexType {
     name: string;
     assets: CustomIndexAsset[];
     startTime?: number;
-    endTime?: number;
 }
 
 /**

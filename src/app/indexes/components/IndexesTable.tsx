@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Asset, Index, MaxDrawDown} from "@/utils/types/general.types";
+import {Asset, AssetWithHistoryOverviewPortionAndMaxDrawDown, Index, MaxDrawDown} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode} from "react";
@@ -33,14 +33,20 @@ import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} f
 import Link from "next/link";
 import {CustomIndex} from "@/app/indexes/components/CustomIndex/CustomIndex";
 
-export default function IndexesTable({data, assets}: {data: Index[]; assets: Asset[]}) {
+export default function IndexesTable({
+    data,
+    assets,
+}: {
+    data: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>[];
+    assets: Asset[];
+}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
 
     const renderColumnSortedHeader =
-        (header: ReactNode): ColumnDef<Index>["header"] =>
+        (header: ReactNode): ColumnDef<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>>["header"] =>
         ({column}) => {
             const sorted = column.getIsSorted();
 
@@ -62,7 +68,7 @@ export default function IndexesTable({data, assets}: {data: Index[]; assets: Ass
             );
         };
 
-    const columns: ColumnDef<Index>[] = [
+    const columns: ColumnDef<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>>[] = [
         {
             accessorKey: "rank",
             header: "#",
@@ -150,7 +156,7 @@ export default function IndexesTable({data, assets}: {data: Index[]; assets: Ass
             accessorFn: row => row.maxDrawDown.value, // Ensure maxDrawDown resolves correctly
             cell: ({row}) => {
                 const maxDrawDownValue = row.getValue("maxDrawDown_value") as MaxDrawDown["value"];
-                console.log("maxDrawDown_value", maxDrawDownValue);
+
                 return (
                     <div className={`lowercase ${getChartColorClassname(maxDrawDownValue)}`}>
                         {renderSafelyNumber(maxDrawDownValue / 100, NumeralFormat.PERCENT)}

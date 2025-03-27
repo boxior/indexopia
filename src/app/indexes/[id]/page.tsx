@@ -6,7 +6,7 @@ import {
     ServerPageProps,
 } from "@/utils/types/general.types";
 import {IndexChart} from "@/app/indexes/[id]/components/IndexChart";
-import {IndexAssets} from "@/app/indexes/[id]/components/IndexAssets";
+import {IndexAssetsTable} from "@/app/indexes/[id]/components/IndexAssetsTable";
 import {getCachedTopAssets, getCustomIndex, getIndex, INDEXES_FOLDER_PATH} from "@/app/db/db.helpers";
 import {Card} from "@/components/ui/card";
 import {IndexOverview} from "@/app/indexes/[id]/components/IndexOverview";
@@ -24,13 +24,13 @@ export default async function IndexPage(props: ServerPageProps<IndexId>) {
     const index = await (async () => {
         switch (true) {
             case getIsDefaultIndex(params.id):
-                return (await getIndex({id: params.id})) as Index<AssetWithHistoryAndOverview>;
+                return await getIndex({id: params.id});
             default: {
                 const customIndex = (await readJsonFile(`${params.id}`, {}, INDEXES_FOLDER_PATH)) as CustomIndexType;
 
-                return (await getCustomIndex({
+                return await getCustomIndex({
                     id: customIndex.id,
-                })) as Index<AssetWithHistoryAndOverview>;
+                });
             }
         }
     })();
@@ -47,7 +47,7 @@ export default async function IndexPage(props: ServerPageProps<IndexId>) {
                 </Card>
             </div>
 
-            <IndexAssets index={index} />
+            <IndexAssetsTable index={index} />
         </div>
     );
 }

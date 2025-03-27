@@ -6,7 +6,7 @@ import {AssetHistory, AssetWithHistory, AssetWithMaxDrawDown, MaxDrawDown} from 
  * @param history - Array of historical price data for an asset.
  * @returns Object containing the max drawdown and its associated time range.
  */
-export function getMaxDrawDownWithTimeRange(history: AssetHistory[]): MaxDrawDown {
+export function getMaxDrawDownWithTimeRange(history: AssetHistory[] | undefined = []): MaxDrawDown {
     if (!history || history.length < 2) {
         // Not enough data to calculate drawdowns
         return {value: 0, startTime: "", endTime: ""};

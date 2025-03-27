@@ -7,6 +7,7 @@ import {
     AssetHistory,
     AssetWithHistoryAndOverview,
     AssetWithHistoryOverviewAndPortion,
+    AssetWithHistoryOverviewPortionAndMaxDrawDown,
     CustomIndexType,
     Index,
     IndexId,
@@ -406,8 +407,8 @@ export async function getIndex({
     id: IndexId;
     startTime?: number;
     endTime?: number;
-}): Promise<Index> {
-    let assets: Asset[] = await getCachedTopAssets(ASSET_COUNT_BY_INDEX_ID[id]);
+}): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>> {
+    let assets = await getCachedTopAssets(ASSET_COUNT_BY_INDEX_ID[id]);
 
     const {
         assets: assetsWithHistories,
@@ -424,12 +425,13 @@ export async function getIndex({
     assets = assets.map(asset => ({
         ...asset,
         portion: Math.trunc(100 / ASSET_COUNT_BY_INDEX_ID[id]),
+        maxDrawDown: getMaxDrawDownWithTimeRange(asset.history),
     }));
 
-    const index: Omit<Index<AssetWithHistoryAndOverview>, "historyOverview" | "maxDrawDown"> = {
+    const index: Omit<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>, "historyOverview" | "maxDrawDown"> = {
         id,
         name: INDEX_NAME_BY_INDEX_ID[id],
-        assets: assets as AssetWithHistoryOverviewAndPortion[],
+        assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
         history: [],
     };
 
@@ -438,7 +440,7 @@ export async function getIndex({
 
     return {
         ...index,
-        assets,
+        assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
         startTime,
         endTime,
         history: indexHistory,
@@ -447,9 +449,13 @@ export async function getIndex({
     };
 }
 
-export async function getCustomIndex({id}: {id: string}): Promise<Index> {
+export async function getCustomIndex({
+    id,
+}: {
+    id: string;
+}): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>> {
     const customIndex = (await readJsonFile(id, {}, INDEXES_FOLDER_PATH)) as CustomIndexType;
-    let assets: Asset[] = await getCachedAssets(customIndex.assets.map(asset => asset.id));
+    let assets = await getCachedAssets(customIndex.assets.map(asset => asset.id));
 
     const {
         assets: assetsWithHistories,
@@ -465,11 +471,12 @@ export async function getCustomIndex({id}: {id: string}): Promise<Index> {
     assets = assets.map((asset, index) => ({
         ...asset,
         portion: customIndex.assets.find(a => a.id === asset.id)?.portion ?? 0,
+        maxDrawDown: getMaxDrawDownWithTimeRange(asset.history),
     }));
 
-    const index: Omit<Index<AssetWithHistoryAndOverview>, "historyOverview" | "maxDrawDown"> = {
+    const index: Omit<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>, "historyOverview" | "maxDrawDown"> = {
         ...pick(customIndex, ["id", "name", "startTime", "endTime"]),
-        assets: assets as AssetWithHistoryOverviewAndPortion[],
+        assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
         history: [],
     };
 
@@ -480,7 +487,7 @@ export async function getCustomIndex({id}: {id: string}): Promise<Index> {
 
     return {
         ...index,
-        assets,
+        assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
         startTime,
         endTime,
         historyOverview: indexHistoryOverview,

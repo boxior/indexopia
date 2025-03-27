@@ -24,22 +24,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {AssetWithHistoryAndOverview, Index} from "@/utils/types/general.types";
+import {
+    AssetWithHistoryAndOverview,
+    AssetWithHistoryOverviewPortionAndMaxDrawDown,
+    Index,
+    MaxDrawDown,
+} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode} from "react";
 import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
 import {getChartColorClassname} from "@/app/indexes/helpers";
 
-export function IndexAssets({index}: {index: Index<AssetWithHistoryAndOverview>}) {
-    console.log("index", index);
+export function IndexAssetsTable({index}: {index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
 
     const renderColumnSortedHeader =
-        (header: ReactNode): ColumnDef<AssetWithHistoryAndOverview>["header"] =>
+        (header: ReactNode): ColumnDef<AssetWithHistoryOverviewPortionAndMaxDrawDown>["header"] =>
         ({column}) => {
             const sorted = column.getIsSorted();
 
@@ -61,7 +65,7 @@ export function IndexAssets({index}: {index: Index<AssetWithHistoryAndOverview>}
             );
         };
 
-    const columns: ColumnDef<AssetWithHistoryAndOverview>[] = [
+    const columns: ColumnDef<AssetWithHistoryOverviewPortionAndMaxDrawDown>[] = [
         {
             accessorKey: "rank",
             header: renderColumnSortedHeader("Rank"),
@@ -125,6 +129,23 @@ export function IndexAssets({index}: {index: Index<AssetWithHistoryAndOverview>}
             header: renderColumnSortedHeader("7d Chart"),
             meta: {
                 text: "7d Chart",
+            },
+        },
+        {
+            id: "maxDrawDown_value",
+            accessorFn: row => row.maxDrawDown.value, // Ensure maxDrawDown resolves correctly
+            cell: ({row}) => {
+                const maxDrawDownValue = row.getValue("maxDrawDown_value") as MaxDrawDown["value"];
+
+                return (
+                    <div className={`lowercase ${getChartColorClassname(maxDrawDownValue)}`}>
+                        {renderSafelyNumber(maxDrawDownValue / 100, NumeralFormat.PERCENT)}
+                    </div>
+                ); // Format and handle null/undefined
+            },
+            header: renderColumnSortedHeader("Max DrawDown %"),
+            meta: {
+                text: "Max DrawDown %",
             },
         },
         {

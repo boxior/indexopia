@@ -8,11 +8,11 @@ import momentTimeZone from "moment-timezone";
 
 export async function DefaultCustomIndex() {
     const props: SaveDefaultCustomIndexProps = {
-        topAssetsCount: 5,
+        topAssetsCount: 10,
         upToNumber: 5,
-        defaultIndexBy: DefaultIndexBy.RANK_AND_EXTRA,
-        defaultIndexSortBy: DefaultIndexSortBy.OPTIMAL,
-        startTime: momentTimeZone.tz("UTC").subtract(3, "y").valueOf(),
+        defaultIndexBy: DefaultIndexBy.RANK,
+        defaultIndexSortBy: DefaultIndexSortBy.MAX_DRAW_DOWN,
+        startTime: momentTimeZone.tz("UTC").subtract(5, "y").valueOf(),
     };
     const handleIndex = async () => {
         "use server";
