@@ -12,7 +12,7 @@ export function getIndexAssetsWithPortionsByRankAndMaxDrawDown(assets: AssetWith
     const totalWeight = sortedAssets.reduce((sum, asset) => {
         const rank = parseInt(asset.rank, 10);
         const maxDrawDown = asset.maxDrawDown.value; // Assume `maxDrawDown.value` is a positive numeric value
-        return sum + (1 / rank) * (1 / maxDrawDown); // Lower maxDrawDown (and lower rank) gives a larger weight
+        return sum + 1 / rank + 1 / maxDrawDown; // Lower maxDrawDown (and lower rank) gives a larger weight
     }, 0);
 
     // Assign portions proportionally based on the combined weight
@@ -21,7 +21,7 @@ export function getIndexAssetsWithPortionsByRankAndMaxDrawDown(assets: AssetWith
     return sortedAssets.map((asset, index) => {
         const rank = parseInt(asset.rank, 10);
         const maxDrawDown = asset.maxDrawDown.value;
-        const weight = (1 / rank) * (1 / maxDrawDown); // Weight is inversely proportional to `maxDrawDown` value
+        const weight = 1 / rank + 1 / maxDrawDown; // Weight is inversely proportional to `maxDrawDown` value
         const portion = Math.round((weight / totalWeight) * 100);
 
         // Ensure that the last asset gets exactly the remaining portion to avoid rounding issues

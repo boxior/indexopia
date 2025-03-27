@@ -11,7 +11,7 @@ export async function DefaultCustomIndex() {
         topAssetsCount: 10,
         upToNumber: 5,
         defaultIndexBy: DefaultIndexBy.RANK,
-        defaultIndexSortBy: DefaultIndexSortBy.MAX_DRAW_DOWN,
+        defaultIndexSortBy: DefaultIndexSortBy.PROFIT,
         startTime: momentTimeZone.tz("UTC").subtract(5, "y").valueOf(),
     };
     const handleIndex = async () => {
