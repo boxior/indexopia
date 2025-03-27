@@ -1,4 +1,4 @@
-import {HistoryOverview} from "@/app/api/assets/db.helpers";
+import {HistoryOverview} from "@/app/db/db.helpers";
 
 export type RecordWithId = Record<string, unknown> & {id: string};
 
@@ -17,17 +17,56 @@ export interface Asset {
     explorer: string; // "https://blockchain.info/"
     history?: AssetHistory[];
     historyOverview?: HistoryOverview;
+    maxDrawDown?: MaxDrawDown;
     portion?: number; // portion of Index
 }
 
+export enum DefaultIndexBy {
+    RANK = "rank",
+    RANK_AND_EXTRA = "rankAndExtra",
+}
+
+export enum DefaultIndexSortBy {
+    PROFIT = "profit",
+    MAX_DRAW_DOWN = "maxDrawDown",
+    OPTIMAL = "optimal",
+}
+
+export type AssetWithProfit = Asset & {profit: number};
+
+export type AssetWithMaxDrawDown = Asset & {maxDrawDown: {value: number; startTime: string; endTime: string}};
+
+export type AssetWithProfitAndMaxDrawDown = AssetWithProfit & AssetWithMaxDrawDown;
+
 export type CustomIndexAsset = Pick<Required<Asset>, "id" | "portion">;
 
-export type AssetWithHistory = Asset & {history: AssetHistory[]; historyOverview: HistoryOverview};
+export type AssetWithHistory = Asset & {history: AssetHistory[]};
+
+export type AssetWithHistoryAndOverview = Asset & {history: AssetHistory[]; historyOverview: HistoryOverview};
+
+export type AssetWithHistoryOverviewAndPortion = Asset & {
+    history: AssetHistory[];
+    historyOverview: HistoryOverview;
+    portion: number;
+};
+
+export type AssetWithHistoryOverviewPortionAndMaxDrawDown = Asset & {
+    history: AssetHistory[];
+    historyOverview: HistoryOverview;
+    portion: number;
+    maxDrawDown: MaxDrawDown;
+};
 
 export interface AssetHistory {
     priceUsd: string; // "priceUsd": "0.52126034102192210769",
     time: number; // "time": 1531180800000,
     date: string; // "date": "2018-07-10T00:00:00.000Z"
+}
+
+export interface MaxDrawDown {
+    value: number;
+    startTime: string;
+    endTime: string;
 }
 
 export type ChartData = {
@@ -51,22 +90,26 @@ export interface Index<A = Asset> {
     name: string;
     assets: A[];
     historyOverview: HistoryOverview;
-    startTime: number | null;
     history: AssetHistory[];
+    maxDrawDown: MaxDrawDown;
+    startTime?: number;
+    endTime?: number;
 }
 
 export interface CustomIndexType {
     id: string;
     name: string;
     assets: CustomIndexAsset[];
+    startTime?: number;
+    isDefault?: boolean;
 }
 
 /**
  * @link https://momentjscom.readthedocs.io/en/latest/moment/04-displaying/01-format/
  */
 export enum MomentFormat {
-    DATE = "YYYY-MM-DD",
-    DATE_TIME = "YYYY-MM-DD HH:mm",
+    DATE = "YYYY.MM.DD",
+    DATE_TIME = "YYYY.MM.DD HH:mm",
     DAY_FULL = "dddd, MMMM Do YYYY",
     DAY_SHORT = "ddd, MMM Do",
     TIME = "HH:mm",

@@ -1,7 +1,8 @@
-import {Index} from "@/utils/types/general.types";
+import {Index, MomentFormat} from "@/utils/types/general.types";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {NumeralFormat} from "@numeral";
 import {getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
+import moment from "moment";
 
 export function IndexOverview({index}: {index: Index}) {
     return (
@@ -14,6 +15,14 @@ export function IndexOverview({index}: {index: Index}) {
                 <span>{renderSafelyNumber(index.historyOverview.days1, NumeralFormat.PERCENT)}</span>
                 <span className={"font-bold"}>7d:</span>{" "}
                 <span>{renderSafelyNumber(index.historyOverview.days7, NumeralFormat.PERCENT)}</span>
+                <span className={"font-bold"}>Max DrawDown:</span>
+                <span>
+                    {renderSafelyNumber(index.maxDrawDown.value / 100, NumeralFormat.PERCENT)}
+                    <span className={"text-xs opacity-50 pl-1"}>
+                        ({moment(index.maxDrawDown.startTime).format(MomentFormat.DATE)} -{" "}
+                        {moment(index.maxDrawDown.endTime).format(MomentFormat.DATE)})
+                    </span>
+                </span>
                 <span className={"font-bold"}>Total:</span>
                 <span>{renderSafelyNumber(index.historyOverview.total, NumeralFormat.PERCENT)}</span>
                 <span className={"font-bold"}>Start from:</span>
