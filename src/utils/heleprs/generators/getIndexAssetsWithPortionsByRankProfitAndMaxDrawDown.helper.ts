@@ -18,7 +18,7 @@ export function getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown(
         const profit = asset.profit / 100; // Normalize profit
         const maxDrawDownValue = asset.maxDrawDown.value / 100; // Lower values should have more weight
         // Combine the weight factors: higher profit, lower rank, and lower maxDrawDown
-        return sum + (1 / rank) * profit + 1 / maxDrawDownValue;
+        return sum + (1 / rank) * profit * (1 / maxDrawDownValue);
     }, 0);
 
     // Ensure no portion is zero
@@ -32,7 +32,7 @@ export function getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown(
         const profit = asset.profit / 100;
         const maxDrawDownValue = asset.maxDrawDown.value / 100;
         // Calculate the weight for each asset
-        const weight = (1 / rank) * profit + 1 / maxDrawDownValue;
+        const weight = (1 / rank) * profit * (1 / maxDrawDownValue);
         // Distribute proportional portion and round it
         return Math.round((weight / totalWeight) * remainingPortion) + minPortion;
     });
