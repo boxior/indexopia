@@ -1,0 +1,34 @@
+name: Deploy Next.js App
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout the repository
+      - uses: actions/checkout@v4
+
+      # Step 2: Install dependencies using yarn
+      - name: Install Dependencies
+        run: yarn install
+
+      # Step 3: Build the Next.js project using yarn
+      - name: Build Next.js
+        run: yarn build
+
+      # Step 4: Deploy using rsync
+      - name: rsync deploy
+        uses: burnett01/rsync-deployments@7.0.2
+        with:
+          switches: -avzr --delete
+          path: ./.next # Update this if using `next export`, e.g., `out`
+          remote_host: ${{ secrets.REMOTE_HOST }}
+          remote_user: ${{ secrets.REMOTE_USER }}
+          remote_key: ${{ secrets.REMOTE_KEY }}
+          remote_key_pass: ${{ secrets.REMOTE_KEY_PASS }}
+          remote_path: ${{ secrets.REMOTE_PATH }}
