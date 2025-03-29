@@ -463,7 +463,7 @@ export async function getCustomIndex({
         endTime,
     } = await getAssetsWithHistories({
         assets,
-        ...pick(customIndex, ["startTime", "endTime"]),
+        ...pick(customIndex, ["startTime"]),
     });
 
     assets = assetsWithHistories;
@@ -475,7 +475,7 @@ export async function getCustomIndex({
     }));
 
     const index: Omit<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>, "historyOverview" | "maxDrawDown"> = {
-        ...pick(customIndex, ["id", "name", "startTime", "endTime"]),
+        ...pick(customIndex, ["id", "name", "startTime"]),
         assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
         history: [],
     };
