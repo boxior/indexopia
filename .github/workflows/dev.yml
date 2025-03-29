@@ -1,0 +1,59 @@
+name: Build and Deploy Next.js
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Install Yarn globally (optional, for safety)
+      - name: Install Yarn
+        run: npm install --global yarn
+
+      # Step 2: Checkout the repository
+      - uses: actions/checkout@v4
+
+      # Step 3: Install dependencies using Yarn
+      - name: Install Dependencies
+        run: yarn install
+
+      # Step 4: Build the Next.js project
+      - name: Build Next.js
+        run: yarn build
+
+      # Step 5: Save the build artifacts (e.g., `.next` folder)
+      - name: Upload Build Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: nextjs-build
+          path: ./.next # Change to `./out` if using `next export`
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build # Make deploy dependent on the build job
+
+    steps:
+      # Step 1: Checkout the repository (needed for context like branch name)
+      - uses: actions/checkout@v4
+
+      # Step 2: Download the artifacts from the build job
+      - name: Download Build Artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: nextjs-build
+
+      # Step 3: Deploy using rsync
+      - name: rsync deploy
+        uses: burnett01/rsync-deployments@7.0.2
+        with:
+          switches: -avzr --delete
+          path: ./.next # Ensure this matches the uploaded artifact directory
+          remote_host: ${{ secrets.REMOTE_HOST }}
+          remote_user: ${{ secrets.REMOTE_USER }}
+          remote_key: ${{ secrets.REMOTE_KEY }}
+          remote_key_pass: ${{ secrets.REMOTE_KEY_PASS }}
+          remote_path: ${{ secrets.REMOTE_PATH }}
