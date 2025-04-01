@@ -8,14 +8,15 @@ import {DefaultCustomIndex} from "@/app/indexes/components/DefaultCustomIndex";
 import * as React from "react";
 
 export default async function IndexesPage() {
-    const topIndexes = await Promise.all(Object.values(IndexId).map(id => getIndex({id})));
-    const customIndexes = await getCustomIndexes();
-    const assets = await getCachedTopAssets(MAX_ASSET_COUNT);
+    // const topIndexes = await Promise.all(Object.values(IndexId).map(id => getIndex({id})));
+    // const customIndexes = await getCustomIndexes();
+    // const assets = await getCachedTopAssets(MAX_ASSET_COUNT);
 
     return (
         <div>
             <DefaultCustomIndex />
-            <IndexesTable data={[...topIndexes, ...customIndexes]} assets={assets} />
+            {/*<IndexesTable data={[...topIndexes, ...customIndexes]} assets={assets} />*/}
+            <IndexesTable data={[]} assets={[]} />
         </div>
     );
 }

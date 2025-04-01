@@ -1,4 +1,4 @@
-import {CustomIndexType, IndexId, ServerPageProps} from "@/utils/types/general.types";
+import {Asset, CustomIndexType, IndexId, ServerPageProps} from "@/utils/types/general.types";
 import {IndexChart} from "@/app/indexes/[id]/components/IndexChart";
 import {IndexAssetsTable} from "@/app/indexes/[id]/components/IndexAssetsTable";
 import {getCachedTopAssets, getCustomIndex, getIndex, INDEXES_FOLDER_PATH} from "@/app/db/db.helpers";
@@ -12,9 +12,11 @@ import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
 
 export default async function IndexPage(props: ServerPageProps<IndexId>) {
     const params = await props.params;
-    const assets = await getCachedTopAssets(MAX_ASSET_COUNT);
-    const customIndex = (await readJsonFile(`${params.id}`, null, INDEXES_FOLDER_PATH)) as CustomIndexType | undefined;
-    const doEdit = customIndex && !customIndex?.isDefault;
+    // const assets = await getCachedTopAssets(MAX_ASSET_COUNT);
+    const assets = [] as Asset[];
+    // const customIndex = (await readJsonFile(`${params.id}`, null, INDEXES_FOLDER_PATH)) as CustomIndexType | undefined;
+    const customIndex: CustomIndexType | undefined = undefined;
+    const doEdit = customIndex && !(customIndex as CustomIndexType)?.isDefault;
 
     const index = await (async () => {
         switch (true) {
