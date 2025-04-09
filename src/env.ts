@@ -8,6 +8,12 @@ interface EnvVariables {
     COINCAP_PRO_API_KEY: string;
     ALPHA_VANTAGE_API_KEY: string;
     DEV_API_KEY: string;
+    // MYSQL
+    MYSQL_HOST: string;
+    MYSQL_USER: string;
+    MYSQL_PASSWORD: string;
+    MYSQL_DATABASE: string;
+    MYSQL_TABLE_NAME_ASSETS: string;
 }
 
 // Parse environment variables and ensure they have the correct types
@@ -21,6 +27,12 @@ export const ENV_VARIABLES: EnvVariables = {
     COINCAP_PRO_API_KEY: process.env.COINCAP_PRO_API_KEY ?? "",
     ALPHA_VANTAGE_API_KEY: process.env.ALPHA_VANTAGE_API_KEY ?? "",
     DEV_API_KEY: process.env.DEV_API_KEY ?? "",
+    // MYSQL
+    MYSQL_HOST: process.env.MYSQL_HOST ?? "",
+    MYSQL_USER: process.env.MYSQL_USER ?? "",
+    MYSQL_PASSWORD: process.env.MYSQL_PASSWORD ?? "",
+    MYSQL_DATABASE: process.env.MYSQL_DATABASE ?? "",
+    MYSQL_TABLE_NAME_ASSETS: process.env.MYSQL_TABLE_NAME_ASSETS ?? "",
 };
 
 console.log("ENV_VARIABLES", ENV_VARIABLES);

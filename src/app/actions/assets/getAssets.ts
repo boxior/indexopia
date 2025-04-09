@@ -11,11 +11,12 @@ export type GetAssetsParameters = {
 
 export default async function getAssets(params: GetAssetsParameters) {
     try {
-        const strUrl = setQueryParams(`${ENV_VARIABLES.COINCAP_API_URL}/assets`, params);
+        const strUrl = setQueryParams(`${ENV_VARIABLES.COINCAP_PRO_API_KEY}/assets`, {
+            ...params,
+            apiKey: ENV_VARIABLES.COINCAP_PRO_API_KEY,
+        });
 
-        return await axios
-            .get(strUrl, {headers: {authorization: `Bearer ${ENV_VARIABLES.COINCAP_API_KEY}`}})
-            .then(res => res.data);
+        return await axios.get(strUrl).then(res => res.data);
     } catch (error) {
         console.log(error);
         throw error;

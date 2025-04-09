@@ -13,7 +13,7 @@ export type GetAssetHistoryParams = {
 export default async function getAssetHistory(params: GetAssetHistoryParams) {
     try {
         const strUrl = setQueryParams(
-            `${ENV_VARIABLES.COINCAP_API_URL}/assets/${params.id}/history/?apiKey=${ENV_VARIABLES.COINCAP_API_KEY}`,
+            `${ENV_VARIABLES.COINCAP_PRO_API_KEY}/assets/${params.id}/history?apiKey=${ENV_VARIABLES.COINCAP_PRO_API_KEY}`,
             omit(params, "id")
         );
 

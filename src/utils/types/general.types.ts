@@ -8,7 +8,7 @@ export interface Asset {
     symbol: string; // "BTC"
     name: string; // "Bitcoin"
     supply: string; // "19825181.0000000000000000"
-    maxSupply: string; // "21000000.0000000000000000"
+    maxSupply: string | null; // "21000000.0000000000000000"
     marketCapUsd: string; // "1925275466470.2756778983560402"
     volumeUsd24Hr: string; // "3258694900.2738844391393532"
     priceUsd: string; //  "97112.6299664187518842"
