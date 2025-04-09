@@ -13,8 +13,8 @@ export interface Asset {
     volumeUsd24Hr: string; // "3258694900.2738844391393532"
     priceUsd: string; //  "97112.6299664187518842"
     changePercent24Hr: string; // "-0.5596263726513635"
-    vwap24Hr: string; // "97457.6771885174285351"
-    explorer: string; // "https://blockchain.info/"
+    vwap24Hr: string | null; // "97457.6771885174285351"
+    explorer: string | null; // "https://blockchain.info/"
     history?: AssetHistory[];
     historyOverview?: HistoryOverview;
     maxDrawDown?: MaxDrawDown;

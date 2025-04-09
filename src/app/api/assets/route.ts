@@ -8,14 +8,21 @@ import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.consta
  */
 export async function POST(req: NextRequest) {
     try {
-        const body = (await req.json()) as {limit?: number};
-        const limit = body.limit ?? MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
+        let body = {} as {limit?: number};
+        try {
+            body = (await req.json()) as {limit?: number};
+        } catch {
+            //
+        }
 
-        const assets = await fetchAssets({limit});
-        await insertAssets(assets);
+        const limit = body?.limit ?? MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
+
+        const {data} = await fetchAssets({limit});
+
+        await insertAssets(data);
 
         return NextResponse.json(
-            {data: assets},
+            {data: []},
             {
                 status: 200,
             }

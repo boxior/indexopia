@@ -1,6 +1,6 @@
 import {processAllFilesInFolder, readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
-import getAssets from "@/app/actions/assets/getAssets";
-import getAssetHistory from "@/app/actions/assets/getAssetHistory";
+import fetchAssets from "@/app/actions/assets/fetchAssets";
+import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
 import {DbItems} from "@/app/db/db.types";
 import {
     Asset,
@@ -33,7 +33,7 @@ export const handleGetAllAssets = async (): Promise<unknown> => {
     const prevData = await readJsonFile(fileName, {}, ASSETS_FOLDER_PATH);
     const prevList = (prevData as any)?.data ?? [];
 
-    const nextData = await getAssets({limit: 2000, offset: prevList.length});
+    const {data: nextData} = await fetchAssets({limit: 2000, offset: prevList.length});
     const nextList = (nextData as any).data ?? [];
 
     if (nextList.length === 0) {
@@ -66,7 +66,7 @@ export const handleGetAssetHistory = async ({id}: {id: string}): Promise<AssetHi
         return oldList;
     }
 
-    const newData = await getAssetHistory({
+    const {data: newData} = await fetchAssetHistory({
         interval: "d1",
         start,
         end,
@@ -468,7 +468,7 @@ export async function getCustomIndex({
 
     assets = assetsWithHistories;
 
-    assets = assets.map((asset, index) => ({
+    assets = assets.map(asset => ({
         ...asset,
         portion: customIndex.assets.find(a => a.id === asset.id)?.portion ?? 0,
         maxDrawDown: getMaxDrawDownWithTimeRange(asset.history),
