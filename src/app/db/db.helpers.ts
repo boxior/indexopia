@@ -22,30 +22,21 @@ import {
 } from "@/utils/constants/general.constants";
 import {pick} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
+import {insertAssets, queryAssets} from "@/lib/db";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
 export const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
 
-export const handleGetAllAssets = async (): Promise<unknown> => {
-    const fileName = "assets";
+export const handleGetAssets = async ({limit}: {limit?: number}): Promise<Asset[]> => {
+    const {data} = await fetchAssets({limit});
 
-    const prevData = await readJsonFile(fileName, {}, ASSETS_FOLDER_PATH);
-    const prevList = (prevData as any)?.data ?? [];
+    await insertAssets(data);
 
-    const {data: nextData} = await fetchAssets({limit: 2000, offset: prevList.length});
-    const nextList = (nextData as any).data ?? [];
-
-    if (nextList.length === 0) {
-        return;
-    }
-
-    await writeJsonFile(fileName, {data: [...prevList, ...nextList]}, ASSETS_FOLDER_PATH);
-
-    return await handleGetAllAssets();
+    return data;
 };
 
-export const handleGetAssetHistory = async ({id}: {id: string}): Promise<AssetHistory[]> => {
+const handleGetAssetHistory = async ({id}: {id: string}): Promise<AssetHistory[]> => {
     const fileName = `asset_${id}_history`;
     const oldData = await readJsonFile(fileName, {}, ASSETS_HISTORY_FOLDER_PATH);
     const oldList = fulfillAssetHistory((oldData as any)?.data ?? []);
@@ -132,14 +123,15 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const handleGetAllAssetsHistories = async (upToRank: number | undefined = MAX_ASSET_COUNT) => {
-    const assets = await readJsonFile("assets", {}, ASSETS_FOLDER_PATH);
-    const assetsList = filterAssetsByOmitIds((assets as {data: Asset[]})?.data ?? [], upToRank);
+export const manageAllAssetsHistories = async (upToRank: number | undefined = MAX_ASSET_COUNT) => {
+    const assets = await queryAssets();
+    const assetsList = filterAssetsByOmitIds(assets, upToRank);
 
     for (const asset of assetsList) {
         try {
             await handleGetAssetHistory({id: asset.id});
         } catch (err) {
+            console.error(err);
             await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
         }
     }

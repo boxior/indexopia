@@ -58,10 +58,10 @@ export const insertAssets = async (data: Asset[]) => {
 };
 
 // Helper function: Fetch all data from the database
-export const queryAssets = async () => {
+export const queryAssets = async (): Promise<Asset[]> => {
     try {
         const [rows] = await pool.query(`SELECT * FROM ${TABLE_NAME_ASSETS}`);
-        return rows;
+        return rows as Asset[];
     } catch (error) {
         console.error("Error fetching data:", error);
         throw error;
@@ -98,7 +98,7 @@ export const queryAssetsByIds = async (ids: string[]) => {
 // Helper function: Fetch data up to a specific rank
 export const queryAssetsByRank = async (upToRank: number) => {
     try {
-        const sql = `SELECT * FROM ${TABLE_NAME_ASSETS} WHERE rank <= ? ORDER BY rank ASC`;
+        const sql = `SELECT * FROM ${TABLE_NAME_ASSETS} WHERE rank <= ?`;
         const [rows] = (await pool.query(sql, [upToRank])) as unknown as [Asset[]];
         return rows;
     } catch (error) {
