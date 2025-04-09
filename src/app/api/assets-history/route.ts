@@ -1,12 +1,12 @@
 import {NextResponse, NextRequest} from "next/server";
-import {manageAllAssetsHistories} from "@/app/db/db.helpers";
+import {manageAssetsHistories} from "@/app/db/db.helpers";
 
 /**
  * Write `assets_history` to the DB
  */
 export async function POST(_req: NextRequest) {
     try {
-        await manageAllAssetsHistories();
+        // await manageAssetsHistories();
 
         return NextResponse.json(
             {success: true},

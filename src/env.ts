@@ -14,6 +14,7 @@ interface EnvVariables {
     MYSQL_PASSWORD: string;
     MYSQL_DATABASE: string;
     MYSQL_TABLE_NAME_ASSETS: string;
+    MYSQL_TABLE_NAME_ASSET_HISTORY: string;
 }
 
 // Parse environment variables and ensure they have the correct types
@@ -33,6 +34,7 @@ export const ENV_VARIABLES: EnvVariables = {
     MYSQL_PASSWORD: process.env.MYSQL_PASSWORD ?? "",
     MYSQL_DATABASE: process.env.MYSQL_DATABASE ?? "",
     MYSQL_TABLE_NAME_ASSETS: process.env.MYSQL_TABLE_NAME_ASSETS ?? "",
+    MYSQL_TABLE_NAME_ASSET_HISTORY: process.env.MYSQL_TABLE_NAME_ASSET_HISTORY ?? "",
 };
 
 console.log("ENV_VARIABLES", ENV_VARIABLES);

@@ -58,10 +58,13 @@ export type AssetWithHistoryOverviewPortionAndMaxDrawDown = Asset & {
 };
 
 export interface AssetHistory {
+    assetId: string;
     priceUsd: string; // "priceUsd": "0.52126034102192210769",
     time: number; // "time": 1531180800000,
     date: string; // "date": "2018-07-10T00:00:00.000Z"
 }
+
+export type IndexHistory = Pick<AssetHistory, "priceUsd" | "time" | "date">;
 
 export interface MaxDrawDown {
     value: number;
@@ -90,7 +93,7 @@ export interface Index<A = Asset> {
     name: string;
     assets: A[];
     historyOverview: HistoryOverview;
-    history: AssetHistory[];
+    history: IndexHistory[];
     maxDrawDown: MaxDrawDown;
     startTime?: number;
     endTime?: number;

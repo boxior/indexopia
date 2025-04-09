@@ -9,6 +9,7 @@ import {
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
     CustomIndexType,
     Index,
+    IndexHistory,
     IndexId,
     NormalizedAssetHistory,
     NormalizedAssets,
@@ -22,18 +23,17 @@ import {
 } from "@/utils/constants/general.constants";
 import {pick} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
-import {insertAssets, queryAssets} from "@/lib/db";
+
+import {insertAssets, queryAssets} from "@/lib/db-helpers/db.assets.helpers";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
 export const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
 
-export const handleGetAssets = async ({limit}: {limit?: number}): Promise<Asset[]> => {
+export const manageAssets = async ({limit}: {limit?: number}) => {
     const {data} = await fetchAssets({limit});
 
     await insertAssets(data);
-
-    return data;
 };
 
 const handleGetAssetHistory = async ({id}: {id: string}): Promise<AssetHistory[]> => {
@@ -123,7 +123,7 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const manageAllAssetsHistories = async (upToRank: number | undefined = MAX_ASSET_COUNT) => {
+export const manageAssetsHistories = async (upToRank: number | undefined = MAX_ASSET_COUNT) => {
     const assets = await queryAssets();
     const assetsList = filterAssetsByOmitIds(assets, upToRank);
 
@@ -333,7 +333,7 @@ export const getAssetHistoriesWithSmallestRange = async ({
 
 export const getIndexHistory = async (
     index: Omit<Index<AssetWithHistoryAndOverview>, "historyOverview" | "maxDrawDown">
-): Promise<AssetHistory[]> => {
+): Promise<IndexHistory[]> => {
     const portions = index.assets.map(asset => asset.portion ?? 0);
 
     return mergeAssetHistories(
@@ -342,7 +342,7 @@ export const getIndexHistory = async (
     );
 };
 
-function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): AssetHistory[] {
+function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): IndexHistory[] {
     if (histories.length === 0 || histories[0].length === 0) {
         return [];
     }
@@ -364,7 +364,7 @@ function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): A
         throw new Error("All histories must have the same length");
     }
 
-    const merged: AssetHistory[] = [];
+    const merged: IndexHistory[] = [];
 
     for (let i = 0; i < arrayLength; i++) {
         const currentElements = histories.map(historyArray => historyArray[i]);
@@ -374,9 +374,9 @@ function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): A
 
         // Compute the weighted average price based on portions
         const weightedAveragePrice = currentElements
-            .reduce((sum, asset, index) => {
+            .reduce((sum, assetHistory, index) => {
                 const weight = portions[index] / 100; // Convert portion to a multiplier
-                return sum + parseFloat(asset.priceUsd) * weight;
+                return sum + parseFloat(assetHistory.priceUsd) * weight;
             }, 0)
             .toFixed(20); // Ensure fixed precision
 
