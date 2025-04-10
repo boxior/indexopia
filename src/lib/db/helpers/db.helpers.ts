@@ -59,7 +59,7 @@ export const manageAssets = async ({limit}: {limit?: number}) => {
     await insertAssets(data);
 };
 
-const manageAssetHistory = async ({id}: {id: string}) => {
+export const manageAssetHistory = async ({id}: {id: string}) => {
     const oldList = await queryAssetHistoryById(id);
 
     let start = momentTimeZone.tz("UTC").startOf("day").add(-11, "year").add(1, "day").valueOf();
@@ -85,14 +85,13 @@ const manageAssetHistory = async ({id}: {id: string}) => {
         id,
     });
 
-    const newList = (newData as any).data ?? [];
+    const newList = (newData ?? []).map(history => ({...history, assetId: id}));
 
     if (newList.length === 0) {
         return;
     }
-    console.time("fulfillAssetHistory_" + id);
+    await writeJsonFile(`history_${id}`, newList, "/db/debug");
     await insertAssetHistory(newList);
-    console.timeEnd("fulfillAssetHistory_" + id);
 };
 
 const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
@@ -233,6 +232,8 @@ export const getAssetHistoryOverview = async (
 
 export const getCachedTopAssets = async (limit: number): Promise<Asset[]> => {
     const assets = await queryAssets();
+    console.log("assets", assets.length);
+    await writeJsonFile("queryAssetsByRank", assets, "/db/debug");
     return filterAssetsByOmitIds(assets ?? [], limit);
 };
 

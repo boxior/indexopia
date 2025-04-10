@@ -4,7 +4,7 @@
 // CREATE OR REPLACE VIEW assets_sorted AS
 // SELECT *
 // FROM assets
-// ORDER BY rank ASC;
+// ORDER BY CAST(rank AS UNSIGNED) ASC;
 
 /**
  * To create Assets History View sorted by Time Asc
@@ -19,3 +19,8 @@
 // assets_history
 // ORDER BY
 // time ASC;
+
+/**
+ * Drop View
+ */
+// DROP VIEW IF EXISTS assets_sorted;

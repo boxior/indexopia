@@ -82,7 +82,8 @@ export const queryAssetsByIds = async (ids: string[]) => {
 // Helper function: Fetch data up to a specific rank
 export const queryAssetsByRank = async (upToRank: number) => {
     try {
-        const sql = `SELECT * FROM ${TABLE_NAME_ASSETS} WHERE rank <= ?`;
+        const sql = `SELECT * FROM ${TABLE_NAME_ASSETS} WHERE CAST(rank AS UNSIGNED)
+ <= ?`;
         const [rows] = (await mySqlPool.query(sql, [upToRank])) as unknown as [Asset[]];
         return rows;
     } catch (error) {
