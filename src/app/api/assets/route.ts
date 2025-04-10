@@ -1,6 +1,6 @@
 import {NextResponse, NextRequest} from "next/server";
 import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
-import {manageAssets} from "@/app/db/db.helpers";
+import {manageAssets} from "@/lib/db/helpers/db.helpers";
 
 /**
  * Write `assets` to the DB

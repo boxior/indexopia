@@ -1,7 +1,7 @@
 import {processAllFilesInFolder, readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
 import fetchAssets from "@/app/actions/assets/fetchAssets";
 import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
-import {DbItems} from "@/app/db/db.types";
+import {DbItems} from "@/lib/db/db.types";
 import {
     Asset,
     AssetHistory,
@@ -24,11 +24,34 @@ import {
 import {pick} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
-import {insertAssets, queryAssets} from "@/lib/db-helpers/db.assets.helpers";
+import {insertAssets, queryAssets} from "@/lib/db/helpers/db.assets.helpers";
+import {insertAssetHistory, queryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
 export const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
+
+export const migrateAssetsHistoriesFromJsonToDb = async () => {
+    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
+    const assetsList = filterAssetsByOmitIds(assets?.data ?? [], MAX_ASSET_COUNT);
+
+    for (const asset of assetsList) {
+        try {
+            const assetHistory = (await readJsonFile(
+                `asset_${asset.id}_history`,
+                {},
+                ASSETS_HISTORY_FOLDER_PATH
+            )) as DbItems<Omit<AssetHistory, "assetId">>;
+            const normalizedAssetHistory = assetHistory.data.map(history => ({assetId: asset.id, ...history}));
+            console.time("insertAssetHistory_" + asset.id);
+            await insertAssetHistory(normalizedAssetHistory);
+            console.timeEnd("insertAssetHistory_" + asset.id);
+        } catch (err) {
+            console.error(err);
+            await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
+        }
+    }
+};
 
 export const manageAssets = async ({limit}: {limit?: number}) => {
     const {data} = await fetchAssets({limit});
@@ -36,10 +59,8 @@ export const manageAssets = async ({limit}: {limit?: number}) => {
     await insertAssets(data);
 };
 
-const handleGetAssetHistory = async ({id}: {id: string}): Promise<AssetHistory[]> => {
-    const fileName = `asset_${id}_history`;
-    const oldData = await readJsonFile(fileName, {}, ASSETS_HISTORY_FOLDER_PATH);
-    const oldList = fulfillAssetHistory((oldData as any)?.data ?? []);
+const manageAssetHistory = async ({id}: {id: string}) => {
+    const oldList = await queryAssetHistoryById(id);
 
     let start = momentTimeZone.tz("UTC").startOf("day").add(-11, "year").add(1, "day").valueOf();
 
@@ -54,7 +75,7 @@ const handleGetAssetHistory = async ({id}: {id: string}): Promise<AssetHistory[]
     const end = momentTimeZone.tz("UTC").startOf("day").valueOf();
 
     if (start === end) {
-        return oldList;
+        return;
     }
 
     const {data: newData} = await fetchAssetHistory({
@@ -67,13 +88,11 @@ const handleGetAssetHistory = async ({id}: {id: string}): Promise<AssetHistory[]
     const newList = (newData as any).data ?? [];
 
     if (newList.length === 0) {
-        return oldList;
+        return;
     }
-
-    const data = fulfillAssetHistory([...oldList, ...newList]);
-    await writeJsonFile(fileName, {data}, ASSETS_HISTORY_FOLDER_PATH);
-
-    return data;
+    console.time("fulfillAssetHistory_" + id);
+    await insertAssetHistory(newList);
+    console.timeEnd("fulfillAssetHistory_" + id);
 };
 
 const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
@@ -123,13 +142,13 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const manageAssetsHistories = async (upToRank: number | undefined = MAX_ASSET_COUNT) => {
+export const manageAssetsHistory = async (upToRank: number | undefined = MAX_ASSET_COUNT) => {
     const assets = await queryAssets();
     const assetsList = filterAssetsByOmitIds(assets, upToRank);
 
     for (const asset of assetsList) {
         try {
-            await handleGetAssetHistory({id: asset.id});
+            await manageAssetHistory({id: asset.id});
         } catch (err) {
             console.error(err);
             await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
@@ -183,11 +202,9 @@ export const getAssetHistoryOverview = async (
     id: string,
     historyListProp?: AssetHistory[]
 ): Promise<HistoryOverview> => {
-    const history = historyListProp
-        ? {data: historyListProp}
-        : ((await readJsonFile(`asset_${id}_history`, {}, ASSETS_HISTORY_FOLDER_PATH)) as DbItems<AssetHistory>);
+    const history = historyListProp ?? (await queryAssetHistoryById(id));
 
-    const historyList = history?.data ?? [];
+    const historyList = history ?? [];
 
     const lastDay = momentTimeZone.tz("UTC").startOf("day").add(-1, "day").valueOf();
     const lastDayItem = historyList.find(item => item.time === lastDay);
@@ -215,13 +232,13 @@ export const getAssetHistoryOverview = async (
 };
 
 export const getCachedTopAssets = async (limit: number): Promise<Asset[]> => {
-    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
-    return filterAssetsByOmitIds(assets?.data ?? [], limit);
+    const assets = await queryAssets();
+    return filterAssetsByOmitIds(assets ?? [], limit);
 };
 
 export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
-    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
-    return (assets?.data ?? []).filter(asset => ids.includes(asset.id));
+    const assets = await queryAssets();
+    return (assets ?? []).filter(asset => ids.includes(asset.id));
 };
 
 export const getIndexHistoryOverview = async (
@@ -287,15 +304,10 @@ export const getAssetHistoriesWithSmallestRange = async ({
 
     // Step 1: Read the history for each asset and determine the smallest start time
     for (const assetId of assetIds) {
-        const historyFileName = `asset_${assetId}_history`;
         try {
-            const historyData = (await readJsonFile(
-                historyFileName,
-                {},
-                ASSETS_HISTORY_FOLDER_PATH
-            )) as DbItems<AssetHistory>;
+            const historyData = await queryAssetHistoryById(assetId);
 
-            const historyList = historyData?.data ?? [];
+            const historyList = historyData ?? [];
 
             if (!historyList.length) {
                 histories[assetId] = []; // No data for this asset
@@ -343,6 +355,7 @@ export const getIndexHistory = async (
 };
 
 function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): IndexHistory[] {
+    writeJsonFile("histories[][]", histories, "/db/debug").then();
     if (histories.length === 0 || histories[0].length === 0) {
         return [];
     }

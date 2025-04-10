@@ -1,4 +1,4 @@
-import {HistoryOverview} from "@/app/db/db.helpers";
+import {HistoryOverview} from "@/lib/db/helpers/db.helpers";
 
 export type RecordWithId = Record<string, unknown> & {id: string};
 

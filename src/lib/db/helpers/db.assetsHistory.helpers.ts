@@ -6,7 +6,7 @@ import {mySqlPool} from "@/lib/db";
 const TABLE_NAME_ASSET_HISTORY = ENV_VARIABLES.MYSQL_TABLE_NAME_ASSET_HISTORY; // Ensure this table exists in your database
 
 // Helper function: Insert `AssetHistory` into the database
-export const insertAssetHistories = async (data: AssetHistory[]) => {
+export const insertAssetHistory = async (data: AssetHistory[]) => {
     try {
         const sql = `
             INSERT INTO ${TABLE_NAME_ASSET_HISTORY} (assetId, priceUsd, time, date)
@@ -26,12 +26,12 @@ export const insertAssetHistories = async (data: AssetHistory[]) => {
 };
 
 // Helper function: Fetch all history for a specific asset by `assetId`
-export const queryAssetHistoriesById = async (assetId: string): Promise<AssetHistory[]> => {
+export const queryAssetHistoryById = async (assetId: string): Promise<AssetHistory[]> => {
     try {
         const sql = `
             SELECT * FROM ${TABLE_NAME_ASSET_HISTORY} 
             WHERE assetId = ? 
-            ORDER BY time ASC;
+            ;
         `;
         const [rows] = await mySqlPool.query(sql, [assetId]);
         return rows as AssetHistory[];
@@ -42,15 +42,15 @@ export const queryAssetHistoriesById = async (assetId: string): Promise<AssetHis
 };
 
 // Helper function: Fetch all history for a specific asset by `assetId` with optional `startTime`
-export const queryAssetHistoriesByIdAndStartTime = async (
+export const queryAssetHistoryByIdAndStartTime = async (
     assetId: string,
     startTime: number
 ): Promise<AssetHistory[]> => {
     try {
         const sql = `
             SELECT * FROM ${TABLE_NAME_ASSET_HISTORY} 
-            WHERE assetId = ? AND time >= ? 
-            ORDER BY time ASC;
+            WHERE assetId = ? AND time >= ?
+            ;
         `;
         const [rows] = await mySqlPool.query(sql, [assetId, startTime]);
         return rows as AssetHistory[];
