@@ -40,6 +40,8 @@ export type AssetWithProfitAndMaxDrawDown = AssetWithProfit & AssetWithMaxDrawDo
 
 export type CustomIndexAsset = Pick<Required<Asset>, "id" | "portion">;
 
+export type CustomIndexAssetWithCustomIndexId = Pick<Required<Asset>, "id" | "portion"> & {customIndexId: string};
+
 export type AssetWithHistory = Asset & {history: AssetHistory[]};
 
 export type AssetWithHistoryAndOverview = Asset & {history: AssetHistory[]; historyOverview: HistoryOverview};

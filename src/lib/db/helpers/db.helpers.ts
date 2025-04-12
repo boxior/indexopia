@@ -1,4 +1,4 @@
-import {processAllFilesInFolder, readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
+import {readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
 import fetchAssets from "@/app/actions/assets/fetchAssets";
 import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
 import {DbItems} from "@/lib/db/db.types";
@@ -7,7 +7,6 @@ import {
     AssetHistory,
     AssetWithHistoryAndOverview,
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
-    CustomIndexType,
     Index,
     IndexHistory,
     IndexId,
@@ -26,6 +25,7 @@ import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/s
 
 import {insertAssets, queryAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {insertAssetHistory, queryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
+import {handleQueryCustomIndexById, handleQueryCustomIndexes} from "@/lib/db/helpers/db.customIndex.helpers";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
@@ -230,7 +230,7 @@ export const getAssetHistoryOverview = async (
     };
 };
 
-export const getCachedTopAssets = async (limit: number): Promise<Asset[]> => {
+export const getCachedTopAssets = async (limit: number | undefined = MAX_ASSET_COUNT): Promise<Asset[]> => {
     const assets = await queryAssets();
     return filterAssetsByOmitIds(assets ?? [], limit);
 };
@@ -456,8 +456,13 @@ export async function getCustomIndex({
     id,
 }: {
     id: string;
-}): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>> {
-    const customIndex = (await readJsonFile(id, {}, INDEXES_FOLDER_PATH)) as CustomIndexType;
+}): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null> {
+    const customIndex = await handleQueryCustomIndexById(id);
+
+    if (!customIndex) {
+        return null;
+    }
+
     let assets = await getCachedAssets(customIndex.assets.map(asset => asset.id));
 
     const {
@@ -499,9 +504,11 @@ export async function getCustomIndex({
 }
 
 export async function getCustomIndexes(): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>[]> {
-    const cachedCustomIndexes = (await processAllFilesInFolder("/db/indexes")) as unknown as CustomIndexType[];
+    const cachedCustomIndexes = await handleQueryCustomIndexes();
 
-    return Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id})));
+    const customIndexes = await Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id})));
+
+    return customIndexes.filter(ci => ci !== null);
 }
 
 async function getAssetsWithHistories({
