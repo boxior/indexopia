@@ -24,3 +24,8 @@
  * Drop View
  */
 // DROP VIEW IF EXISTS assets_sorted;
+
+/**
+ * Clear table
+ */
+// TRUNCATE TABLE assets;

@@ -232,8 +232,6 @@ export const getAssetHistoryOverview = async (
 
 export const getCachedTopAssets = async (limit: number): Promise<Asset[]> => {
     const assets = await queryAssets();
-    console.log("assets", assets.length);
-    await writeJsonFile("queryAssetsByRank", assets, "/db/debug");
     return filterAssetsByOmitIds(assets ?? [], limit);
 };
 
