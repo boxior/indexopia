@@ -17,6 +17,7 @@ interface EnvVariables {
     MYSQL_TABLE_NAME_ASSET_HISTORY: string;
     MYSQL_TABLE_NAME_CUSTOM_INDEX: string;
     TABLE_NAME_CUSTOM_INDEX_ASSETS: string;
+    API_KEY: string;
 }
 
 // Parse environment variables and ensure they have the correct types
@@ -39,6 +40,7 @@ export const ENV_VARIABLES: EnvVariables = {
     MYSQL_TABLE_NAME_ASSET_HISTORY: process.env.MYSQL_TABLE_NAME_ASSET_HISTORY ?? "",
     MYSQL_TABLE_NAME_CUSTOM_INDEX: process.env.MYSQL_TABLE_NAME_CUSTOM_INDEX ?? "",
     TABLE_NAME_CUSTOM_INDEX_ASSETS: process.env.TABLE_NAME_CUSTOM_INDEX_ASSETS ?? "",
+    API_KEY: process.env.API_KEY ?? "",
 };
 
 console.log("ENV_VARIABLES", ENV_VARIABLES);
