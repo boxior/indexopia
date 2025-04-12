@@ -3,18 +3,12 @@ import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.consta
 import {manageAssets} from "@/lib/db/helpers/db.helpers";
 
 /**
- * Write `assets` to the DB
+ * Write `assets` to the DB.
+ * The request should be GET to use free cron job https://console.cron-job.org/dashboard
  */
-export async function POST(req: NextRequest) {
+export async function GET(_req: NextRequest) {
     try {
-        let body = {} as {limit?: number};
-        try {
-            body = (await req.json()) as {limit?: number};
-        } catch {
-            //
-        }
-
-        const limit = body?.limit ?? MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
+        const limit = MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
 
         await manageAssets({limit});
 

@@ -3,8 +3,9 @@ import {manageAssetsHistory} from "@/lib/db/helpers/db.helpers";
 
 /**
  * Write `assets_history` to the DB
+ * The request should be GET to use free cron job https://console.cron-job.org/dashboard
  */
-export async function POST(_req: NextRequest) {
+export async function GET(_req: NextRequest) {
     try {
         await manageAssetsHistory();
 
