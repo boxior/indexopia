@@ -354,7 +354,6 @@ export const getIndexHistory = async (
 };
 
 function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): IndexHistory[] {
-    writeJsonFile("histories[][]", histories, "/db/debug").then();
     if (histories.length === 0 || histories[0].length === 0) {
         return [];
     }
