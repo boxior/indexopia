@@ -48,7 +48,7 @@ export function handleGenerateDefaultIndex(props: {
                 const optimalAssets = sortLessMaxDrawDownIndexAssets({
                     ...props,
                     assets: sortMostProfitableAssets(props),
-                }).slice(0, props.upToNumber) as unknown as AssetWithProfitAndMaxDrawDown[];
+                }).slice(0, upToNumber) as unknown as AssetWithProfitAndMaxDrawDown[];
 
                 switch (defaultIndexBy) {
                     case DefaultIndexBy.RANK:
