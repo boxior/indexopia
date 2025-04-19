@@ -54,9 +54,10 @@ export const migrateAssetsHistoriesFromJsonToDb = async () => {
 };
 
 export const manageAssets = async ({limit}: {limit?: number}) => {
-    const {data} = await fetchAssets({limit});
+    const {data, timestamp} = await fetchAssets({limit});
 
     await insertAssets(data);
+    await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, data, ASSETS_FOLDER_PATH);
 };
 
 export const manageAssetHistory = async ({id}: {id: string}) => {
@@ -365,14 +366,20 @@ function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): I
     // Ensure all portions sum to 100%
     const portionSum = portions.reduce((sum, portion) => sum + portion, 0);
     if (Math.abs(portionSum - 100) > 1e-8) {
-        throw new Error("Portions must sum up to 100%");
+        console.error("Portions must sum up to 100%");
+
+        return [];
     }
 
     const arrayLength = histories[0].length;
 
     // Ensure all histories have the same length
     if (!histories.every(history => history.length === arrayLength)) {
-        throw new Error("All histories must have the same length");
+        writeJsonFile("histories[][]", histories, "/db/debug");
+        console.error("All histories must have the same length");
+        return [];
+
+        // throw new Error("All histories must have the same length");
     }
 
     const merged: IndexHistory[] = [];

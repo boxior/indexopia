@@ -11,12 +11,12 @@ isDefault BOOLEAN DEFAULT FALSE      -- Represents the optional 'isDefault' fiel
 ```
 
 ```sql
-CREATE TABLE CustomIndexAsset (
+CREATE TABLE custom_index_assets (
     id VARCHAR(255) NOT NULL,            -- Represents the asset 'id' field
-    customIndexId VARCHAR(255) NOT NULL, -- Foreign key to CustomIndexType
+    customIndexId VARCHAR(255) NOT NULL, -- Foreign key to custom_index
     portion FLOAT NOT NULL,              -- Represents the 'portion' field
     PRIMARY KEY (id, customIndexId),     -- Composite primary key (one asset per custom index)
-    FOREIGN KEY (customIndexId) REFERENCES CustomIndexType(id) ON DELETE CASCADE
+    FOREIGN KEY (customIndexId) REFERENCES custom_index(id) ON DELETE CASCADE
 );
 
 ```
@@ -54,3 +54,5 @@ CREATE TABLE CustomIndexAsset (
  * Clear table
  */
 // TRUNCATE TABLE assets;
+ * Show Transactions
+ // SHOW PROCESSLIST;

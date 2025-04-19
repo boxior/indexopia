@@ -3,6 +3,8 @@ import {setQueryParams} from "@/utils/heleprs/setQueryParams.helper";
 import {ENV_VARIABLES} from "@/env";
 import {omit} from "lodash";
 import {AssetHistory} from "@/utils/types/general.types";
+import {populateMissingAssetHistory} from "@/app/indexes/helpers";
+import {writeJsonFile} from "@/utils/heleprs/fs.helpers";
 
 export type FetchAssetHistoryParams = {
     interval: string; // point-in-time interval, e.g. m1, m5, m15, m30, h1, h2, h6, h12, d1
@@ -20,7 +22,14 @@ export default async function fetchAssetHistory(
             omit(params, "id")
         );
 
-        return await axios.get(strUrl).then(res => res.data);
+        const history = await axios.get(strUrl).then(res => res.data);
+        await writeJsonFile("history_" + params.id, history.data, "/db/raw-history");
+        const populatedHistory = populateMissingAssetHistory<Omit<AssetHistory, "assetId">>(history.data);
+        await writeJsonFile("history_" + params.id, history.data, "/db/populated-history");
+
+        return {
+            data: populatedHistory,
+        };
     } catch (error) {
         console.log(error);
         throw error;
