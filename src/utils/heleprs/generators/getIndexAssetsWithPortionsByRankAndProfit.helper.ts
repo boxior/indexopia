@@ -1,66 +1,63 @@
 import {AssetWithProfit, CustomIndexAsset} from "@/utils/types/general.types";
-import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
 
 export function getIndexAssetsWithPortionsByRankAndProfit(assets: AssetWithProfit[]): CustomIndexAsset[] {
-    // Parse ranks and sort assets by their rank (ascending order)
-    const sortedAssets = sortRankIndexAssets<AssetWithProfit>(assets);
+    if (assets.length === 0) {
+        return [];
+    }
 
-    // Get the minimum profit for normalization
-    const minProfit = Math.min(...sortedAssets.map(asset => asset.profit));
+    // Extract profits from the list and find the minimum (most negative) and maximum profit
+    const profits = assets.map(asset => asset.profit);
+    const minProfit = Math.min(...profits);
+    const maxProfit = Math.max(...profits);
 
-    // Adjust profits to ensure they are all >= 1 (normalize profits)
-    const adjustedAssets = sortedAssets.map(asset => ({
-        ...asset,
-        adjustedProfit: asset.profit - minProfit + 1, // Shift profits so the smallest becomes 1
-    }));
+    // Guard against all profits being the same (avoid division by zero)
+    const profitRange = maxProfit - minProfit;
+    if (profitRange === 0) {
+        // If all profits are the same, assign equal portions
+        const equalPortion = 100 / assets.length;
+        return assets.map(asset => ({
+            ...asset,
+            portion: Math.round(equalPortion),
+        }));
+    }
 
-    // Calculate the total "weight" for distributing portions
-    const totalWeight = adjustedAssets.reduce((sum, asset) => {
-        const rank = parseInt(asset.rank, 10);
-        const adjustedProfit = asset.adjustedProfit;
-        return sum + (1 / rank) * adjustedProfit;
-    }, 0);
+    // Define the maximum portion for the most positive profit
+    const maxPortion = 50; // N = 50% for the maximum profit as per requirements
 
-    // Assign raw portions based on the calculated weights
-    let rawPortions = adjustedAssets.map(asset => {
-        const rank = parseInt(asset.rank, 10);
-        const adjustedProfit = asset.adjustedProfit;
-        const weight = (1 / rank) * adjustedProfit;
-        return (weight / totalWeight) * 100; // Portion as a percentage
+    // Calculate the portions
+    const rawPortions = assets.map(asset => {
+        const {profit} = asset;
+
+        // Scale the profit relative to the range, ensuring the most negative profit corresponds to 1%
+        const relativeProfit = (profit - minProfit) / profitRange; // Normalized profit between [0, 1]
+        const portion = 1 + relativeProfit * (maxPortion - 1); // Scale to [1%, maxPortion%]
+
+        return portion;
     });
 
-    // Ensure each portion is at least 1% and calculate total
-    rawPortions = rawPortions.map(portion => Math.max(portion, 1)); // Enforce minimum portion of 1%
-    const totalAllocated = rawPortions.reduce((sum, portion) => sum + portion, 0);
+    // Calculate the total sum of raw portions
+    const totalRawPortions = rawPortions.reduce((sum, portion) => sum + portion, 0);
 
-    // Adjust portions if total exceeds or is less than exactly 100%
-    const adjustment = 100 - totalAllocated;
+    // Normalize portions to ensure they sum to exactly 100%
+    const normalizedPortions = rawPortions.map(portion => (portion / totalRawPortions) * 100);
 
-    if (adjustment !== 0) {
-        // Redistribute the adjustment proportionally
-        rawPortions = rawPortions.map(portion => portion + (portion / totalAllocated) * adjustment);
-    }
+    // Round portions to integers, ensuring the total is exactly 100%
+    let roundedPortions = normalizedPortions.map(portion => Math.round(portion));
+    let totalRounded = roundedPortions.reduce((sum, portion) => sum + portion, 0);
 
-    // Round portions and finalize
-    let finalPortions = rawPortions.map(portion => Math.round(portion));
-
-    // Handle rounding edge case so the sum is exactly 100%
-    const finalTotal = finalPortions.reduce((sum, portion) => sum + portion, 0);
-    const roundingError = 100 - finalTotal;
-
-    if (roundingError !== 0) {
-        // Fix the difference by adjusting the largest/smallest portion
+    // Fix any rounding discrepancies — adjust the largest portion up or down
+    if (totalRounded !== 100) {
+        const difference = 100 - totalRounded;
         const indexToAdjust =
-            roundingError > 0
-                ? finalPortions.findIndex(portion => portion > 1) // Find a portion to increment
-                : finalPortions.findIndex(portion => portion > Math.abs(roundingError)); // Find a portion to decrement
-
-        finalPortions[indexToAdjust] += roundingError;
+            difference > 0
+                ? roundedPortions.indexOf(Math.max(...roundedPortions))
+                : roundedPortions.indexOf(Math.min(...roundedPortions));
+        roundedPortions[indexToAdjust] += difference;
     }
 
-    // Return the assets with their respective portions
-    return adjustedAssets.map((asset, index) => ({
+    // Return the assets with their final portions
+    return assets.map((asset, index) => ({
         ...asset,
-        portion: finalPortions[index],
+        portion: roundedPortions[index],
     }));
 }

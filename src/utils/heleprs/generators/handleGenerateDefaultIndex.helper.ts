@@ -10,6 +10,7 @@ import {getIndexAssetsWithPortionsByRank} from "@/utils/heleprs/generators/getIn
 import {sortMostProfitableAssets} from "@/utils/heleprs/generators/profit/sortMostProfitableIndexAssets.helper";
 import {sortLessMaxDrawDownIndexAssets} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 import {getIndexAssetsWithPortionsByRankAndMaxDrawDown} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankAndMaxDrawDown.helper";
+import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
 import {getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown.helper";
 
 export function handleGenerateDefaultIndex(props: {
@@ -19,11 +20,15 @@ export function handleGenerateDefaultIndex(props: {
     defaultIndexSortBy?: DefaultIndexSortBy;
 }): CustomIndexAsset[] {
     const {defaultIndexBy = DefaultIndexBy.RANK, defaultIndexSortBy = DefaultIndexSortBy.PROFIT, upToNumber} = props;
+    const sortedAssetsByRank = sortRankIndexAssets(props.assets);
 
     return (() => {
         switch (defaultIndexSortBy) {
             case DefaultIndexSortBy.PROFIT:
-                const mostProfitableAssets = sortMostProfitableAssets(props).slice(0, upToNumber);
+                const mostProfitableAssets = sortMostProfitableAssets({assets: sortedAssetsByRank}).slice(
+                    0,
+                    upToNumber
+                );
 
                 switch (defaultIndexBy) {
                     case DefaultIndexBy.RANK:
@@ -34,7 +39,10 @@ export function handleGenerateDefaultIndex(props: {
                         return [];
                 }
             case DefaultIndexSortBy.MAX_DRAW_DOWN:
-                const lessMaxDrawDownAssets = sortLessMaxDrawDownIndexAssets(props).slice(0, upToNumber);
+                const lessMaxDrawDownAssets = sortLessMaxDrawDownIndexAssets({assets: sortedAssetsByRank}).slice(
+                    0,
+                    upToNumber
+                );
 
                 switch (defaultIndexBy) {
                     case DefaultIndexBy.RANK:
@@ -46,15 +54,30 @@ export function handleGenerateDefaultIndex(props: {
                 }
             case DefaultIndexSortBy.OPTIMAL:
                 const optimalAssets = sortLessMaxDrawDownIndexAssets({
-                    ...props,
-                    assets: sortMostProfitableAssets(props),
+                    assets: sortMostProfitableAssets({assets: sortedAssetsByRank}),
                 }).slice(0, upToNumber) as unknown as AssetWithProfitAndMaxDrawDown[];
 
                 switch (defaultIndexBy) {
                     case DefaultIndexBy.RANK:
                         return getIndexAssetsWithPortionsByRank(optimalAssets);
                     case DefaultIndexBy.RANK_AND_EXTRA:
-                        return getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown(optimalAssets);
+                        const mostProfitableAssets = sortMostProfitableAssets({assets: sortedAssetsByRank}).slice(
+                            0,
+                            upToNumber
+                        );
+                        const assetsByProfit = getIndexAssetsWithPortionsByRankAndProfit(mostProfitableAssets);
+
+                        const lessMaxDrawDownAssets = sortLessMaxDrawDownIndexAssets({
+                            assets: sortedAssetsByRank,
+                        }).slice(0, upToNumber);
+
+                        const assetsByMaxDrawDown =
+                            getIndexAssetsWithPortionsByRankAndMaxDrawDown(lessMaxDrawDownAssets);
+
+                        return getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown(
+                            assetsByProfit,
+                            assetsByMaxDrawDown
+                        );
                     default:
                         return [];
                 }
