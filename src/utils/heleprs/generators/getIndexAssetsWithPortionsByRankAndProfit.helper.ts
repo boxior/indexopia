@@ -1,6 +1,9 @@
 import {AssetWithProfit, CustomIndexAsset} from "@/utils/types/general.types";
 
-export function getIndexAssetsWithPortionsByRankAndProfit(assets: AssetWithProfit[]): CustomIndexAsset[] {
+export function getIndexAssetsWithPortionsByRankAndProfit(
+    assets: AssetWithProfit[],
+    maxPortion: number | undefined = 50
+): CustomIndexAsset[] {
     if (assets.length === 0) {
         return [];
     }
@@ -20,9 +23,6 @@ export function getIndexAssetsWithPortionsByRankAndProfit(assets: AssetWithProfi
             portion: Math.round(equalPortion),
         }));
     }
-
-    // Define the maximum portion for the most positive profit
-    const maxPortion = 50; // N = 50% for the maximum profit as per requirements
 
     // Calculate the portions
     const rawPortions = assets.map(asset => {

@@ -6,7 +6,10 @@ import {AssetWithMaxDrawDown, CustomIndexAsset} from "@/utils/types/general.type
  * Ensures that no single asset has more than 50% of the portion,
  * and the total sum of all portions equals 100.
  */
-export function getIndexAssetsWithPortionsByRankAndMaxDrawDown(assets: AssetWithMaxDrawDown[]): CustomIndexAsset[] {
+export function getIndexAssetsWithPortionsByRankAndMaxDrawDown(
+    assets: AssetWithMaxDrawDown[],
+    maxPortion: number | undefined = 50
+): CustomIndexAsset[] {
     // Parse ranks and sort assets by their rank (ascending order)
     const sortedAssets = assets.toSorted((a, b) => parseInt(a.rank, 10) - parseInt(b.rank, 10));
 
@@ -26,8 +29,7 @@ export function getIndexAssetsWithPortionsByRankAndMaxDrawDown(assets: AssetWith
         return {...asset, portion};
     });
 
-    // Step 1: Cap any portion to a maximum of 50% and calculate excess to redistribute
-    const maxPortion = 50;
+    // Step 1: Cap any portion to a maximum of {maxPortion}% and calculate excess to redistribute
     let excessPortion = 0;
 
     portions = portions.map(asset => {
