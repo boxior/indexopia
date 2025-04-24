@@ -8,7 +8,9 @@ export async function middleware(request: NextRequest) {
     const isDevAuthPath = request.nextUrl.pathname.includes(DEV_AUTH_NAME);
     const doRedirect = !isDevAuth && !isDevAuthPath;
 
-    if (doRedirect) {
+    const ignoreDevAuth = request.nextUrl.pathname.includes("api");
+
+    if (doRedirect && !ignoreDevAuth) {
         return NextResponse.redirect(new URL(DEV_AUTH_PATH, request.url));
     }
 

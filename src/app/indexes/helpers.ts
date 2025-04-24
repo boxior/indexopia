@@ -1,6 +1,7 @@
-import {IndexId, MomentFormat} from "@/utils/types/general.types";
+import {AssetHistory, IndexId, MomentFormat} from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 import moment from "moment/moment";
+import {convertToUTC} from "@/utils/heleprs/convertToUTC.helper";
 
 export const getChartColorClassname = (value: number) => {
     return value < 0 ? "text-red-500" : "text-green-500";
@@ -31,3 +32,51 @@ export const getIndexDurationLabel = (startTime: number) => {
 export const getIsTopIndex = (id: string) => {
     return Object.values(IndexId).includes(id as IndexId);
 };
+
+/**
+ * Function to populate absent records for a list of assets
+ * @param histories - Array of asset records sorted by date (ascending).
+ * @returns Array with missing records populated.
+ */
+export function populateMissingAssetHistory<D extends Omit<AssetHistory, "assetId"> = AssetHistory>(
+    histories: D[]
+): D[] {
+    if (histories.length === 0) return [];
+
+    const filledRecords: D[] = [];
+    let previousRecord = histories[0];
+
+    // Iterate over each record
+    for (let i = 1; i < histories.length; i++) {
+        const currentRecord = histories[i];
+
+        // Add the previous record to the result
+        filledRecords.push(previousRecord);
+
+        // Convert dates to UTC for comparison
+        const previousDate = convertToUTC(previousRecord.date);
+        const currentDate = convertToUTC(currentRecord.date);
+
+        // Calculate days between the current and previous records
+        const daysGap = currentDate.diff(previousDate, "days");
+
+        // Fill in missing records for days in between
+        for (let day = 1; day < daysGap; day++) {
+            const missingDate = previousDate.clone().add(day, "days"); // Generate missing date in UTC
+
+            filledRecords.push({
+                ...previousRecord,
+                time: missingDate.valueOf(), // Unix timestamp in milliseconds
+                date: missingDate.toISOString(), // ISO string in UTC
+            });
+        }
+
+        // Update the previous record to the current one
+        previousRecord = currentRecord;
+    }
+
+    // Push the final record
+    filledRecords.push(previousRecord);
+
+    return filledRecords;
+}
