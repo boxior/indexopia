@@ -1,10 +1,9 @@
 import {NextResponse, NextRequest} from "next/server";
-import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
-import {manageAssets} from "@/lib/db/helpers/db.helpers";
+import {manageAssetsHistory} from "@/lib/db/helpers/db.helpers";
 import {ENV_VARIABLES} from "@/env";
 
 /**
- * Write `assets` to the DB.
+ * Write `assets_history` to the DB
  * The request should be GET to use free cron job https://console.cron-job.org/dashboard
  */
 export async function GET(_req: NextRequest) {
@@ -24,9 +23,7 @@ export async function GET(_req: NextRequest) {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
-        const limit = MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
-
-        await manageAssets({limit});
+        await manageAssetsHistory();
 
         return NextResponse.json(
             {success: true},

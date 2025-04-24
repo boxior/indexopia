@@ -4,11 +4,11 @@ import {Area, AreaChart, CartesianGrid} from "recharts";
 
 import {ChartConfig, ChartContainer, ChartTooltip} from "@/components/ui/chart";
 import moment from "moment";
-import {AssetHistory, ChartData, MomentFormat} from "@/utils/types/general.types";
+import {AssetHistory, ChartData, IndexHistory, MomentFormat} from "@/utils/types/general.types";
 import {IndexPreviewChartTooltip} from "@/app/indexes/components/indexPreviewChartTooltip";
 import {getChartColor} from "@/app/indexes/helpers";
 
-export function IndexPreviewChart({history}: {history: AssetHistory[]}) {
+export function IndexPreviewChart({history}: {history: IndexHistory[]}) {
     const chartData: ChartData[] = history.slice(-7).map(item => ({
         date: moment(item.time).format(MomentFormat.DAY_FULL),
         price: parseFloat(item.priceUsd),

@@ -1,36 +1,35 @@
-import {Asset, CustomIndexType, IndexId, ServerPageProps} from "@/utils/types/general.types";
+import {IndexId, ServerPageProps} from "@/utils/types/general.types";
 import {IndexChart} from "@/app/indexes/[id]/components/IndexChart";
 import {IndexAssetsTable} from "@/app/indexes/[id]/components/IndexAssetsTable";
-import {getCachedTopAssets, getCustomIndex, getIndex, INDEXES_FOLDER_PATH} from "@/app/db/db.helpers";
+import {getCachedTopAssets, getCustomIndex, getIndex} from "@/lib/db/helpers/db.helpers";
 import {Card} from "@/components/ui/card";
 import {IndexOverview} from "@/app/indexes/[id]/components/IndexOverview";
 import {getIsTopIndex} from "@/app/indexes/helpers";
-import {readJsonFile} from "@/utils/heleprs/fs.helpers";
 import * as React from "react";
 import {CustomIndex} from "@/app/indexes/components/CustomIndex/CustomIndex";
-import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
+import {handleQueryCustomIndexById} from "@/lib/db/helpers/db.customIndex.helpers";
 
-export default async function IndexPage(props: ServerPageProps<IndexId>) {
+export default async function IndexPage(props: ServerPageProps<IndexId | string>) {
     const params = await props.params;
-    // const assets = await getCachedTopAssets(MAX_ASSET_COUNT);
-    const assets = [] as Asset[];
-    // const customIndex = (await readJsonFile(`${params.id}`, null, INDEXES_FOLDER_PATH)) as CustomIndexType | undefined;
-    const customIndex: CustomIndexType | undefined = undefined;
-    const doEdit = customIndex && !(customIndex as CustomIndexType)?.isDefault;
+    const assets = await getCachedTopAssets();
+    const customIndex = await handleQueryCustomIndexById(params.id);
+    const doEdit = customIndex && !customIndex?.isDefault;
 
     const index = await (async () => {
         switch (true) {
             case getIsTopIndex(params.id):
-                return await getIndex({id: params.id});
+                return await getIndex({id: params.id as IndexId});
             default: {
-                const customIndex = (await readJsonFile(`${params.id}`, {}, INDEXES_FOLDER_PATH)) as CustomIndexType;
-
                 return await getCustomIndex({
-                    id: customIndex.id,
+                    id: params.id,
                 });
             }
         }
     })();
+
+    if (!index) {
+        return <div>Custom index not found</div>;
+    }
 
     return (
         <div className={"flex flex-col gap-4"}>

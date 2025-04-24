@@ -1,14 +1,14 @@
-import {processAllFilesInFolder, readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
-import getAssets from "@/app/actions/assets/getAssets";
-import getAssetHistory from "@/app/actions/assets/getAssetHistory";
-import {DbItems} from "@/app/db/db.types";
+import {readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
+import fetchAssets from "@/app/actions/assets/fetchAssets";
+import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
+import {DbItems} from "@/lib/db/db.types";
 import {
     Asset,
     AssetHistory,
     AssetWithHistoryAndOverview,
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
-    CustomIndexType,
     Index,
+    IndexHistory,
     IndexId,
     NormalizedAssetHistory,
     NormalizedAssets,
@@ -23,32 +23,45 @@ import {
 import {pick} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
+import {insertAssets, queryAssets} from "@/lib/db/helpers/db.assets.helpers";
+import {insertAssetHistory, queryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
+import {handleQueryCustomIndexById, handleQueryCustomIndexes} from "@/lib/db/helpers/db.customIndex.helpers";
+
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
 export const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
 
-export const handleGetAllAssets = async (): Promise<unknown> => {
-    const fileName = "assets";
+export const migrateAssetsHistoriesFromJsonToDb = async () => {
+    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
+    const assetsList = filterAssetsByOmitIds(assets?.data ?? [], MAX_ASSET_COUNT);
 
-    const prevData = await readJsonFile(fileName, {}, ASSETS_FOLDER_PATH);
-    const prevList = (prevData as any)?.data ?? [];
-
-    const nextData = await getAssets({limit: 2000, offset: prevList.length});
-    const nextList = (nextData as any).data ?? [];
-
-    if (nextList.length === 0) {
-        return;
+    for (const asset of assetsList) {
+        try {
+            const assetHistory = (await readJsonFile(
+                `asset_${asset.id}_history`,
+                {},
+                ASSETS_HISTORY_FOLDER_PATH
+            )) as DbItems<Omit<AssetHistory, "assetId">>;
+            const normalizedAssetHistory = assetHistory.data.map(history => ({assetId: asset.id, ...history}));
+            console.time("insertAssetHistory_" + asset.id);
+            await insertAssetHistory(normalizedAssetHistory);
+            console.timeEnd("insertAssetHistory_" + asset.id);
+        } catch (err) {
+            console.error(err);
+            await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
+        }
     }
-
-    await writeJsonFile(fileName, {data: [...prevList, ...nextList]}, ASSETS_FOLDER_PATH);
-
-    return await handleGetAllAssets();
 };
 
-export const handleGetAssetHistory = async ({id}: {id: string}): Promise<AssetHistory[]> => {
-    const fileName = `asset_${id}_history`;
-    const oldData = await readJsonFile(fileName, {}, ASSETS_HISTORY_FOLDER_PATH);
-    const oldList = fulfillAssetHistory((oldData as any)?.data ?? []);
+export const manageAssets = async ({limit}: {limit?: number}) => {
+    const {data, timestamp} = await fetchAssets({limit});
+
+    await insertAssets(data);
+    await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, data, ASSETS_FOLDER_PATH);
+};
+
+export const manageAssetHistory = async ({id}: {id: string}) => {
+    const oldList = await queryAssetHistoryById(id);
 
     let start = momentTimeZone.tz("UTC").startOf("day").add(-11, "year").add(1, "day").valueOf();
 
@@ -63,26 +76,23 @@ export const handleGetAssetHistory = async ({id}: {id: string}): Promise<AssetHi
     const end = momentTimeZone.tz("UTC").startOf("day").valueOf();
 
     if (start === end) {
-        return oldList;
+        return;
     }
 
-    const newData = await getAssetHistory({
+    const {data: newData} = await fetchAssetHistory({
         interval: "d1",
         start,
         end,
         id,
     });
 
-    const newList = (newData as any).data ?? [];
+    const newList = (newData ?? []).map(history => ({...history, assetId: id}));
 
     if (newList.length === 0) {
-        return oldList;
+        return;
     }
-
-    const data = fulfillAssetHistory([...oldList, ...newList]);
-    await writeJsonFile(fileName, {data}, ASSETS_HISTORY_FOLDER_PATH);
-
-    return data;
+    await writeJsonFile(`history_${id}`, newList, "/db/debug");
+    await insertAssetHistory(newList);
 };
 
 const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
@@ -132,14 +142,15 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const handleGetAllAssetsHistories = async (upToRank: number | undefined = MAX_ASSET_COUNT) => {
-    const assets = await readJsonFile("assets", {}, ASSETS_FOLDER_PATH);
-    const assetsList = filterAssetsByOmitIds((assets as {data: Asset[]})?.data ?? [], upToRank);
+export const manageAssetsHistory = async (upToRank: number | undefined = MAX_ASSET_COUNT) => {
+    const assets = await queryAssets();
+    const assetsList = filterAssetsByOmitIds(assets, upToRank);
 
     for (const asset of assetsList) {
         try {
-            await handleGetAssetHistory({id: asset.id});
+            await manageAssetHistory({id: asset.id});
         } catch (err) {
+            console.error(err);
             await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
         }
     }
@@ -191,11 +202,9 @@ export const getAssetHistoryOverview = async (
     id: string,
     historyListProp?: AssetHistory[]
 ): Promise<HistoryOverview> => {
-    const history = historyListProp
-        ? {data: historyListProp}
-        : ((await readJsonFile(`asset_${id}_history`, {}, ASSETS_HISTORY_FOLDER_PATH)) as DbItems<AssetHistory>);
+    const history = historyListProp ?? (await queryAssetHistoryById(id));
 
-    const historyList = history?.data ?? [];
+    const historyList = history ?? [];
 
     const lastDay = momentTimeZone.tz("UTC").startOf("day").add(-1, "day").valueOf();
     const lastDayItem = historyList.find(item => item.time === lastDay);
@@ -222,14 +231,14 @@ export const getAssetHistoryOverview = async (
     };
 };
 
-export const getCachedTopAssets = async (limit: number): Promise<Asset[]> => {
-    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
-    return filterAssetsByOmitIds(assets?.data ?? [], limit);
+export const getCachedTopAssets = async (limit: number | undefined = MAX_ASSET_COUNT): Promise<Asset[]> => {
+    const assets = await queryAssets();
+    return filterAssetsByOmitIds(assets ?? [], limit);
 };
 
 export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
-    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
-    return (assets?.data ?? []).filter(asset => ids.includes(asset.id));
+    const assets = await queryAssets();
+    return (assets ?? []).filter(asset => ids.includes(asset.id));
 };
 
 export const getIndexHistoryOverview = async (
@@ -295,15 +304,10 @@ export const getAssetHistoriesWithSmallestRange = async ({
 
     // Step 1: Read the history for each asset and determine the smallest start time
     for (const assetId of assetIds) {
-        const historyFileName = `asset_${assetId}_history`;
         try {
-            const historyData = (await readJsonFile(
-                historyFileName,
-                {},
-                ASSETS_HISTORY_FOLDER_PATH
-            )) as DbItems<AssetHistory>;
+            const historyData = await queryAssetHistoryById(assetId);
 
-            const historyList = historyData?.data ?? [];
+            const historyList = historyData ?? [];
 
             if (!historyList.length) {
                 histories[assetId] = []; // No data for this asset
@@ -341,7 +345,7 @@ export const getAssetHistoriesWithSmallestRange = async ({
 
 export const getIndexHistory = async (
     index: Omit<Index<AssetWithHistoryAndOverview>, "historyOverview" | "maxDrawDown">
-): Promise<AssetHistory[]> => {
+): Promise<IndexHistory[]> => {
     const portions = index.assets.map(asset => asset.portion ?? 0);
 
     return mergeAssetHistories(
@@ -350,7 +354,7 @@ export const getIndexHistory = async (
     );
 };
 
-function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): AssetHistory[] {
+function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): IndexHistory[] {
     if (histories.length === 0 || histories[0].length === 0) {
         return [];
     }
@@ -362,17 +366,23 @@ function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): A
     // Ensure all portions sum to 100%
     const portionSum = portions.reduce((sum, portion) => sum + portion, 0);
     if (Math.abs(portionSum - 100) > 1e-8) {
-        throw new Error("Portions must sum up to 100%");
+        console.error("Portions must sum up to 100%");
+
+        return [];
     }
 
     const arrayLength = histories[0].length;
 
     // Ensure all histories have the same length
     if (!histories.every(history => history.length === arrayLength)) {
-        throw new Error("All histories must have the same length");
+        writeJsonFile("histories[][]", histories, "/db/debug");
+        console.error("All histories must have the same length");
+        return [];
+
+        // throw new Error("All histories must have the same length");
     }
 
-    const merged: AssetHistory[] = [];
+    const merged: IndexHistory[] = [];
 
     for (let i = 0; i < arrayLength; i++) {
         const currentElements = histories.map(historyArray => historyArray[i]);
@@ -382,9 +392,9 @@ function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): A
 
         // Compute the weighted average price based on portions
         const weightedAveragePrice = currentElements
-            .reduce((sum, asset, index) => {
+            .reduce((sum, assetHistory, index) => {
                 const weight = portions[index] / 100; // Convert portion to a multiplier
-                return sum + parseFloat(asset.priceUsd) * weight;
+                return sum + parseFloat(assetHistory.priceUsd) * weight;
             }, 0)
             .toFixed(20); // Ensure fixed precision
 
@@ -453,8 +463,13 @@ export async function getCustomIndex({
     id,
 }: {
     id: string;
-}): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>> {
-    const customIndex = (await readJsonFile(id, {}, INDEXES_FOLDER_PATH)) as CustomIndexType;
+}): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null> {
+    const customIndex = await handleQueryCustomIndexById(id);
+
+    if (!customIndex) {
+        return null;
+    }
+
     let assets = await getCachedAssets(customIndex.assets.map(asset => asset.id));
 
     const {
@@ -468,7 +483,7 @@ export async function getCustomIndex({
 
     assets = assetsWithHistories;
 
-    assets = assets.map((asset, index) => ({
+    assets = assets.map(asset => ({
         ...asset,
         portion: customIndex.assets.find(a => a.id === asset.id)?.portion ?? 0,
         maxDrawDown: getMaxDrawDownWithTimeRange(asset.history),
@@ -496,9 +511,11 @@ export async function getCustomIndex({
 }
 
 export async function getCustomIndexes(): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>[]> {
-    const cachedCustomIndexes = (await processAllFilesInFolder("/db/indexes")) as unknown as CustomIndexType[];
+    const cachedCustomIndexes = await handleQueryCustomIndexes();
 
-    return Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id})));
+    const customIndexes = await Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id})));
+
+    return customIndexes.filter(ci => ci !== null);
 }
 
 async function getAssetsWithHistories({

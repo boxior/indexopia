@@ -1,11 +1,10 @@
 "use server";
 
 import {CustomIndexType} from "@/utils/types/general.types";
-import {writeJsonFile} from "@/utils/heleprs/fs.helpers";
-import {INDEXES_FOLDER_PATH} from "@/app/db/db.helpers";
+import {handleInsertCustomIndex} from "@/lib/db/helpers/db.customIndex.helpers";
 
 export async function saveCustomIndex(customIndex: CustomIndexType): Promise<CustomIndexType> {
-    await writeJsonFile(customIndex.id, customIndex, INDEXES_FOLDER_PATH);
+    await handleInsertCustomIndex(customIndex);
 
     return customIndex;
 }

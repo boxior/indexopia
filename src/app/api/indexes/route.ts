@@ -1,16 +1,17 @@
 import {NextResponse, NextRequest} from "next/server";
-import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
-import {manageAssets} from "@/lib/db/helpers/db.helpers";
 import {ENV_VARIABLES} from "@/env";
+import {
+    handleSaveDefaultCustomIndex,
+    SaveDefaultCustomIndexProps,
+} from "@/utils/heleprs/generators/handleSaveDefaultCustomIndex.helper";
 
 /**
- * Write `assets` to the DB.
- * The request should be GET to use free cron job https://console.cron-job.org/dashboard
+ * Generate Default Custom Indexes
  */
-export async function GET(_req: NextRequest) {
+export async function POST(req: NextRequest) {
     try {
         // Get the URL and search parameters
-        const {searchParams} = new URL(_req.url);
+        const {searchParams} = new URL(req.url);
 
         // Retrieve the apiKey from the query string
         const apiKey = searchParams.get("apiKey");
@@ -24,9 +25,9 @@ export async function GET(_req: NextRequest) {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
-        const limit = MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
+        const body = (await req.json()) as SaveDefaultCustomIndexProps;
 
-        await manageAssets({limit});
+        await handleSaveDefaultCustomIndex(body);
 
         return NextResponse.json(
             {success: true},

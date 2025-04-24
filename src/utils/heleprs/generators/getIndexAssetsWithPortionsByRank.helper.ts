@@ -9,24 +9,21 @@ import {Asset, CustomIndexAsset} from "@/utils/types/general.types";
  * @returns Array of Assets with the calculated portion.
  */
 export function getIndexAssetsWithPortionsByRank(assets: Asset[]): CustomIndexAsset[] {
-    // Parse ranks and sort assets by their rank (ascending order)
-    const sortedAssets = assets.toSorted((a, b) => parseInt(a.rank, 10) - parseInt(b.rank, 10));
-
     // Calculate the total "weight" based on rank for distributing the portions
-    const totalWeight = sortedAssets.reduce((sum, asset) => {
+    const totalWeight = assets.reduce((sum, asset) => {
         const rank = parseInt(asset.rank, 10);
         return sum + 1 / rank; // Higher rank (lower number) gives bigger weight
     }, 0);
 
     // Assign portions proportionally based on the rank weight
     let remainingPortion = 100;
-    return sortedAssets.map((asset, index) => {
+    return assets.map((asset, index) => {
         const rank = parseInt(asset.rank, 10);
         const weight = 1 / rank;
         const portion = Math.round((weight / totalWeight) * 100);
 
         // Ensure the last asset gets exactly the remaining portion to avoid rounding issues
-        if (index === sortedAssets.length - 1) {
+        if (index === assets.length - 1) {
             return {...asset, portion: remainingPortion};
         }
 

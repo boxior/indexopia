@@ -1,4 +1,4 @@
-import {getAssetHistoriesWithSmallestRange, getCachedTopAssets} from "@/app/db/db.helpers";
+import {getAssetHistoriesWithSmallestRange, getCachedTopAssets} from "@/lib/db/helpers/db.helpers";
 import {AssetWithHistory} from "@/utils/types/general.types";
 import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
 
