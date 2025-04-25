@@ -1,3 +1,5 @@
+import {Suspense} from "react";
+
 export default async function HomePage() {
     try {
         //
@@ -5,5 +7,5 @@ export default async function HomePage() {
         console.log(err);
     }
 
-    return <div>Home page</div>;
+    return <Suspense fallback={<div>Loading...</div>}>Home page</Suspense>;
 }
