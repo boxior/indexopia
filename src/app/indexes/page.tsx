@@ -14,7 +14,6 @@ export default async function IndexesPage() {
 
     return (
         <Suspense fallback={<div>Loading...</div>}>
-            <DefaultCustomIndex />
             <IndexesTable data={[...topIndexes, ...customIndexes]} assets={assets} />
         </Suspense>
     );
