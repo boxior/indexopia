@@ -1,12 +1,13 @@
 import {ENV_VARIABLES} from "@/env";
 import {mySqlPool} from "@/lib/db";
 import {CustomIndexAsset, CustomIndexAssetWithCustomIndexId, CustomIndexType} from "@/utils/types/general.types";
+import {cache} from "react";
 
 const TABLE_NAME_CUSTOM_INDEX = ENV_VARIABLES.MYSQL_TABLE_NAME_CUSTOM_INDEX; // Ensure your database table exists
 const TABLE_NAME_CUSTOM_INDEX_ASSETS = ENV_VARIABLES.TABLE_NAME_CUSTOM_INDEX_ASSETS; // Ensure your database table exists
 
 // Fetch a custom index by ID
-const queryCustomIndexById = async (id: string) => {
+const queryCustomIndexById = cache(async (id: string) => {
     const query = `
     SELECT 
       id,
@@ -21,10 +22,10 @@ const queryCustomIndexById = async (id: string) => {
     const customIndexes = rows as Omit<CustomIndexType, "assets">[];
 
     return customIndexes.length ? customIndexes[0] : null; // Return the first result or null if not found
-};
+});
 
 // Fetch all custom indexes
-export const queryCustomIndexes = async () => {
+export const queryCustomIndexes = cache(async () => {
     const query = `
     SELECT 
       id,
@@ -36,10 +37,10 @@ export const queryCustomIndexes = async () => {
 
     const [rows] = await mySqlPool.execute(query);
     return rows as Omit<CustomIndexType, "assets">[]; // Return the list of indexes
-};
+});
 
 // Fetch assets belonging to a specific custom index
-export const queryAssetsByCustomIndexId = async (customIndexId: string) => {
+export const queryAssetsByCustomIndexId = cache(async (customIndexId: string) => {
     const query = `
     SELECT 
       id,
@@ -50,10 +51,10 @@ export const queryAssetsByCustomIndexId = async (customIndexId: string) => {
 
     const [rows] = await mySqlPool.execute(query, [customIndexId]);
     return rows as CustomIndexAssetWithCustomIndexId[]; // Return all assets for the custom index
-};
+});
 
 // Fetch all assets across all custom indexes
-export const queryCustomIndexAssets = async () => {
+export const queryCustomIndexAssets = cache(async () => {
     const query = `
     SELECT 
       customIndexId,
@@ -64,7 +65,7 @@ export const queryCustomIndexAssets = async () => {
 
     const [rows] = await mySqlPool.execute(query);
     return rows as CustomIndexAssetWithCustomIndexId[]; // Return the list of all assets
-};
+});
 
 // Insert a custom index into the database
 export const insertCustomIndex = async (id: string, name: string, startTime: number | null, isDefault: boolean) => {
@@ -107,7 +108,7 @@ export const handleInsertCustomIndex = async (customIndex: CustomIndexType) => {
 };
 
 // Fetch custom index details by ID, including its assets
-export const handleQueryCustomIndexById = async (id: string): Promise<CustomIndexType | null> => {
+export const handleQueryCustomIndexById = cache(async (id: string): Promise<CustomIndexType | null> => {
     // Query custom index
     const customIndex = await queryCustomIndexById(id);
     if (!customIndex) {
@@ -122,10 +123,10 @@ export const handleQueryCustomIndexById = async (id: string): Promise<CustomInde
         ...customIndex,
         assets,
     };
-};
+});
 
 // Fetch all custom indexes with their respective assets
-export const handleQueryCustomIndexes = async (): Promise<CustomIndexType[]> => {
+export const handleQueryCustomIndexes = cache(async (): Promise<CustomIndexType[]> => {
     // Query all custom indexes
     const customIndexes = await queryCustomIndexes();
 
@@ -152,4 +153,4 @@ export const handleQueryCustomIndexes = async (): Promise<CustomIndexType[]> => 
         ...customIndex,
         assets: assetsByCustomIndexId[customIndex.id] ?? [],
     }));
-};
+});

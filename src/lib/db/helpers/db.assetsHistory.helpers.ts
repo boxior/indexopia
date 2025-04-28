@@ -1,6 +1,7 @@
 import {AssetHistory} from "@/utils/types/general.types"; // Assuming this is the correct path
 import {ENV_VARIABLES} from "@/env";
 import {mySqlPool} from "@/lib/db";
+import {cache} from "react";
 
 // Define the table name for `AssetHistory`
 const TABLE_NAME_ASSET_HISTORY = ENV_VARIABLES.MYSQL_TABLE_NAME_ASSET_HISTORY; // Ensure this table exists in your database
@@ -26,7 +27,7 @@ export const insertAssetHistory = async (data: AssetHistory[]) => {
 };
 
 // Helper function: Fetch all history for a specific asset by `assetId`
-export const queryAssetHistoryById = async (assetId: string): Promise<AssetHistory[]> => {
+export const queryAssetHistoryById = cache(async (assetId: string): Promise<AssetHistory[]> => {
     try {
         const sql = `
             SELECT * FROM ${TABLE_NAME_ASSET_HISTORY} 
@@ -39,23 +40,22 @@ export const queryAssetHistoryById = async (assetId: string): Promise<AssetHisto
         console.error("Error fetching asset histories by ID:", error);
         throw error;
     }
-};
+});
 
 // Helper function: Fetch all history for a specific asset by `assetId` with optional `startTime`
-export const queryAssetHistoryByIdAndStartTime = async (
-    assetId: string,
-    startTime: number
-): Promise<AssetHistory[]> => {
-    try {
-        const sql = `
+export const queryAssetHistoryByIdAndStartTime = cache(
+    async (assetId: string, startTime: number): Promise<AssetHistory[]> => {
+        try {
+            const sql = `
             SELECT * FROM ${TABLE_NAME_ASSET_HISTORY} 
             WHERE assetId = ? AND time >= ?
             ;
         `;
-        const [rows] = await mySqlPool.query(sql, [assetId, startTime]);
-        return rows as AssetHistory[];
-    } catch (error) {
-        console.error("Error fetching asset histories by ID and start time:", error);
-        throw error;
+            const [rows] = await mySqlPool.query(sql, [assetId, startTime]);
+            return rows as AssetHistory[];
+        } catch (error) {
+            console.error("Error fetching asset histories by ID and start time:", error);
+            throw error;
+        }
     }
-};
+);

@@ -1,6 +1,6 @@
-import axios from "axios";
 import {setQueryParams} from "@/utils/heleprs/setQueryParams.helper";
 import {ENV_VARIABLES} from "@/env";
+import {secondsUntilNextMidnightUTC} from "@/utils/heleprs/axios/axios.helpers";
 
 export type FetchAssetsParameters = {
     search?: string; // DEFAULT: bitcoin; Search by asset id (bitcoin) or symbol (BTC)
@@ -16,7 +16,9 @@ export default async function fetchAssets(params: FetchAssetsParameters) {
             params
         );
 
-        return await axios.get(strUrl).then(res => res.data);
+        return await fetch(strUrl, {next: {revalidate: secondsUntilNextMidnightUTC()}}).then(res => {
+            return res.json();
+        });
     } catch (error) {
         console.log(error);
         throw error;

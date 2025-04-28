@@ -2,6 +2,7 @@
 import {Asset} from "@/utils/types/general.types";
 import {ENV_VARIABLES} from "@/env";
 import {mySqlPool} from "@/lib/db";
+import {cache} from "react";
 
 const TABLE_NAME_ASSETS = ENV_VARIABLES.MYSQL_TABLE_NAME_ASSETS; // Ensure this table exists in your database
 // Helper function: Insert data into the database
@@ -45,7 +46,7 @@ export const insertAssets = async (data: Asset[]) => {
     }
 };
 // Helper function: Fetch all data from the database
-export const queryAssets = async (): Promise<Asset[]> => {
+export const queryAssets = cache(async (): Promise<Asset[]> => {
     try {
         const [rows] = await mySqlPool.query(`SELECT * FROM ${TABLE_NAME_ASSETS}`);
         return rows as Asset[];
@@ -53,9 +54,9 @@ export const queryAssets = async (): Promise<Asset[]> => {
         console.error("Error fetching data:", error);
         throw error;
     }
-};
+});
 // Helper function: Fetch data by ID
-export const queryAssetById = async (id: string) => {
+export const queryAssetById = cache(async (id: string) => {
     try {
         const [rows] = (await mySqlPool.query(`SELECT * FROM ${TABLE_NAME_ASSETS} WHERE id = ?`, [id])) as unknown as [
             Asset[],
@@ -65,9 +66,9 @@ export const queryAssetById = async (id: string) => {
         console.error("Error fetching data by ID:", error);
         throw error;
     }
-};
+});
 // Helper function: Fetch data by multiple IDs
-export const queryAssetsByIds = async (ids: string[]) => {
+export const queryAssetsByIds = cache(async (ids: string[]) => {
     try {
         if (ids.length === 0) return [];
         const placeholders = ids.map(() => "?").join(", "); // Generate placeholders (?, ?, ?)
@@ -78,9 +79,9 @@ export const queryAssetsByIds = async (ids: string[]) => {
         console.error("Error fetching data by IDs:", error);
         throw error;
     }
-};
+});
 // Helper function: Fetch data up to a specific rank
-export const queryAssetsByRank = async (upToRank: number) => {
+export const queryAssetsByRank = cache(async (upToRank: number) => {
     try {
         const sql = `SELECT * FROM ${TABLE_NAME_ASSETS} WHERE CAST(rank AS UNSIGNED)
  <= ?`;
@@ -90,4 +91,4 @@ export const queryAssetsByRank = async (upToRank: number) => {
         console.error("Error fetching data by rank:", error);
         throw error;
     }
-};
+});
