@@ -8,6 +8,7 @@ export const mySqlPool = mysql.createPool({
     password: ENV_VARIABLES.MYSQL_PASSWORD, // Replace with your MySQL password
     database: ENV_VARIABLES.MYSQL_DATABASE, // Replace with your MySQL database name
     waitForConnections: true,
-    connectionLimit: 50,
+    connectionLimit: 40,
+    maxIdle: 10,
     queueLimit: 0,
 });
