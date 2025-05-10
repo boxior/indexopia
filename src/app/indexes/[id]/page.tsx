@@ -8,7 +8,6 @@ import {getIsTopIndex} from "@/app/indexes/helpers";
 import * as React from "react";
 import {CustomIndex} from "@/app/indexes/components/CustomIndex/CustomIndex";
 import {handleQueryCustomIndexById} from "@/lib/db/helpers/db.customIndex.helpers";
-import {Suspense} from "react";
 
 export default async function IndexPage(props: ServerPageProps<IndexId | string>) {
     const params = await props.params;
@@ -33,20 +32,18 @@ export default async function IndexPage(props: ServerPageProps<IndexId | string>
     }
 
     return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <div className={"flex flex-col gap-4"}>
-                {doEdit && <CustomIndex assets={assets} customIndex={customIndex} />}
-                <div className="flex gap-4">
-                    <Card className={"flex-1 p-2"}>
-                        <IndexOverview index={index} />
-                    </Card>
-                    <Card className="size-2/4 ">
-                        <IndexChart index={index} />
-                    </Card>
-                </div>
-
-                <IndexAssetsTable index={index} />
+        <div className={"flex flex-col gap-4"}>
+            {doEdit && <CustomIndex assets={assets} customIndex={customIndex} />}
+            <div className="flex gap-4">
+                <Card className={"flex-1 p-2"}>
+                    <IndexOverview index={index} />
+                </Card>
+                <Card className="size-2/4 ">
+                    <IndexChart index={index} />
+                </Card>
             </div>
-        </Suspense>
+
+            <IndexAssetsTable index={index} />
+        </div>
     );
 }

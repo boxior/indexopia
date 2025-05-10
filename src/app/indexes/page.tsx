@@ -4,7 +4,6 @@ import IndexesTable from "@/app/indexes/components/IndexesTable";
 import {getCachedTopAssets, getCustomIndexes, getIndex} from "@/lib/db/helpers/db.helpers";
 import {IndexId} from "@/utils/types/general.types";
 import * as React from "react";
-import {Suspense} from "react";
 
 export default async function IndexesPage() {
     console.time("topIndexes");
@@ -19,9 +18,5 @@ export default async function IndexesPage() {
     const assets = await getCachedTopAssets();
     console.timeEnd("assets");
 
-    return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <IndexesTable data={[...topIndexes, ...customIndexes]} assets={assets} />
-        </Suspense>
-    );
+    return <IndexesTable data={[...topIndexes, ...customIndexes]} assets={assets} />;
 }
