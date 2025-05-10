@@ -17,6 +17,9 @@ interface EnvVariables {
     MYSQL_TABLE_NAME_ASSET_HISTORY: string;
     MYSQL_TABLE_NAME_CUSTOM_INDEX: string;
     TABLE_NAME_CUSTOM_INDEX_ASSETS: string;
+    TABLE_NAME_INDEX: string;
+    TABLE_NAME_INDEX_ASSET: string;
+    TABLE_NAME_INDEX_HISTORY: string;
     API_KEY: string;
 }
 
@@ -40,6 +43,9 @@ export const ENV_VARIABLES: EnvVariables = {
     MYSQL_TABLE_NAME_ASSET_HISTORY: process.env.MYSQL_TABLE_NAME_ASSET_HISTORY ?? "",
     MYSQL_TABLE_NAME_CUSTOM_INDEX: process.env.MYSQL_TABLE_NAME_CUSTOM_INDEX ?? "",
     TABLE_NAME_CUSTOM_INDEX_ASSETS: process.env.TABLE_NAME_CUSTOM_INDEX_ASSETS ?? "",
+    TABLE_NAME_INDEX: process.env.TABLE_NAME_INDEX ?? "",
+    TABLE_NAME_INDEX_ASSET: process.env.TABLE_NAME_INDEX_ASSET ?? "",
+    TABLE_NAME_INDEX_HISTORY: process.env.TABLE_NAME_INDEX_HISTORY ?? "",
     API_KEY: process.env.API_KEY ?? "",
 };
 

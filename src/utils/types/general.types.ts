@@ -109,6 +109,42 @@ export interface CustomIndexType {
     isDefault?: boolean;
 }
 
+export interface IndexDb {
+    id: IndexId | string;
+    name: string;
+    historyOverview: string; // HistoryOverview
+    maxDrawDown: string; // MaxDrawDown
+    startTime: number;
+    endTime: number;
+    isSystem: number; // 0 | 1
+}
+
+export interface IndexAssetDb {
+    id: string;
+    indexId: string;
+    portion: number;
+    historyOverview: HistoryOverview;
+    maxDrawDown: MaxDrawDown;
+}
+
+export interface IndexHistoryDb {
+    indexId: string;
+    priceUsd: string;
+    time: number;
+    date: string;
+}
+
+export interface IndexOverview {
+    id: IndexId | string;
+    name: string;
+    assets: Pick<Asset, "id" | "name">[];
+    historyOverview: HistoryOverview;
+    maxDrawDown: MaxDrawDown;
+    startTime: number;
+    endTime: number;
+    isSystem?: boolean;
+}
+
 /**
  * @link https://momentjscom.readthedocs.io/en/latest/moment/04-displaying/01-format/
  */
