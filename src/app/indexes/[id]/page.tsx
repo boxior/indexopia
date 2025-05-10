@@ -8,8 +8,17 @@ import {getIsTopIndex} from "@/app/indexes/helpers";
 import * as React from "react";
 import {CustomIndex} from "@/app/indexes/components/CustomIndex/CustomIndex";
 import {handleQueryCustomIndexById} from "@/lib/db/helpers/db.customIndex.helpers";
+import {SuspenseContainer} from "@/components/SuspenseContainer";
 
 export default async function IndexPage(props: ServerPageProps<IndexId | string>) {
+    return (
+        <SuspenseContainer>
+            <SuspendedComponent {...props} />
+        </SuspenseContainer>
+    );
+}
+
+const SuspendedComponent = async (props: ServerPageProps<IndexId | string>) => {
     const params = await props.params;
     const assets = await getCachedTopAssets();
     const customIndex = await handleQueryCustomIndexById(params.id);
@@ -46,4 +55,4 @@ export default async function IndexPage(props: ServerPageProps<IndexId | string>
             <IndexAssetsTable index={index} />
         </div>
     );
-}
+};
