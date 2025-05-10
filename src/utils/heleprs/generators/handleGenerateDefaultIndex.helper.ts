@@ -13,7 +13,7 @@ import {getIndexAssetsWithPortionsByRankAndMaxDrawDown} from "@/utils/heleprs/ge
 import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
 import {getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown.helper";
 
-export function handleGenerateDefaultIndex(props: {
+export function handleGetCustomIndexAssets(props: {
     assets: AssetWithHistory[];
     upToNumber: number;
     defaultIndexBy?: DefaultIndexBy;

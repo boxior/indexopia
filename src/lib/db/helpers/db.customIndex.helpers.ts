@@ -4,7 +4,7 @@ import {CustomIndexAsset, CustomIndexAssetWithCustomIndexId, CustomIndexType} fr
 import {cache} from "react";
 
 const TABLE_NAME_CUSTOM_INDEX = ENV_VARIABLES.MYSQL_TABLE_NAME_CUSTOM_INDEX; // Ensure your database table exists
-const TABLE_NAME_CUSTOM_INDEX_ASSETS = ENV_VARIABLES.TABLE_NAME_CUSTOM_INDEX_ASSETS; // Ensure your database table exists
+const TABLE_NAME_CUSTOM_INDEX_ASSETS = ENV_VARIABLES.MYSQL_TABLE_NAME_CUSTOM_INDEX_ASSETS; // Ensure your database table exists
 
 // Fetch a custom index by ID
 const queryCustomIndexById = cache(async (id: string) => {

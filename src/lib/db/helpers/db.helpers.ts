@@ -5,6 +5,7 @@ import {DbItems} from "@/lib/db/db.types";
 import {
     Asset,
     AssetHistory,
+    AssetIdWithHistoryAndOverview,
     AssetWithHistoryAndOverview,
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
     Index,
@@ -243,7 +244,7 @@ export const getCachedAssets = cache(async (ids: string[]): Promise<Asset[]> => 
 
 export const getIndexHistoryOverview = cache(
     async (
-        index: Omit<Index<AssetWithHistoryAndOverview>, "historyOverview" | "maxDrawDown">
+        index: Pick<Index<Pick<AssetWithHistoryAndOverview, "id" | "portion" | "historyOverview">>, "assets">
     ): Promise<HistoryOverview> => {
         // Read all assets
         const indexAssets = index.assets;
@@ -349,7 +350,7 @@ export const getAssetHistoriesWithSmallestRange = cache(
 
 export const getIndexHistory = cache(
     async (
-        index: Omit<Index<AssetWithHistoryAndOverview>, "historyOverview" | "maxDrawDown">
+        index: Pick<Index<Pick<AssetWithHistoryAndOverview, "portion" | "history">>, "assets">
     ): Promise<IndexHistory[]> => {
         const portions = index.assets.map(asset => asset.portion ?? 0);
 
@@ -547,6 +548,36 @@ async function getAssetsWithHistories({
         assets: assets.map((asset, index) => ({
             ...asset,
             history: histories[asset.id],
+            historyOverview: assetsHistoriesOverviews[index],
+        })),
+        startTime,
+        endTime,
+    };
+}
+
+export async function getAssetsIdsWithHistories({
+    assetIds,
+    startTime: startTimeProp,
+    endTime: endTimeProp,
+}: {
+    assetIds: Asset["id"][];
+    startTime?: number;
+    endTime?: number;
+}): Promise<{assets: AssetIdWithHistoryAndOverview[]; startTime?: number; endTime?: number}> {
+    const {histories, startTime, endTime} = await getAssetHistoriesWithSmallestRange({
+        assetIds,
+        startTime: startTimeProp,
+        endTime: endTimeProp,
+    });
+
+    const assetsHistoriesOverviews: HistoryOverview[] = await Promise.all(
+        assetIds.map(assetId => getAssetHistoryOverview(assetId, histories[assetId]))
+    );
+
+    return {
+        assets: assetIds.map((assetId, index) => ({
+            id: assetId,
+            history: histories[assetId],
             historyOverview: assetsHistoriesOverviews[index],
         })),
         startTime,

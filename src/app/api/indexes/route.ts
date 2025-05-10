@@ -1,9 +1,10 @@
-import {NextResponse, NextRequest} from "next/server";
+import {NextRequest, NextResponse} from "next/server";
 import {ENV_VARIABLES} from "@/env";
-import {
-    handleSaveDefaultCustomIndex,
-    SaveDefaultCustomIndexProps,
-} from "@/utils/heleprs/generators/handleSaveDefaultCustomIndex.helper";
+import {SaveDefaultCustomIndexProps} from "@/utils/heleprs/generators/handleSaveDefaultCustomIndex.helper";
+import {handleCreateIndex} from "@/utils/heleprs/index/index.helpers";
+import {IndexId} from "@/utils/types/general.types";
+import {INDEX_NAME_BY_INDEX_ID} from "@/utils/constants/general.constants";
+import {getCachedTopAssets} from "@/lib/db/helpers/db.helpers";
 
 /**
  * Generate Default Custom Indexes
@@ -27,7 +28,15 @@ export async function POST(req: NextRequest) {
 
         const body = (await req.json()) as SaveDefaultCustomIndexProps;
 
-        await handleSaveDefaultCustomIndex(body);
+        // await handleSaveDefaultCustomIndex(body);
+
+        const assets = await getCachedTopAssets();
+        await handleCreateIndex({
+            id: IndexId.TOP_5,
+            name: INDEX_NAME_BY_INDEX_ID[IndexId.TOP_5],
+            assetIds: assets.slice(0, 5).map(a => a.id),
+            isSystem: true,
+        });
 
         return NextResponse.json(
             {success: true},

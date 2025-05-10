@@ -46,6 +46,11 @@ export type AssetWithHistory = Asset & {history: AssetHistory[]};
 
 export type AssetWithHistoryAndOverview = Asset & {history: AssetHistory[]; historyOverview: HistoryOverview};
 
+export type AssetIdWithHistoryAndOverview = Pick<Asset, "id"> & {
+    history: AssetHistory[];
+    historyOverview: HistoryOverview;
+};
+
 export type AssetWithHistoryOverviewAndPortion = Asset & {
     history: AssetHistory[];
     historyOverview: HistoryOverview;
@@ -112,8 +117,8 @@ export interface CustomIndexType {
 export interface IndexDb {
     id: IndexId | string;
     name: string;
-    historyOverview: string; // HistoryOverview
-    maxDrawDown: string; // MaxDrawDown
+    historyOverview: string; // JSON string of HistoryOverview
+    maxDrawDown: string; // JSON string of MaxDrawDown
     startTime: number;
     endTime: number;
     isSystem: number; // 0 | 1
@@ -123,8 +128,8 @@ export interface IndexAssetDb {
     id: string;
     indexId: string;
     portion: number;
-    historyOverview: HistoryOverview;
-    maxDrawDown: MaxDrawDown;
+    historyOverview: string; // JSON string of HistoryOverview
+    maxDrawDown: string; // JSON string of MaxDrawDown
 }
 
 export interface IndexHistoryDb {

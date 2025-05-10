@@ -1,5 +1,5 @@
 import {handleGetAssetsForIndex} from "@/utils/heleprs/generators/handleGetAssetsForIndex.helper";
-import {handleGenerateDefaultIndex} from "@/utils/heleprs/generators/handleGenerateDefaultIndex.helper";
+import {handleGetCustomIndexAssets} from "@/utils/heleprs/generators/handleGenerateDefaultIndex.helper";
 import {CustomIndexAsset, DefaultIndexBy, DefaultIndexSortBy} from "@/utils/types/general.types";
 import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
 
@@ -25,7 +25,7 @@ export const handleGenerateDefaultIndexFromScratch = async ({
     });
 
     return {
-        assets: handleGenerateDefaultIndex({
+        assets: handleGetCustomIndexAssets({
             assets,
             upToNumber: upToNumber ?? topAssetsCount ?? MAX_ASSET_COUNT,
             defaultIndexBy,
