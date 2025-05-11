@@ -1,14 +1,15 @@
 import {ENV_VARIABLES} from "@/env";
 import {mySqlPool} from "@/lib/db";
 import {CustomIndexAsset, CustomIndexAssetWithCustomIndexId, CustomIndexType} from "@/utils/types/general.types";
-import {cacheTag} from "next/dist/server/use-cache/cache-tag";
+import {revalidateTag, unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
+import {combineTags} from "@/utils/cache/helpers.cache";
 
 const TABLE_NAME_CUSTOM_INDEX = ENV_VARIABLES.MYSQL_TABLE_NAME_CUSTOM_INDEX; // Ensure your database table exists
 const TABLE_NAME_CUSTOM_INDEX_ASSETS = ENV_VARIABLES.TABLE_NAME_CUSTOM_INDEX_ASSETS; // Ensure your database table exists
 
 // Fetch a custom index by ID
-const queryCustomIndexById = async (id: string) => {
+const dbQueryCustomIndexById = async (id: string) => {
     try {
         const query = `
     SELECT 
@@ -31,7 +32,7 @@ const queryCustomIndexById = async (id: string) => {
 };
 
 // Fetch all custom indexes
-export const queryCustomIndexes = async () => {
+export const dbQueryCustomIndexes = async () => {
     try {
         const query = `
     SELECT 
@@ -51,7 +52,7 @@ export const queryCustomIndexes = async () => {
 };
 
 // Fetch assets belonging to a specific custom index
-export const queryAssetsByCustomIndexId = async (customIndexId: string) => {
+export const dbQueryAssetsByCustomIndexId = async (customIndexId: string) => {
     try {
         const query = `
     SELECT 
@@ -70,7 +71,7 @@ export const queryAssetsByCustomIndexId = async (customIndexId: string) => {
 };
 
 // Fetch all assets across all custom indexes
-export const queryCustomIndexAssets = async () => {
+export const dbQueryCustomIndexAssets = async () => {
     try {
         const query = `
     SELECT 
@@ -89,7 +90,7 @@ export const queryCustomIndexAssets = async () => {
 };
 
 // Insert a custom index into the database
-export const insertCustomIndex = async (id: string, name: string, startTime: number | null, isDefault: boolean) => {
+export const dbInsertCustomIndex = async (id: string, name: string, startTime: number | null, isDefault: boolean) => {
     try {
         const query = `
     INSERT INTO ${TABLE_NAME_CUSTOM_INDEX} (id, name, startTime, isDefault)
@@ -112,7 +113,7 @@ export const insertCustomIndex = async (id: string, name: string, startTime: num
 };
 
 // Delete assets associated with a custom index from the database
-export const deleteCustomIndexAssets = async (customIndexId: string) => {
+export const dbDeleteCustomIndexAssets = async (customIndexId: string) => {
     try {
         const query = `
     DELETE FROM ${TABLE_NAME_CUSTOM_INDEX_ASSETS}
@@ -127,7 +128,7 @@ export const deleteCustomIndexAssets = async (customIndexId: string) => {
 };
 
 // Insert assets associated with a custom index into the database
-export const insertCustomIndexAssets = async (customIndexId: string, assets: CustomIndexAsset[]) => {
+export const dbInsertCustomIndexAssets = async (customIndexId: string, assets: CustomIndexAsset[]) => {
     try {
         const query = `
     INSERT INTO ${TABLE_NAME_CUSTOM_INDEX_ASSETS} (customIndexId, id, portion)
@@ -144,16 +145,16 @@ export const insertCustomIndexAssets = async (customIndexId: string, assets: Cus
 };
 
 // Combined helper to create a custom index and its associated assets
-export const handleInsertCustomIndex = async (customIndex: CustomIndexType) => {
+export const dbHandleInsertCustomIndex = async (customIndex: CustomIndexType) => {
     try {
         const {id, name, startTime, isDefault, assets} = customIndex;
         // Insert the custom index and get its ID
-        await insertCustomIndex(id, name, startTime ?? null, !!isDefault);
+        await dbInsertCustomIndex(id, name, startTime ?? null, !!isDefault);
 
-        await deleteCustomIndexAssets(id);
+        await dbDeleteCustomIndexAssets(id);
         // If there are assets, insert them into the assets table
         if (assets.length > 0) {
-            await insertCustomIndexAssets(id, assets);
+            await dbInsertCustomIndexAssets(id, assets);
         }
 
         return id; // Return the ID of the newly created custom index
@@ -164,19 +165,19 @@ export const handleInsertCustomIndex = async (customIndex: CustomIndexType) => {
 };
 
 // Fetch custom index details by ID, including its assets
-export const handleQueryCustomIndexById = async (id: string): Promise<CustomIndexType | null> => {
+export const dbHandleQueryCustomIndexById = async (id: string): Promise<CustomIndexType | null> => {
     "use cache";
-    cacheTag(`${CacheTag.CUSTOM_INDEX}_${id}`);
+    cacheTag(combineTags(CacheTag.CUSTOM_INDEX, id));
 
     try {
         // Query custom index
-        const customIndex = await queryCustomIndexById(id);
+        const customIndex = await dbQueryCustomIndexById(id);
         if (!customIndex) {
             return null; // Return null if the custom index is not found
         }
 
         // Query related assets
-        const assets = await queryAssetsByCustomIndexId(id);
+        const assets = await dbQueryAssetsByCustomIndexId(id);
 
         // Combine custom index and its assets
         return {
@@ -190,13 +191,13 @@ export const handleQueryCustomIndexById = async (id: string): Promise<CustomInde
 };
 
 // Fetch all custom indexes with their respective assets
-export const handleQueryCustomIndexes = async (): Promise<CustomIndexType[]> => {
+export const dbHandleQueryCustomIndexes = async (): Promise<CustomIndexType[]> => {
     try {
         // Query all custom indexes
-        const customIndexes = await queryCustomIndexes();
+        const customIndexes = await dbQueryCustomIndexes();
 
         // Query all assets
-        const allAssets = await queryCustomIndexAssets();
+        const allAssets = await dbQueryCustomIndexAssets();
 
         // Group assets by custom index ID
         const assetsByCustomIndexId = allAssets.reduce(
@@ -220,6 +221,49 @@ export const handleQueryCustomIndexes = async (): Promise<CustomIndexType[]> => 
         }));
     } catch (error) {
         console.error("Error fetching custom indexes:", error);
+        throw error;
+    }
+};
+
+// Deletes a custom index and its related assets
+export const dbDeleteCustomIndex = async (customIndexId: string): Promise<void> => {
+    try {
+        // Start a transaction to ensure both delete operations are atomic
+        const connection = await mySqlPool.getConnection();
+
+        try {
+            await connection.beginTransaction();
+
+            // Delete assets associated with the custom index
+            const deleteAssetsQuery = `
+        DELETE FROM ${TABLE_NAME_CUSTOM_INDEX_ASSETS}
+        WHERE customIndexId = ?;
+      `;
+            await connection.execute(deleteAssetsQuery, [customIndexId]);
+
+            // Delete the custom index itself
+            const deleteCustomIndexQuery = `
+        DELETE FROM ${TABLE_NAME_CUSTOM_INDEX}
+        WHERE id = ?;
+      `;
+            await connection.execute(deleteCustomIndexQuery, [customIndexId]);
+
+            // Commit the transaction
+            await connection.commit();
+        } catch (error) {
+            // Rollback the transaction on error
+            await connection.rollback();
+            console.error("Error during deleteCustomIndex transaction:", error);
+            throw error;
+        } finally {
+            // Release the connection
+            connection.release();
+        }
+
+        revalidateTag(CacheTag.CUSTOM_INDEXES);
+        revalidateTag(combineTags(CacheTag.CUSTOM_INDEX, customIndexId));
+    } catch (error) {
+        console.error("Error deleting custom index and its related assets:", error);
         throw error;
     }
 };

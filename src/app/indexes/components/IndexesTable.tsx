@@ -32,6 +32,7 @@ import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
 import Link from "next/link";
 import {CustomIndex} from "@/app/indexes/components/CustomIndex/CustomIndex";
+import {dbDeleteCustomIndex} from "@/lib/db/helpers/db.customIndex.helpers";
 
 export default function IndexesTable({
     data,
@@ -67,6 +68,14 @@ export default function IndexesTable({
                 </Button>
             );
         };
+
+    const handleDeleteIndex = (index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>) => () => {
+        console.log("handleDeleteIndex", index);
+        if (index.isDefault) {
+            return;
+        }
+        // dbDeleteCustomIndex(id).then(); // need tls
+    };
 
     const columns: ColumnDef<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>>[] = [
         {
@@ -205,6 +214,26 @@ export default function IndexesTable({
             },
             meta: {
                 text: "Duration",
+            },
+        },
+        {
+            accessorKey: "id",
+            header: "Delete",
+            cell: ({row}) => {
+                const index = row.original as unknown as Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
+
+                if (index.isDefault) {
+                    return null;
+                }
+
+                return (
+                    <button type={"button"} className="lowercase" onClick={handleDeleteIndex(index)}>
+                        Delete
+                    </button>
+                );
+            },
+            meta: {
+                text: "Delete",
             },
         },
     ];

@@ -99,6 +99,7 @@ export interface Index<A = Asset> {
     maxDrawDown: MaxDrawDown;
     startTime?: number;
     endTime?: number;
+    isDefault?: boolean; // means system one.
 }
 
 export interface CustomIndexType {

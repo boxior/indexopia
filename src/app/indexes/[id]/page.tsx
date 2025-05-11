@@ -7,7 +7,7 @@ import {IndexOverview} from "@/app/indexes/[id]/components/IndexOverview";
 import {getIsTopIndex} from "@/app/indexes/helpers";
 import * as React from "react";
 import {CustomIndex} from "@/app/indexes/components/CustomIndex/CustomIndex";
-import {handleQueryCustomIndexById} from "@/lib/db/helpers/db.customIndex.helpers";
+import {dbHandleQueryCustomIndexById} from "@/lib/db/helpers/db.customIndex.helpers";
 import {SuspenseContainer} from "@/components/SuspenseContainer";
 
 export default async function IndexPage(props: ServerPageProps<IndexId | string>) {
@@ -21,7 +21,7 @@ export default async function IndexPage(props: ServerPageProps<IndexId | string>
 const SuspendedComponent = async (props: ServerPageProps<IndexId | string>) => {
     const params = await props.params;
     const assets = await getCachedTopAssets();
-    const customIndex = await handleQueryCustomIndexById(params.id);
+    const customIndex = await dbHandleQueryCustomIndexById(params.id);
     const doEdit = customIndex && !customIndex?.isDefault;
     const index = await (async () => {
         switch (true) {
