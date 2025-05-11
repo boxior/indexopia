@@ -20,13 +20,13 @@ import {
     MAX_ASSET_COUNT,
     OMIT_ASSETS_IDS,
 } from "@/utils/constants/general.constants";
-import {pick} from "lodash";
+import {cloneDeep, get, pick, set} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
 import {dbInsertAssets, dbQueryAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {dbInsertAssetHistory, dbQueryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
 import {dbHandleQueryCustomIndexById, dbHandleQueryCustomIndexes} from "@/lib/db/helpers/db.customIndex.helpers";
-import {revalidateTag, unstable_cacheTag as cacheTag} from "next/cache";
+import {unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineTags} from "@/utils/cache/helpers.cache";
 
@@ -564,3 +564,15 @@ function filterAssetsByOmitIds(assets: Asset[], limit: number): Asset[] {
         .filter(a => !OMIT_ASSETS_IDS.includes(a.id))
         .slice(0, limit);
 }
+
+export const normalizeDbBoolean = <Input extends Record<string, unknown>, Output>(
+    entity: Input,
+    keys: string[]
+): Output => {
+    const clonedEntity = cloneDeep(entity);
+
+    for (const key of keys) {
+        set(clonedEntity, key, Boolean(get(clonedEntity, key)));
+    }
+    return clonedEntity as unknown as Output;
+};

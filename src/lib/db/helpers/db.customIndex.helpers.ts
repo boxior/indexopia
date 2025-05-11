@@ -1,15 +1,21 @@
 import {ENV_VARIABLES} from "@/env";
 import {mySqlPool} from "@/lib/db";
-import {CustomIndexAsset, CustomIndexAssetWithCustomIndexId, CustomIndexType} from "@/utils/types/general.types";
+import {
+    CustomIndexAsset,
+    CustomIndexAssetWithCustomIndexId,
+    CustomIndexType,
+    CustomIndexTypeDb,
+} from "@/utils/types/general.types";
 import {revalidateTag, unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineTags} from "@/utils/cache/helpers.cache";
+import {normalizeDbBoolean} from "@/lib/db/helpers/db.helpers";
 
 const TABLE_NAME_CUSTOM_INDEX = ENV_VARIABLES.MYSQL_TABLE_NAME_CUSTOM_INDEX; // Ensure your database table exists
 const TABLE_NAME_CUSTOM_INDEX_ASSETS = ENV_VARIABLES.TABLE_NAME_CUSTOM_INDEX_ASSETS; // Ensure your database table exists
 
 // Fetch a custom index by ID
-const dbQueryCustomIndexById = async (id: string) => {
+const dbQueryCustomIndexById = async (id: string): Promise<Omit<CustomIndexType, "assets"> | null> => {
     try {
         const query = `
     SELECT 
@@ -22,9 +28,11 @@ const dbQueryCustomIndexById = async (id: string) => {
   `;
 
         const [rows] = await mySqlPool.execute(query, [id]);
-        const customIndexes = rows as Omit<CustomIndexType, "assets">[];
+        const customIndexes = rows as CustomIndexTypeDb[];
 
-        return customIndexes.length ? customIndexes[0] : null; // Return the first result or null if not found
+        return customIndexes.length
+            ? normalizeDbBoolean<CustomIndexTypeDb, Omit<CustomIndexType, "assets">>(customIndexes[0], ["isDefault"])
+            : null; // Return the first result or null if not found
     } catch (error) {
         console.error("Error fetching custom index by ID:", error);
         throw error;
@@ -32,7 +40,7 @@ const dbQueryCustomIndexById = async (id: string) => {
 };
 
 // Fetch all custom indexes
-export const dbQueryCustomIndexes = async () => {
+export const dbQueryCustomIndexes = async (): Promise<Omit<CustomIndexType, "assets">[]> => {
     try {
         const query = `
     SELECT 
@@ -44,7 +52,10 @@ export const dbQueryCustomIndexes = async () => {
   `;
 
         const [rows] = await mySqlPool.execute(query);
-        return rows as Omit<CustomIndexType, "assets">[]; // Return the list of indexes
+        return (rows as CustomIndexTypeDb[]).map(row => normalizeDbBoolean(row, ["isDefault"])) as Omit<
+            CustomIndexType,
+            "assets"
+        >[]; // Return the list of indexes
     } catch (error) {
         console.error("Error fetching custom indexes:", error);
         throw error;
@@ -172,6 +183,7 @@ export const dbHandleQueryCustomIndexById = async (id: string): Promise<CustomIn
     try {
         // Query custom index
         const customIndex = await dbQueryCustomIndexById(id);
+        console.log("customIndex", customIndex);
         if (!customIndex) {
             return null; // Return null if the custom index is not found
         }
@@ -259,7 +271,7 @@ export const dbDeleteCustomIndex = async (customIndexId: string): Promise<void> 
             // Release the connection
             connection.release();
         }
-
+        console.log("revalidateTag");
         revalidateTag(CacheTag.CUSTOM_INDEXES);
         revalidateTag(combineTags(CacheTag.CUSTOM_INDEX, customIndexId));
     } catch (error) {

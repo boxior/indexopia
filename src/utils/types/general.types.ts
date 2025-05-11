@@ -110,6 +110,8 @@ export interface CustomIndexType {
     isDefault?: boolean;
 }
 
+export type CustomIndexTypeDb = Omit<CustomIndexType, "isDefault" | "assets"> & {isDefault: number | null};
+
 /**
  * @link https://momentjscom.readthedocs.io/en/latest/moment/04-displaying/01-format/
  */

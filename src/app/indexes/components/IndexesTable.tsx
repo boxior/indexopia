@@ -27,12 +27,12 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import {Asset, AssetWithHistoryOverviewPortionAndMaxDrawDown, Index, MaxDrawDown} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
-import {ReactNode} from "react";
+import {ReactNode, useEffect} from "react";
 import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
 import Link from "next/link";
 import {CustomIndex} from "@/app/indexes/components/CustomIndex/CustomIndex";
-import {dbDeleteCustomIndex} from "@/lib/db/helpers/db.customIndex.helpers";
+import {clientApiDeleteCustomIndex} from "@/utils/clientApi/customIndex.clientApi";
 
 export default function IndexesTable({
     data,
@@ -45,6 +45,12 @@ export default function IndexesTable({
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
+
+    const [localData, setLocalData] = React.useState<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>[]>(data);
+
+    useEffect(() => {
+        setLocalData(data);
+    }, [JSON.stringify(data)]);
 
     const renderColumnSortedHeader =
         (header: ReactNode): ColumnDef<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>>["header"] =>
@@ -69,12 +75,12 @@ export default function IndexesTable({
             );
         };
 
-    const handleDeleteIndex = (index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>) => () => {
-        console.log("handleDeleteIndex", index);
+    const handleDeleteIndex = (index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>) => async () => {
         if (index.isDefault) {
             return;
         }
-        // dbDeleteCustomIndex(id).then(); // need tls
+        await clientApiDeleteCustomIndex(index.id); // need tls
+        setLocalData(localData.filter(i => i.id !== index.id));
     };
 
     const columns: ColumnDef<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>>[] = [
@@ -239,7 +245,7 @@ export default function IndexesTable({
     ];
 
     const table = useReactTable({
-        data,
+        data: localData,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
