@@ -23,7 +23,6 @@ const SuspendedComponent = async (props: ServerPageProps<IndexId | string>) => {
     const assets = await getCachedTopAssets();
     const customIndex = await handleQueryCustomIndexById(params.id);
     const doEdit = customIndex && !customIndex?.isDefault;
-
     const index = await (async () => {
         switch (true) {
             case getIsTopIndex(params.id):

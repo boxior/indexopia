@@ -26,6 +26,8 @@ import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/s
 import {insertAssets, queryAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {insertAssetHistory, queryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
 import {handleQueryCustomIndexById, handleQueryCustomIndexes} from "@/lib/db/helpers/db.customIndex.helpers";
+import {unstable_cacheTag as cacheTag} from "next/cache";
+import {CacheTag} from "@/utils/cache/constants.cache";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
@@ -233,6 +235,7 @@ export const getAssetHistoryOverview = async (
 
 export const getCachedTopAssets = async (limit: number | undefined = MAX_ASSET_COUNT): Promise<Asset[]> => {
     "use cache";
+    cacheTag(CacheTag.TOP_ASSETS);
     const assets = await queryAssets();
     return filterAssetsByOmitIds(assets ?? [], limit);
 };
@@ -419,6 +422,7 @@ export const getIndex = async ({
     endTime?: number;
 }): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>> => {
     "use cache";
+    cacheTag(`${CacheTag.INDEX}_${id}`);
     let assets = await getCachedTopAssets(ASSET_COUNT_BY_INDEX_ID[id]);
 
     const {
@@ -466,6 +470,8 @@ export const getCustomIndex = async ({
 }: {
     id: string;
 }): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null> => {
+    "use cache";
+    cacheTag(`${CacheTag.INDEX}_${id}`);
     const customIndex = await handleQueryCustomIndexById(id);
 
     if (!customIndex) {
@@ -514,6 +520,7 @@ export const getCustomIndex = async ({
 
 export async function getCustomIndexes(): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>[]> {
     "use cache";
+    cacheTag(CacheTag.CUSTOM_INDEXES);
     const cachedCustomIndexes = await handleQueryCustomIndexes();
 
     const customIndexes = await Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id})));

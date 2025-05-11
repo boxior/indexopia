@@ -25,6 +25,7 @@ const SuspendedComponent = async () => {
     // console.time("assets");
 
     const assets = await getCachedTopAssets();
+
     // console.timeEnd("assets");
 
     return <IndexesTable data={[...topIndexes, ...customIndexes]} assets={assets} />;

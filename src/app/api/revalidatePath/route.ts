@@ -1,6 +1,7 @@
 import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 import {revalidatePath} from "next/cache";
+export const dynamic = "force-dynamic";
 
 /**
  * Generate Default Custom Indexes
@@ -23,7 +24,6 @@ export async function POST(req: NextRequest) {
         }
 
         const {path} = (await req.json()) as {path: string};
-        console.log("revalidatePath all", path);
         // Assets
         revalidatePath(path);
 
