@@ -22,12 +22,13 @@ export function CustomIndex({assets, customIndex}: {assets: Asset[]; customIndex
         setOpen(false);
     };
 
+    const doDelete = customIndex?.id && !customIndex?.isDefault;
+
     const handleDelete = async () => {
-        console.log("customIndex", customIndex);
-        if (!customIndex?.id || customIndex?.isDefault) {
+        if (doDelete) {
             return;
         }
-        await clientApiDeleteCustomIndex(customIndex.id); // need tls
+        await clientApiDeleteCustomIndex(customIndex?.id ?? ""); // need tls
         redirect("/indexes");
     };
 
@@ -36,9 +37,11 @@ export function CustomIndex({assets, customIndex}: {assets: Asset[]; customIndex
             <Button variant="outline" onClick={openDialog}>
                 {`${customIndex ? "Edit" : "Create"} Custom Index ${customIndex ? `(${customIndex.name})` : ""}`}
             </Button>
-            <Button variant="outline" type={"button"} onClick={handleDelete}>
-                Delete
-            </Button>
+            {doDelete && (
+                <Button variant="outline" type={"button"} onClick={handleDelete}>
+                    Delete
+                </Button>
+            )}
             {open && <CustomIndexDialog assets={assets} closeDialog={closeDialog} customIndex={customIndex} />}
         </Dialog>
     );

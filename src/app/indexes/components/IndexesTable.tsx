@@ -223,8 +223,7 @@ export default function IndexesTable({
             },
         },
         {
-            accessorKey: "id",
-            header: "Delete",
+            header: "Actions",
             cell: ({row}) => {
                 const index = row.original as unknown as Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
 
@@ -239,7 +238,7 @@ export default function IndexesTable({
                 );
             },
             meta: {
-                text: "Delete",
+                text: "Actions",
             },
         },
     ];
