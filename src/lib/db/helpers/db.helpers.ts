@@ -29,6 +29,7 @@ import {dbHandleQueryCustomIndexById, dbHandleQueryCustomIndexes} from "@/lib/db
 import {unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineTags} from "@/utils/cache/helpers.cache";
+import {generateUuid} from "@/utils/heleprs/generateUuid.helper";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
@@ -305,10 +306,25 @@ export const getAssetHistoriesWithSmallestRange = async ({
     let minStartTime: number | null = startTime ?? null;
     let maxEndTime: number | null = endTime ?? null;
 
+    const historyDatas = await Promise.all(
+        assetIds.map(assetId => {
+            return (async () => {
+                try {
+                    return dbQueryAssetHistoryById(assetId);
+                } catch {
+                    return [];
+                }
+            })();
+        })
+    );
+
     // Step 1: Read the history for each asset and determine the smallest start time
-    for (const assetId of assetIds) {
+
+    for (const [index, assetId] of assetIds.entries()) {
         try {
-            const historyData = await dbQueryAssetHistoryById(assetId);
+            console.time(`dbQueryAssetHistoryById_${assetId}`);
+            const historyData = historyDatas[index] ?? [];
+            console.timeEnd(`dbQueryAssetHistoryById_${assetId}`);
 
             const historyList = historyData ?? [];
 
@@ -353,11 +369,12 @@ export const getIndexHistory = async (
 
     return mergeAssetHistories(
         index.assets.map(a => a.history),
-        portions
+        portions,
+        index
     );
 };
 
-function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): IndexHistory[] {
+function mergeAssetHistories(histories: AssetHistory[][], portions: number[], index: Partial<Index>): IndexHistory[] {
     if (histories.length === 0 || histories[0].length === 0) {
         return [];
     }
@@ -369,7 +386,7 @@ function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): I
     // Ensure all portions sum to 100%
     const portionSum = portions.reduce((sum, portion) => sum + portion, 0);
     if (Math.abs(portionSum - 100) > 1e-8) {
-        console.error("Portions must sum up to 100%");
+        console.error("Portions must sum up to 100%", index.id, index.name);
 
         return [];
     }
@@ -472,6 +489,7 @@ export const getCustomIndex = async ({
 }): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null> => {
     "use cache";
     cacheTag(combineTags(CacheTag.INDEX, id));
+
     const customIndex = await dbHandleQueryCustomIndexById(id);
 
     if (!customIndex) {
@@ -480,6 +498,7 @@ export const getCustomIndex = async ({
 
     let assets = await getCachedAssets(customIndex.assets.map(asset => asset.id));
 
+    console.time(`getAssetsWithHistories_${id}`);
     const {
         assets: assetsWithHistories,
         startTime,
@@ -488,6 +507,7 @@ export const getCustomIndex = async ({
         assets,
         ...pick(customIndex, ["startTime"]),
     });
+    console.timeEnd(`getAssetsWithHistories_${id}`);
 
     assets = assetsWithHistories;
 
@@ -521,9 +541,14 @@ export const getCustomIndex = async ({
 export async function getCustomIndexes(): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>[]> {
     "use cache";
     cacheTag(CacheTag.CUSTOM_INDEXES);
-    const cachedCustomIndexes = await dbHandleQueryCustomIndexes();
 
+    console.time("dbHandleQueryCustomIndexes");
+    const cachedCustomIndexes = await dbHandleQueryCustomIndexes();
+    console.timeEnd("dbHandleQueryCustomIndexes");
+
+    console.time("all getCustomIndex");
     const customIndexes = await Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id})));
+    console.timeEnd("all getCustomIndex");
 
     return customIndexes.filter(ci => ci !== null);
 }
@@ -537,11 +562,14 @@ async function getAssetsWithHistories({
     startTime?: number;
     endTime?: number;
 }): Promise<{assets: AssetWithHistoryAndOverview[]; startTime?: number; endTime?: number}> {
+    const uuid = generateUuid();
+    console.time(`getAssetHistoriesWithSmallestRange_${assets.length}_${uuid}`);
     const {histories, startTime, endTime} = await getAssetHistoriesWithSmallestRange({
         assetIds: assets.map(asset => asset.id),
         startTime: startTimeProp,
         endTime: endTimeProp,
     });
+    console.timeEnd(`getAssetHistoriesWithSmallestRange_${assets.length}_${uuid}`);
 
     const assetsHistoriesOverviews: HistoryOverview[] = await Promise.all(
         assets.map(asset => getAssetHistoryOverview(asset.id, histories[asset.id]))
