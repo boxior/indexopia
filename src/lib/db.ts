@@ -9,7 +9,7 @@ export const mySqlPool = mysql.createPool({
     database: ENV_VARIABLES.MYSQL_DATABASE, // Replace with your MySQL database name
     waitForConnections: true,
     connectionLimit: 50,
-    maxIdle: 0,
-    idleTimeout: 0,
-    queueLimit: 0,
+    maxIdle: 1,
+    idleTimeout: 1,
+    queueLimit: 1,
 });
