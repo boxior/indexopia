@@ -9,23 +9,20 @@ import {
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
     Index,
     IndexHistory,
-    IndexId,
     NormalizedAssetHistory,
     NormalizedAssets,
 } from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
-import {
-    ASSET_COUNT_BY_INDEX_ID,
-    INDEX_NAME_BY_INDEX_ID,
-    MAX_ASSET_COUNT,
-    OMIT_ASSETS_IDS,
-} from "@/utils/constants/general.constants";
-import {pick} from "lodash";
+import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
+import {cloneDeep, get, pick, set} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
-import {insertAssets, queryAssets} from "@/lib/db/helpers/db.assets.helpers";
-import {insertAssetHistory, queryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
-import {handleQueryCustomIndexById, handleQueryCustomIndexes} from "@/lib/db/helpers/db.customIndex.helpers";
+import {dbInsertAssets, dbQueryAssets} from "@/lib/db/helpers/db.assets.helpers";
+import {dbInsertAssetHistory, dbQueryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
+import {dbHandleQueryCustomIndexById, dbHandleQueryCustomIndexes} from "@/lib/db/helpers/db.customIndex.helpers";
+import {unstable_cacheTag as cacheTag} from "next/cache";
+import {CacheTag} from "@/utils/cache/constants.cache";
+import {combineTags} from "@/utils/cache/helpers.cache";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
@@ -43,9 +40,8 @@ export const migrateAssetsHistoriesFromJsonToDb = async () => {
                 ASSETS_HISTORY_FOLDER_PATH
             )) as DbItems<Omit<AssetHistory, "assetId">>;
             const normalizedAssetHistory = assetHistory.data.map(history => ({assetId: asset.id, ...history}));
-            console.time("insertAssetHistory_" + asset.id);
-            await insertAssetHistory(normalizedAssetHistory);
-            console.timeEnd("insertAssetHistory_" + asset.id);
+
+            await dbInsertAssetHistory(normalizedAssetHistory);
         } catch (err) {
             console.error(err);
             await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
@@ -56,12 +52,12 @@ export const migrateAssetsHistoriesFromJsonToDb = async () => {
 export const manageAssets = async ({limit}: {limit?: number}) => {
     const {data, timestamp} = await fetchAssets({limit});
 
-    await insertAssets(data);
+    await dbInsertAssets(data);
     await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, data, ASSETS_FOLDER_PATH);
 };
 
 export const manageAssetHistory = async ({id}: {id: string}) => {
-    const oldList = await queryAssetHistoryById(id);
+    const oldList = await dbQueryAssetHistoryById(id);
 
     let start = momentTimeZone.tz("UTC").startOf("day").add(-11, "year").add(1, "day").valueOf();
 
@@ -92,7 +88,7 @@ export const manageAssetHistory = async ({id}: {id: string}) => {
         return;
     }
     await writeJsonFile(`history_${id}`, newList, "/db/debug");
-    await insertAssetHistory(newList);
+    await dbInsertAssetHistory(newList);
 };
 
 const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
@@ -143,7 +139,7 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const manageAssetsHistory = async (upToRank: number | undefined = MAX_ASSET_COUNT) => {
-    const assets = await queryAssets();
+    const assets = await dbQueryAssets();
     const assetsList = filterAssetsByOmitIds(assets, upToRank);
 
     for (const asset of assetsList) {
@@ -198,16 +194,21 @@ export type HistoryOverview = {
     days7: number;
     total: number;
 };
+/**
+ * Taking the last day from existed item, not the current last day as sometimes, it might be lack of data due to populating progress that we make regularly once per day.
+ * Look at /populate API request where we fetch up-to-date top assets and their histories and all other assets that were fetched before as top ones.
+ */
 export const getAssetHistoryOverview = async (
     id: string,
     historyListProp?: AssetHistory[]
 ): Promise<HistoryOverview> => {
-    const history = historyListProp ?? (await queryAssetHistoryById(id));
+    const history = historyListProp ?? (await dbQueryAssetHistoryById(id));
 
     const historyList = history ?? [];
 
-    const lastDay = momentTimeZone.tz("UTC").startOf("day").add(-1, "day").valueOf();
-    const lastDayItem = historyList.find(item => item.time === lastDay);
+    const lastDayItem = historyList[historyList.length - 1];
+
+    const lastDay = lastDayItem?.time;
     const oneDayAgo = historyList.find(
         item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-1, "day").valueOf()
     );
@@ -232,12 +233,12 @@ export const getAssetHistoryOverview = async (
 };
 
 export const getCachedTopAssets = async (limit: number | undefined = MAX_ASSET_COUNT): Promise<Asset[]> => {
-    const assets = await queryAssets();
+    const assets = await dbQueryAssets();
     return filterAssetsByOmitIds(assets ?? [], limit);
 };
 
 export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
-    const assets = await queryAssets();
+    const assets = await dbQueryAssets();
     return (assets ?? []).filter(asset => ids.includes(asset.id));
 };
 
@@ -302,10 +303,23 @@ export const getAssetHistoriesWithSmallestRange = async ({
     let minStartTime: number | null = startTime ?? null;
     let maxEndTime: number | null = endTime ?? null;
 
+    const historyDatas = await Promise.all(
+        assetIds.map(assetId => {
+            return (async () => {
+                try {
+                    return dbQueryAssetHistoryById(assetId);
+                } catch {
+                    return [];
+                }
+            })();
+        })
+    );
+
     // Step 1: Read the history for each asset and determine the smallest start time
-    for (const assetId of assetIds) {
+
+    for (const [index, assetId] of assetIds.entries()) {
         try {
-            const historyData = await queryAssetHistoryById(assetId);
+            const historyData = historyDatas[index] ?? [];
 
             const historyList = historyData ?? [];
 
@@ -350,11 +364,12 @@ export const getIndexHistory = async (
 
     return mergeAssetHistories(
         index.assets.map(a => a.history),
-        portions
+        portions,
+        index
     );
 };
 
-function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): IndexHistory[] {
+function mergeAssetHistories(histories: AssetHistory[][], portions: number[], index: Partial<Index>): IndexHistory[] {
     if (histories.length === 0 || histories[0].length === 0) {
         return [];
     }
@@ -366,7 +381,7 @@ function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): I
     // Ensure all portions sum to 100%
     const portionSum = portions.reduce((sum, portion) => sum + portion, 0);
     if (Math.abs(portionSum - 100) > 1e-8) {
-        console.error("Portions must sum up to 100%");
+        console.error("Portions must sum up to 100%", index.id, index.name);
 
         return [];
     }
@@ -408,63 +423,15 @@ function mergeAssetHistories(histories: AssetHistory[][], portions: number[]): I
     return merged;
 }
 
-export async function getIndex({
-    id,
-    startTime: startTimeProp,
-    endTime: endTimeProp,
-}: {
-    id: IndexId;
-    startTime?: number;
-    endTime?: number;
-}): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>> {
-    let assets = await getCachedTopAssets(ASSET_COUNT_BY_INDEX_ID[id]);
-
-    const {
-        assets: assetsWithHistories,
-        startTime,
-        endTime,
-    } = await getAssetsWithHistories({
-        assets,
-        startTime: startTimeProp,
-        endTime: endTimeProp,
-    });
-
-    assets = assetsWithHistories;
-
-    assets = assets.map(asset => ({
-        ...asset,
-        portion: Math.trunc(100 / ASSET_COUNT_BY_INDEX_ID[id]),
-        maxDrawDown: getMaxDrawDownWithTimeRange(asset.history),
-    }));
-
-    const index: Omit<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>, "historyOverview" | "maxDrawDown"> = {
-        id,
-        name: INDEX_NAME_BY_INDEX_ID[id],
-        assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
-        history: [],
-    };
-
-    const indexHistory = await getIndexHistory(index);
-    const indexHistoryOverview = await getIndexHistoryOverview(index);
-    const indexMaxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
-
-    return {
-        ...index,
-        assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
-        startTime,
-        endTime,
-        history: indexHistory,
-        historyOverview: indexHistoryOverview,
-        maxDrawDown: indexMaxDrawDown,
-    };
-}
-
-export async function getCustomIndex({
+export const getCustomIndex = async ({
     id,
 }: {
     id: string;
-}): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null> {
-    const customIndex = await handleQueryCustomIndexById(id);
+}): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null> => {
+    "use cache";
+    cacheTag(combineTags(CacheTag.INDEX, id));
+
+    const customIndex = await dbHandleQueryCustomIndexById(id);
 
     if (!customIndex) {
         return null;
@@ -490,7 +457,7 @@ export async function getCustomIndex({
     }));
 
     const index: Omit<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>, "historyOverview" | "maxDrawDown"> = {
-        ...pick(customIndex, ["id", "name", "startTime"]),
+        ...pick(customIndex, ["id", "name", "startTime", "isDefault"]),
         assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
         history: [],
     };
@@ -508,10 +475,13 @@ export async function getCustomIndex({
         historyOverview: indexHistoryOverview,
         maxDrawDown: indexMaxDrawDown,
     };
-}
+};
 
 export async function getCustomIndexes(): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>[]> {
-    const cachedCustomIndexes = await handleQueryCustomIndexes();
+    "use cache";
+    cacheTag(CacheTag.CUSTOM_INDEXES);
+
+    const cachedCustomIndexes = await dbHandleQueryCustomIndexes();
 
     const customIndexes = await Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id})));
 
@@ -554,3 +524,15 @@ function filterAssetsByOmitIds(assets: Asset[], limit: number): Asset[] {
         .filter(a => !OMIT_ASSETS_IDS.includes(a.id))
         .slice(0, limit);
 }
+
+export const normalizeDbBoolean = <Input extends Record<string, unknown>, Output>(
+    entity: Input,
+    keys: string[]
+): Output => {
+    const clonedEntity = cloneDeep(entity);
+
+    for (const key of keys) {
+        set(clonedEntity, key, Boolean(get(clonedEntity, key)));
+    }
+    return clonedEntity as unknown as Output;
+};

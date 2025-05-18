@@ -1,19 +1,37 @@
 "use server";
 
 import IndexesTable from "@/app/indexes/components/IndexesTable";
-import {getCachedTopAssets, getCustomIndexes, getIndex} from "@/lib/db/helpers/db.helpers";
-import {IndexId} from "@/utils/types/general.types";
+import {getCachedTopAssets, getCustomIndexes} from "@/lib/db/helpers/db.helpers";
 import * as React from "react";
-import {Suspense} from "react";
+import {SuspenseContainer} from "@/components/SuspenseContainer";
+import {dbQueryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
 
 export default async function IndexesPage() {
-    const topIndexes = await Promise.all(Object.values(IndexId).map(id => getIndex({id})));
-    const customIndexes = await getCustomIndexes();
-    const assets = await getCachedTopAssets();
-
     return (
-        <Suspense fallback={<div>Loading...</div>}>
-            <IndexesTable data={[...topIndexes, ...customIndexes]} assets={assets} />
-        </Suspense>
+        <SuspenseContainer>
+            <SuspendedComponent />
+        </SuspenseContainer>
     );
 }
+
+const SuspendedComponent = async () => {
+    const assets = await getCachedTopAssets();
+
+    // precache all histories, so that in the nested helpers it will be taken from cache as we use `use cache` directive.
+    // Later, in any queries it will be taken from cache.
+    await Promise.all(
+        assets.map(({id: assetId}) => {
+            return (async () => {
+                try {
+                    return dbQueryAssetHistoryById(assetId);
+                } catch {
+                    return [];
+                }
+            })();
+        })
+    );
+
+    const customIndexes = await getCustomIndexes();
+
+    return <IndexesTable data={[...[], ...customIndexes]} assets={assets} />;
+};

@@ -2,10 +2,12 @@
 import {Asset} from "@/utils/types/general.types";
 import {ENV_VARIABLES} from "@/env";
 import {mySqlPool} from "@/lib/db";
+import {revalidateTag, unstable_cacheTag as cacheTag} from "next/cache";
+import {CacheTag} from "@/utils/cache/constants.cache";
 
 const TABLE_NAME_ASSETS = ENV_VARIABLES.MYSQL_TABLE_NAME_ASSETS; // Ensure this table exists in your database
 // Helper function: Insert data into the database
-export const insertAssets = async (data: Asset[]) => {
+export const dbInsertAssets = async (data: Asset[]) => {
     try {
         const sql = `
       INSERT INTO ${TABLE_NAME_ASSETS} (id, rank, symbol, name, supply, maxSupply, 
@@ -38,14 +40,19 @@ export const insertAssets = async (data: Asset[]) => {
         );
 
         await Promise.all(promises);
+        revalidateTag(CacheTag.ASSETS);
         console.log("Data inserted/updated successfully!");
     } catch (error) {
         console.error("Error inserting data:", error);
         throw error;
     }
 };
+
 // Helper function: Fetch all data from the database
-export const queryAssets = async (): Promise<Asset[]> => {
+export const dbQueryAssets = async (): Promise<Asset[]> => {
+    "use cache";
+    cacheTag(CacheTag.ASSETS);
+
     try {
         const [rows] = await mySqlPool.query(`SELECT * FROM ${TABLE_NAME_ASSETS}`);
         return rows as Asset[];
@@ -55,7 +62,7 @@ export const queryAssets = async (): Promise<Asset[]> => {
     }
 };
 // Helper function: Fetch data by ID
-export const queryAssetById = async (id: string) => {
+export const dbQueryAssetById = async (id: string) => {
     try {
         const [rows] = (await mySqlPool.query(`SELECT * FROM ${TABLE_NAME_ASSETS} WHERE id = ?`, [id])) as unknown as [
             Asset[],
@@ -67,7 +74,7 @@ export const queryAssetById = async (id: string) => {
     }
 };
 // Helper function: Fetch data by multiple IDs
-export const queryAssetsByIds = async (ids: string[]) => {
+export const dbQueryAssetsByIds = async (ids: string[]) => {
     try {
         if (ids.length === 0) return [];
         const placeholders = ids.map(() => "?").join(", "); // Generate placeholders (?, ?, ?)
@@ -80,7 +87,7 @@ export const queryAssetsByIds = async (ids: string[]) => {
     }
 };
 // Helper function: Fetch data up to a specific rank
-export const queryAssetsByRank = async (upToRank: number) => {
+export const dbQueryAssetsByRank = async (upToRank: number) => {
     try {
         const sql = `SELECT * FROM ${TABLE_NAME_ASSETS} WHERE CAST(rank AS UNSIGNED)
  <= ?`;

@@ -83,15 +83,8 @@ export type NormalizedAssets = Record<Asset["id"], Asset>;
 
 export type NormalizedAssetHistory = Record<Asset["id"], AssetHistory[]>;
 
-export enum IndexId {
-    TOP_5 = "top5",
-    TOP_10 = "top10",
-    TOP_25 = "top25",
-    TOP_50 = "top50",
-}
-
 export interface Index<A = Asset> {
-    id: IndexId | string;
+    id: string;
     name: string;
     assets: A[];
     historyOverview: HistoryOverview;
@@ -99,6 +92,7 @@ export interface Index<A = Asset> {
     maxDrawDown: MaxDrawDown;
     startTime?: number;
     endTime?: number;
+    isDefault?: boolean; // means system one.
 }
 
 export interface CustomIndexType {
@@ -108,6 +102,8 @@ export interface CustomIndexType {
     startTime?: number;
     isDefault?: boolean;
 }
+
+export type CustomIndexTypeDb = Omit<CustomIndexType, "isDefault" | "assets"> & {isDefault: number | null};
 
 /**
  * @link https://momentjscom.readthedocs.io/en/latest/moment/04-displaying/01-format/

@@ -27,9 +27,8 @@ export function CustomIndexDialog({
             name,
             assets: selectedAssets,
         });
-        closeDialog();
 
-        !customIndex && window.location.reload();
+        closeDialog();
     };
 
     const handleChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {

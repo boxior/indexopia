@@ -4,6 +4,7 @@ import {
     handleSaveDefaultCustomIndex,
     SaveDefaultCustomIndexProps,
 } from "@/utils/heleprs/generators/handleSaveDefaultCustomIndex.helper";
+export const dynamic = "force-dynamic";
 
 /**
  * Generate Default Custom Indexes
