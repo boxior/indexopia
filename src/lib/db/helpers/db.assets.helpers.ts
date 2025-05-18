@@ -2,7 +2,6 @@
 import {Asset} from "@/utils/types/general.types";
 import {ENV_VARIABLES} from "@/env";
 import {mySqlPool} from "@/lib/db";
-import {generateUuid} from "@/utils/heleprs/generateUuid.helper";
 import {revalidateTag, unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
 
