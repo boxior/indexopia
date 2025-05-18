@@ -1,7 +1,7 @@
 "use server";
 
 import IndexesTable from "@/app/indexes/components/IndexesTable";
-import {getCachedTopAssets, getCustomIndexes, getIndex} from "@/lib/db/helpers/db.helpers";
+import {getCachedTopAssets, getCustomIndexes} from "@/lib/db/helpers/db.helpers";
 import * as React from "react";
 import {SuspenseContainer} from "@/components/SuspenseContainer";
 import {dbQueryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";

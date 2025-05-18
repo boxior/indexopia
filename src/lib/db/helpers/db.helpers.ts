@@ -9,17 +9,11 @@ import {
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
     Index,
     IndexHistory,
-    IndexId,
     NormalizedAssetHistory,
     NormalizedAssets,
 } from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
-import {
-    ASSET_COUNT_BY_INDEX_ID,
-    INDEX_NAME_BY_INDEX_ID,
-    MAX_ASSET_COUNT,
-    OMIT_ASSETS_IDS,
-} from "@/utils/constants/general.constants";
+import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
 import {cloneDeep, get, pick, set} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
@@ -29,7 +23,6 @@ import {dbHandleQueryCustomIndexById, dbHandleQueryCustomIndexes} from "@/lib/db
 import {unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineTags} from "@/utils/cache/helpers.cache";
-import {generateUuid} from "@/utils/heleprs/generateUuid.helper";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
@@ -424,60 +417,6 @@ function mergeAssetHistories(histories: AssetHistory[][], portions: number[], in
 
     return merged;
 }
-
-export const getIndex = async ({
-    id,
-    startTime: startTimeProp,
-    endTime: endTimeProp,
-}: {
-    id: IndexId;
-    startTime?: number;
-    endTime?: number;
-}): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>> => {
-    "use cache";
-    cacheTag(combineTags(CacheTag.INDEX, id));
-    let assets = await getCachedTopAssets(ASSET_COUNT_BY_INDEX_ID[id]);
-
-    const {
-        assets: assetsWithHistories,
-        startTime,
-        endTime,
-    } = await getAssetsWithHistories({
-        assets,
-        startTime: startTimeProp,
-        endTime: endTimeProp,
-    });
-
-    assets = assetsWithHistories;
-
-    assets = assets.map(asset => ({
-        ...asset,
-        portion: Math.trunc(100 / ASSET_COUNT_BY_INDEX_ID[id]),
-        maxDrawDown: getMaxDrawDownWithTimeRange(asset.history),
-    }));
-
-    const index: Omit<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>, "historyOverview" | "maxDrawDown"> = {
-        id,
-        name: INDEX_NAME_BY_INDEX_ID[id],
-        assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
-        history: [],
-    };
-
-    const indexHistory = await getIndexHistory(index);
-    const indexHistoryOverview = await getIndexHistoryOverview(index);
-    const indexMaxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
-
-    return {
-        ...index,
-        assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
-        startTime,
-        endTime,
-        history: indexHistory,
-        historyOverview: indexHistoryOverview,
-        maxDrawDown: indexMaxDrawDown,
-        isDefault: true,
-    };
-};
 
 export const getCustomIndex = async ({
     id,

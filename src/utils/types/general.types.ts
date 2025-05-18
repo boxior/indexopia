@@ -83,15 +83,8 @@ export type NormalizedAssets = Record<Asset["id"], Asset>;
 
 export type NormalizedAssetHistory = Record<Asset["id"], AssetHistory[]>;
 
-export enum IndexId {
-    TOP_5 = "top5",
-    TOP_10 = "top10",
-    TOP_25 = "top25",
-    TOP_50 = "top50",
-}
-
 export interface Index<A = Asset> {
-    id: IndexId | string;
+    id: string;
     name: string;
     assets: A[];
     historyOverview: HistoryOverview;

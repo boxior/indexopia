@@ -1,4 +1,4 @@
-import {AssetHistory, IndexId, MomentFormat} from "@/utils/types/general.types";
+import {AssetHistory, MomentFormat} from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 import moment from "moment/moment";
 import {convertToUTC} from "@/utils/heleprs/convertToUTC.helper";
@@ -27,10 +27,6 @@ export const getIndexDurationLabel = (startTime: number) => {
     const days = duration.days() > 0 ? `${duration.days()} day${duration.days() > 1 ? "s" : ""}` : "";
 
     return `${years}${months}${days}`.trim() || "0 days";
-};
-
-export const getIsTopIndex = (id: string) => {
-    return Object.values(IndexId).includes(id as IndexId);
 };
 
 /**
