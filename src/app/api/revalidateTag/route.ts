@@ -1,17 +1,14 @@
 import {NextResponse, NextRequest} from "next/server";
-import {manageAssetsHistory} from "@/lib/db/helpers/db.helpers";
 import {ENV_VARIABLES} from "@/env";
-
-export const dynamic = "force-dynamic";
+import {revalidateTag} from "next/cache";
 
 /**
- * Write `assets_history` to the DB
- * The request should be GET to use free cron job https://console.cron-job.org/dashboard
+ * Generate Default Custom Indexes
  */
-export async function GET(_req: NextRequest) {
+export async function POST(req: NextRequest) {
     try {
         // Get the URL and search parameters
-        const {searchParams} = new URL(_req.url);
+        const {searchParams} = new URL(req.url);
 
         // Retrieve the apiKey from the query string
         const apiKey = searchParams.get("apiKey");
@@ -25,10 +22,13 @@ export async function GET(_req: NextRequest) {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
-        await manageAssetsHistory();
+        const {tag} = (await req.json()) as {tag: string};
+
+        // Assets
+        revalidateTag(tag);
 
         return NextResponse.json(
-            {success: true},
+            {success: true, tag},
             {
                 status: 200,
             }

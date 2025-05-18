@@ -2,6 +2,7 @@ import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
 import {manageAssets, manageAssetsHistory} from "@/lib/db/helpers/db.helpers";
+export const dynamic = "force-dynamic";
 
 /**
  * Generate Default Custom Indexes

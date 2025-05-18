@@ -10,6 +10,7 @@ export const handleGenerateDefaultIndexFromScratch = async ({
     defaultIndexSortBy,
     startTime: startTimeProp,
     endTime: endTimeProp,
+    equalPortions = false,
 }: {
     topAssetsCount?: number;
     upToNumber?: number;
@@ -17,6 +18,7 @@ export const handleGenerateDefaultIndexFromScratch = async ({
     defaultIndexSortBy?: DefaultIndexSortBy;
     startTime?: number;
     endTime?: number;
+    equalPortions?: boolean;
 }): Promise<{assets: CustomIndexAsset[]; startTime?: number; endTime?: number}> => {
     const {assets, startTime, endTime} = await handleGetAssetsForIndex({
         topAssetsCount,
@@ -30,6 +32,7 @@ export const handleGenerateDefaultIndexFromScratch = async ({
             upToNumber: upToNumber ?? topAssetsCount ?? MAX_ASSET_COUNT,
             defaultIndexBy,
             defaultIndexSortBy,
+            equalPortions,
         }),
         startTime,
         endTime,

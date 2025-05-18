@@ -12,15 +12,27 @@ import {sortLessMaxDrawDownIndexAssets} from "@/utils/heleprs/generators/drawdow
 import {getIndexAssetsWithPortionsByRankAndMaxDrawDown} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankAndMaxDrawDown.helper";
 import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
 import {getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown.helper";
+import {pick} from "lodash";
 
 export function handleGenerateDefaultIndex(props: {
     assets: AssetWithHistory[];
     upToNumber: number;
     defaultIndexBy?: DefaultIndexBy;
     defaultIndexSortBy?: DefaultIndexSortBy;
+    equalPortions?: boolean;
 }): CustomIndexAsset[] {
-    const {defaultIndexBy = DefaultIndexBy.RANK, defaultIndexSortBy = DefaultIndexSortBy.PROFIT, upToNumber} = props;
+    const {
+        defaultIndexBy = DefaultIndexBy.RANK,
+        defaultIndexSortBy = DefaultIndexSortBy.PROFIT,
+        upToNumber,
+        equalPortions = false,
+    } = props;
     const sortedAssetsByRank = sortRankIndexAssets(props.assets);
+
+    if (equalPortions) {
+        const assets = sortedAssetsByRank.slice(0, upToNumber);
+        return assets.map(a => ({...pick(a, "id"), portion: Math.trunc(100 / assets.length)}));
+    }
 
     return (() => {
         switch (defaultIndexSortBy) {

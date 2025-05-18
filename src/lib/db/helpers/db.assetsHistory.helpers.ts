@@ -1,12 +1,15 @@
 import {AssetHistory} from "@/utils/types/general.types"; // Assuming this is the correct path
 import {ENV_VARIABLES} from "@/env";
 import {mySqlPool} from "@/lib/db";
+import {revalidateTag, unstable_cacheTag as cacheTag} from "next/cache";
+import {CacheTag} from "@/utils/cache/constants.cache";
+import {combineTags} from "@/utils/cache/helpers.cache";
 
 // Define the table name for `AssetHistory`
 const TABLE_NAME_ASSET_HISTORY = ENV_VARIABLES.MYSQL_TABLE_NAME_ASSET_HISTORY; // Ensure this table exists in your database
 
 // Helper function: Insert `AssetHistory` into the database
-export const insertAssetHistory = async (data: AssetHistory[]) => {
+export const dbInsertAssetHistory = async (data: AssetHistory[]) => {
     try {
         const sql = `
             INSERT INTO ${TABLE_NAME_ASSET_HISTORY} (assetId, priceUsd, time, date)
@@ -18,6 +21,7 @@ export const insertAssetHistory = async (data: AssetHistory[]) => {
         `;
         const promises = data.map(item => mySqlPool.execute(sql, [item.assetId, item.priceUsd, item.time, item.date]));
         await Promise.all(promises);
+        revalidateTag(combineTags(CacheTag.ASSET_HISTORY, data[0].assetId));
         console.log("Asset histories inserted/updated successfully!");
     } catch (error) {
         console.error("Error inserting asset histories:", error);
@@ -26,7 +30,10 @@ export const insertAssetHistory = async (data: AssetHistory[]) => {
 };
 
 // Helper function: Fetch all history for a specific asset by `assetId`
-export const queryAssetHistoryById = async (assetId: string): Promise<AssetHistory[]> => {
+export const dbQueryAssetHistoryById = async (assetId: string): Promise<AssetHistory[]> => {
+    "use cache";
+    cacheTag(combineTags(CacheTag.ASSET_HISTORY, assetId));
+
     try {
         const sql = `
             SELECT * FROM ${TABLE_NAME_ASSET_HISTORY} 
@@ -42,7 +49,7 @@ export const queryAssetHistoryById = async (assetId: string): Promise<AssetHisto
 };
 
 // Helper function: Fetch all history for a specific asset by `assetId` with optional `startTime`
-export const queryAssetHistoryByIdAndStartTime = async (
+export const dbQueryAssetHistoryByIdAndStartTime = async (
     assetId: string,
     startTime: number
 ): Promise<AssetHistory[]> => {
