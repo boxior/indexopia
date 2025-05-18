@@ -194,6 +194,10 @@ export type HistoryOverview = {
     days7: number;
     total: number;
 };
+/**
+ * Taking the last day from existed item, not the current last day as sometimes, it might be lack of data due to populating progress that we make regularly once per day.
+ * Look at /populate API request where we fetch up-to-date top assets and their histories and all other assets that were fetched before as top ones.
+ */
 export const getAssetHistoryOverview = async (
     id: string,
     historyListProp?: AssetHistory[]
@@ -202,8 +206,9 @@ export const getAssetHistoryOverview = async (
 
     const historyList = history ?? [];
 
-    const lastDay = momentTimeZone.tz("UTC").startOf("day").add(-1, "day").valueOf();
-    const lastDayItem = historyList.find(item => item.time === lastDay);
+    const lastDayItem = historyList[historyList.length - 1];
+
+    const lastDay = lastDayItem?.time;
     const oneDayAgo = historyList.find(
         item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-1, "day").valueOf()
     );
