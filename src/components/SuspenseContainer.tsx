@@ -1,3 +1,4 @@
+"use client";
 import {FC, PropsWithChildren, Suspense} from "react";
 
 export const SuspenseContainer: FC<PropsWithChildren> = ({children}) => (
