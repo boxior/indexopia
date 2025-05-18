@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
         }
 
         const {tag} = (await req.json()) as {tag: string};
-        console.log("revalidateTag", tag);
+
         // Assets
         revalidateTag(tag);
 

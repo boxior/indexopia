@@ -183,7 +183,7 @@ export const dbHandleQueryCustomIndexById = async (id: string): Promise<CustomIn
     try {
         // Query custom index
         const customIndex = await dbQueryCustomIndexById(id);
-        console.log("customIndex", customIndex);
+
         if (!customIndex) {
             return null; // Return null if the custom index is not found
         }
@@ -271,7 +271,7 @@ export const dbDeleteCustomIndex = async (customIndexId: string): Promise<void> 
             // Release the connection
             connection.release();
         }
-        console.log("revalidateTag");
+
         revalidateTag(CacheTag.CUSTOM_INDEXES);
         revalidateTag(combineTags(CacheTag.CUSTOM_INDEX, customIndexId));
     } catch (error) {

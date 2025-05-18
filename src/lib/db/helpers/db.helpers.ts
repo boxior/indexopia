@@ -47,9 +47,8 @@ export const migrateAssetsHistoriesFromJsonToDb = async () => {
                 ASSETS_HISTORY_FOLDER_PATH
             )) as DbItems<Omit<AssetHistory, "assetId">>;
             const normalizedAssetHistory = assetHistory.data.map(history => ({assetId: asset.id, ...history}));
-            // console.time("insertAssetHistory_" + asset.id);
+
             await dbInsertAssetHistory(normalizedAssetHistory);
-            // console.timeEnd("insertAssetHistory_" + asset.id);
         } catch (err) {
             console.error(err);
             await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
@@ -322,9 +321,7 @@ export const getAssetHistoriesWithSmallestRange = async ({
 
     for (const [index, assetId] of assetIds.entries()) {
         try {
-            console.time(`dbQueryAssetHistoryById_${assetId}`);
             const historyData = historyDatas[index] ?? [];
-            console.timeEnd(`dbQueryAssetHistoryById_${assetId}`);
 
             const historyList = historyData ?? [];
 
@@ -498,7 +495,6 @@ export const getCustomIndex = async ({
 
     let assets = await getCachedAssets(customIndex.assets.map(asset => asset.id));
 
-    console.time(`getAssetsWithHistories_${id}`);
     const {
         assets: assetsWithHistories,
         startTime,
@@ -507,7 +503,6 @@ export const getCustomIndex = async ({
         assets,
         ...pick(customIndex, ["startTime"]),
     });
-    console.timeEnd(`getAssetsWithHistories_${id}`);
 
     assets = assetsWithHistories;
 
@@ -542,13 +537,9 @@ export async function getCustomIndexes(): Promise<Index<AssetWithHistoryOverview
     "use cache";
     cacheTag(CacheTag.CUSTOM_INDEXES);
 
-    console.time("dbHandleQueryCustomIndexes");
     const cachedCustomIndexes = await dbHandleQueryCustomIndexes();
-    console.timeEnd("dbHandleQueryCustomIndexes");
 
-    console.time("all getCustomIndex");
     const customIndexes = await Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id})));
-    console.timeEnd("all getCustomIndex");
 
     return customIndexes.filter(ci => ci !== null);
 }
@@ -562,14 +553,11 @@ async function getAssetsWithHistories({
     startTime?: number;
     endTime?: number;
 }): Promise<{assets: AssetWithHistoryAndOverview[]; startTime?: number; endTime?: number}> {
-    const uuid = generateUuid();
-    console.time(`getAssetHistoriesWithSmallestRange_${assets.length}_${uuid}`);
     const {histories, startTime, endTime} = await getAssetHistoriesWithSmallestRange({
         assetIds: assets.map(asset => asset.id),
         startTime: startTimeProp,
         endTime: endTimeProp,
     });
-    console.timeEnd(`getAssetHistoriesWithSmallestRange_${assets.length}_${uuid}`);
 
     const assetsHistoriesOverviews: HistoryOverview[] = await Promise.all(
         assets.map(asset => getAssetHistoryOverview(asset.id, histories[asset.id]))

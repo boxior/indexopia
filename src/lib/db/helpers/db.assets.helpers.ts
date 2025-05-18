@@ -55,10 +55,7 @@ export const dbQueryAssets = async (): Promise<Asset[]> => {
     cacheTag(CacheTag.ASSETS);
 
     try {
-        const uuid = generateUuid();
-        // console.time("dbQueryAssets_" + uuid);
         const [rows] = await mySqlPool.query(`SELECT * FROM ${TABLE_NAME_ASSETS}`);
-        // console.timeEnd("dbQueryAssets_" + uuid);
         return rows as Asset[];
     } catch (error) {
         console.error("Error fetching data:", error);
