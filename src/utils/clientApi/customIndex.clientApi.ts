@@ -2,7 +2,7 @@
 
 export const clientApiDeleteCustomIndex = async (customIndexId: string) => {
     try {
-        const response = await fetch(`/api/custom-index/${customIndexId}`, {
+        const response = await fetch(`/api/index/${customIndexId}`, {
             method: "DELETE",
         });
 
