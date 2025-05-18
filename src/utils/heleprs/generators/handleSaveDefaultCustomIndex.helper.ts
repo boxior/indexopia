@@ -20,7 +20,7 @@ export const handleSaveDefaultCustomIndex = async (props: SaveDefaultCustomIndex
 
     const generatedId = generateUuid();
     await saveCustomIndex({
-        id: `default_${props.defaultIndexBy}_${props.defaultIndexSortBy}_${generatedId}`,
+        id: generatedId,
         name: props.name ?? `Default by ${props.defaultIndexBy} and ${props.defaultIndexSortBy} (${generatedId})`,
         assets: assets.map(a => pick(a, ["id", "portion"])),
         startTime,

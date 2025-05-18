@@ -46,6 +46,7 @@ export default function IndexesTable({
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
 
+    // this `localData` is needed to provide local filter after DeleteItem.
     const [localData, setLocalData] = React.useState<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>[]>(data);
 
     useEffect(() => {
