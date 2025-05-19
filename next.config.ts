@@ -13,6 +13,19 @@ const nextConfig: NextConfig = {
         dynamicIO: true,
     },
     compress: true,
+    async headers() {
+        return [
+            {
+                source: "/indexes",
+                headers: [
+                    {
+                        key: "Cache-Control",
+                        value: "max-age=3600, private, stale-while-revalidate=0",
+                    },
+                ],
+            },
+        ];
+    },
 };
 
 export default nextConfig;
