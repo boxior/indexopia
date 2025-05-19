@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
     experimental: {
         dynamicIO: true,
     },
+    compress: true,
     async headers() {
         return [
             {
@@ -19,7 +20,7 @@ const nextConfig: NextConfig = {
                 headers: [
                     {
                         key: "Cache-Control",
-                        value: "public, max-age=31536000, immutable",
+                        value: "s-maxage=31536000, stale-while-revalidate=604800",
                     },
                 ],
             },
