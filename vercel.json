@@ -1,11 +1,11 @@
 {
   "headers": [
     {
-      "source": "/(.*)",
+      "source": "/indexes",
       "headers": [
         {
           "key": "Cache-Control",
-          "value": "public, max-age=0, s-maxage=86400"
+          "value": "max-age=3600, private, stale-while-revalidate=0"
         }
       ]
     }
