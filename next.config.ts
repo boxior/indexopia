@@ -16,11 +16,11 @@ const nextConfig: NextConfig = {
     async headers() {
         return [
             {
-                source: "/:path*", // Apply to all routes and files
+                source: "/(.*)",
                 headers: [
                     {
                         key: "Cache-Control",
-                        value: "s-maxage=31536000, stale-while-revalidate=604800",
+                        value: "public, max-age=0, s-maxage=86400",
                     },
                 ],
             },
