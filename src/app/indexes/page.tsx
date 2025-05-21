@@ -5,8 +5,12 @@ import {getCachedTopAssets, getCustomIndexes} from "@/lib/db/helpers/db.helpers"
 import * as React from "react";
 import {SuspenseContainer} from "@/components/SuspenseContainer";
 import {dbQueryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
+import {unstable_cacheTag as cacheTag} from "next/cache";
 
 export default async function IndexesPage() {
+    "use cache";
+    cacheTag("indexesPage");
+
     return (
         <SuspenseContainer>
             <SuspendedComponent />
@@ -15,6 +19,9 @@ export default async function IndexesPage() {
 }
 
 const SuspendedComponent = async () => {
+    "use cache";
+    cacheTag("indexesPage_suspended");
+
     const assets = await getCachedTopAssets();
 
     // precache all histories, so that in the nested helpers it will be taken from cache as we use `use cache` directive.
