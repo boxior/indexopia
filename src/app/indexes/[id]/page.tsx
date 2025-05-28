@@ -5,9 +5,9 @@ import {getCachedTopAssets, getCustomIndex} from "@/lib/db/helpers/db.helpers";
 import {Card} from "@/components/ui/card";
 import {IndexOverview} from "@/app/indexes/[id]/components/IndexOverview";
 import * as React from "react";
-import {CustomIndex} from "@/app/indexes/components/CustomIndex/CustomIndex";
 import {dbHandleQueryCustomIndexById} from "@/lib/db/helpers/db.customIndex.helpers";
 import {SuspenseContainer} from "@/components/SuspenseContainer";
+import {UpdateCustomIndex} from "@/app/indexes/components/CustomIndex/UpdateCustomIndex";
 
 export default async function IndexPage(props: ServerPageProps) {
     return (
@@ -22,7 +22,6 @@ const SuspendedComponent = async (props: ServerPageProps) => {
     const assets = await getCachedTopAssets();
 
     const customIndex = await dbHandleQueryCustomIndexById(params.id);
-    const doEdit = customIndex && !customIndex?.isDefault;
 
     const index = await getCustomIndex({
         id: params.id,
@@ -32,9 +31,11 @@ const SuspendedComponent = async (props: ServerPageProps) => {
         return <div>Custom index not found</div>;
     }
 
+    const doUpdate = customIndex && !customIndex.isDefault;
+
     return (
         <div className={"flex flex-col gap-4"}>
-            {doEdit && <CustomIndex assets={assets} customIndex={customIndex} />}
+            {doUpdate && <UpdateCustomIndex assets={assets} customIndex={customIndex} />}
             <div className="flex gap-4">
                 <Card className={"flex-1 p-2"}>
                     <IndexOverview index={index} />

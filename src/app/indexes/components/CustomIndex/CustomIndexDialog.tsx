@@ -6,8 +6,7 @@ import {CustomIndexAssetsPortions} from "@/app/indexes/components/CustomIndex/Cu
 import {Button} from "@/components/ui/button";
 import {useState} from "react";
 import {CustomIndexAsset, Asset, CustomIndexType} from "@/utils/types/general.types";
-import {saveCustomIndex} from "@/app/indexes/[id]/actions";
-import {generateUuid} from "@/utils/heleprs/generateUuid.helper";
+import {createCustomIndex, updateCustomIndex} from "@/app/indexes/[id]/actions";
 
 export function CustomIndexDialog({
     assets,
@@ -21,12 +20,21 @@ export function CustomIndexDialog({
     const [selectedAssets, setSelectedAssets] = useState<CustomIndexAsset[]>(customIndex?.assets ?? []);
     const [name, setName] = useState<string>(customIndex?.name ?? "");
 
+    const isEdit = !!customIndex;
+
     const handleSave = async () => {
-        await saveCustomIndex({
-            id: customIndex?.id ?? generateUuid(),
-            name,
-            assets: selectedAssets,
-        });
+        if (isEdit) {
+            await updateCustomIndex({
+                ...customIndex,
+                name,
+                assets: selectedAssets,
+            });
+        } else {
+            await createCustomIndex({
+                name,
+                assets: selectedAssets,
+            });
+        }
 
         closeDialog();
     };

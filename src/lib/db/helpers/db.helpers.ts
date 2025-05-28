@@ -7,6 +7,8 @@ import {
     AssetHistory,
     AssetWithHistoryAndOverview,
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
+    CustomIndexType,
+    Id,
     Index,
     IndexHistory,
     NormalizedAssetHistory,
@@ -425,13 +427,15 @@ function mergeAssetHistories(histories: AssetHistory[][], portions: number[], in
 
 export const getCustomIndex = async ({
     id,
+    customIndex: propCustomIndex,
 }: {
-    id: string;
+    id: Id;
+    customIndex?: CustomIndexType;
 }): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null> => {
     "use cache";
     cacheTag(combineTags(CacheTag.INDEX, id));
 
-    const customIndex = await dbHandleQueryCustomIndexById(id);
+    const customIndex = propCustomIndex ?? (await dbHandleQueryCustomIndexById(id));
 
     if (!customIndex) {
         return null;
@@ -483,7 +487,9 @@ export async function getCustomIndexes(): Promise<Index<AssetWithHistoryOverview
 
     const cachedCustomIndexes = await dbHandleQueryCustomIndexes();
 
-    const customIndexes = await Promise.all(cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id})));
+    const customIndexes = await Promise.all(
+        cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id, customIndex: ci}))
+    );
 
     return customIndexes.filter(ci => ci !== null);
 }

@@ -9,37 +9,40 @@ const TABLE_NAME_ASSETS = ENV_VARIABLES.MYSQL_TABLE_NAME_ASSETS; // Ensure this 
 // Helper function: Insert data into the database
 export const dbInsertAssets = async (data: Asset[]) => {
     try {
+        // Prepare the SQL query with multiple VALUES clauses
         const sql = `
-      INSERT INTO ${TABLE_NAME_ASSETS} (id, rank, symbol, name, supply, maxSupply, 
-                                 marketCapUsd, volumeUsd24Hr, priceUsd, 
-                                 changePercent24Hr, vwap24Hr, explorer)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-      ON DUPLICATE KEY UPDATE
-        rank = VALUES(rank), symbol = VALUES(symbol), name = VALUES(name),
-        supply = VALUES(supply), maxSupply = VALUES(maxSupply), 
-        marketCapUsd = VALUES(marketCapUsd), volumeUsd24Hr = VALUES(volumeUsd24Hr),
-        priceUsd = VALUES(priceUsd), changePercent24Hr = VALUES(changePercent24Hr),
-        vwap24Hr = VALUES(vwap24Hr), explorer = VALUES(explorer);
-    `;
+            INSERT INTO ${TABLE_NAME_ASSETS} (id, rank, symbol, name, supply, maxSupply, 
+                                              marketCapUsd, volumeUsd24Hr, priceUsd, 
+                                              changePercent24Hr, vwap24Hr, explorer)
+            VALUES ${data.map(() => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").join(", ")}
+            ON DUPLICATE KEY UPDATE
+                rank = VALUES(rank), symbol = VALUES(symbol), name = VALUES(name),
+                supply = VALUES(supply), maxSupply = VALUES(maxSupply), 
+                marketCapUsd = VALUES(marketCapUsd), volumeUsd24Hr = VALUES(volumeUsd24Hr),
+                priceUsd = VALUES(priceUsd), changePercent24Hr = VALUES(changePercent24Hr),
+                vwap24Hr = VALUES(vwap24Hr), explorer = VALUES(explorer);
+        `;
 
-        const promises = data.map(item =>
-            mySqlPool.execute(sql, [
-                item.id,
-                item.rank,
-                item.symbol,
-                item.name,
-                item.supply,
-                item.maxSupply,
-                item.marketCapUsd,
-                item.volumeUsd24Hr,
-                item.priceUsd,
-                item.changePercent24Hr,
-                item.vwap24Hr,
-                item.explorer,
-            ])
-        );
+        // Flatten the data array into a single set of values
+        const values = data.flatMap(item => [
+            item.id,
+            item.rank,
+            item.symbol,
+            item.name,
+            item.supply,
+            item.maxSupply,
+            item.marketCapUsd,
+            item.volumeUsd24Hr,
+            item.priceUsd,
+            item.changePercent24Hr,
+            item.vwap24Hr,
+            item.explorer,
+        ]);
 
-        await Promise.all(promises);
+        // Execute the query once with the entire batch of data
+        await mySqlPool.execute(sql, values);
+
+        // Invalidate the cache after inserting/updating the data
         revalidateTag(CacheTag.ASSETS);
         console.log("Data inserted/updated successfully!");
     } catch (error) {
