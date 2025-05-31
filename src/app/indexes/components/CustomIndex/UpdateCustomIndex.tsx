@@ -7,7 +7,9 @@ import {useState} from "react";
 import {CustomIndexDialog} from "@/app/indexes/components/CustomIndex/CustomIndexDialog";
 import {clientApiDeleteCustomIndex} from "@/utils/clientApi/customIndex.clientApi";
 import {redirect} from "next/navigation";
-export function CustomIndex({assets, customIndex}: {assets: Asset[]; customIndex?: CustomIndexType}) {
+import {isNil} from "lodash";
+
+export function UpdateCustomIndex({assets, customIndex}: {assets: Asset[]; customIndex: CustomIndexType}) {
     const [open, setOpen] = useState<boolean>(false);
 
     const onOpenChange = (bool: boolean) => {
@@ -22,10 +24,10 @@ export function CustomIndex({assets, customIndex}: {assets: Asset[]; customIndex
         setOpen(false);
     };
 
-    const doDelete = customIndex?.id && !customIndex?.isDefault;
+    const doDelete = !isNil(customIndex?.id) && !customIndex?.isDefault;
 
     const handleDelete = async () => {
-        if (doDelete) {
+        if (!doDelete) {
             return;
         }
         await clientApiDeleteCustomIndex(customIndex?.id ?? ""); // need tls
@@ -33,16 +35,20 @@ export function CustomIndex({assets, customIndex}: {assets: Asset[]; customIndex
     };
 
     return (
-        <Dialog open={open} onOpenChange={onOpenChange}>
-            <Button variant="outline" onClick={openDialog}>
-                {`${customIndex ? "Edit" : "Create"} Custom Index ${customIndex ? `(${customIndex.name})` : ""}`}
-            </Button>
-            {doDelete && (
-                <Button variant="outline" type={"button"} onClick={handleDelete}>
-                    Delete
+        <>
+            <div>
+                <Button variant="outline" onClick={openDialog}>
+                    Update
                 </Button>
-            )}
-            {open && <CustomIndexDialog assets={assets} closeDialog={closeDialog} customIndex={customIndex} />}
-        </Dialog>
+                {doDelete && (
+                    <Button variant="outline" type={"button"} onClick={handleDelete}>
+                        Delete
+                    </Button>
+                )}
+            </div>
+            <Dialog open={open} onOpenChange={onOpenChange}>
+                {open && <CustomIndexDialog assets={assets} closeDialog={closeDialog} customIndex={customIndex} />}
+            </Dialog>
+        </>
     );
 }

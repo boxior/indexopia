@@ -31,7 +31,7 @@ import {ReactNode, useEffect} from "react";
 import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
 import Link from "next/link";
-import {CustomIndex} from "@/app/indexes/components/CustomIndex/CustomIndex";
+import {CreateCustomIndex} from "@/app/indexes/components/CustomIndex/CreateCustomIndex";
 import {clientApiDeleteCustomIndex} from "@/utils/clientApi/customIndex.clientApi";
 
 export default function IndexesTable({
@@ -272,7 +272,7 @@ export default function IndexesTable({
                     onChange={event => table.getColumn("name")?.setFilterValue(event.target.value)}
                     className="max-w-sm"
                 />
-                <CustomIndex assets={assets} />
+                <CreateCustomIndex assets={assets} />
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

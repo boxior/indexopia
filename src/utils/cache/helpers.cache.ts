@@ -1,1 +1,1 @@
-export const combineTags = (...tags: string[]) => tags.join("_");
+export const combineTags = (...tags: (string | number)[]) => tags.join("_");

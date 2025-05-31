@@ -3,7 +3,7 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {ChangeEventHandler} from "react";
 
-const MAX_PORTION = 100;
+export const MAX_PORTION = 100;
 
 export function CustomIndexAssetsPortions({
     assets,

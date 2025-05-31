@@ -11,16 +11,23 @@ const TABLE_NAME_ASSET_HISTORY = ENV_VARIABLES.MYSQL_TABLE_NAME_ASSET_HISTORY; /
 // Helper function: Insert `AssetHistory` into the database
 export const dbInsertAssetHistory = async (data: AssetHistory[]) => {
     try {
+        // Prepare the SQL query with multiple VALUES clauses
         const sql = `
             INSERT INTO ${TABLE_NAME_ASSET_HISTORY} (assetId, priceUsd, time, date)
-            VALUES (?, ?, ?, ?)
+            VALUES ${data.map(() => "(?, ?, ?, ?)").join(", ")}
             ON DUPLICATE KEY UPDATE
               priceUsd = VALUES(priceUsd), 
               time = VALUES(time), 
               date = VALUES(date);
         `;
-        const promises = data.map(item => mySqlPool.execute(sql, [item.assetId, item.priceUsd, item.time, item.date]));
-        await Promise.all(promises);
+
+        // Flatten the data array into a single set of values
+        const values = data.flatMap(item => [item.assetId, item.priceUsd, item.time, item.date]);
+
+        // Execute the query once with the entire batch of data
+        await mySqlPool.execute(sql, values);
+
+        // Invalidate cache after successful insertion/update
         revalidateTag(combineTags(CacheTag.ASSET_HISTORY, data[0].assetId));
         console.log("Asset histories inserted/updated successfully!");
     } catch (error) {

@@ -6,8 +6,7 @@ import {CustomIndexAssetsPortions} from "@/app/indexes/components/CustomIndex/Cu
 import {Button} from "@/components/ui/button";
 import {useState} from "react";
 import {CustomIndexAsset, Asset, CustomIndexType} from "@/utils/types/general.types";
-import {saveCustomIndex} from "@/app/indexes/[id]/actions";
-import {generateUuid} from "@/utils/heleprs/generateUuid.helper";
+import {createCustomIndex, updateCustomIndex} from "@/app/indexes/[id]/actions";
 
 export function CustomIndexDialog({
     assets,
@@ -21,12 +20,21 @@ export function CustomIndexDialog({
     const [selectedAssets, setSelectedAssets] = useState<CustomIndexAsset[]>(customIndex?.assets ?? []);
     const [name, setName] = useState<string>(customIndex?.name ?? "");
 
+    const isUpdateMode = !!customIndex;
+
     const handleSave = async () => {
-        await saveCustomIndex({
-            id: customIndex?.id ?? generateUuid(),
-            name,
-            assets: selectedAssets,
-        });
+        if (isUpdateMode) {
+            await updateCustomIndex({
+                ...customIndex,
+                name,
+                assets: selectedAssets,
+            });
+        } else {
+            await createCustomIndex({
+                name,
+                assets: selectedAssets,
+            });
+        }
 
         closeDialog();
     };
@@ -59,8 +67,8 @@ export function CustomIndexDialog({
     return (
         <DialogContent className="w-full max-w-lg">
             <DialogHeader>
-                <DialogTitle>{`${customIndex ? "Edit" : "Create"} Custom Index ${customIndex ? `(${customIndex.name})` : ""}`}</DialogTitle>
-                <DialogDescription>{`${customIndex ? "" : "Create your custom Index"}`}</DialogDescription>
+                <DialogTitle>{`${isUpdateMode ? "Update" : "Create"} Custom Index ${customIndex ? `(${customIndex.name})` : ""}`}</DialogTitle>
+                <DialogDescription>{`${isUpdateMode ? "" : "Create your custom Index"}`}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">
@@ -98,7 +106,7 @@ export function CustomIndexDialog({
             </div>
             <DialogFooter>
                 <Button type="button" onClick={handleSave}>
-                    Add Index
+                    {isUpdateMode ? "Update" : "Create"}
                 </Button>
             </DialogFooter>
         </DialogContent>
