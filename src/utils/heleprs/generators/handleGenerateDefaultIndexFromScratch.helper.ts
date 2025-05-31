@@ -26,14 +26,16 @@ export const handleGenerateDefaultIndexFromScratch = async ({
         endTime: endTimeProp,
     });
 
+    const generatedAssets = handleGenerateDefaultIndex({
+        assets,
+        upToNumber: upToNumber ?? topAssetsCount ?? MAX_ASSET_COUNT,
+        defaultIndexBy,
+        defaultIndexSortBy,
+        equalPortions,
+    });
+
     return {
-        assets: handleGenerateDefaultIndex({
-            assets,
-            upToNumber: upToNumber ?? topAssetsCount ?? MAX_ASSET_COUNT,
-            defaultIndexBy,
-            defaultIndexSortBy,
-            equalPortions,
-        }),
+        assets: generatedAssets,
         startTime,
         endTime,
     };

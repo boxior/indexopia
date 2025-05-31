@@ -23,7 +23,7 @@ export interface Asset {
 
 export enum DefaultIndexBy {
     RANK = "rank",
-    RANK_AND_EXTRA = "rankAndExtra",
+    EXTRA = "extra",
 }
 
 export enum DefaultIndexSortBy {

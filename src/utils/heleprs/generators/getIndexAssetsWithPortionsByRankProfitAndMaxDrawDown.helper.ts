@@ -1,4 +1,5 @@
 import {CustomIndexAsset} from "@/utils/types/general.types";
+import {correctAssetPortions} from "@/utils/heleprs/generators/generators.helpers";
 
 /**
  * Compute the middle portion value (weighted average) for every unique asset
@@ -12,32 +13,31 @@ export function getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown(
     assets1: CustomIndexAsset[],
     assets2: CustomIndexAsset[]
 ): CustomIndexAsset[] {
+    const numberOfArrays = 2;
     // Create a mapping for all assets from both arrays
-    const assetMap: Record<string, {sumPortion: number; count: number}> = {};
+    const assetMap: Record<string, {sumPortion: number}> = {};
 
     // Process the first array
     for (const asset of assets1) {
         if (!assetMap[asset.id]) {
-            assetMap[asset.id] = {sumPortion: 0, count: 0};
+            assetMap[asset.id] = {sumPortion: 0};
         }
-        assetMap[asset.id].sumPortion += asset.portion;
-        assetMap[asset.id].count += 1;
+        assetMap[asset.id].sumPortion += asset.portion / numberOfArrays;
     }
 
     // Process the second array
     for (const asset of assets2) {
         if (!assetMap[asset.id]) {
-            assetMap[asset.id] = {sumPortion: 0, count: 0};
+            assetMap[asset.id] = {sumPortion: 0};
         }
-        assetMap[asset.id].sumPortion += asset.portion;
-        assetMap[asset.id].count += 1;
+        assetMap[asset.id].sumPortion += asset.portion / numberOfArrays;
     }
 
     // Calculate middle portion for each asset
     const result: CustomIndexAsset[] = Object.entries(assetMap).map(([id, data]) => {
-        const middlePortion = data.sumPortion / data.count; // Weighted average
+        const middlePortion = Math.round(data.sumPortion); // Weighted average
         return {id, portion: middlePortion};
     });
 
-    return result;
+    return correctAssetPortions(result);
 }
