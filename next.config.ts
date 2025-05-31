@@ -11,7 +11,6 @@ const nextConfig: NextConfig = {
     // },
     experimental: {
         dynamicIO: true,
-        isrFlushToDisk: true,
     },
     compress: true,
 };
