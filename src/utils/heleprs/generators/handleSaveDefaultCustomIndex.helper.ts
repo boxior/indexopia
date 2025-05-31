@@ -1,7 +1,6 @@
 import {DefaultIndexBy, DefaultIndexSortBy} from "@/utils/types/general.types";
 import {handleGenerateDefaultIndexFromScratch} from "@/utils/heleprs/generators/handleGenerateDefaultIndexFromScratch.helper";
-import {saveCustomIndex} from "@/app/indexes/[id]/actions";
-import {generateUuid} from "@/utils/heleprs/generateUuid.helper";
+import {createCustomIndex} from "@/app/indexes/[id]/actions";
 import {pick} from "lodash";
 
 export type SaveDefaultCustomIndexProps = {
@@ -18,10 +17,8 @@ export const handleSaveDefaultCustomIndex = async (props: SaveDefaultCustomIndex
     "use server";
     const {assets, startTime} = await handleGenerateDefaultIndexFromScratch(props);
 
-    const generatedId = generateUuid();
-    await saveCustomIndex({
-        id: generatedId,
-        name: props.name ?? `Default by ${props.defaultIndexBy} and ${props.defaultIndexSortBy} (${generatedId})`,
+    await createCustomIndex({
+        name: props.name ?? `Default by ${props.defaultIndexBy} and ${props.defaultIndexSortBy}`,
         assets: assets.map(a => pick(a, ["id", "portion"])),
         startTime,
         isDefault: true,

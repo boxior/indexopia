@@ -23,7 +23,7 @@ export interface Asset {
 
 export enum DefaultIndexBy {
     RANK = "rank",
-    RANK_AND_EXTRA = "rankAndExtra",
+    EXTRA = "extra",
 }
 
 export enum DefaultIndexSortBy {
@@ -40,7 +40,7 @@ export type AssetWithProfitAndMaxDrawDown = AssetWithProfit & AssetWithMaxDrawDo
 
 export type CustomIndexAsset = Pick<Required<Asset>, "id" | "portion">;
 
-export type CustomIndexAssetWithCustomIndexId = Pick<Required<Asset>, "id" | "portion"> & {customIndexId: string};
+export type CustomIndexAssetWithCustomIndexId = Pick<Required<Asset>, "id" | "portion"> & {customIndexId: number};
 
 export type AssetWithHistory = Asset & {history: AssetHistory[]};
 
@@ -84,7 +84,7 @@ export type NormalizedAssets = Record<Asset["id"], Asset>;
 export type NormalizedAssetHistory = Record<Asset["id"], AssetHistory[]>;
 
 export interface Index<A = Asset> {
-    id: string;
+    id: Id;
     name: string;
     assets: A[];
     historyOverview: HistoryOverview;
@@ -96,7 +96,7 @@ export interface Index<A = Asset> {
 }
 
 export interface CustomIndexType {
-    id: string;
+    id: Id;
     name: string;
     assets: CustomIndexAsset[];
     startTime?: number;
@@ -120,3 +120,5 @@ export type ServerPageProps<ID extends string = string> = {
     params: Promise<{id: ID}>;
     searchParams: Promise<{[key: string]: string | string[] | undefined}>;
 };
+
+export type Id = string | number;

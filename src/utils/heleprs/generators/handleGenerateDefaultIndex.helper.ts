@@ -9,10 +9,10 @@ import {getIndexAssetsWithPortionsByRankAndProfit} from "@/utils/heleprs/generat
 import {getIndexAssetsWithPortionsByRank} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRank.helper";
 import {sortMostProfitableAssets} from "@/utils/heleprs/generators/profit/sortMostProfitableIndexAssets.helper";
 import {sortLessMaxDrawDownIndexAssets} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
-import {getIndexAssetsWithPortionsByRankAndMaxDrawDown} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankAndMaxDrawDown.helper";
 import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
 import {getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown.helper";
 import {pick} from "lodash";
+import {getIndexAssetsWithPortionsByRankAndMaxDrawDown} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankAndMaxDrawDown.helper";
 
 export function handleGenerateDefaultIndex(props: {
     assets: AssetWithHistory[];
@@ -45,7 +45,7 @@ export function handleGenerateDefaultIndex(props: {
                 switch (defaultIndexBy) {
                     case DefaultIndexBy.RANK:
                         return getIndexAssetsWithPortionsByRank(mostProfitableAssets);
-                    case DefaultIndexBy.RANK_AND_EXTRA:
+                    case DefaultIndexBy.EXTRA:
                         return getIndexAssetsWithPortionsByRankAndProfit(mostProfitableAssets);
                     default:
                         return [];
@@ -59,7 +59,7 @@ export function handleGenerateDefaultIndex(props: {
                 switch (defaultIndexBy) {
                     case DefaultIndexBy.RANK:
                         return getIndexAssetsWithPortionsByRank(lessMaxDrawDownAssets);
-                    case DefaultIndexBy.RANK_AND_EXTRA:
+                    case DefaultIndexBy.EXTRA:
                         return getIndexAssetsWithPortionsByRankAndMaxDrawDown(lessMaxDrawDownAssets);
                     default:
                         return [];
@@ -72,11 +72,12 @@ export function handleGenerateDefaultIndex(props: {
                 switch (defaultIndexBy) {
                     case DefaultIndexBy.RANK:
                         return getIndexAssetsWithPortionsByRank(optimalAssets);
-                    case DefaultIndexBy.RANK_AND_EXTRA:
+                    case DefaultIndexBy.EXTRA:
                         const mostProfitableAssets = sortMostProfitableAssets({assets: sortedAssetsByRank}).slice(
                             0,
                             upToNumber
                         );
+
                         const assetsByProfit = getIndexAssetsWithPortionsByRankAndProfit(mostProfitableAssets);
 
                         const lessMaxDrawDownAssets = sortLessMaxDrawDownIndexAssets({

@@ -1,6 +1,8 @@
 "use client";
 
-export const clientApiDeleteCustomIndex = async (customIndexId: string) => {
+import {Id} from "@/utils/types/general.types";
+
+export const clientApiDeleteCustomIndex = async (customIndexId: Id) => {
     try {
         const response = await fetch(`/api/index/${customIndexId}`, {
             method: "DELETE",
