@@ -44,4 +44,3 @@ export const ENV_VARIABLES: EnvVariables = {
 };
 
 console.log("ENV_VARIABLES", ENV_VARIABLES);
-console.log("process.env", process.env);
