@@ -21,7 +21,7 @@ const SuspendedComponent = async () => {
     // precache all histories, so that in the nested helpers it will be taken from cache as we use `use cache` directive.
     // Later, in any queries it will be taken from cache.
     await Promise.all(
-        assets.slice(0, MAX_DB_CONNECTIONS - 10).map(({id: assetId}) => {
+        assets.slice(0, MAX_DB_CONNECTIONS - 45).map(({id: assetId}) => {
             return (async () => {
                 try {
                     return dbQueryAssetHistoryById(assetId);
