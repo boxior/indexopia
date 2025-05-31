@@ -12,3 +12,5 @@ export const OMIT_ASSETS_IDS = [
     "official-trump",
     "first-digital-usd",
 ];
+
+export const MAX_DB_CONNECTIONS = 50;
