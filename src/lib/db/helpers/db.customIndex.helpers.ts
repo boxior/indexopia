@@ -288,7 +288,8 @@ export const dbHandleQueryCustomIndexes = async (): Promise<CustomIndexType[]> =
         }));
     } catch (error) {
         console.error("Error fetching custom indexes:", error);
-        throw error;
+        return [];
+        // throw error;
     }
 };
 

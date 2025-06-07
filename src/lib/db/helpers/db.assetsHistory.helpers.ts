@@ -51,7 +51,8 @@ export const dbQueryAssetHistoryById = async (assetId: string): Promise<AssetHis
         return rows as AssetHistory[];
     } catch (error) {
         console.error("Error fetching asset histories by ID:", error);
-        throw error;
+        return [];
+        // throw error;
     }
 };
 
