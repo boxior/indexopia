@@ -36,7 +36,8 @@ const dbQueryCustomIndexById = async (id: Id): Promise<Omit<CustomIndexType, "as
             : null; // Return the first result or null if not found
     } catch (error) {
         console.error("Error fetching custom index by ID:", error);
-        throw error;
+        return null;
+        // throw error;
     }
 };
 
@@ -59,7 +60,8 @@ export const dbQueryCustomIndexes = async (): Promise<Omit<CustomIndexType, "ass
         >[]; // Return the list of indexes
     } catch (error) {
         console.error("Error fetching custom indexes:", error);
-        throw error;
+        return [];
+        // throw error;
     }
 };
 
@@ -78,7 +80,8 @@ export const dbQueryAssetsByCustomIndexId = async (customIndexId: Id) => {
         return rows as CustomIndexAssetWithCustomIndexId[]; // Return all assets for the custom index
     } catch (error) {
         console.error("Error fetching assets by custom index ID:", error);
-        throw error;
+        return [];
+        // throw error;
     }
 };
 
@@ -95,7 +98,8 @@ export const dbQueryCustomIndexAssets = async () => {
         return rows as CustomIndexAssetWithCustomIndexId[]; // Return the list of all assets
     } catch (error) {
         console.error("Error fetching custom index assets:", error);
-        throw error;
+        return [];
+        // throw error;
     }
 };
 
@@ -335,3 +339,11 @@ export const dbDeleteCustomIndex = async (customIndexId: string): Promise<void> 
         throw error;
     }
 };
+
+export async function getUniqueCustomIndexesAssetIds() {
+    const [rows] = (await mySqlPool.execute(
+        `SELECT DISTINCT assetId FROM ${TABLE_NAME_CUSTOM_INDEX_ASSETS}`
+    )) as unknown as [{assetId: string}[]];
+
+    return rows.map((row: {assetId: string}) => row.assetId);
+}

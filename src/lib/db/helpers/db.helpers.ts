@@ -51,11 +51,12 @@ export const migrateAssetsHistoriesFromJsonToDb = async () => {
     }
 };
 
-export const manageAssets = async ({limit}: {limit?: number}) => {
+export const manageAssets = async ({limit = MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length}: {limit?: number}) => {
     const {data, timestamp} = await fetchAssets({limit});
+    const assets = filterAssetsByOmitIds(data);
 
-    await dbInsertAssets(data);
-    await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, data, ASSETS_FOLDER_PATH);
+    await dbInsertAssets(assets);
+    await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, assets, ASSETS_FOLDER_PATH);
 };
 
 export const manageAssetHistory = async ({id}: {id: string}) => {
@@ -140,9 +141,9 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const manageAssetsHistory = async (upToRank: number | undefined = MAX_ASSET_COUNT) => {
+export const manageAssetsHistory = async () => {
     const assets = await dbQueryAssets();
-    const assetsList = filterAssetsByOmitIds(assets, upToRank);
+    const assetsList = filterAssetsByOmitIds(assets);
 
     for (const asset of assetsList) {
         try {
@@ -524,7 +525,7 @@ async function getAssetsWithHistories({
     };
 }
 
-function filterAssetsByOmitIds(assets: Asset[], limit: number): Asset[] {
+function filterAssetsByOmitIds(assets: Asset[], limit: number | undefined = assets.length): Asset[] {
     return assets
         .slice(0, limit + OMIT_ASSETS_IDS.length)
         .filter(a => !OMIT_ASSETS_IDS.includes(a.id))
