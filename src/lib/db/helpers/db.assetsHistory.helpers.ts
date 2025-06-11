@@ -51,12 +51,31 @@ export const dbQueryAssetHistoryById = async (assetId: string): Promise<AssetHis
         return rows as AssetHistory[];
     } catch (error) {
         console.error("Error fetching asset histories by ID:", error);
-        return [];
-        // throw error;
+        throw error;
+    }
+};
+
+// Helper function: Fetch all history for a specific asset by `assetId` with optional `startTime`
+export const dbQueryAssetHistoryByIdAndStartTime = async (
+    assetId: string,
+    startTime: number
+): Promise<AssetHistory[]> => {
+    try {
+        const sql = `
+            SELECT * FROM ${TABLE_NAME_ASSET_HISTORY} 
+            WHERE assetId = ? AND time >= ?
+            ;
+        `;
+        const [rows] = await mySqlPool.query(sql, [assetId, startTime]);
+        return rows as AssetHistory[];
+    } catch (error) {
+        console.error("Error fetching asset histories by ID and start time:", error);
+        throw error;
     }
 };
 
 // Helper function: Fetch all history for an array of assetIds and return a map by assetId
+// For some reason this helper produce the issue with Next.js Date.now()
 export const dbQueryAssetHistoryByIds = async (assetIds: string[]): Promise<Record<string, AssetHistory[]>> => {
     try {
         // Generate placeholders for the SQL query (?, ?, ?,...)
@@ -86,24 +105,5 @@ export const dbQueryAssetHistoryByIds = async (assetIds: string[]): Promise<Reco
     } catch (error) {
         console.error("Error fetching asset histories for multiple assetIds:", error);
         return {};
-    }
-};
-
-// Helper function: Fetch all history for a specific asset by `assetId` with optional `startTime`
-export const dbQueryAssetHistoryByIdAndStartTime = async (
-    assetId: string,
-    startTime: number
-): Promise<AssetHistory[]> => {
-    try {
-        const sql = `
-            SELECT * FROM ${TABLE_NAME_ASSET_HISTORY} 
-            WHERE assetId = ? AND time >= ?
-            ;
-        `;
-        const [rows] = await mySqlPool.query(sql, [assetId, startTime]);
-        return rows as AssetHistory[];
-    } catch (error) {
-        console.error("Error fetching asset histories by ID and start time:", error);
-        throw error;
     }
 };

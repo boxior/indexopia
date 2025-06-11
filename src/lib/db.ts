@@ -9,7 +9,7 @@ export const mySqlPool = mysql.createPool({
     database: ENV_VARIABLES.MYSQL_DATABASE, // Replace with your MySQL database name
     waitForConnections: true,
     connectionLimit: 50, // Max number of connections in the pool
-    queueLimit: 100, // Increased to allow more queries to queue when the pool is busy
-    maxIdle: 10, // Allow up to 10 idle connections in the pool
-    idleTimeout: 60000, // Increase timeout for idle connections (60 seconds)
+    queueLimit: 0, // Increased to allow more queries to queue when the pool is busy
+    maxIdle: 1, // Allow up to 1 idle connections in the pool
+    idleTimeout: 10000, // Increase timeout for idle connections (10 seconds)
 });

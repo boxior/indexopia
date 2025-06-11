@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
+        // Assets
         await manageAssets();
 
         // Assets history
