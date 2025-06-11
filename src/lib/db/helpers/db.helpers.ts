@@ -149,9 +149,8 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const manageAssetsHistory = async () => {
     const assets = await dbQueryAssets();
-    const assetsList = filterAssetsByOmitIds(assets);
 
-    for (const asset of assetsList) {
+    for (const asset of assets) {
         try {
             await manageAssetHistory({id: asset.id});
         } catch (err) {
