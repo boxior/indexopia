@@ -1,7 +1,7 @@
 import {NextResponse, NextRequest} from "next/server";
-import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
 import {manageAssets} from "@/lib/db/helpers/db.helpers";
 import {ENV_VARIABLES} from "@/env";
+import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
 export const dynamic = "force-dynamic";
 
 /**

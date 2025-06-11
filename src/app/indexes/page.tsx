@@ -18,10 +18,10 @@ export default async function IndexesPage() {
 const SuspendedComponent = async () => {
     const assets = await getCachedTopAssets();
 
-    // precache all histories, so that in the nested helpers it will be taken from cache as we use `use cache` directive.
-    // Later, in any queries it will be taken from cache.
+    // // precache all histories, so that in the nested helpers it will be taken from cache as we use `use cache` directive.
+    // // Later, in any queries it will be taken from cache.
     await Promise.all(
-        assets.slice(0, 5).map(({id: assetId}) => {
+        assets.slice(0, 30).map(({id: assetId}) => {
             return (async () => {
                 try {
                     return dbQueryAssetHistoryById(assetId);
