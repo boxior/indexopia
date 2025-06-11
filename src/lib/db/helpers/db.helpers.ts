@@ -20,7 +20,11 @@ import {cloneDeep, get, pick, set} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
 import {dbInsertAssets, dbQueryAssets} from "@/lib/db/helpers/db.assets.helpers";
-import {dbInsertAssetHistory, dbQueryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
+import {
+    dbInsertAssetHistory,
+    dbQueryAssetHistoryById,
+    dbQueryAssetHistoryByIds,
+} from "@/lib/db/helpers/db.assetsHistory.helpers";
 import {dbHandleQueryCustomIndexById, dbHandleQueryCustomIndexes} from "@/lib/db/helpers/db.customIndex.helpers";
 import {unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
@@ -51,11 +55,14 @@ export const migrateAssetsHistoriesFromJsonToDb = async () => {
     }
 };
 
-export const manageAssets = async ({limit}: {limit?: number}) => {
-    const {data, timestamp} = await fetchAssets({limit});
+export const manageAssets = async () => {
+    const limit = MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
 
-    await dbInsertAssets(data);
-    await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, data, ASSETS_FOLDER_PATH);
+    const {data, timestamp} = await fetchAssets({limit});
+    const assets = filterAssetsByOmitIds(data);
+
+    await dbInsertAssets(assets);
+    await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, assets, ASSETS_FOLDER_PATH);
 };
 
 export const manageAssetHistory = async ({id}: {id: string}) => {
@@ -140,9 +147,9 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const manageAssetsHistory = async (upToRank: number | undefined = MAX_ASSET_COUNT) => {
+export const manageAssetsHistory = async () => {
     const assets = await dbQueryAssets();
-    const assetsList = filterAssetsByOmitIds(assets, upToRank);
+    const assetsList = filterAssetsByOmitIds(assets);
 
     for (const asset of assetsList) {
         try {
@@ -305,23 +312,13 @@ export const getAssetHistoriesWithSmallestRange = async ({
     let minStartTime: number | null = startTime ?? null;
     let maxEndTime: number | null = endTime ?? null;
 
-    const historyDatas = await Promise.all(
-        assetIds.map(assetId => {
-            return (async () => {
-                try {
-                    return dbQueryAssetHistoryById(assetId);
-                } catch {
-                    return [];
-                }
-            })();
-        })
-    );
+    const {allAssetsHistory} = await fetchAllAssetsAndHistory();
 
     // Step 1: Read the history for each asset and determine the smallest start time
 
-    for (const [index, assetId] of assetIds.entries()) {
+    for (const assetId of assetIds) {
         try {
-            const historyData = historyDatas[index] ?? [];
+            const historyData = allAssetsHistory[assetId] ?? [];
 
             const historyList = historyData ?? [];
 
@@ -524,7 +521,7 @@ async function getAssetsWithHistories({
     };
 }
 
-function filterAssetsByOmitIds(assets: Asset[], limit: number): Asset[] {
+function filterAssetsByOmitIds(assets: Asset[], limit: number | undefined = assets.length): Asset[] {
     return assets
         .slice(0, limit + OMIT_ASSETS_IDS.length)
         .filter(a => !OMIT_ASSETS_IDS.includes(a.id))
@@ -541,4 +538,22 @@ export const normalizeDbBoolean = <Input extends Record<string, unknown>, Output
         set(clonedEntity, key, Boolean(get(clonedEntity, key)));
     }
     return clonedEntity as unknown as Output;
+};
+
+/**
+ * As we pre-cache it on a phase of building, we will use it inside nested implementations to avoid much queries into DB, like, during `map` iteration.
+ */
+export const fetchAllAssetsAndHistory = async () => {
+    "use cache";
+    cacheTag(CacheTag.ALL_ASSETS_AND_HISTORY);
+
+    const allAssets = await dbQueryAssets();
+    // precache all histories, so that in the nested helpers it will be taken from cache as we use `use cache` directive.
+    // Later, in any queries it will be taken from cache.
+    const allAssetsHistory = await dbQueryAssetHistoryByIds(allAssets.map(({id: assetId}) => assetId));
+
+    return {
+        allAssets,
+        allAssetsHistory,
+    };
 };

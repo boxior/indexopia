@@ -56,6 +56,39 @@ export const dbQueryAssetHistoryById = async (assetId: string): Promise<AssetHis
     }
 };
 
+// Helper function: Fetch all history for an array of assetIds and return a map by assetId
+export const dbQueryAssetHistoryByIds = async (assetIds: string[]): Promise<Record<string, AssetHistory[]>> => {
+    try {
+        // Generate placeholders for the SQL query (?, ?, ?,...)
+        const placeholders = assetIds.map(() => "?").join(", ");
+
+        // SQL query to fetch histories for multiple assetIds
+        const sql = `
+            SELECT * FROM ${TABLE_NAME_ASSET_HISTORY} 
+            WHERE assetId IN (${placeholders})
+            ;
+        `;
+
+        // Perform the query
+        const [rows] = await mySqlPool.query(sql, assetIds);
+
+        // Convert the results into a Map by assetId
+        const resultMap: Record<string, AssetHistory[]> = {};
+        (rows as AssetHistory[]).forEach(row => {
+            if (!resultMap[row.assetId]) {
+                resultMap[row.assetId] = [row];
+            } else {
+                resultMap[row.assetId] = [...resultMap[row.assetId], row];
+            }
+        });
+
+        return resultMap;
+    } catch (error) {
+        console.error("Error fetching asset histories for multiple assetIds:", error);
+        return {};
+    }
+};
+
 // Helper function: Fetch all history for a specific asset by `assetId` with optional `startTime`
 export const dbQueryAssetHistoryByIdAndStartTime = async (
     assetId: string,

@@ -1,7 +1,8 @@
 import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
-import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
 import {manageAssets, manageAssetsHistory} from "@/lib/db/helpers/db.helpers";
+import {revalidateTag} from "next/cache";
+import {CacheTag} from "@/utils/cache/constants.cache";
 export const dynamic = "force-dynamic";
 
 /**
@@ -24,13 +25,12 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
-        // Assets
-        const limit = MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
-
-        await manageAssets({limit});
+        await manageAssets();
 
         // Assets history
         await manageAssetsHistory();
+
+        revalidateTag(CacheTag.ALL_ASSETS_AND_HISTORY);
 
         return NextResponse.json(
             {success: true},

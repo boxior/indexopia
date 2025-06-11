@@ -1,5 +1,4 @@
 import {NextResponse, NextRequest} from "next/server";
-import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
 import {manageAssets} from "@/lib/db/helpers/db.helpers";
 import {ENV_VARIABLES} from "@/env";
 export const dynamic = "force-dynamic";
@@ -25,9 +24,7 @@ export async function GET(_req: NextRequest) {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
-        const limit = MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
-
-        await manageAssets({limit});
+        await manageAssets();
 
         return NextResponse.json(
             {success: true},
