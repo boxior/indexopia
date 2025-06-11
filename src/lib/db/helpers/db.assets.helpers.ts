@@ -61,8 +61,7 @@ export const dbQueryAssets = async (): Promise<Asset[]> => {
         return rows as Asset[];
     } catch (error) {
         console.error("Error fetching data:", error);
-        return [];
-        // throw error;
+        throw error;
     }
 };
 // Helper function: Fetch data by ID

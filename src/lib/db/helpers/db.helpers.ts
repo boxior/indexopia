@@ -521,7 +521,7 @@ async function getAssetsWithHistories({
     };
 }
 
-function filterAssetsByOmitIds(assets: Asset[], limit: number | undefined = assets.length): Asset[] {
+export function filterAssetsByOmitIds(assets: Asset[], limit: number | undefined = assets.length): Asset[] {
     return assets
         .slice(0, limit + OMIT_ASSETS_IDS.length)
         .filter(a => !OMIT_ASSETS_IDS.includes(a.id))
