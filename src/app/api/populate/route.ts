@@ -25,9 +25,7 @@ export async function POST(req: NextRequest) {
         }
 
         // Assets
-        const limit = MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
-
-        await manageAssets({limit});
+        await manageAssets();
 
         // Assets history
         await manageAssetsHistory();

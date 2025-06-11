@@ -25,9 +25,7 @@ export async function GET(_req: NextRequest) {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
-        const limit = MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
-
-        await manageAssets({limit});
+        await manageAssets();
 
         return NextResponse.json(
             {success: true},

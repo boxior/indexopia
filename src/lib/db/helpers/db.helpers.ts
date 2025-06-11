@@ -51,10 +51,13 @@ export const migrateAssetsHistoriesFromJsonToDb = async () => {
     }
 };
 
-export const manageAssets = async ({limit}: {limit?: number}) => {
-    const {data, timestamp} = await fetchAssets({limit});
+export const manageAssets = async () => {
+    const limit = MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
 
-    await dbInsertAssets(data);
+    const {data, timestamp} = await fetchAssets({limit});
+    const assets = filterAssetsByOmitIds(data);
+
+    await dbInsertAssets(assets);
     await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, data, ASSETS_FOLDER_PATH);
 };
 
@@ -140,11 +143,10 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const manageAssetsHistory = async (upToRank: number | undefined = MAX_ASSET_COUNT) => {
+export const manageAssetsHistory = async () => {
     const assets = await dbQueryAssets();
-    const assetsList = filterAssetsByOmitIds(assets, upToRank);
 
-    for (const asset of assetsList) {
+    for (const asset of assets) {
         try {
             await manageAssetHistory({id: asset.id});
         } catch (err) {
