@@ -19,9 +19,13 @@ import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.consta
 import {cloneDeep, get, pick, set} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
-import {dbInsertAssets, dbQueryAssets} from "@/lib/db/helpers/db.assets.helpers";
+import {dbInsertAssets, dbQueryAssets, dbQueryAssetsByIds} from "@/lib/db/helpers/db.assets.helpers";
 import {dbInsertAssetHistory, dbQueryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
-import {dbHandleQueryCustomIndexById, dbHandleQueryCustomIndexes} from "@/lib/db/helpers/db.customIndex.helpers";
+import {
+    dbGetUniqueCustomIndexesAssetIds,
+    dbHandleQueryCustomIndexById,
+    dbHandleQueryCustomIndexes,
+} from "@/lib/db/helpers/db.customIndex.helpers";
 import {unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineTags} from "@/utils/cache/helpers.cache";
@@ -57,8 +61,14 @@ export const manageAssets = async () => {
     const {data, timestamp} = await fetchAssets({limit});
     const assets = filterAssetsByOmitIds(data);
 
-    await dbInsertAssets(assets);
-    await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, assets, ASSETS_FOLDER_PATH);
+    const customIndexesAssetsIds = await dbGetUniqueCustomIndexesAssetIds();
+    const assetsIdsToFetchMore = customIndexesAssetsIds.filter(id => !assets.some(asset => asset.id === id));
+    const assetsToFetchMore = await dbQueryAssetsByIds(assetsIdsToFetchMore);
+
+    const allAssets = [...assets, ...assetsToFetchMore];
+
+    await dbInsertAssets(allAssets);
+    await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, allAssets, ASSETS_FOLDER_PATH);
 };
 
 export const manageAssetHistory = async ({id}: {id: string}) => {
