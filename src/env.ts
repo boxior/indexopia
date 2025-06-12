@@ -21,6 +21,7 @@ interface EnvVariables {
 }
 
 // Parse environment variables and ensure they have the correct types
+// Example: Vercel uses `process.env.PORT` and Amplify uses `process.env.NEXT_PUBLIC_PORT`
 export const ENV_VARIABLES: EnvVariables = {
     PORT: process.env.PORT ?? process.env.NEXT_PUBLIC_PORT ?? "",
     NODE_ENV: process.env.NODE_ENV ?? process.env.NEXT_PUBLIC_NODE_ENV ?? "",
