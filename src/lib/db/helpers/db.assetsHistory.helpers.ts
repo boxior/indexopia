@@ -73,37 +73,3 @@ export const dbQueryAssetHistoryByIdAndStartTime = async (
         throw error;
     }
 };
-
-// Helper function: Fetch all history for an array of assetIds and return a map by assetId
-// For some reason this helper produce the issue with Next.js Date.now()
-export const dbQueryAssetHistoryByIds = async (assetIds: string[]): Promise<Record<string, AssetHistory[]>> => {
-    try {
-        // Generate placeholders for the SQL query (?, ?, ?,...)
-        const placeholders = assetIds.map(() => "?").join(", ");
-
-        // SQL query to fetch histories for multiple assetIds
-        const sql = `
-            SELECT * FROM ${TABLE_NAME_ASSET_HISTORY} 
-            WHERE assetId IN (${placeholders})
-            ;
-        `;
-
-        // Perform the query
-        const [rows] = await mySqlPool.query(sql, assetIds);
-
-        // Convert the results into a Map by assetId
-        const resultMap: Record<string, AssetHistory[]> = {};
-        (rows as AssetHistory[]).forEach(row => {
-            if (!resultMap[row.assetId]) {
-                resultMap[row.assetId] = [row];
-            } else {
-                resultMap[row.assetId] = [...resultMap[row.assetId], row];
-            }
-        });
-
-        return resultMap;
-    } catch (error) {
-        console.error("Error fetching asset histories for multiple assetIds:", error);
-        return {};
-    }
-};

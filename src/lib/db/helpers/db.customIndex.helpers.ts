@@ -339,7 +339,7 @@ export const dbDeleteCustomIndex = async (customIndexId: string): Promise<void> 
     }
 };
 
-export async function getUniqueCustomIndexesAssetIds() {
+export async function dbGetUniqueCustomIndexesAssetIds() {
     const [rows] = (await mySqlPool.execute(
         `SELECT DISTINCT assetId FROM ${TABLE_NAME_CUSTOM_INDEX_ASSETS}`
     )) as unknown as [{assetId: string}[]];
