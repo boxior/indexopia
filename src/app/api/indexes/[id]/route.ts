@@ -10,7 +10,7 @@ export const dynamic = "force-dynamic";
 export async function DELETE(req: NextRequest) {
     try {
         const urlParts = req.nextUrl.pathname.split("/");
-        const idIndex = urlParts.indexOf("index") + 1;
+        const idIndex = urlParts.indexOf("indexes") + 1;
         const id = urlParts[idIndex];
 
         await dbDeleteIndex(id);

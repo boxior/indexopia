@@ -4,7 +4,7 @@ import {Id, IndexOverview} from "@/utils/types/general.types";
 
 export const clientApiDeleteCustomIndex = async (customIndexId: Id) => {
     try {
-        const response = await fetch(`/api/index/${customIndexId}`, {
+        const response = await fetch(`/api/indexes/${customIndexId}`, {
             method: "DELETE",
         });
 
@@ -37,9 +37,9 @@ export const clientApiGetAssets = async () => {
 
 export const clientApiGetIndexHistory = async (id: Id, indexOverview?: IndexOverview) => {
     try {
-        const response = await fetch(`/api/index/${id}/history`, {
+        const response = await fetch(`/api/indexes/${id}/history`, {
             method: "POST",
-            body: JSON.stringify(indexOverview),
+            body: JSON.stringify({indexOverview}),
         });
 
         if (!response.ok) {

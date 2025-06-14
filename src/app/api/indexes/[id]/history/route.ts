@@ -7,12 +7,12 @@ import {pick} from "lodash";
 export async function POST(req: NextRequest) {
     try {
         const urlParts = req.nextUrl.pathname.split("/");
-        const idIndex = urlParts.indexOf("index") + 1;
+        const idIndex = urlParts.indexOf("indexes") + 1;
         const id = urlParts[idIndex];
 
         const body = await req.json();
-        const {indexOverview: propIndexOverview} = body;
 
+        const {indexOverview: propIndexOverview} = body;
         const indexOverview = propIndexOverview ?? (await dbGetIndexOverviewById(id));
 
         if (!indexOverview) {

@@ -33,6 +33,7 @@ import Link from "next/link";
 import {CreateCustomIndex} from "@/app/indexes/components/CustomIndex/CreateCustomIndex";
 import {clientApiDeleteCustomIndex} from "@/utils/clientApi/customIndex.clientApi";
 import {IndexHistoryPreviewChart} from "@/app/indexes/components/IndexHistoryPreviewChart";
+import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 
 export default function IndexesTable({data}: {data: IndexOverview[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -145,10 +146,10 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
             },
         },
         {
-            id: "historyOverview_7d_chart",
+            id: `historyOverview_${HISTORY_OVERVIEW_DAYS}d_chart`,
             accessorFn: index => index,
             cell: ({row}) => {
-                const index = row.getValue("historyOverview_7d_chart") as IndexOverview;
+                const index = row.getValue(`historyOverview_${HISTORY_OVERVIEW_DAYS}d_chart`) as IndexOverview;
 
                 return (
                     <div className={`lowercase ${getChartColorClassname(index.historyOverview.days7)}`}>
@@ -156,9 +157,9 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
                     </div>
                 ); // Safely render the value
             },
-            header: renderColumnSortedHeader("7d Chart"),
+            header: renderColumnSortedHeader(`${HISTORY_OVERVIEW_DAYS}d Chart`),
             meta: {
-                text: "7d Chart",
+                text: `${HISTORY_OVERVIEW_DAYS}d Chart`,
             },
         },
         {
