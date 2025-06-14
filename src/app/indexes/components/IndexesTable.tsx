@@ -77,7 +77,7 @@ export default function IndexesTable({
         };
 
     const handleDeleteIndex = (index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>) => async () => {
-        if (index.isDefault) {
+        if (index.isSystem) {
             return;
         }
         await clientApiDeleteCustomIndex(index.id); // need tls
@@ -228,7 +228,7 @@ export default function IndexesTable({
             cell: ({row}) => {
                 const index = row.original as unknown as Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
 
-                if (index.isDefault) {
+                if (index.isSystem) {
                     return null;
                 }
 

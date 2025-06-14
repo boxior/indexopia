@@ -24,7 +24,7 @@ export function UpdateCustomIndex({assets, customIndex}: {assets: Asset[]; custo
         setOpen(false);
     };
 
-    const doDelete = !isNil(customIndex?.id) && !customIndex?.isDefault;
+    const doDelete = !isNil(customIndex?.id) && !customIndex?.isSystem;
 
     const handleDelete = async () => {
         if (!doDelete) {

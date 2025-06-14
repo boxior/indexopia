@@ -473,7 +473,7 @@ export const getCustomIndex = async ({
     }));
 
     const index: Omit<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>, "historyOverview" | "maxDrawDown"> = {
-        ...pick(customIndex, ["id", "name", "startTime", "isDefault"]),
+        ...pick(customIndex, ["id", "name", "startTime", "isSystem"]),
         assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
         history: [],
     };

@@ -92,18 +92,20 @@ export interface Index<A = Asset> {
     maxDrawDown: MaxDrawDown;
     startTime?: number;
     endTime?: number;
-    isDefault?: boolean; // means system one.
+    isSystem?: boolean; // means system one.
 }
+
+export type IndexOverview = Pick<Index, "id" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime">;
 
 export interface CustomIndexType {
     id: Id;
     name: string;
     assets: CustomIndexAsset[];
     startTime?: number;
-    isDefault?: boolean;
+    isSystem?: boolean;
 }
 
-export type CustomIndexTypeDb = Omit<CustomIndexType, "isDefault" | "assets"> & {isDefault: number | null};
+export type CustomIndexTypeDb = Omit<CustomIndexType, "isSystem" | "assets"> & {isSystem: number | null};
 
 /**
  * @link https://momentjscom.readthedocs.io/en/latest/moment/04-displaying/01-format/

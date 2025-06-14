@@ -21,6 +21,6 @@ export const handleSaveDefaultCustomIndex = async (props: SaveDefaultCustomIndex
         name: props.name ?? `Default by ${props.defaultIndexBy} and ${props.defaultIndexSortBy}`,
         assets: assets.map(a => pick(a, ["id", "portion"])),
         startTime,
-        isDefault: true,
+        isSystem: true,
     });
 };
