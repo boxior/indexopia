@@ -2,6 +2,7 @@ import {
     AssetWithHistory,
     AssetWithProfitAndMaxDrawDown,
     CustomIndexAsset,
+    IndexOverviewAsset,
     SystemIndexBy,
     SystemIndexSortBy,
 } from "@/utils/types/general.types";
@@ -14,13 +15,13 @@ import {getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown} from "@/utils/hele
 import {pick} from "lodash";
 import {getIndexAssetsWithPortionsByRankAndMaxDrawDown} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankAndMaxDrawDown.helper";
 
-export function handleGenerateSystemIndex(props: {
+export function handleGenerateSystemIndexOverviewAssets(props: {
     assets: AssetWithHistory[];
     upToNumber: number;
     systemIndexBy?: SystemIndexBy;
     systemIndexSortBy?: SystemIndexSortBy;
     equalPortions?: boolean;
-}): CustomIndexAsset[] {
+}): IndexOverviewAsset[] {
     const {
         systemIndexBy = SystemIndexBy.RANK,
         systemIndexSortBy = SystemIndexSortBy.PROFIT,
@@ -31,7 +32,10 @@ export function handleGenerateSystemIndex(props: {
 
     if (equalPortions) {
         const assets = sortedAssetsByRank.slice(0, upToNumber);
-        return assets.map(a => ({...pick(a, "id"), portion: Math.trunc(100 / assets.length)}));
+        return assets.map(a => ({
+            ...pick(a, ["id", "symbol", "name", "rank"]),
+            portion: Math.trunc(100 / assets.length),
+        }));
     }
 
     return (() => {

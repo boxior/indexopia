@@ -44,7 +44,7 @@ export type CustomIndexAssetWithCustomIndexId = Pick<Required<Asset>, "id" | "po
 
 export type AssetWithHistory = Asset & {history: AssetHistory[]};
 
-export type AssetWithHistoryAndOverview = Asset & {history: AssetHistory[]; historyOverview: HistoryOverview};
+export type AssetWithHistoryAndOverview<A = Asset> = A & {history: AssetHistory[]; historyOverview: HistoryOverview};
 
 export type AssetWithHistoryOverviewAndPortion = Asset & {
     history: AssetHistory[];
@@ -95,10 +95,12 @@ export interface Index<A = Asset> {
     isSystem?: boolean; // means system one.
 }
 
+export type IndexOverviewAsset = Pick<Required<Asset>, "id" | "name" | "symbol" | "rank" | "portion">;
+
 export type IndexOverview = Pick<
     Index,
     "id" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime" | "isSystem"
-> & {assets: Pick<Asset, "id" | "name" | "symbol" | "rank">};
+> & {assets: IndexOverviewAsset[]};
 
 export interface CustomIndexType {
     id: Id;

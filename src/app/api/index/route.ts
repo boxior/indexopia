@@ -2,8 +2,9 @@ import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 import {
     handleSaveSystemCustomIndex,
-    SaveSystemCustomIndexProps,
+    SaveSystemIndexProps,
 } from "@/utils/heleprs/generators/handleSaveSystemCustomIndex.helper";
+import {handleSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
 
 export const dynamic = "force-dynamic";
 
@@ -27,9 +28,10 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
-        const body = (await req.json()) as SaveSystemCustomIndexProps;
+        const body = (await req.json()) as SaveSystemIndexProps;
 
-        await handleSaveSystemCustomIndex(body);
+        // await handleSaveSystemCustomIndex(body);
+        await handleSaveSystemIndexOverview(body);
 
         return NextResponse.json(
             {success: true},

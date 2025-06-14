@@ -1,11 +1,13 @@
 import {mySqlPool} from "@/lib/db";
 import {IndexOverview} from "@/utils/types/general.types";
 import {ENV_VARIABLES} from "@/env";
+import {connection} from "next/server";
 
 const TABLE_NAME_CUSTOM_INDEX_OVERVIEW = ENV_VARIABLES.MYSQL_TABLE_NAME_CUSTOM_INDEX_OVERVIEW; // Ensure your database table exists
 
 // Insert an IndexOverview record into the database
-const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Promise<number | null> => {
+export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Promise<number | null> => {
+    await connection();
     try {
         const query = `
             INSERT INTO ${TABLE_NAME_CUSTOM_INDEX_OVERVIEW}
@@ -41,7 +43,9 @@ const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Promise<num
 };
 
 // Fetch all IndexOverview items from the database
-const dbGetListIndexOverview = async (): Promise<IndexOverview[] | null> => {
+export const dbGetListIndexOverview = async (): Promise<IndexOverview[]> => {
+    await connection();
+
     try {
         const query = `
             SELECT 
@@ -53,16 +57,16 @@ const dbGetListIndexOverview = async (): Promise<IndexOverview[] | null> => {
                 startTime,
                 endTime,
                 isSystem
-            FROM IndexOverview;
+            FROM ${TABLE_NAME_CUSTOM_INDEX_OVERVIEW};
         `;
 
         const [rows] = await mySqlPool.execute(query);
         const indexOverviews = rows as Array<{
             id: number;
             name: string;
-            historyOverview: string; // JSON stored as string in the DB
-            maxDrawDown: string; // JSON stored as string in the DB
-            assets: string; // JSON stored as string in the DB
+            historyOverview: IndexOverview["historyOverview"]; // JSON stored as string in the DB
+            maxDrawDown: IndexOverview["maxDrawDown"]; // JSON stored as string in the DB
+            assets: IndexOverview["assets"]; // JSON stored as string in the DB
             startTime: number;
             endTime: number;
             isSystem: number; // Stored as tinyint in the DB
@@ -72,17 +76,17 @@ const dbGetListIndexOverview = async (): Promise<IndexOverview[] | null> => {
         const result: IndexOverview[] = indexOverviews.map(item => ({
             id: item.id,
             name: item.name,
-            historyOverview: JSON.parse(item.historyOverview), // Parse JSON
-            maxDrawDown: JSON.parse(item.maxDrawDown), // Parse JSON
-            assets: JSON.parse(item.assets), // Parse JSON array of assets
+            historyOverview: item.historyOverview, // Parse JSON
+            maxDrawDown: item.maxDrawDown, // Parse JSON
+            assets: item.assets, // Parse JSON array of assets
             startTime: item.startTime || undefined,
             endTime: item.endTime || undefined,
             isSystem: !!item.isSystem, // Convert tinyint to boolean
         }));
 
-        return result; // Return the parsed array of IndexOverview items
+        return result ?? []; // Return the parsed array of IndexOverview items
     } catch (error) {
         console.error("Error fetching all IndexOverview records:", error);
-        return null;
+        return [];
     }
 };

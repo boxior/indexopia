@@ -256,18 +256,17 @@ export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
     return (assets ?? []).filter(asset => ids.includes(asset.id));
 };
 
-export const getIndexHistoryOverview = async (
-    index: Omit<Index<AssetWithHistoryAndOverview>, "historyOverview" | "maxDrawDown">
+export const getIndexHistoryOverview = async <A extends {id: string; portion?: number} = Asset>(
+    assets: AssetWithHistoryAndOverview<A>[]
 ): Promise<HistoryOverview> => {
     // Read all assets
-    const indexAssets = index.assets;
 
-    if (indexAssets.length === 0) {
+    if (assets.length === 0) {
         return {days1: 0, days7: 0, total: 0};
     }
 
     // Extract portions from the index assets
-    const portions = indexAssets.map(asset => asset.portion ?? 0);
+    const portions = assets.map(asset => asset.portion ?? 0);
 
     // Ensure portions sum to 100%
     const portionSum = portions.reduce((sum, portion) => sum + portion, 0);
@@ -280,7 +279,7 @@ export const getIndexHistoryOverview = async (
     let weightedDays7 = 0;
     let weightedTotal = 0;
 
-    for (const asset of indexAssets) {
+    for (const asset of assets) {
         try {
             const assetHistoryOverview = asset.historyOverview;
 
@@ -371,9 +370,11 @@ export const getAssetHistoriesWithSmallestRange = async ({
     return {histories, startTime: minStartTime ?? undefined, endTime: maxEndTime ?? undefined};
 };
 
-export const getIndexHistory = async (
-    index: Omit<Index<AssetWithHistoryAndOverview>, "historyOverview" | "maxDrawDown">
-): Promise<IndexHistory[]> => {
+export const getIndexHistory = async <A extends {id: Id; portion?: number}>(index: {
+    id: Id;
+    name: string;
+    assets: AssetWithHistoryAndOverview<A>[];
+}): Promise<IndexHistory[]> => {
     const portions = index.assets.map(asset => asset.portion ?? 0);
 
     return mergeAssetHistories(
@@ -383,7 +384,11 @@ export const getIndexHistory = async (
     );
 };
 
-function mergeAssetHistories(histories: AssetHistory[][], portions: number[], index: Partial<Index>): IndexHistory[] {
+function mergeAssetHistories<A = Asset>(
+    histories: AssetHistory[][],
+    portions: number[],
+    index: {id: Id; name: string; assets: AssetWithHistoryAndOverview<A>[]}
+): IndexHistory[] {
     if (histories.length === 0 || histories[0].length === 0) {
         return [];
     }
@@ -479,13 +484,13 @@ export const getCustomIndex = async ({
     };
 
     const indexHistory = await getIndexHistory(index);
-    const indexHistoryOverview = await getIndexHistoryOverview(index);
+    const indexHistoryOverview = await getIndexHistoryOverview(index.assets);
     const indexMaxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
     return {
         ...index,
         assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
-        startTime,
+        startTime: startTime ?? performance.now(),
         endTime,
         history: indexHistory,
         historyOverview: indexHistoryOverview,
@@ -506,15 +511,15 @@ export async function getCustomIndexes(): Promise<Index<AssetWithHistoryOverview
     return customIndexes.filter(ci => ci !== null);
 }
 
-async function getAssetsWithHistories({
+export async function getAssetsWithHistories<A extends {id: string} = Asset>({
     assets,
     startTime: startTimeProp,
     endTime: endTimeProp,
 }: {
-    assets: Asset[];
+    assets: A[];
     startTime?: number;
     endTime?: number;
-}): Promise<{assets: AssetWithHistoryAndOverview[]; startTime?: number; endTime?: number}> {
+}): Promise<{assets: AssetWithHistoryAndOverview<A>[]; startTime?: number; endTime?: number}> {
     const {histories, startTime, endTime} = await getAssetHistoriesWithSmallestRange({
         assetIds: assets.map(asset => asset.id),
         startTime: startTimeProp,

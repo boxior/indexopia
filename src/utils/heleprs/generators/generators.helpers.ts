@@ -1,11 +1,11 @@
-import {Asset} from "@/utils/types/general.types";
+import {Asset, IndexOverviewAsset} from "@/utils/types/general.types";
 import {MAX_PORTION} from "@/app/indexes/components/CustomIndex/CustomIndexAssetsPortions";
 
 /**
  * Assets portion should be strictly equal MAX_PORTION
  * @param assets
  */
-export const correctAssetPortions = (assets: Pick<Required<Asset>, "id" | "portion">[]) => {
+export const correctAssetPortions = (assets: IndexOverviewAsset[]) => {
     const draftSumm = assets.reduce((acc, r) => {
         return acc + r.portion;
     }, 0);

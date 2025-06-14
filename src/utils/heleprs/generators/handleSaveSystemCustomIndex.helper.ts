@@ -1,9 +1,9 @@
 import {SystemIndexBy, SystemIndexSortBy} from "@/utils/types/general.types";
-import {handleGenerateSystemIndexFromScratch} from "@/utils/heleprs/generators/handleGenerateSystemIndexFromScratch.helper";
+import {handleGenerateSystemIndexOverviewAssetsWithStartEndTimes} from "@/utils/heleprs/generators/handleGenerateSystemIndexFromScratch.helper";
 import {createCustomIndex} from "@/app/indexes/[id]/actions";
 import {pick} from "lodash";
 
-export type SaveSystemCustomIndexProps = {
+export type SaveSystemIndexProps = {
     upToNumber?: number;
     topAssetsCount?: number;
     systemIndexBy?: SystemIndexBy;
@@ -13,9 +13,9 @@ export type SaveSystemCustomIndexProps = {
     equalPortions?: boolean;
     name?: string;
 };
-export const handleSaveSystemCustomIndex = async (props: SaveSystemCustomIndexProps) => {
+export const handleSaveSystemCustomIndex = async (props: SaveSystemIndexProps) => {
     "use server";
-    const {assets, startTime} = await handleGenerateSystemIndexFromScratch(props);
+    const {assets, startTime} = await handleGenerateSystemIndexOverviewAssetsWithStartEndTimes(props);
 
     await createCustomIndex({
         name: props.name ?? `Default by ${props.systemIndexBy} and ${props.systemIndexSortBy}`,

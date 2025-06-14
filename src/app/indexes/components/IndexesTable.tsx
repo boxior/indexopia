@@ -24,7 +24,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Asset, AssetWithHistoryOverviewPortionAndMaxDrawDown, Index, MaxDrawDown} from "@/utils/types/general.types";
+import {Asset, Index, IndexOverview, MaxDrawDown} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode, useEffect} from "react";
@@ -34,27 +34,21 @@ import Link from "next/link";
 import {CreateCustomIndex} from "@/app/indexes/components/CustomIndex/CreateCustomIndex";
 import {clientApiDeleteCustomIndex} from "@/utils/clientApi/customIndex.clientApi";
 
-export default function IndexesTable({
-    data,
-    assets,
-}: {
-    data: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>[];
-    assets: Asset[];
-}) {
+export default function IndexesTable({data, assets}: {data: IndexOverview[]; assets: Asset[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
 
     // this `localData` is needed to provide local filter after DeleteItem.
-    const [localData, setLocalData] = React.useState<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>[]>(data);
+    const [localData, setLocalData] = React.useState<IndexOverview[]>(data);
 
     useEffect(() => {
         setLocalData(data);
     }, [JSON.stringify(data)]);
 
     const renderColumnSortedHeader =
-        (header: ReactNode): ColumnDef<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>>["header"] =>
+        (header: ReactNode): ColumnDef<IndexOverview>["header"] =>
         ({column}) => {
             const sorted = column.getIsSorted();
 
@@ -76,7 +70,7 @@ export default function IndexesTable({
             );
         };
 
-    const handleDeleteIndex = (index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>) => async () => {
+    const handleDeleteIndex = (index: IndexOverview) => async () => {
         if (index.isSystem) {
             return;
         }
@@ -84,7 +78,7 @@ export default function IndexesTable({
         setLocalData(localData.filter(i => i.id !== index.id));
     };
 
-    const columns: ColumnDef<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>>[] = [
+    const columns: ColumnDef<IndexOverview>[] = [
         {
             accessorKey: "rank",
             header: "#",
@@ -154,11 +148,11 @@ export default function IndexesTable({
             id: "historyOverview_7d_chart",
             accessorFn: index => index,
             cell: ({row}) => {
-                const index = row.getValue("historyOverview_7d_chart") as Index;
+                const index = row.getValue("historyOverview_7d_chart") as IndexOverview;
 
                 return (
                     <div className={`lowercase ${getChartColorClassname(index.historyOverview.days7)}`}>
-                        <IndexPreviewChart history={index.history} />
+                        <IndexPreviewChart history={[]} />
                     </div>
                 ); // Safely render the value
             },
@@ -226,7 +220,7 @@ export default function IndexesTable({
         {
             header: "Actions",
             cell: ({row}) => {
-                const index = row.original as unknown as Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
+                const index = row.original as unknown as IndexOverview;
 
                 if (index.isSystem) {
                     return null;
