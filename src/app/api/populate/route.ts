@@ -1,8 +1,6 @@
 import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 import {manageAssets, manageAssetsHistory} from "@/lib/db/helpers/db.helpers";
-import {revalidateTag} from "next/cache";
-import {CacheTag} from "@/utils/cache/constants.cache";
 export const dynamic = "force-dynamic";
 
 /**
@@ -30,8 +28,6 @@ export async function POST(req: NextRequest) {
 
         // Assets history
         await manageAssetsHistory();
-
-        revalidateTag(CacheTag.ALL_ASSETS_AND_HISTORY);
 
         return NextResponse.json(
             {success: true},

@@ -297,7 +297,7 @@ export const dbHandleQueryCustomIndexes = async (): Promise<CustomIndexType[]> =
 };
 
 // Deletes a custom index and its related assets
-export const dbDeleteCustomIndex = async (customIndexId: string): Promise<void> => {
+export const dbDeleteSystemIndex = async (customIndexId: string): Promise<void> => {
     try {
         // Start a transaction to ensure both delete operations are atomic
         const connection = await mySqlPool.getConnection();

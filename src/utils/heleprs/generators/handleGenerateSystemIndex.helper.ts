@@ -2,8 +2,8 @@ import {
     AssetWithHistory,
     AssetWithProfitAndMaxDrawDown,
     CustomIndexAsset,
-    DefaultIndexBy,
-    DefaultIndexSortBy,
+    SystemIndexBy,
+    SystemIndexSortBy,
 } from "@/utils/types/general.types";
 import {getIndexAssetsWithPortionsByRankAndProfit} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankAndProfit.helper";
 import {getIndexAssetsWithPortionsByRank} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRank.helper";
@@ -14,16 +14,16 @@ import {getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown} from "@/utils/hele
 import {pick} from "lodash";
 import {getIndexAssetsWithPortionsByRankAndMaxDrawDown} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankAndMaxDrawDown.helper";
 
-export function handleGenerateDefaultIndex(props: {
+export function handleGenerateSystemIndex(props: {
     assets: AssetWithHistory[];
     upToNumber: number;
-    defaultIndexBy?: DefaultIndexBy;
-    defaultIndexSortBy?: DefaultIndexSortBy;
+    systemIndexBy?: SystemIndexBy;
+    systemIndexSortBy?: SystemIndexSortBy;
     equalPortions?: boolean;
 }): CustomIndexAsset[] {
     const {
-        defaultIndexBy = DefaultIndexBy.RANK,
-        defaultIndexSortBy = DefaultIndexSortBy.PROFIT,
+        systemIndexBy = SystemIndexBy.RANK,
+        systemIndexSortBy = SystemIndexSortBy.PROFIT,
         upToNumber,
         equalPortions = false,
     } = props;
@@ -35,44 +35,44 @@ export function handleGenerateDefaultIndex(props: {
     }
 
     return (() => {
-        switch (defaultIndexSortBy) {
-            case DefaultIndexSortBy.PROFIT:
+        switch (systemIndexSortBy) {
+            case SystemIndexSortBy.PROFIT:
                 const mostProfitableAssets = sortMostProfitableAssets({assets: sortedAssetsByRank}).slice(
                     0,
                     upToNumber
                 );
 
-                switch (defaultIndexBy) {
-                    case DefaultIndexBy.RANK:
+                switch (systemIndexBy) {
+                    case SystemIndexBy.RANK:
                         return getIndexAssetsWithPortionsByRank(mostProfitableAssets);
-                    case DefaultIndexBy.EXTRA:
+                    case SystemIndexBy.EXTRA:
                         return getIndexAssetsWithPortionsByRankAndProfit(mostProfitableAssets);
                     default:
                         return [];
                 }
-            case DefaultIndexSortBy.MAX_DRAW_DOWN:
+            case SystemIndexSortBy.MAX_DRAW_DOWN:
                 const lessMaxDrawDownAssets = sortLessMaxDrawDownIndexAssets({assets: sortedAssetsByRank}).slice(
                     0,
                     upToNumber
                 );
 
-                switch (defaultIndexBy) {
-                    case DefaultIndexBy.RANK:
+                switch (systemIndexBy) {
+                    case SystemIndexBy.RANK:
                         return getIndexAssetsWithPortionsByRank(lessMaxDrawDownAssets);
-                    case DefaultIndexBy.EXTRA:
+                    case SystemIndexBy.EXTRA:
                         return getIndexAssetsWithPortionsByRankAndMaxDrawDown(lessMaxDrawDownAssets);
                     default:
                         return [];
                 }
-            case DefaultIndexSortBy.OPTIMAL:
+            case SystemIndexSortBy.OPTIMAL:
                 const optimalAssets = sortLessMaxDrawDownIndexAssets({
                     assets: sortMostProfitableAssets({assets: sortedAssetsByRank}),
                 }).slice(0, upToNumber) as unknown as AssetWithProfitAndMaxDrawDown[];
 
-                switch (defaultIndexBy) {
-                    case DefaultIndexBy.RANK:
+                switch (systemIndexBy) {
+                    case SystemIndexBy.RANK:
                         return getIndexAssetsWithPortionsByRank(optimalAssets);
-                    case DefaultIndexBy.EXTRA:
+                    case SystemIndexBy.EXTRA:
                         const mostProfitableAssets = sortMostProfitableAssets({assets: sortedAssetsByRank}).slice(
                             0,
                             upToNumber

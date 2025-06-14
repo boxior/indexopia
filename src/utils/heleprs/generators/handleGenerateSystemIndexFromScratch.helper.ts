@@ -1,21 +1,21 @@
 import {handleGetAssetsForIndex} from "@/utils/heleprs/generators/handleGetAssetsForIndex.helper";
-import {handleGenerateDefaultIndex} from "@/utils/heleprs/generators/handleGenerateDefaultIndex.helper";
-import {CustomIndexAsset, DefaultIndexBy, DefaultIndexSortBy} from "@/utils/types/general.types";
+import {handleGenerateSystemIndex} from "@/utils/heleprs/generators/handleGenerateSystemIndex.helper";
+import {CustomIndexAsset, SystemIndexBy, SystemIndexSortBy} from "@/utils/types/general.types";
 import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
 
-export const handleGenerateDefaultIndexFromScratch = async ({
+export const handleGenerateSystemIndexFromScratch = async ({
     topAssetsCount,
     upToNumber,
-    defaultIndexBy,
-    defaultIndexSortBy,
+    systemIndexBy,
+    systemIndexSortBy,
     startTime: startTimeProp,
     endTime: endTimeProp,
     equalPortions = false,
 }: {
     topAssetsCount?: number;
     upToNumber?: number;
-    defaultIndexBy?: DefaultIndexBy;
-    defaultIndexSortBy?: DefaultIndexSortBy;
+    systemIndexBy?: SystemIndexBy;
+    systemIndexSortBy?: SystemIndexSortBy;
     startTime?: number;
     endTime?: number;
     equalPortions?: boolean;
@@ -26,11 +26,11 @@ export const handleGenerateDefaultIndexFromScratch = async ({
         endTime: endTimeProp,
     });
 
-    const generatedAssets = handleGenerateDefaultIndex({
+    const generatedAssets = handleGenerateSystemIndex({
         assets,
         upToNumber: upToNumber ?? topAssetsCount ?? MAX_ASSET_COUNT,
-        defaultIndexBy,
-        defaultIndexSortBy,
+        systemIndexBy,
+        systemIndexSortBy,
         equalPortions,
     });
 

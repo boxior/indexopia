@@ -21,12 +21,12 @@ export interface Asset {
     portion?: number; // portion of Index
 }
 
-export enum DefaultIndexBy {
+export enum SystemIndexBy {
     RANK = "rank",
     EXTRA = "extra",
 }
 
-export enum DefaultIndexSortBy {
+export enum SystemIndexSortBy {
     PROFIT = "profit",
     MAX_DRAW_DOWN = "maxDrawDown",
     OPTIMAL = "optimal",
@@ -95,7 +95,10 @@ export interface Index<A = Asset> {
     isSystem?: boolean; // means system one.
 }
 
-export type IndexOverview = Pick<Index, "id" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime">;
+export type IndexOverview = Pick<
+    Index,
+    "id" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime" | "isSystem"
+> & {assets: Pick<Asset, "id" | "name" | "symbol" | "rank">};
 
 export interface CustomIndexType {
     id: Id;
