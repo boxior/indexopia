@@ -21,6 +21,21 @@ CREATE TABLE custom_index_assets (
 
 ```
 
+```sql
+CREATE TABLE custom_index_overview (
+    id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, -- Auto-incremented primary key
+    name VARCHAR(255) NOT NULL, -- Corresponds to the name field of Index
+    historyOverview JSON NOT NULL, -- Storing JSON data for historyOverview object structure
+    maxDrawDown JSON NOT NULL, -- Storing JSON data for maxDrawDown object structure
+    assets JSON NOT NULL, -- Storing the assets array as JSON
+    startTime BIGINT, -- Corresponds to the optional startTime field of Index
+    endTime BIGINT, -- Corresponds to the optional endTime field of Index
+    isSystem BOOLEAN, -- Corresponds to the optional isSystem field of Index
+    PRIMARY KEY (id) -- Setting id as the primary key
+);
+
+```
+
 
 
 /**

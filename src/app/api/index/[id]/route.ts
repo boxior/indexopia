@@ -1,5 +1,5 @@
 import {NextResponse, NextRequest} from "next/server";
-import {dbDeleteCustomIndex} from "@/lib/db/helpers/db.customIndex.helpers";
+import {dbDeleteSystemIndex} from "@/lib/db/helpers/db.customIndex.helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +12,7 @@ export async function DELETE(req: NextRequest) {
         const urlParts = req.nextUrl.pathname.split("/");
         const id = urlParts[urlParts.length - 1]; // Get the last part of the path
 
-        await dbDeleteCustomIndex(id);
+        await dbDeleteSystemIndex(id);
 
         return NextResponse.json(
             {success: true},
