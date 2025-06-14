@@ -17,3 +17,20 @@ export const clientApiDeleteCustomIndex = async (customIndexId: Id) => {
         throw error;
     }
 };
+
+export const clientApiGetAssets = async () => {
+    try {
+        const response = await fetch(`/api/assets`, {
+            method: "GET",
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to get assets.");
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error("Error while deleting custom index:", error);
+        throw error;
+    }
+};

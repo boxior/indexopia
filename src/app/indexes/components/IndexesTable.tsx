@@ -34,7 +34,7 @@ import Link from "next/link";
 import {CreateCustomIndex} from "@/app/indexes/components/CustomIndex/CreateCustomIndex";
 import {clientApiDeleteCustomIndex} from "@/utils/clientApi/customIndex.clientApi";
 
-export default function IndexesTable({data, assets}: {data: IndexOverview[]; assets: Asset[]}) {
+export default function IndexesTable({data}: {data: IndexOverview[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -266,7 +266,7 @@ export default function IndexesTable({data, assets}: {data: IndexOverview[]; ass
                     onChange={event => table.getColumn("name")?.setFilterValue(event.target.value)}
                     className="max-w-sm"
                 />
-                <CreateCustomIndex assets={assets} />
+                <CreateCustomIndex />
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

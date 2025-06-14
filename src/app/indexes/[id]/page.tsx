@@ -5,7 +5,7 @@ import {getCachedTopAssets, getCustomIndex} from "@/lib/db/helpers/db.helpers";
 import {Card} from "@/components/ui/card";
 import {IndexOverview} from "@/app/indexes/[id]/components/IndexOverview";
 import * as React from "react";
-import {dbHandleQueryCustomIndexById} from "@/lib/db/helpers/db.customIndex.helpers";
+import {dbHandleGetCustomIndexById} from "@/lib/db/helpers/db.customIndex.helpers";
 import {SuspenseContainer} from "@/components/SuspenseContainer";
 import {UpdateCustomIndex} from "@/app/indexes/components/CustomIndex/UpdateCustomIndex";
 
@@ -21,7 +21,7 @@ const SuspendedComponent = async (props: ServerPageProps) => {
     const params = await props.params;
     const assets = await getCachedTopAssets();
 
-    const customIndex = await dbHandleQueryCustomIndexById(params.id);
+    const customIndex = await dbHandleGetCustomIndexById(params.id);
 
     const index = await getCustomIndex({
         id: params.id,

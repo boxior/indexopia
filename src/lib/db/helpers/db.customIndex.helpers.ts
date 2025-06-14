@@ -16,7 +16,7 @@ const TABLE_NAME_CUSTOM_INDEX = ENV_VARIABLES.MYSQL_TABLE_NAME_CUSTOM_INDEX; // 
 const TABLE_NAME_CUSTOM_INDEX_ASSETS = ENV_VARIABLES.TABLE_NAME_CUSTOM_INDEX_ASSETS; // Ensure your database table exists
 
 // Fetch a custom index by ID
-const dbQueryCustomIndexById = async (id: Id): Promise<Omit<CustomIndexType, "assets"> | null> => {
+const dbGetCustomIndexById = async (id: Id): Promise<Omit<CustomIndexType, "assets"> | null> => {
     try {
         const query = `
     SELECT 
@@ -42,7 +42,7 @@ const dbQueryCustomIndexById = async (id: Id): Promise<Omit<CustomIndexType, "as
 };
 
 // Fetch all custom indexes
-export const dbQueryCustomIndexes = async (): Promise<Omit<CustomIndexType, "assets">[]> => {
+export const dbGetCustomIndexes = async (): Promise<Omit<CustomIndexType, "assets">[]> => {
     try {
         const query = `
     SELECT 
@@ -66,7 +66,7 @@ export const dbQueryCustomIndexes = async (): Promise<Omit<CustomIndexType, "ass
 };
 
 // Fetch assets belonging to a specific custom index
-export const dbQueryAssetsByCustomIndexId = async (customIndexId: Id) => {
+export const dbGetAssetsByCustomIndexId = async (customIndexId: Id) => {
     try {
         const query = `
     SELECT 
@@ -86,7 +86,7 @@ export const dbQueryAssetsByCustomIndexId = async (customIndexId: Id) => {
 };
 
 // Fetch all assets across all custom indexes
-export const dbQueryCustomIndexAssets = async () => {
+export const dbGetCustomIndexAssets = async () => {
     try {
         const query = `
     SELECT 
@@ -104,7 +104,7 @@ export const dbQueryCustomIndexAssets = async () => {
 };
 
 // Create a custom index into the database
-export const dbCreateCustomIndex = async (name: string, startTime: number | null, isSystem: boolean) => {
+export const dbPostCustomIndex = async (name: string, startTime: number | null, isSystem: boolean) => {
     try {
         const query = `
     INSERT INTO ${TABLE_NAME_CUSTOM_INDEX} (name, startTime, isSystem)
@@ -124,7 +124,7 @@ export const dbCreateCustomIndex = async (name: string, startTime: number | null
 };
 
 // Update a custom index in the database (throws error if entity does not exist)
-export const dbUpdateCustomIndex = async (
+export const dbPutCustomIndex = async (
     id: Id, // Assuming an "id" is provided for identifying the record
     name: string,
     startTime: number | null,
@@ -180,7 +180,7 @@ export const dbDeleteCustomIndexAssets = async (customIndexId: Id) => {
 };
 
 // Insert assets associated with a custom index into the database
-export const dbCreateCustomIndexAssets = async (customIndexId: Id, assets: CustomIndexAsset[]) => {
+export const dbPostCustomIndexAssets = async (customIndexId: Id, assets: CustomIndexAsset[]) => {
     try {
         const query = `
     INSERT INTO ${TABLE_NAME_CUSTOM_INDEX_ASSETS} (customIndexId, assetId, portion)
@@ -197,14 +197,14 @@ export const dbCreateCustomIndexAssets = async (customIndexId: Id, assets: Custo
 };
 
 // Combined helper to create a custom index and its associated assets
-export const dbHandleCreateCustomIndex = async (customIndex: Omit<CustomIndexType, "id">) => {
+export const dbHandlePostCustomIndex = async (customIndex: Omit<CustomIndexType, "id">) => {
     try {
         const {name, startTime, isSystem, assets} = customIndex;
         // Insert the custom index and get its ID
-        const id = await dbCreateCustomIndex(name, startTime ?? null, !!isSystem);
+        const id = await dbPostCustomIndex(name, startTime ?? null, !!isSystem);
         // If there are assets, insert them into the assets table
         if (assets.length > 0) {
-            await dbCreateCustomIndexAssets(id, assets);
+            await dbPostCustomIndexAssets(id, assets);
         }
 
         return {id}; // Return the ID of the newly created custom index
@@ -215,16 +215,16 @@ export const dbHandleCreateCustomIndex = async (customIndex: Omit<CustomIndexTyp
 };
 
 // Combined helper to create a custom index and its associated assets
-export const dbHandleUpdateCustomIndex = async (customIndex: CustomIndexType) => {
+export const dbHandlePutCustomIndex = async (customIndex: CustomIndexType) => {
     try {
         const {id, name, startTime, isSystem, assets} = customIndex;
         // Insert the custom index and get its ID
-        await dbUpdateCustomIndex(id, name, startTime ?? null, !!isSystem);
+        await dbPutCustomIndex(id, name, startTime ?? null, !!isSystem);
 
         await dbDeleteCustomIndexAssets(id);
         // If there are assets, insert them into the assets table
         if (assets.length > 0) {
-            await dbCreateCustomIndexAssets(id, assets);
+            await dbPostCustomIndexAssets(id, assets);
         }
 
         return id; // Return the ID of the newly created custom index
@@ -235,20 +235,20 @@ export const dbHandleUpdateCustomIndex = async (customIndex: CustomIndexType) =>
 };
 
 // Fetch custom index details by ID, including its assets
-export const dbHandleQueryCustomIndexById = async (id: Id): Promise<CustomIndexType | null> => {
+export const dbHandleGetCustomIndexById = async (id: Id): Promise<CustomIndexType | null> => {
     "use cache";
     cacheTag(combineTags(CacheTag.CUSTOM_INDEX, id));
 
     try {
         // Query custom index
-        const customIndex = await dbQueryCustomIndexById(id);
+        const customIndex = await dbGetCustomIndexById(id);
 
         if (!customIndex) {
             return null; // Return null if the custom index is not found
         }
 
         // Query related assets
-        const assets = await dbQueryAssetsByCustomIndexId(id);
+        const assets = await dbGetAssetsByCustomIndexId(id);
 
         // Combine custom index and its assets
         return {
@@ -262,13 +262,13 @@ export const dbHandleQueryCustomIndexById = async (id: Id): Promise<CustomIndexT
 };
 
 // Fetch all custom indexes with their respective assets
-export const dbHandleQueryCustomIndexes = async (): Promise<CustomIndexType[]> => {
+export const dbHandleGetCustomIndexes = async (): Promise<CustomIndexType[]> => {
     try {
         // Query all custom indexes
-        const customIndexes = await dbQueryCustomIndexes();
+        const customIndexes = await dbGetCustomIndexes();
 
         // Query all assets
-        const allAssets = await dbQueryCustomIndexAssets();
+        const allAssets = await dbGetCustomIndexAssets();
 
         // Group assets by custom index ID
         const assetsByCustomIndexId = allAssets.reduce(

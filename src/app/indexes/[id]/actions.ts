@@ -1,13 +1,13 @@
 "use server";
 
 import {CustomIndexType} from "@/utils/types/general.types";
-import {dbHandleCreateCustomIndex, dbHandleUpdateCustomIndex} from "@/lib/db/helpers/db.customIndex.helpers";
+import {dbHandlePostCustomIndex, dbHandlePutCustomIndex} from "@/lib/db/helpers/db.customIndex.helpers";
 import {revalidateTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineTags} from "@/utils/cache/helpers.cache";
 
 export async function createCustomIndex(customIndex: Omit<CustomIndexType, "id">): Promise<CustomIndexType> {
-    const {id} = await dbHandleCreateCustomIndex(customIndex);
+    const {id} = await dbHandlePostCustomIndex(customIndex);
 
     revalidateTag(CacheTag.CUSTOM_INDEXES);
     revalidateTag(combineTags(CacheTag.INDEX, id));
@@ -16,7 +16,7 @@ export async function createCustomIndex(customIndex: Omit<CustomIndexType, "id">
 }
 
 export async function updateCustomIndex(customIndex: CustomIndexType): Promise<CustomIndexType> {
-    await dbHandleUpdateCustomIndex(customIndex);
+    await dbHandlePutCustomIndex(customIndex);
 
     revalidateTag(CacheTag.CUSTOM_INDEXES);
     revalidateTag(combineTags(CacheTag.INDEX, customIndex.id));

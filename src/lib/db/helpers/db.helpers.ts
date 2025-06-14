@@ -19,12 +19,12 @@ import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.consta
 import {cloneDeep, get, pick, set} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
-import {dbInsertAssets, dbQueryAssets, dbQueryAssetsByIds} from "@/lib/db/helpers/db.assets.helpers";
-import {dbInsertAssetHistory, dbQueryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
+import {dbPostAssets, dbGetAssets, dbGetAssetsByIds} from "@/lib/db/helpers/db.assets.helpers";
+import {dbPostAssetHistory, dbGetAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
 import {
     dbGetUniqueCustomIndexesAssetIds,
-    dbHandleQueryCustomIndexById,
-    dbHandleQueryCustomIndexes,
+    dbHandleGetCustomIndexById,
+    dbHandleGetCustomIndexes,
 } from "@/lib/db/helpers/db.customIndex.helpers";
 import {unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
@@ -47,7 +47,7 @@ export const migrateAssetsHistoriesFromJsonToDb = async () => {
             )) as DbItems<Omit<AssetHistory, "assetId">>;
             const normalizedAssetHistory = assetHistory.data.map(history => ({assetId: asset.id, ...history}));
 
-            await dbInsertAssetHistory(normalizedAssetHistory);
+            await dbPostAssetHistory(normalizedAssetHistory);
         } catch (err) {
             console.error(err);
             await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
@@ -63,16 +63,16 @@ export const manageAssets = async () => {
 
     const customIndexesAssetsIds = await dbGetUniqueCustomIndexesAssetIds();
     const assetsIdsToFetchMore = customIndexesAssetsIds.filter(id => !assets.some(asset => asset.id === id));
-    const assetsToFetchMore = await dbQueryAssetsByIds(assetsIdsToFetchMore);
+    const assetsToFetchMore = await dbGetAssetsByIds(assetsIdsToFetchMore);
 
     const allAssets = [...assets, ...assetsToFetchMore];
 
-    await dbInsertAssets(allAssets);
+    await dbPostAssets(allAssets);
     await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, allAssets, ASSETS_FOLDER_PATH);
 };
 
 export const manageAssetHistory = async ({id}: {id: string}) => {
-    const oldList = await dbQueryAssetHistoryById(id);
+    const oldList = await dbGetAssetHistoryById(id);
 
     let start = momentTimeZone.tz("UTC").startOf("day").add(-11, "year").add(1, "day").valueOf();
 
@@ -103,7 +103,7 @@ export const manageAssetHistory = async ({id}: {id: string}) => {
         return;
     }
     await writeJsonFile(`history_${id}`, newList, "/db/debug");
-    await dbInsertAssetHistory(newList);
+    await dbPostAssetHistory(newList);
 };
 
 const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
@@ -154,7 +154,7 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const manageAssetsHistory = async () => {
-    const assets = await dbQueryAssets();
+    const assets = await dbGetAssets();
 
     for (const asset of assets) {
         try {
@@ -216,7 +216,7 @@ export const getAssetHistoryOverview = async (
     id: string,
     historyListProp?: AssetHistory[]
 ): Promise<HistoryOverview> => {
-    const history = historyListProp ?? (await dbQueryAssetHistoryById(id));
+    const history = historyListProp ?? (await dbGetAssetHistoryById(id));
 
     const historyList = history ?? [];
 
@@ -247,12 +247,12 @@ export const getAssetHistoryOverview = async (
 };
 
 export const getCachedTopAssets = async (limit: number | undefined = MAX_ASSET_COUNT): Promise<Asset[]> => {
-    const assets = await dbQueryAssets();
+    const assets = await dbGetAssets();
     return filterAssetsByOmitIds(assets ?? [], limit);
 };
 
 export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
-    const assets = await dbQueryAssets();
+    const assets = await dbGetAssets();
     return (assets ?? []).filter(asset => ids.includes(asset.id));
 };
 
@@ -320,7 +320,7 @@ export const getAssetHistoriesWithSmallestRange = async ({
         assetIds.map(assetId => {
             return (async () => {
                 try {
-                    return dbQueryAssetHistoryById(assetId);
+                    return dbGetAssetHistoryById(assetId);
                 } catch {
                     return [];
                 }
@@ -452,7 +452,7 @@ export const getCustomIndex = async ({
     "use cache";
     cacheTag(combineTags(CacheTag.INDEX, id));
 
-    const customIndex = propCustomIndex ?? (await dbHandleQueryCustomIndexById(id));
+    const customIndex = propCustomIndex ?? (await dbHandleGetCustomIndexById(id));
 
     if (!customIndex) {
         return null;
@@ -502,7 +502,7 @@ export async function getCustomIndexes(): Promise<Index<AssetWithHistoryOverview
     "use cache";
     cacheTag(CacheTag.CUSTOM_INDEXES);
 
-    const cachedCustomIndexes = await dbHandleQueryCustomIndexes();
+    const cachedCustomIndexes = await dbHandleGetCustomIndexes();
 
     const customIndexes = await Promise.all(
         cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id, customIndex: ci}))

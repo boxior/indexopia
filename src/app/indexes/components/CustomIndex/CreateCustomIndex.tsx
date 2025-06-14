@@ -3,10 +3,19 @@
 import {Button} from "@/components/ui/button";
 import {Dialog} from "@/components/ui/dialog";
 import {Asset} from "@/utils/types/general.types";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import {CustomIndexDialog} from "@/app/indexes/components/CustomIndex/CustomIndexDialog";
+import {clientApiGetAssets} from "@/utils/clientApi/customIndex.clientApi";
 
-export function CreateCustomIndex({assets}: {assets: Asset[]}) {
+export function CreateCustomIndex() {
+    const [assets, setAssets] = useState<Asset[]>([]);
+
+    useEffect(() => {
+        (async () => {
+            setAssets((await clientApiGetAssets()).assets);
+        })();
+    }, []);
+
     const [open, setOpen] = useState<boolean>(false);
 
     const onOpenChange = (bool: boolean) => {
