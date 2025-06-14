@@ -11,11 +11,7 @@ export const handleSaveSystemIndexOverview = async (props: SaveSystemIndexProps)
     //
     const {assets, startTime: assetsStartTime} = await handleGenerateSystemIndexOverviewAssetsWithStartEndTimes(props);
 
-    const {
-        assets: assetsWithHistories,
-        startTime,
-        endTime,
-    } = await getAssetsWithHistories<IndexOverviewAsset>({
+    const {assets: assetsWithHistories, startTime} = await getAssetsWithHistories<IndexOverviewAsset>({
         assets,
         startTime: assetsStartTime,
     });
@@ -26,7 +22,7 @@ export const handleSaveSystemIndexOverview = async (props: SaveSystemIndexProps)
     const historyOverview = await getIndexHistoryOverview(assetsWithHistories);
     const maxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
-    const systemIndexId = await dbPostIndexOverview({
+    return dbPostIndexOverview({
         name,
         assets,
         startTime: startTime ?? performance.now(),
@@ -34,6 +30,4 @@ export const handleSaveSystemIndexOverview = async (props: SaveSystemIndexProps)
         historyOverview,
         maxDrawDown,
     });
-
-    console.log("systemIndexId", systemIndexId);
 };

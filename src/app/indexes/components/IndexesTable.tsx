@@ -24,15 +24,15 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Asset, Index, IndexOverview, MaxDrawDown} from "@/utils/types/general.types";
+import {Asset, IndexOverview, MaxDrawDown} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode, useEffect} from "react";
-import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
 import Link from "next/link";
 import {CreateCustomIndex} from "@/app/indexes/components/CustomIndex/CreateCustomIndex";
 import {clientApiDeleteCustomIndex} from "@/utils/clientApi/customIndex.clientApi";
+import {IndexHistoryPreviewChart} from "@/app/indexes/components/IndexHistoryPreviewChart";
 
 export default function IndexesTable({data}: {data: IndexOverview[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -152,7 +152,7 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
 
                 return (
                     <div className={`lowercase ${getChartColorClassname(index.historyOverview.days7)}`}>
-                        <IndexPreviewChart history={[]} />
+                        <IndexHistoryPreviewChart index={index} />
                     </div>
                 ); // Safely render the value
             },

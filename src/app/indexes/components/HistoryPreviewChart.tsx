@@ -8,7 +8,7 @@ import {AssetHistory, ChartData, IndexHistory, MomentFormat} from "@/utils/types
 import {IndexPreviewChartTooltip} from "@/app/indexes/components/indexPreviewChartTooltip";
 import {getChartColor} from "@/app/indexes/helpers";
 
-export function IndexPreviewChart({history}: {history: IndexHistory[]}) {
+export function HistoryPreviewChart({history}: {history: (AssetHistory | IndexHistory)[]}) {
     const chartData: ChartData[] = history.slice(-7).map(item => ({
         date: moment(item.time).format(MomentFormat.DAY_FULL),
         price: parseFloat(item.priceUsd),
