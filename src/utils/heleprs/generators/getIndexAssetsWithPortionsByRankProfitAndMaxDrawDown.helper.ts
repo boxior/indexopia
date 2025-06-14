@@ -1,4 +1,4 @@
-import {CustomIndexAsset} from "@/utils/types/general.types";
+import {IndexOverviewAsset} from "@/utils/types/general.types";
 import {correctAssetPortions} from "@/utils/heleprs/generators/generators.helpers";
 
 /**
@@ -10,17 +10,17 @@ import {correctAssetPortions} from "@/utils/heleprs/generators/generators.helper
  * @returns An array of assets with middle portions
  */
 export function getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown(
-    assets1: CustomIndexAsset[],
-    assets2: CustomIndexAsset[]
-): CustomIndexAsset[] {
+    assets1: IndexOverviewAsset[],
+    assets2: IndexOverviewAsset[]
+): IndexOverviewAsset[] {
     const numberOfArrays = 2;
     // Create a mapping for all assets from both arrays
-    const assetMap: Record<string, {sumPortion: number}> = {};
+    const assetMap: Record<string, {sumPortion: number; asset: IndexOverviewAsset}> = {};
 
     // Process the first array
     for (const asset of assets1) {
         if (!assetMap[asset.id]) {
-            assetMap[asset.id] = {sumPortion: 0};
+            assetMap[asset.id] = {sumPortion: 0, asset};
         }
         assetMap[asset.id].sumPortion += asset.portion / numberOfArrays;
     }
@@ -28,15 +28,15 @@ export function getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown(
     // Process the second array
     for (const asset of assets2) {
         if (!assetMap[asset.id]) {
-            assetMap[asset.id] = {sumPortion: 0};
+            assetMap[asset.id] = {sumPortion: 0, asset};
         }
         assetMap[asset.id].sumPortion += asset.portion / numberOfArrays;
     }
 
     // Calculate middle portion for each asset
-    const result: CustomIndexAsset[] = Object.entries(assetMap).map(([id, data]) => {
+    const result: IndexOverviewAsset[] = Object.entries(assetMap).map(([_id, data]) => {
         const middlePortion = Math.round(data.sumPortion); // Weighted average
-        return {id, portion: middlePortion};
+        return {...data.asset, portion: middlePortion};
     });
 
     return correctAssetPortions(result);

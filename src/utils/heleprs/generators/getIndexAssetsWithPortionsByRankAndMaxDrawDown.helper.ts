@@ -1,8 +1,9 @@
-import {AssetWithMaxDrawDown, CustomIndexAsset} from "@/utils/types/general.types";
+import {AssetWithMaxDrawDown, CustomIndexAsset, IndexOverviewAsset} from "@/utils/types/general.types";
 import {MAX_PORTION} from "@/app/indexes/components/CustomIndex/CustomIndexAssetsPortions";
 import {correctAssetPortions} from "@/utils/heleprs/generators/generators.helpers";
+import {pick} from "lodash";
 
-export function getIndexAssetsWithPortionsByRankAndMaxDrawDown(assets: AssetWithMaxDrawDown[]): CustomIndexAsset[] {
+export function getIndexAssetsWithPortionsByRankAndMaxDrawDown(assets: AssetWithMaxDrawDown[]): IndexOverviewAsset[] {
     if (assets.length === 0) {
         return [];
     }
@@ -15,7 +16,7 @@ export function getIndexAssetsWithPortionsByRankAndMaxDrawDown(assets: AssetWith
 
     return correctAssetPortions(
         assets.map(a => ({
-            id: a.id,
+            ...pick(a, ["id", "symbol", "name", "rank"]),
             portion: Math.max(Math.round((1 / a.maxDrawDown.value) * portionPerUnit), 1),
         }))
     );

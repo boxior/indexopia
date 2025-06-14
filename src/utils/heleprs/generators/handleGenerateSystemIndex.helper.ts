@@ -2,8 +2,9 @@ import {
     AssetWithHistory,
     AssetWithProfitAndMaxDrawDown,
     CustomIndexAsset,
-    DefaultIndexBy,
-    DefaultIndexSortBy,
+    IndexOverviewAsset,
+    SystemIndexBy,
+    SystemIndexSortBy,
 } from "@/utils/types/general.types";
 import {getIndexAssetsWithPortionsByRankAndProfit} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankAndProfit.helper";
 import {getIndexAssetsWithPortionsByRank} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRank.helper";
@@ -14,16 +15,16 @@ import {getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown} from "@/utils/hele
 import {pick} from "lodash";
 import {getIndexAssetsWithPortionsByRankAndMaxDrawDown} from "@/utils/heleprs/generators/getIndexAssetsWithPortionsByRankAndMaxDrawDown.helper";
 
-export function handleGenerateDefaultIndex(props: {
+export function handleGenerateSystemIndexOverviewAssets(props: {
     assets: AssetWithHistory[];
     upToNumber: number;
-    defaultIndexBy?: DefaultIndexBy;
-    defaultIndexSortBy?: DefaultIndexSortBy;
+    systemIndexBy?: SystemIndexBy;
+    systemIndexSortBy?: SystemIndexSortBy;
     equalPortions?: boolean;
-}): CustomIndexAsset[] {
+}): IndexOverviewAsset[] {
     const {
-        defaultIndexBy = DefaultIndexBy.RANK,
-        defaultIndexSortBy = DefaultIndexSortBy.PROFIT,
+        systemIndexBy = SystemIndexBy.RANK,
+        systemIndexSortBy = SystemIndexSortBy.PROFIT,
         upToNumber,
         equalPortions = false,
     } = props;
@@ -31,48 +32,51 @@ export function handleGenerateDefaultIndex(props: {
 
     if (equalPortions) {
         const assets = sortedAssetsByRank.slice(0, upToNumber);
-        return assets.map(a => ({...pick(a, "id"), portion: Math.trunc(100 / assets.length)}));
+        return assets.map(a => ({
+            ...pick(a, ["id", "symbol", "name", "rank"]),
+            portion: Math.trunc(100 / assets.length),
+        }));
     }
 
     return (() => {
-        switch (defaultIndexSortBy) {
-            case DefaultIndexSortBy.PROFIT:
+        switch (systemIndexSortBy) {
+            case SystemIndexSortBy.PROFIT:
                 const mostProfitableAssets = sortMostProfitableAssets({assets: sortedAssetsByRank}).slice(
                     0,
                     upToNumber
                 );
 
-                switch (defaultIndexBy) {
-                    case DefaultIndexBy.RANK:
+                switch (systemIndexBy) {
+                    case SystemIndexBy.RANK:
                         return getIndexAssetsWithPortionsByRank(mostProfitableAssets);
-                    case DefaultIndexBy.EXTRA:
+                    case SystemIndexBy.EXTRA:
                         return getIndexAssetsWithPortionsByRankAndProfit(mostProfitableAssets);
                     default:
                         return [];
                 }
-            case DefaultIndexSortBy.MAX_DRAW_DOWN:
+            case SystemIndexSortBy.MAX_DRAW_DOWN:
                 const lessMaxDrawDownAssets = sortLessMaxDrawDownIndexAssets({assets: sortedAssetsByRank}).slice(
                     0,
                     upToNumber
                 );
 
-                switch (defaultIndexBy) {
-                    case DefaultIndexBy.RANK:
+                switch (systemIndexBy) {
+                    case SystemIndexBy.RANK:
                         return getIndexAssetsWithPortionsByRank(lessMaxDrawDownAssets);
-                    case DefaultIndexBy.EXTRA:
+                    case SystemIndexBy.EXTRA:
                         return getIndexAssetsWithPortionsByRankAndMaxDrawDown(lessMaxDrawDownAssets);
                     default:
                         return [];
                 }
-            case DefaultIndexSortBy.OPTIMAL:
+            case SystemIndexSortBy.OPTIMAL:
                 const optimalAssets = sortLessMaxDrawDownIndexAssets({
                     assets: sortMostProfitableAssets({assets: sortedAssetsByRank}),
                 }).slice(0, upToNumber) as unknown as AssetWithProfitAndMaxDrawDown[];
 
-                switch (defaultIndexBy) {
-                    case DefaultIndexBy.RANK:
+                switch (systemIndexBy) {
+                    case SystemIndexBy.RANK:
                         return getIndexAssetsWithPortionsByRank(optimalAssets);
-                    case DefaultIndexBy.EXTRA:
+                    case SystemIndexBy.EXTRA:
                         const mostProfitableAssets = sortMostProfitableAssets({assets: sortedAssetsByRank}).slice(
                             0,
                             upToNumber

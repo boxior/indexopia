@@ -21,12 +21,12 @@ export interface Asset {
     portion?: number; // portion of Index
 }
 
-export enum DefaultIndexBy {
+export enum SystemIndexBy {
     RANK = "rank",
     EXTRA = "extra",
 }
 
-export enum DefaultIndexSortBy {
+export enum SystemIndexSortBy {
     PROFIT = "profit",
     MAX_DRAW_DOWN = "maxDrawDown",
     OPTIMAL = "optimal",
@@ -44,7 +44,7 @@ export type CustomIndexAssetWithCustomIndexId = Pick<Required<Asset>, "id" | "po
 
 export type AssetWithHistory = Asset & {history: AssetHistory[]};
 
-export type AssetWithHistoryAndOverview = Asset & {history: AssetHistory[]; historyOverview: HistoryOverview};
+export type AssetWithHistoryAndOverview<A = Asset> = A & {history: AssetHistory[]; historyOverview: HistoryOverview};
 
 export type AssetWithHistoryOverviewAndPortion = Asset & {
     history: AssetHistory[];
@@ -92,18 +92,25 @@ export interface Index<A = Asset> {
     maxDrawDown: MaxDrawDown;
     startTime?: number;
     endTime?: number;
-    isDefault?: boolean; // means system one.
+    isSystem?: boolean; // means system one.
 }
+
+export type IndexOverviewAsset = Pick<Required<Asset>, "id" | "name" | "symbol" | "rank" | "portion">;
+
+export type IndexOverview = Pick<
+    Index,
+    "id" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime" | "isSystem"
+> & {assets: IndexOverviewAsset[]};
 
 export interface CustomIndexType {
     id: Id;
     name: string;
     assets: CustomIndexAsset[];
     startTime?: number;
-    isDefault?: boolean;
+    isSystem?: boolean;
 }
 
-export type CustomIndexTypeDb = Omit<CustomIndexType, "isDefault" | "assets"> & {isDefault: number | null};
+export type CustomIndexTypeDb = Omit<CustomIndexType, "isSystem" | "assets"> & {isSystem: number | null};
 
 /**
  * @link https://momentjscom.readthedocs.io/en/latest/moment/04-displaying/01-format/

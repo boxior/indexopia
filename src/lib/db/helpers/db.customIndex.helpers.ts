@@ -23,7 +23,7 @@ const dbQueryCustomIndexById = async (id: Id): Promise<Omit<CustomIndexType, "as
       id,
       name,
       startTime,
-      isDefault
+      isSystem
     FROM ${TABLE_NAME_CUSTOM_INDEX}
     WHERE id = ?;
   `;
@@ -32,7 +32,7 @@ const dbQueryCustomIndexById = async (id: Id): Promise<Omit<CustomIndexType, "as
         const customIndexes = rows as CustomIndexTypeDb[];
 
         return customIndexes.length
-            ? normalizeDbBoolean<CustomIndexTypeDb, Omit<CustomIndexType, "assets">>(customIndexes[0], ["isDefault"])
+            ? normalizeDbBoolean<CustomIndexTypeDb, Omit<CustomIndexType, "assets">>(customIndexes[0], ["isSystem"])
             : null; // Return the first result or null if not found
     } catch (error) {
         console.error("Error fetching custom index by ID:", error);
@@ -49,12 +49,12 @@ export const dbQueryCustomIndexes = async (): Promise<Omit<CustomIndexType, "ass
       id,
       name,
       startTime,
-      isDefault
+      isSystem
     FROM ${TABLE_NAME_CUSTOM_INDEX};
   `;
 
         const [rows] = await mySqlPool.execute(query);
-        return (rows as CustomIndexTypeDb[]).map(row => normalizeDbBoolean(row, ["isDefault"])) as Omit<
+        return (rows as CustomIndexTypeDb[]).map(row => normalizeDbBoolean(row, ["isSystem"])) as Omit<
             CustomIndexType,
             "assets"
         >[]; // Return the list of indexes
@@ -104,17 +104,17 @@ export const dbQueryCustomIndexAssets = async () => {
 };
 
 // Create a custom index into the database
-export const dbCreateCustomIndex = async (name: string, startTime: number | null, isDefault: boolean) => {
+export const dbCreateCustomIndex = async (name: string, startTime: number | null, isSystem: boolean) => {
     try {
         const query = `
-    INSERT INTO ${TABLE_NAME_CUSTOM_INDEX} (name, startTime, isDefault)
+    INSERT INTO ${TABLE_NAME_CUSTOM_INDEX} (name, startTime, isSystem)
     VALUES (?, ?, ?);
 `;
 
-        const isDefaultValue = isDefault ? 1 : 0;
+        const isSystemValue = isSystem ? 1 : 0;
 
         // Execute with parameters
-        const [result] = await mySqlPool.execute(query, [name, startTime, isDefaultValue]);
+        const [result] = await mySqlPool.execute(query, [name, startTime, isSystemValue]);
 
         return (result as any).insertId;
     } catch (error) {
@@ -128,7 +128,7 @@ export const dbUpdateCustomIndex = async (
     id: Id, // Assuming an "id" is provided for identifying the record
     name: string,
     startTime: number | null,
-    isDefault: boolean
+    isSystem: boolean
 ) => {
     try {
         // Step 1: Check if the entity exists
@@ -148,14 +148,14 @@ export const dbUpdateCustomIndex = async (
             SET 
                 name = ?,
                 startTime = ?,
-                isDefault = ?
+                isSystem = ?
             WHERE id = ?;
         `;
 
-        const isDefaultValue = isDefault ? 1 : 0;
+        const isSystemValue = isSystem ? 1 : 0;
 
         // Execute the update
-        const [result] = await mySqlPool.execute(updateQuery, [name, startTime, isDefaultValue, id]);
+        const [result] = await mySqlPool.execute(updateQuery, [name, startTime, isSystemValue, id]);
 
         return result as unknown as CustomIndexType;
     } catch (error) {
@@ -199,9 +199,9 @@ export const dbCreateCustomIndexAssets = async (customIndexId: Id, assets: Custo
 // Combined helper to create a custom index and its associated assets
 export const dbHandleCreateCustomIndex = async (customIndex: Omit<CustomIndexType, "id">) => {
     try {
-        const {name, startTime, isDefault, assets} = customIndex;
+        const {name, startTime, isSystem, assets} = customIndex;
         // Insert the custom index and get its ID
-        const id = await dbCreateCustomIndex(name, startTime ?? null, !!isDefault);
+        const id = await dbCreateCustomIndex(name, startTime ?? null, !!isSystem);
         // If there are assets, insert them into the assets table
         if (assets.length > 0) {
             await dbCreateCustomIndexAssets(id, assets);
@@ -217,9 +217,9 @@ export const dbHandleCreateCustomIndex = async (customIndex: Omit<CustomIndexTyp
 // Combined helper to create a custom index and its associated assets
 export const dbHandleUpdateCustomIndex = async (customIndex: CustomIndexType) => {
     try {
-        const {id, name, startTime, isDefault, assets} = customIndex;
+        const {id, name, startTime, isSystem, assets} = customIndex;
         // Insert the custom index and get its ID
-        await dbUpdateCustomIndex(id, name, startTime ?? null, !!isDefault);
+        await dbUpdateCustomIndex(id, name, startTime ?? null, !!isSystem);
 
         await dbDeleteCustomIndexAssets(id);
         // If there are assets, insert them into the assets table
@@ -297,7 +297,7 @@ export const dbHandleQueryCustomIndexes = async (): Promise<CustomIndexType[]> =
 };
 
 // Deletes a custom index and its related assets
-export const dbDeleteCustomIndex = async (customIndexId: string): Promise<void> => {
+export const dbDeleteSystemIndex = async (customIndexId: string): Promise<void> => {
     try {
         // Start a transaction to ensure both delete operations are atomic
         const connection = await mySqlPool.getConnection();

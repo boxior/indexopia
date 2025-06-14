@@ -1,4 +1,4 @@
-import {Asset, CustomIndexAsset} from "@/utils/types/general.types";
+import {Asset, CustomIndexAsset, IndexOverviewAsset} from "@/utils/types/general.types";
 
 /**
  * Helper function to assign a portion to each asset based on its rank.
@@ -8,7 +8,7 @@ import {Asset, CustomIndexAsset} from "@/utils/types/general.types";
  * @param assets - Array of Assets with rank data.
  * @returns Array of Assets with the calculated portion.
  */
-export function getIndexAssetsWithPortionsByRank(assets: Asset[]): CustomIndexAsset[] {
+export function getIndexAssetsWithPortionsByRank(assets: Asset[]): IndexOverviewAsset[] {
     // Calculate the total "weight" based on rank for distributing the portions
     const totalWeight = assets.reduce((sum, asset) => {
         const rank = parseInt(asset.rank, 10);

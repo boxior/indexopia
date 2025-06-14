@@ -31,7 +31,7 @@ const SuspendedComponent = async (props: ServerPageProps) => {
         return <div>Custom index not found</div>;
     }
 
-    const doUpdate = customIndex && !customIndex.isDefault;
+    const doUpdate = customIndex && !customIndex.isSystem;
 
     return (
         <div className={"flex flex-col gap-4"}>

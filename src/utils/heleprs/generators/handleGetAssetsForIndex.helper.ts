@@ -2,7 +2,7 @@ import {getAssetHistoriesWithSmallestRange, getCachedTopAssets} from "@/lib/db/h
 import {AssetWithHistory} from "@/utils/types/general.types";
 import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
 
-export const handleGetAssetsForIndex = async ({
+export const handleGetAssetsWithHistory = async ({
     topAssetsCount = MAX_ASSET_COUNT,
     startTime: startTimeProp,
     endTime: endTimeProp,
