@@ -215,6 +215,7 @@ export const normalizeAssetsHistory = async (): Promise<NormalizedAssetHistory> 
 export type HistoryOverview = {
     days1: number;
     days7: number;
+    days30: number;
     total: number;
 };
 /**
@@ -226,17 +227,19 @@ export const getAssetHistoryOverview = async (
     historyListProp?: AssetHistory[]
 ): Promise<HistoryOverview> => {
     const history = historyListProp ?? (await dbGetAssetHistoryById(id));
-
     const historyList = history ?? [];
 
     const lastDayItem = historyList[historyList.length - 1];
-
     const lastDay = lastDayItem?.time;
+
     const oneDayAgo = historyList.find(
         item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-1, "day").valueOf()
     );
     const sevenDaysAgo = historyList.find(
         item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-7, "day").valueOf()
+    );
+    const thirtyDaysAgo = historyList.find(
+        item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-30, "day").valueOf()
     );
 
     const days1Profit = Number(lastDayItem?.priceUsd) - Number(oneDayAgo?.priceUsd);
@@ -245,12 +248,16 @@ export const getAssetHistoryOverview = async (
     const days7Profit = Number(lastDayItem?.priceUsd) - Number(sevenDaysAgo?.priceUsd);
     const days7ProfitPercent = days7Profit / Number(sevenDaysAgo?.priceUsd);
 
+    const days30Profit = Number(lastDayItem?.priceUsd) - Number(thirtyDaysAgo?.priceUsd);
+    const days30ProfitPercent = days30Profit / Number(thirtyDaysAgo?.priceUsd);
+
     const totalProfit = Number(lastDayItem?.priceUsd) - Number(historyList[0]?.priceUsd);
     const totalProfitPercent = totalProfit / Number(historyList[0]?.priceUsd);
 
     return {
         days1: days1ProfitPercent,
         days7: days7ProfitPercent,
+        days30: days30ProfitPercent,
         total: totalProfitPercent,
     };
 };
@@ -269,9 +276,8 @@ export const getIndexHistoryOverview = async <A extends {id: string; portion?: n
     assets: AssetWithHistoryAndOverview<A>[]
 ): Promise<HistoryOverview> => {
     // Read all assets
-
     if (assets.length === 0) {
-        return {days1: 0, days7: 0, total: 0};
+        return {days1: 0, days7: 0, days30: 0, total: 0};
     }
 
     // Extract portions from the index assets
@@ -286,6 +292,7 @@ export const getIndexHistoryOverview = async <A extends {id: string; portion?: n
     // Initialize cumulative weighted performance variables
     let weightedDays1 = 0;
     let weightedDays7 = 0;
+    let weightedDays30 = 0;
     let weightedTotal = 0;
 
     for (const asset of assets) {
@@ -297,6 +304,7 @@ export const getIndexHistoryOverview = async <A extends {id: string; portion?: n
             // Accumulate weighted values
             weightedDays1 += assetHistoryOverview.days1 * weight;
             weightedDays7 += assetHistoryOverview.days7 * weight;
+            weightedDays30 += assetHistoryOverview.days30 * weight;
             weightedTotal += assetHistoryOverview.total * weight;
         } catch (error) {
             console.error(`Failed to calculate history overview for asset ${asset.id}`, error);
@@ -307,6 +315,7 @@ export const getIndexHistoryOverview = async <A extends {id: string; portion?: n
     return {
         days1: weightedDays1,
         days7: weightedDays7,
+        days30: weightedDays30,
         total: weightedTotal,
     };
 };
