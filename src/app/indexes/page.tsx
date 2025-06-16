@@ -8,12 +8,12 @@ import {dbGetListIndexOverview} from "@/lib/db/helpers/db.indexOverview.helpers"
 export default async function IndexesPage() {
     return (
         <SuspenseContainer>
-            <SuspendedComponent />
+            <IndexesPageComponent />
         </SuspenseContainer>
     );
 }
 
-const SuspendedComponent = async () => {
+const IndexesPageComponent = async () => {
     const customIndexes = await dbGetListIndexOverview();
 
     return <IndexesTable data={customIndexes} />;

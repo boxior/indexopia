@@ -12,12 +12,12 @@ import {UpdateCustomIndex} from "@/app/indexes/components/CustomIndex/UpdateCust
 export default async function IndexPage(props: ServerPageProps) {
     return (
         <SuspenseContainer>
-            <SuspendedComponent {...props} />
+            <IndexPageComponent {...props} />
         </SuspenseContainer>
     );
 }
 
-const SuspendedComponent = async (props: ServerPageProps) => {
+const IndexPageComponent = async (props: ServerPageProps) => {
     const params = await props.params;
     const assets = await getCachedTopAssets();
 

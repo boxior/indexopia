@@ -16,7 +16,7 @@ import {
 } from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
-import {cloneDeep, get, pick, set} from "lodash";
+import {chunk, cloneDeep, get, pick, set} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
 import {dbPostAssets, dbGetAssets, dbGetAssetsByIds} from "@/lib/db/helpers/db.assets.helpers";
@@ -156,14 +156,26 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 export const manageAssetsHistory = async () => {
     const assets = await dbGetAssets();
 
-    for (const asset of assets) {
-        try {
-            await manageAssetHistory({id: asset.id});
-        } catch (err) {
-            console.error(err);
-            await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
-        }
-    }
+    const chunks = chunk(assets, 10);
+
+    const res = await Promise.all(
+        chunks.map(async chunk => {
+            return Promise.all(
+                chunk.map(async asset => {
+                    try {
+                        return manageAssetHistory({id: asset.id});
+                    } catch (err) {
+                        console.error(err);
+                        return writeJsonFile(
+                            `error_${(err as Error).name}`,
+                            JSON.parse(JSON.stringify(err)),
+                            `/db/errors`
+                        );
+                    }
+                })
+            );
+        })
+    );
 };
 
 export const normalizeAssets = async (): Promise<NormalizedAssets> => {
