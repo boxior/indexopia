@@ -23,7 +23,7 @@ export function CreateIndex() {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <Button variant="outline" onClick={openDialog}>
-                Crate Custom Index
+                Create Custom Index
             </Button>
             {open && <IndexDialog closeDialog={closeDialog} />}
         </Dialog>
