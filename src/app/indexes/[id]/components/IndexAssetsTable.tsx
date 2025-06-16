@@ -33,7 +33,7 @@ import {
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode} from "react";
-import {HistoryPreviewChart} from "@/app/indexes/components/HistoryPreviewChart";
+import {HistoryOverviewChart} from "@/app/indexes/components/HistoryOverviewChart";
 import {getChartColorClassname} from "@/app/indexes/helpers";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 
@@ -125,7 +125,7 @@ export function IndexAssetsTable({index}: {index: Index<AssetWithHistoryOverview
 
                 return (
                     <div className={`lowercase ${getChartColorClassname(asset.historyOverview.days7)}`}>
-                        <HistoryPreviewChart history={asset.history} />
+                        <HistoryOverviewChart history={asset.history} />
                     </div>
                 ); // Safely render the value
             },

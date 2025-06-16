@@ -21,14 +21,11 @@ import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/s
 
 import {dbPostAssets, dbGetAssets, dbGetAssetsByIds} from "@/lib/db/helpers/db.assets.helpers";
 import {dbPostAssetHistory, dbGetAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
-import {
-    dbGetUniqueCustomIndexesAssetIds,
-    dbHandleGetCustomIndexById,
-    dbHandleGetCustomIndexes,
-} from "@/lib/db/helpers/db.customIndex.helpers";
+import {dbGetUniqueCustomIndexesAssetIds, dbHandleGetCustomIndexes} from "@/lib/db/helpers/db.index.helpers";
 import {unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineTags} from "@/utils/cache/helpers.cache";
+import {dbGetIndexOverviewById} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
@@ -454,23 +451,23 @@ function mergeAssetHistories<A = Asset>(
     return merged;
 }
 
-export const getCustomIndex = async ({
+export const getIndex = async ({
     id,
-    customIndex: propCustomIndex,
+    indexOverview: propIndexOverview,
 }: {
     id: Id;
-    customIndex?: CustomIndexType;
+    indexOverview?: CustomIndexType;
 }): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null> => {
     "use cache";
     cacheTag(combineTags(CacheTag.INDEX, id));
 
-    const customIndex = propCustomIndex ?? (await dbHandleGetCustomIndexById(id));
+    const indexOverview = propIndexOverview ?? (await dbGetIndexOverviewById(id));
 
-    if (!customIndex) {
+    if (!indexOverview) {
         return null;
     }
 
-    let assets = await getCachedAssets(customIndex.assets.map(asset => asset.id));
+    let assets = await getCachedAssets(indexOverview.assets.map(asset => asset.id));
 
     const {
         assets: assetsWithHistories,
@@ -478,19 +475,19 @@ export const getCustomIndex = async ({
         endTime,
     } = await getAssetsWithHistories({
         assets,
-        ...pick(customIndex, ["startTime"]),
+        ...pick(indexOverview, ["startTime"]),
     });
 
     assets = assetsWithHistories;
 
     assets = assets.map(asset => ({
         ...asset,
-        portion: customIndex.assets.find(a => a.id === asset.id)?.portion ?? 0,
+        portion: indexOverview.assets.find(a => a.id === asset.id)?.portion ?? 0,
         maxDrawDown: getMaxDrawDownWithTimeRange(asset.history),
     }));
 
     const index: Omit<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>, "historyOverview" | "maxDrawDown"> = {
-        ...pick(customIndex, ["id", "name", "startTime", "isSystem"]),
+        ...pick(indexOverview, ["id", "name", "startTime", "isSystem"]),
         assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
         history: [],
     };
@@ -516,9 +513,7 @@ export async function getCustomIndexes(): Promise<Index<AssetWithHistoryOverview
 
     const cachedCustomIndexes = await dbHandleGetCustomIndexes();
 
-    const customIndexes = await Promise.all(
-        cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id, customIndex: ci}))
-    );
+    const customIndexes = await Promise.all(cachedCustomIndexes.map(ci => getIndex({id: ci.id, indexOverview: ci})));
 
     return customIndexes.filter(ci => ci !== null);
 }

@@ -1,5 +1,5 @@
 import {NextResponse, NextRequest} from "next/server";
-import {dbDeleteIndex, dbGetAssetsByCustomIndexId} from "@/lib/db/helpers/db.customIndex.helpers";
+import {dbDeleteIndex, dbGetAssetsByCustomIndexId} from "@/lib/db/helpers/db.index.helpers";
 
 export const dynamic = "force-dynamic";
 

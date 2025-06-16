@@ -1,7 +1,7 @@
 "use server";
 
 import {CustomIndexType} from "@/utils/types/general.types";
-import {dbHandlePostCustomIndex, dbHandlePutCustomIndex} from "@/lib/db/helpers/db.customIndex.helpers";
+import {dbHandlePostCustomIndex, dbHandlePutCustomIndex} from "@/lib/db/helpers/db.index.helpers";
 import {revalidateTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineTags} from "@/utils/cache/helpers.cache";

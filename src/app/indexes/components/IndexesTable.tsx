@@ -30,9 +30,9 @@ import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode, useEffect} from "react";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
 import Link from "next/link";
-import {CreateCustomIndex} from "@/app/indexes/components/CustomIndex/CreateCustomIndex";
+import {CreateIndex} from "@/app/indexes/components/Index/CreateIndex";
 import {clientApiDeleteCustomIndex} from "@/utils/clientApi/customIndex.clientApi";
-import {IndexHistoryPreviewChart} from "@/app/indexes/components/IndexHistoryPreviewChart";
+import {IndexHistoryOverviewChart} from "@/app/indexes/components/IndexHistoryOverviewChart";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 
 export default function IndexesTable({data}: {data: IndexOverview[]}) {
@@ -153,7 +153,7 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
 
                 return (
                     <div className={`lowercase ${getChartColorClassname(index.historyOverview.days7)}`}>
-                        <IndexHistoryPreviewChart index={index} />
+                        <IndexHistoryOverviewChart index={index} />
                     </div>
                 ); // Safely render the value
             },
@@ -267,7 +267,7 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
                     onChange={event => table.getColumn("name")?.setFilterValue(event.target.value)}
                     className="max-w-sm"
                 />
-                <CreateCustomIndex />
+                <CreateIndex />
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

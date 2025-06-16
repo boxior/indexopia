@@ -2,7 +2,7 @@ import React from "react";
 import {MultiSelect} from "@/components/custom-ui/multiselect";
 import {Asset} from "@/utils/types/general.types";
 
-export function CustomIndexAssets({
+export function IndexAssets({
     assets,
     assetsIds,
     onChangeMultiselect,

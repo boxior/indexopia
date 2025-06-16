@@ -1,12 +1,12 @@
 "use client";
 
 import {IndexHistory, IndexOverview} from "@/utils/types/general.types";
-import {HistoryPreviewChart} from "@/app/indexes/components/HistoryPreviewChart";
+import {HistoryOverviewChart} from "@/app/indexes/components/HistoryOverviewChart";
 import {useEffect, useState} from "react";
 import {clientApiGetIndexHistory} from "@/utils/clientApi/customIndex.clientApi";
 import {isEmpty} from "lodash";
 
-export function IndexHistoryPreviewChart({index}: {index: IndexOverview}) {
+export function IndexHistoryOverviewChart({index}: {index: IndexOverview}) {
     const [history, setHistory] = useState<IndexHistory[]>([]);
 
     useEffect(() => {
@@ -19,5 +19,5 @@ export function IndexHistoryPreviewChart({index}: {index: IndexOverview}) {
         return null;
     }
 
-    return <HistoryPreviewChart history={history} />;
+    return <HistoryOverviewChart history={history} />;
 }
