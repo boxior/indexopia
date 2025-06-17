@@ -1,31 +1,32 @@
 import {DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
-import {CustomIndexAssets} from "@/app/indexes/components/CustomIndex/CustomIndexAssets";
-import {CustomIndexAssetsPortions} from "@/app/indexes/components/CustomIndex/CustomIndexAssetsPortions";
+import {IndexAssets} from "@/app/indexes/components/Index/IndexAssets";
+import {IndexAssetsPortions} from "@/app/indexes/components/Index/IndexAssetsPortions";
 import {Button} from "@/components/ui/button";
-import {useState} from "react";
-import {CustomIndexAsset, Asset, CustomIndexType} from "@/utils/types/general.types";
+import {useEffect, useState} from "react";
+import {CustomIndexAsset, Asset, CustomIndexType, IndexOverview} from "@/utils/types/general.types";
 import {createCustomIndex, updateCustomIndex} from "@/app/indexes/[id]/actions";
+import {clientApiGetAssets} from "@/utils/clientApi/customIndex.clientApi";
 
-export function CustomIndexDialog({
-    assets,
-    closeDialog,
-    customIndex,
-}: {
-    assets: Asset[];
-    closeDialog: () => void;
-    customIndex?: CustomIndexType;
-}) {
-    const [selectedAssets, setSelectedAssets] = useState<CustomIndexAsset[]>(customIndex?.assets ?? []);
-    const [name, setName] = useState<string>(customIndex?.name ?? "");
+export function IndexDialog({closeDialog, indexOverview}: {closeDialog: () => void; indexOverview?: IndexOverview}) {
+    const [assets, setAssets] = useState<Asset[]>([]);
 
-    const isUpdateMode = !!customIndex;
+    useEffect(() => {
+        (async () => {
+            setAssets((await clientApiGetAssets()).assets);
+        })();
+    }, []);
+
+    const [selectedAssets, setSelectedAssets] = useState<CustomIndexAsset[]>(indexOverview?.assets ?? []);
+    const [name, setName] = useState<string>(indexOverview?.name ?? "");
+
+    const isUpdateMode = !!indexOverview;
 
     const handleSave = async () => {
         if (isUpdateMode) {
             await updateCustomIndex({
-                ...customIndex,
+                ...indexOverview,
                 name,
                 assets: selectedAssets,
             });
@@ -67,7 +68,7 @@ export function CustomIndexDialog({
     return (
         <DialogContent className="w-full max-w-lg">
             <DialogHeader>
-                <DialogTitle>{`${isUpdateMode ? "Update" : "Create"} Custom Index ${customIndex ? `(${customIndex.name})` : ""}`}</DialogTitle>
+                <DialogTitle>{`${isUpdateMode ? "Update" : "Create"} Custom Index ${indexOverview ? `(${indexOverview.name})` : ""}`}</DialogTitle>
                 <DialogDescription>{`${isUpdateMode ? "" : "Create your custom Index"}`}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
@@ -87,7 +88,7 @@ export function CustomIndexDialog({
                     <Label htmlFor="assets" className="text-right">
                         Assets
                     </Label>
-                    <CustomIndexAssets
+                    <IndexAssets
                         assets={assets}
                         assetsIds={selectedAssets.map(item => item.id)}
                         onChangeMultiselect={handleChangeMultiselect}
@@ -97,7 +98,7 @@ export function CustomIndexDialog({
                     <Label htmlFor="assets" className="text-right">
                         Assets Portions
                     </Label>
-                    <CustomIndexAssetsPortions
+                    <IndexAssetsPortions
                         assets={assets}
                         selectedAssets={selectedAssets}
                         onChangeAssetPortion={handleChangeAssetPortion}

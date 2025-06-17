@@ -1,9 +1,6 @@
 import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
-import {
-    handleSaveSystemCustomIndex,
-    SaveSystemIndexProps,
-} from "@/utils/heleprs/generators/handleSaveSystemCustomIndex.helper";
+import {SaveSystemIndexProps} from "@/utils/heleprs/generators/handleSaveSystemCustomIndex.helper";
 import {handleSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
 
 export const dynamic = "force-dynamic";
@@ -30,7 +27,6 @@ export async function POST(req: NextRequest) {
 
         const body = (await req.json()) as SaveSystemIndexProps;
 
-        // await handleSaveSystemCustomIndex(body);
         await handleSaveSystemIndexOverview(body);
 
         return NextResponse.json(

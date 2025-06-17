@@ -24,17 +24,18 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Asset, Index, IndexOverview, MaxDrawDown} from "@/utils/types/general.types";
+import {Asset, IndexOverview, MaxDrawDown} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode, useEffect} from "react";
-import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
 import Link from "next/link";
-import {CreateCustomIndex} from "@/app/indexes/components/CustomIndex/CreateCustomIndex";
+import {CreateIndex} from "@/app/indexes/components/Index/CreateIndex";
 import {clientApiDeleteCustomIndex} from "@/utils/clientApi/customIndex.clientApi";
+import {IndexHistoryOverviewChart} from "@/app/indexes/components/IndexHistoryOverviewChart";
+import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 
-export default function IndexesTable({data, assets}: {data: IndexOverview[]; assets: Asset[]}) {
+export default function IndexesTable({data}: {data: IndexOverview[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -145,20 +146,20 @@ export default function IndexesTable({data, assets}: {data: IndexOverview[]; ass
             },
         },
         {
-            id: "historyOverview_7d_chart",
+            id: `historyOverview_${HISTORY_OVERVIEW_DAYS}d_chart`,
             accessorFn: index => index,
             cell: ({row}) => {
-                const index = row.getValue("historyOverview_7d_chart") as IndexOverview;
+                const index = row.getValue(`historyOverview_${HISTORY_OVERVIEW_DAYS}d_chart`) as IndexOverview;
 
                 return (
                     <div className={`lowercase ${getChartColorClassname(index.historyOverview.days7)}`}>
-                        <IndexPreviewChart history={[]} />
+                        <IndexHistoryOverviewChart index={index} />
                     </div>
                 ); // Safely render the value
             },
-            header: renderColumnSortedHeader("7d Chart"),
+            header: renderColumnSortedHeader(`${HISTORY_OVERVIEW_DAYS}d Chart`),
             meta: {
-                text: "7d Chart",
+                text: `${HISTORY_OVERVIEW_DAYS}d Chart`,
             },
         },
         {
@@ -266,7 +267,7 @@ export default function IndexesTable({data, assets}: {data: IndexOverview[]; ass
                     onChange={event => table.getColumn("name")?.setFilterValue(event.target.value)}
                     className="max-w-sm"
                 />
-                <CreateCustomIndex assets={assets} />
+                <CreateIndex />
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

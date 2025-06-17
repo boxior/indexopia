@@ -1,5 +1,5 @@
 import {AssetWithProfit, CustomIndexAsset, IndexOverviewAsset} from "@/utils/types/general.types";
-import {MAX_PORTION} from "@/app/indexes/components/CustomIndex/CustomIndexAssetsPortions";
+import {MAX_PORTION} from "@/app/indexes/components/Index/IndexAssetsPortions";
 import {correctAssetPortions} from "@/utils/heleprs/generators/generators.helpers";
 import {pick} from "lodash";
 
