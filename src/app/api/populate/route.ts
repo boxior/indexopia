@@ -1,6 +1,7 @@
 import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 import {manageAssets, manageAssetsHistory} from "@/lib/db/helpers/db.helpers";
+
 export const dynamic = "force-dynamic";
 
 /**

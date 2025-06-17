@@ -4,9 +4,16 @@ import {dbPostIndexOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {generateUuid} from "@/utils/heleprs/generateUuid.helper";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 import {getAssetsWithHistories, getIndexHistory, getIndexHistoryOverview} from "@/lib/db/helpers/db.helpers";
-import {IndexOverviewAsset} from "@/utils/types/general.types";
+import {IndexOverview, IndexOverviewAsset} from "@/utils/types/general.types";
+import {pick} from "lodash";
 
 export const handleSaveSystemIndexOverview = async (props: SaveSystemIndexProps) => {
+    return await dbPostIndexOverview(await handlePrepareToSaveSystemIndexOverview(props));
+};
+
+export const handlePrepareToSaveSystemIndexOverview = async (
+    props: SaveSystemIndexProps
+): Promise<Omit<IndexOverview, "id">> => {
     const {name: propName} = props;
     //
     const {assets, startTime: assetsStartTime} = await handleGenerateSystemIndexOverviewAssetsWithStartEndTimes(props);
@@ -22,12 +29,12 @@ export const handleSaveSystemIndexOverview = async (props: SaveSystemIndexProps)
     const historyOverview = await getIndexHistoryOverview(assetsWithHistories);
     const maxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
-    return dbPostIndexOverview({
+    return {
         name,
-        assets,
+        assets: assets.map(asset => pick(asset, ["id", "name", "rank", "symbol", "portion"])),
         startTime: startTime ?? performance.now(),
         isSystem: true,
         historyOverview,
         maxDrawDown,
-    });
+    };
 };
