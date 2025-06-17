@@ -8,7 +8,7 @@ export const dynamic = "force-dynamic";
  * Write `assets_history` to the DB
  * The request should be GET to use free cron job https://console.cron-job.org/dashboard
  */
-export async function GET(_req: NextRequest) {
+export async function POST(_req: NextRequest) {
     try {
         // Get the URL and search parameters
         const {searchParams} = new URL(_req.url);

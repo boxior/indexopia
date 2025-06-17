@@ -5,7 +5,7 @@ import {ChangeEventHandler} from "react";
 
 export const MAX_PORTION = 100;
 
-export function CustomIndexAssetsPortions({
+export function IndexAssetsPortions({
     assets,
     selectedAssets,
     onChangeAssetPortion,

@@ -9,7 +9,7 @@ import {combineTags} from "@/utils/cache/helpers.cache";
 const TABLE_NAME_ASSET_HISTORY = ENV_VARIABLES.MYSQL_TABLE_NAME_ASSET_HISTORY; // Ensure this table exists in your database
 
 // Helper function: Insert `AssetHistory` into the database
-export const dbInsertAssetHistory = async (data: AssetHistory[]) => {
+export const dbPostAssetHistory = async (data: AssetHistory[]) => {
     try {
         // Prepare the SQL query with multiple VALUES clauses
         const sql = `
@@ -37,7 +37,7 @@ export const dbInsertAssetHistory = async (data: AssetHistory[]) => {
 };
 
 // Helper function: Fetch all history for a specific asset by `assetId`
-export const dbQueryAssetHistoryById = async (assetId: string): Promise<AssetHistory[]> => {
+export const dbGetAssetHistoryById = async (assetId: string): Promise<AssetHistory[]> => {
     "use cache";
     cacheTag(combineTags(CacheTag.ASSET_HISTORY, assetId));
 
@@ -56,7 +56,7 @@ export const dbQueryAssetHistoryById = async (assetId: string): Promise<AssetHis
 };
 
 // Helper function: Fetch all history for a specific asset by `assetId` with optional `startTime`
-export const dbQueryAssetHistoryByIdAndStartTime = async (
+export const dbGetAssetHistoryByIdAndStartTime = async (
     assetId: string,
     startTime: number
 ): Promise<AssetHistory[]> => {

@@ -33,8 +33,9 @@ import {
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode} from "react";
-import {IndexPreviewChart} from "@/app/indexes/components/IndexPreviewChart";
+import {HistoryOverviewChart} from "@/app/indexes/components/HistoryOverviewChart";
 import {getChartColorClassname} from "@/app/indexes/helpers";
+import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 
 export function IndexAssetsTable({index}: {index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -115,20 +116,22 @@ export function IndexAssetsTable({index}: {index: Index<AssetWithHistoryOverview
             },
         },
         {
-            id: "historyOverview_7d_chart",
+            id: `historyOverview_${HISTORY_OVERVIEW_DAYS}d_chart`,
             accessorFn: index => index,
             cell: ({row}) => {
-                const asset = row.getValue("historyOverview_7d_chart") as AssetWithHistoryAndOverview;
+                const asset = row.getValue(
+                    `historyOverview_${HISTORY_OVERVIEW_DAYS}d_chart`
+                ) as AssetWithHistoryAndOverview;
 
                 return (
                     <div className={`lowercase ${getChartColorClassname(asset.historyOverview.days7)}`}>
-                        <IndexPreviewChart history={asset.history} />
+                        <HistoryOverviewChart history={asset.history} />
                     </div>
                 ); // Safely render the value
             },
-            header: renderColumnSortedHeader("7d Chart"),
+            header: renderColumnSortedHeader(`${HISTORY_OVERVIEW_DAYS}d Chart`),
             meta: {
-                text: "7d Chart",
+                text: `${HISTORY_OVERVIEW_DAYS}d Chart`,
             },
         },
         {

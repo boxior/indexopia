@@ -1,5 +1,5 @@
 import {Asset, IndexOverviewAsset} from "@/utils/types/general.types";
-import {MAX_PORTION} from "@/app/indexes/components/CustomIndex/CustomIndexAssetsPortions";
+import {MAX_PORTION} from "@/app/indexes/components/Index/IndexAssetsPortions";
 
 /**
  * Assets portion should be strictly equal MAX_PORTION

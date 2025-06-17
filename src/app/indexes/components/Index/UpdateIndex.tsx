@@ -2,14 +2,14 @@
 
 import {Button} from "@/components/ui/button";
 import {Dialog} from "@/components/ui/dialog";
-import {Asset, CustomIndexType} from "@/utils/types/general.types";
+import {IndexOverview} from "@/utils/types/general.types";
 import {useState} from "react";
-import {CustomIndexDialog} from "@/app/indexes/components/CustomIndex/CustomIndexDialog";
+import {IndexDialog} from "@/app/indexes/components/Index/IndexDialog";
 import {clientApiDeleteCustomIndex} from "@/utils/clientApi/customIndex.clientApi";
 import {redirect} from "next/navigation";
 import {isNil} from "lodash";
 
-export function UpdateCustomIndex({assets, customIndex}: {assets: Asset[]; customIndex: CustomIndexType}) {
+export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
     const [open, setOpen] = useState<boolean>(false);
 
     const onOpenChange = (bool: boolean) => {
@@ -24,13 +24,13 @@ export function UpdateCustomIndex({assets, customIndex}: {assets: Asset[]; custo
         setOpen(false);
     };
 
-    const doDelete = !isNil(customIndex?.id) && !customIndex?.isSystem;
+    const doDelete = !isNil(indexOverview?.id) && !indexOverview?.isSystem;
 
     const handleDelete = async () => {
         if (!doDelete) {
             return;
         }
-        await clientApiDeleteCustomIndex(customIndex?.id ?? ""); // need tls
+        await clientApiDeleteCustomIndex(indexOverview?.id ?? ""); // need tls
         redirect("/indexes");
     };
 
@@ -47,7 +47,7 @@ export function UpdateCustomIndex({assets, customIndex}: {assets: Asset[]; custo
                 )}
             </div>
             <Dialog open={open} onOpenChange={onOpenChange}>
-                {open && <CustomIndexDialog assets={assets} closeDialog={closeDialog} customIndex={customIndex} />}
+                {open && <IndexDialog closeDialog={closeDialog} indexOverview={indexOverview} />}
             </Dialog>
         </>
     );

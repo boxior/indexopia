@@ -16,19 +16,16 @@ import {
 } from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
-import {cloneDeep, get, pick, set} from "lodash";
+import {chunk, cloneDeep, get, pick, set} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
-import {dbInsertAssets, dbQueryAssets, dbQueryAssetsByIds} from "@/lib/db/helpers/db.assets.helpers";
-import {dbInsertAssetHistory, dbQueryAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
-import {
-    dbGetUniqueCustomIndexesAssetIds,
-    dbHandleQueryCustomIndexById,
-    dbHandleQueryCustomIndexes,
-} from "@/lib/db/helpers/db.customIndex.helpers";
+import {dbPostAssets, dbGetAssets, dbGetAssetsByIds} from "@/lib/db/helpers/db.assets.helpers";
+import {dbPostAssetHistory, dbGetAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
+import {dbGetUniqueCustomIndexesAssetIds, dbHandleGetCustomIndexes} from "@/lib/db/helpers/db.index.helpers";
 import {unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineTags} from "@/utils/cache/helpers.cache";
+import {dbGetIndexOverviewById} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
@@ -47,7 +44,7 @@ export const migrateAssetsHistoriesFromJsonToDb = async () => {
             )) as DbItems<Omit<AssetHistory, "assetId">>;
             const normalizedAssetHistory = assetHistory.data.map(history => ({assetId: asset.id, ...history}));
 
-            await dbInsertAssetHistory(normalizedAssetHistory);
+            await dbPostAssetHistory(normalizedAssetHistory);
         } catch (err) {
             console.error(err);
             await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
@@ -63,16 +60,16 @@ export const manageAssets = async () => {
 
     const customIndexesAssetsIds = await dbGetUniqueCustomIndexesAssetIds();
     const assetsIdsToFetchMore = customIndexesAssetsIds.filter(id => !assets.some(asset => asset.id === id));
-    const assetsToFetchMore = await dbQueryAssetsByIds(assetsIdsToFetchMore);
+    const assetsToFetchMore = await dbGetAssetsByIds(assetsIdsToFetchMore);
 
     const allAssets = [...assets, ...assetsToFetchMore];
 
-    await dbInsertAssets(allAssets);
+    await dbPostAssets(allAssets);
     await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, allAssets, ASSETS_FOLDER_PATH);
 };
 
 export const manageAssetHistory = async ({id}: {id: string}) => {
-    const oldList = await dbQueryAssetHistoryById(id);
+    const oldList = await dbGetAssetHistoryById(id);
 
     let start = momentTimeZone.tz("UTC").startOf("day").add(-11, "year").add(1, "day").valueOf();
 
@@ -103,7 +100,7 @@ export const manageAssetHistory = async ({id}: {id: string}) => {
         return;
     }
     await writeJsonFile(`history_${id}`, newList, "/db/debug");
-    await dbInsertAssetHistory(newList);
+    await dbPostAssetHistory(newList);
 };
 
 const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
@@ -154,16 +151,28 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 export const manageAssetsHistory = async () => {
-    const assets = await dbQueryAssets();
+    const assets = await dbGetAssets();
 
-    for (const asset of assets) {
-        try {
-            await manageAssetHistory({id: asset.id});
-        } catch (err) {
-            console.error(err);
-            await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
-        }
-    }
+    const chunks = chunk(assets, 10);
+
+    const res = await Promise.all(
+        chunks.map(async chunk => {
+            return Promise.all(
+                chunk.map(async asset => {
+                    try {
+                        return manageAssetHistory({id: asset.id});
+                    } catch (err) {
+                        console.error(err);
+                        return writeJsonFile(
+                            `error_${(err as Error).name}`,
+                            JSON.parse(JSON.stringify(err)),
+                            `/db/errors`
+                        );
+                    }
+                })
+            );
+        })
+    );
 };
 
 export const normalizeAssets = async (): Promise<NormalizedAssets> => {
@@ -206,6 +215,7 @@ export const normalizeAssetsHistory = async (): Promise<NormalizedAssetHistory> 
 export type HistoryOverview = {
     days1: number;
     days7: number;
+    days30: number;
     total: number;
 };
 /**
@@ -216,18 +226,20 @@ export const getAssetHistoryOverview = async (
     id: string,
     historyListProp?: AssetHistory[]
 ): Promise<HistoryOverview> => {
-    const history = historyListProp ?? (await dbQueryAssetHistoryById(id));
-
+    const history = historyListProp ?? (await dbGetAssetHistoryById(id));
     const historyList = history ?? [];
 
     const lastDayItem = historyList[historyList.length - 1];
-
     const lastDay = lastDayItem?.time;
+
     const oneDayAgo = historyList.find(
         item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-1, "day").valueOf()
     );
     const sevenDaysAgo = historyList.find(
         item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-7, "day").valueOf()
+    );
+    const thirtyDaysAgo = historyList.find(
+        item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-30, "day").valueOf()
     );
 
     const days1Profit = Number(lastDayItem?.priceUsd) - Number(oneDayAgo?.priceUsd);
@@ -236,23 +248,27 @@ export const getAssetHistoryOverview = async (
     const days7Profit = Number(lastDayItem?.priceUsd) - Number(sevenDaysAgo?.priceUsd);
     const days7ProfitPercent = days7Profit / Number(sevenDaysAgo?.priceUsd);
 
+    const days30Profit = Number(lastDayItem?.priceUsd) - Number(thirtyDaysAgo?.priceUsd);
+    const days30ProfitPercent = days30Profit / Number(thirtyDaysAgo?.priceUsd);
+
     const totalProfit = Number(lastDayItem?.priceUsd) - Number(historyList[0]?.priceUsd);
     const totalProfitPercent = totalProfit / Number(historyList[0]?.priceUsd);
 
     return {
         days1: days1ProfitPercent,
         days7: days7ProfitPercent,
+        days30: days30ProfitPercent,
         total: totalProfitPercent,
     };
 };
 
 export const getCachedTopAssets = async (limit: number | undefined = MAX_ASSET_COUNT): Promise<Asset[]> => {
-    const assets = await dbQueryAssets();
+    const assets = await dbGetAssets();
     return filterAssetsByOmitIds(assets ?? [], limit);
 };
 
 export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
-    const assets = await dbQueryAssets();
+    const assets = await dbGetAssets();
     return (assets ?? []).filter(asset => ids.includes(asset.id));
 };
 
@@ -260,9 +276,8 @@ export const getIndexHistoryOverview = async <A extends {id: string; portion?: n
     assets: AssetWithHistoryAndOverview<A>[]
 ): Promise<HistoryOverview> => {
     // Read all assets
-
     if (assets.length === 0) {
-        return {days1: 0, days7: 0, total: 0};
+        return {days1: 0, days7: 0, days30: 0, total: 0};
     }
 
     // Extract portions from the index assets
@@ -277,6 +292,7 @@ export const getIndexHistoryOverview = async <A extends {id: string; portion?: n
     // Initialize cumulative weighted performance variables
     let weightedDays1 = 0;
     let weightedDays7 = 0;
+    let weightedDays30 = 0;
     let weightedTotal = 0;
 
     for (const asset of assets) {
@@ -288,6 +304,7 @@ export const getIndexHistoryOverview = async <A extends {id: string; portion?: n
             // Accumulate weighted values
             weightedDays1 += assetHistoryOverview.days1 * weight;
             weightedDays7 += assetHistoryOverview.days7 * weight;
+            weightedDays30 += assetHistoryOverview.days30 * weight;
             weightedTotal += assetHistoryOverview.total * weight;
         } catch (error) {
             console.error(`Failed to calculate history overview for asset ${asset.id}`, error);
@@ -298,6 +315,7 @@ export const getIndexHistoryOverview = async <A extends {id: string; portion?: n
     return {
         days1: weightedDays1,
         days7: weightedDays7,
+        days30: weightedDays30,
         total: weightedTotal,
     };
 };
@@ -320,7 +338,7 @@ export const getAssetHistoriesWithSmallestRange = async ({
         assetIds.map(assetId => {
             return (async () => {
                 try {
-                    return dbQueryAssetHistoryById(assetId);
+                    return dbGetAssetHistoryById(assetId);
                 } catch {
                     return [];
                 }
@@ -442,23 +460,23 @@ function mergeAssetHistories<A = Asset>(
     return merged;
 }
 
-export const getCustomIndex = async ({
+export const getIndex = async ({
     id,
-    customIndex: propCustomIndex,
+    indexOverview: propIndexOverview,
 }: {
     id: Id;
-    customIndex?: CustomIndexType;
+    indexOverview?: CustomIndexType;
 }): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null> => {
     "use cache";
     cacheTag(combineTags(CacheTag.INDEX, id));
 
-    const customIndex = propCustomIndex ?? (await dbHandleQueryCustomIndexById(id));
+    const indexOverview = propIndexOverview ?? (await dbGetIndexOverviewById(id));
 
-    if (!customIndex) {
+    if (!indexOverview) {
         return null;
     }
 
-    let assets = await getCachedAssets(customIndex.assets.map(asset => asset.id));
+    let assets = await getCachedAssets(indexOverview.assets.map(asset => asset.id));
 
     const {
         assets: assetsWithHistories,
@@ -466,19 +484,19 @@ export const getCustomIndex = async ({
         endTime,
     } = await getAssetsWithHistories({
         assets,
-        ...pick(customIndex, ["startTime"]),
+        ...pick(indexOverview, ["startTime"]),
     });
 
     assets = assetsWithHistories;
 
     assets = assets.map(asset => ({
         ...asset,
-        portion: customIndex.assets.find(a => a.id === asset.id)?.portion ?? 0,
+        portion: indexOverview.assets.find(a => a.id === asset.id)?.portion ?? 0,
         maxDrawDown: getMaxDrawDownWithTimeRange(asset.history),
     }));
 
     const index: Omit<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>, "historyOverview" | "maxDrawDown"> = {
-        ...pick(customIndex, ["id", "name", "startTime", "isSystem"]),
+        ...pick(indexOverview, ["id", "name", "startTime", "isSystem"]),
         assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
         history: [],
     };
@@ -502,11 +520,9 @@ export async function getCustomIndexes(): Promise<Index<AssetWithHistoryOverview
     "use cache";
     cacheTag(CacheTag.CUSTOM_INDEXES);
 
-    const cachedCustomIndexes = await dbHandleQueryCustomIndexes();
+    const cachedCustomIndexes = await dbHandleGetCustomIndexes();
 
-    const customIndexes = await Promise.all(
-        cachedCustomIndexes.map(ci => getCustomIndex({id: ci.id, customIndex: ci}))
-    );
+    const customIndexes = await Promise.all(cachedCustomIndexes.map(ci => getIndex({id: ci.id, indexOverview: ci})));
 
     return customIndexes.filter(ci => ci !== null);
 }
