@@ -85,6 +85,8 @@ export type NormalizedAssetHistory = Record<Asset["id"], AssetHistory[]>;
 
 export interface Index<A = Asset> {
     id: Id;
+    systemId?: string;
+    userId?: string;
     name: string;
     assets: A[];
     historyOverview: HistoryOverview;
@@ -99,7 +101,7 @@ export type IndexOverviewAsset = Pick<Required<Asset>, "id" | "name" | "symbol" 
 
 export type IndexOverview = Pick<
     Index,
-    "id" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime" | "isSystem"
+    "id" | "systemId" | "userId" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime" | "isSystem"
 > & {assets: IndexOverviewAsset[]};
 
 export interface CustomIndexType {
