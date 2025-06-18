@@ -1,6 +1,8 @@
 import {ENV_VARIABLES} from "@/env";
 import {mySqlPool} from "@/lib/db";
 import {
+    Asset,
+    AssetHistory,
     CustomIndexAsset,
     CustomIndexAssetWithCustomIndexId,
     CustomIndexType,
@@ -11,6 +13,12 @@ import {revalidateTag, unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineTags} from "@/utils/cache/helpers.cache";
 import {normalizeDbBoolean} from "@/lib/db/helpers/db.helpers";
+import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
+import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
+import {chunk} from "lodash";
+import {SYSTEM_INDEXES_PROPS} from "@/app/api/populate/populate.constants";
+import {handlePrepareToSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
+import {dbDeleteSystemIndexes, dbPostIndexOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 const TABLE_NAME_CUSTOM_INDEX = ENV_VARIABLES.MYSQL_TABLE_NAME_CUSTOM_INDEX; // Ensure your database table exists
 const TABLE_NAME_CUSTOM_INDEX_ASSETS = ENV_VARIABLES.TABLE_NAME_CUSTOM_INDEX_ASSETS; // Ensure your database table exists
@@ -346,3 +354,44 @@ export async function dbGetUniqueCustomIndexesAssetIds() {
 
     return rows.map((row: {assetId: string}) => row.assetId);
 }
+
+export const manageSystemIndexes = async (
+    allAssets: Asset[] | undefined = [],
+    allAssetsHistory: AssetHistory[] | undefined = []
+) => {
+    try {
+        const assets = sortRankIndexAssets(allAssets).slice(0, MAX_ASSET_COUNT);
+        const normalizedAssetsHistory = allAssetsHistory.reduce(
+            (acc, assetHistory) => {
+                const hasNeededHistory = assets.some(item => item.id === assetHistory.assetId);
+
+                if (!hasNeededHistory) {
+                    return acc;
+                }
+
+                return {
+                    ...acc,
+                    [assetHistory.assetId]: [...(acc[assetHistory.assetId] ?? []), assetHistory],
+                };
+            },
+            {} as Record<string, AssetHistory[]>
+        );
+
+        const indexesToSave = [];
+        const chunksProps = chunk(SYSTEM_INDEXES_PROPS, 10);
+        for (const chunk of chunksProps) {
+            const indexesProps = await Promise.all(
+                chunk.map(item => handlePrepareToSaveSystemIndexOverview(item, assets, normalizedAssetsHistory))
+            );
+            indexesToSave.push(...indexesProps);
+        }
+
+        await dbDeleteSystemIndexes();
+        const chunksToSave = chunk(indexesToSave, 10);
+        for (const chunkToSave of chunksToSave) {
+            await Promise.all(chunkToSave.map(item => dbPostIndexOverview(item)));
+        }
+    } catch (error) {
+        console.log(error);
+    }
+};

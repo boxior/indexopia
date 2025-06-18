@@ -31,8 +31,11 @@ CREATE TABLE custom_index_overview (
     startTime BIGINT, -- Corresponds to the optional startTime field of Index
     endTime BIGINT, -- Corresponds to the optional endTime field of Index
     isSystem BOOLEAN, -- Corresponds to the optional isSystem field of Index
+    systemId VARCHAR(255), -- Optional systemId field for querying by system
+    userId VARCHAR(255), -- Optional userId field for querying by user
     PRIMARY KEY (id) -- Setting id as the primary key
 );
+
 
 ```
 
