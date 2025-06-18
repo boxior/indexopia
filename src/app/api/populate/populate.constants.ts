@@ -1,6 +1,8 @@
 import {SystemIndexBy, SystemIndexSortBy} from "@/utils/types/general.types";
 import {capitalize} from "lodash";
 import {SaveSystemIndexProps} from "@/utils/heleprs/generators/handleSaveSystemCustomIndex.helper";
+import {MAX} from "uuid";
+import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
 
 const UP_TO_NUMBERS = [5, 25, 50];
 const SORT_BY = Object.values(SystemIndexSortBy);
@@ -12,7 +14,7 @@ const getSystemIndexesProps = () => {
             const byProps = BY.map(b => {
                 return {
                     upToNumber: upToNumber,
-                    topAssetsCount: 50,
+                    topAssetsCount: MAX_ASSET_COUNT,
                     equalPortions: false,
                     name: `${capitalize(sort)} ${capitalize(b)} ${upToNumber}`,
                     systemIndexSortBy: SystemIndexSortBy.PROFIT, // profit | maxDrawDown | optimal

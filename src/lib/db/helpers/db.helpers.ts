@@ -16,7 +16,7 @@ import {
 } from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
-import {chunk, cloneDeep, get, pick, set} from "lodash";
+import {chunk, cloneDeep, flatten, get, pick, set} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
 import {dbPostAssets, dbGetAssets, dbGetAssetsByIds} from "@/lib/db/helpers/db.assets.helpers";
@@ -66,9 +66,11 @@ export const manageAssets = async () => {
 
     await dbPostAssets(allAssets);
     await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, allAssets, ASSETS_FOLDER_PATH);
+
+    return allAssets;
 };
 
-export const manageAssetHistory = async ({id}: {id: string}) => {
+export const manageAssetHistory = async ({id}: {id: string}): Promise<AssetHistory[]> => {
     const oldList = await dbGetAssetHistoryById(id);
 
     let start = momentTimeZone.tz("UTC").startOf("day").add(-11, "year").add(1, "day").valueOf();
@@ -84,7 +86,7 @@ export const manageAssetHistory = async ({id}: {id: string}) => {
     const end = momentTimeZone.tz("UTC").startOf("day").valueOf();
 
     if (start === end) {
-        return;
+        return oldList;
     }
 
     const {data: newData} = await fetchAssetHistory({
@@ -97,10 +99,12 @@ export const manageAssetHistory = async ({id}: {id: string}) => {
     const newList = (newData ?? []).map(history => ({...history, assetId: id}));
 
     if (newList.length === 0) {
-        return;
+        return oldList;
     }
     await writeJsonFile(`history_${id}`, newList, "/db/debug");
     await dbPostAssetHistory(newList);
+
+    return [...oldList, ...newList];
 };
 
 const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
@@ -150,12 +154,12 @@ const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const manageAssetsHistory = async () => {
+export const manageAssetsHistory = async (): Promise<AssetHistory[]> => {
     const assets = await dbGetAssets();
 
     const chunks = chunk(assets, 10);
 
-    const res = await Promise.all(
+    const result = await Promise.all(
         chunks.map(async chunk => {
             return Promise.all(
                 chunk.map(async asset => {
@@ -163,16 +167,20 @@ export const manageAssetsHistory = async () => {
                         return manageAssetHistory({id: asset.id});
                     } catch (err) {
                         console.error(err);
-                        return writeJsonFile(
+                        await writeJsonFile(
                             `error_${(err as Error).name}`,
                             JSON.parse(JSON.stringify(err)),
                             `/db/errors`
                         );
+
+                        return [];
                     }
                 })
             );
         })
     );
+
+    return flatten(flatten(result));
 };
 
 export const normalizeAssets = async (): Promise<NormalizedAssets> => {
@@ -324,33 +332,47 @@ export const getAssetHistoriesWithSmallestRange = async ({
     assetIds,
     startTime,
     endTime,
+    normalizedAssetsHistory,
 }: {
     assetIds: string[];
     startTime?: number;
     endTime?: number;
+    normalizedAssetsHistory?: Record<string, AssetHistory[]>;
 }): Promise<{histories: Record<string, AssetHistory[]>; startTime?: number; endTime?: number}> => {
     const histories: Record<string, AssetHistory[]> = {};
 
     let minStartTime: number | null = startTime ?? null;
     let maxEndTime: number | null = endTime ?? null;
 
-    const historyDatas = await Promise.all(
-        assetIds.map(assetId => {
-            return (async () => {
-                try {
-                    return dbGetAssetHistoryById(assetId);
-                } catch {
-                    return [];
-                }
-            })();
-        })
-    );
+    const historyRecord =
+        normalizedAssetsHistory ??
+        flatten(
+            await Promise.all(
+                assetIds.map(assetId => {
+                    return (async () => {
+                        try {
+                            return dbGetAssetHistoryById(assetId);
+                        } catch {
+                            return [];
+                        }
+                    })();
+                })
+            )
+        ).reduce(
+            (acc, assetHistory) => {
+                return {
+                    ...acc,
+                    [assetHistory.assetId]: [...(acc[assetHistory.assetId] ?? []), assetHistory],
+                };
+            },
+            {} as Record<string, AssetHistory[]>
+        );
 
     // Step 1: Read the history for each asset and determine the smallest start time
 
-    for (const [assetIndex, assetId] of assetIds.entries()) {
+    for (const assetId of assetIds) {
         try {
-            const historyData = historyDatas[assetIndex] ?? [];
+            const historyData = historyRecord[assetId] ?? [];
 
             const historyList = historyData ?? [];
 
@@ -531,15 +553,18 @@ export async function getAssetsWithHistories<A extends {id: string} = Asset>({
     assets,
     startTime: startTimeProp,
     endTime: endTimeProp,
+    normalizedAssetsHistory,
 }: {
     assets: A[];
     startTime?: number;
     endTime?: number;
+    normalizedAssetsHistory?: Record<string, AssetHistory[]>;
 }): Promise<{assets: AssetWithHistoryAndOverview<A>[]; startTime?: number; endTime?: number}> {
     const {histories, startTime, endTime} = await getAssetHistoriesWithSmallestRange({
         assetIds: assets.map(asset => asset.id),
         startTime: startTimeProp,
         endTime: endTimeProp,
+        normalizedAssetsHistory,
     });
 
     const assetsHistoriesOverviews: HistoryOverview[] = await Promise.all(

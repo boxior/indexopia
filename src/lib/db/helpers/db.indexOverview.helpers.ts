@@ -4,6 +4,7 @@ import {ENV_VARIABLES} from "@/env";
 import {connection} from "next/server";
 import {cacheTag} from "next/dist/server/use-cache/cache-tag";
 import {CacheTag} from "@/utils/cache/constants.cache";
+import {combineTags} from "@/utils/cache/helpers.cache";
 
 const TABLE_NAME_CUSTOM_INDEX_OVERVIEW = ENV_VARIABLES.MYSQL_TABLE_NAME_CUSTOM_INDEX_OVERVIEW; // Ensure your database table exists
 
@@ -48,7 +49,7 @@ export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Prom
 // Fetch IndexOverview items from the database based on isSystem parameter
 export const dbGetListIndexOverview = async (isSystem: boolean | undefined = true): Promise<IndexOverview[]> => {
     "use cache";
-    cacheTag(CacheTag.INDEX_OVERVIEW, isSystem.toString());
+    cacheTag(combineTags(CacheTag.INDEX_OVERVIEW, isSystem ? "system" : undefined));
 
     try {
         // Base query
@@ -130,7 +131,7 @@ export const dbDeleteSystemIndexes = async (): Promise<boolean> => {
 // Fetch an IndexOverview item from the database by ID
 export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | null> => {
     "use cache";
-    cacheTag(CacheTag.INDEX_OVERVIEW, id.toString());
+    cacheTag(combineTags(CacheTag.INDEX_OVERVIEW, id.toString()));
 
     try {
         const query = `

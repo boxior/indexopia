@@ -4,6 +4,10 @@ import {handlePrepareToSaveSystemIndexOverview} from "@/utils/heleprs/generators
 import {SYSTEM_INDEXES_PROPS} from "@/app/api/populate/populate.constants";
 import {chunk} from "lodash";
 import {dbDeleteSystemIndexes, dbPostIndexOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
+import {Asset, AssetHistory} from "@/utils/types/general.types";
+import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
+import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
+import {manageSystemIndexes} from "@/lib/db/helpers/db.index.helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -46,24 +50,3 @@ export async function POST(req: NextRequest) {
         );
     }
 }
-
-const manageSystemIndexes = async () => {
-    try {
-        const indexesToSave = [];
-
-        const chunks = chunk(SYSTEM_INDEXES_PROPS, 10);
-        for (const chunk of chunks) {
-            const chunkIndexes = await Promise.all(chunk.map(item => handlePrepareToSaveSystemIndexOverview(item)));
-
-            indexesToSave.push(...chunkIndexes);
-        }
-
-        await dbDeleteSystemIndexes();
-        const chunksToSave = chunk(indexesToSave, 10);
-        for (const chunkToSave of chunksToSave) {
-            await Promise.all(chunkToSave.map(item => dbPostIndexOverview(item)));
-        }
-    } catch (error) {
-        console.log(error);
-    }
-};
