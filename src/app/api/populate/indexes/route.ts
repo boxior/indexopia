@@ -47,6 +47,9 @@ export async function POST(req: NextRequest) {
     }
 }
 
+// TODO: fix system indexes managing: WE have timeout 60 sec on Versel.
+// Split up to a couple of cron jobs execution.
+// add ids to the System Indexes to delete them grararly
 const manageSystemIndexes = async () => {
     try {
         const indexesToSave = [];
