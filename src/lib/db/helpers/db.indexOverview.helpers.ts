@@ -47,7 +47,7 @@ export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Prom
 };
 
 // Fetch IndexOverview items from the database based on isSystem parameter
-export const dbGetListIndexOverview = async (isSystem: boolean | undefined = true): Promise<IndexOverview[]> => {
+export const dbGetIndexesOverview = async (isSystem: boolean | undefined = true): Promise<IndexOverview[]> => {
     "use cache";
     cacheTag(combineTags(CacheTag.INDEX_OVERVIEW, isSystem ? "system" : undefined));
 

@@ -13,6 +13,7 @@ export async function POST(req: NextRequest) {
         const body = await req.json();
 
         const {indexOverview: propIndexOverview} = body;
+
         const indexOverview = propIndexOverview ?? (await dbGetIndexOverviewById(id));
 
         if (!indexOverview) {
