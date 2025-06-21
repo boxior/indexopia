@@ -5,4 +5,5 @@ export enum CacheTag {
     CUSTOM_INDEXES = "customIndexes",
     ASSET_HISTORY = "assetHistory",
     INDEX_OVERVIEW = "indexOverview",
+    INDEX_HISTORY = "indexHistory",
 }

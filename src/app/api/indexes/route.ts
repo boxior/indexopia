@@ -2,14 +2,8 @@ import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 import {SaveSystemIndexProps} from "@/utils/heleprs/generators/handleSaveSystemCustomIndex.helper";
 import {handleSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
-import {dbPostIndexOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
-import {
-    AssetWithHistoryOverviewPortionAndMaxDrawDown,
-    IndexOverview,
-    IndexOverviewAsset,
-} from "@/utils/types/general.types";
-import {getAssetsWithHistories, getIndexHistory, getIndexHistoryOverview} from "@/lib/db/helpers/db.helpers";
-import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
+import {IndexOverviewAsset} from "@/utils/types/general.types";
+import {handleCreateIndexOverview} from "@/app/indexes/[id]/actions";
 
 export const dynamic = "force-dynamic";
 
@@ -23,13 +17,26 @@ export async function POST(req: NextRequest) {
 
         // Retrieve the apiKey from the query string
         const isSystem = searchParams.get("isSystem") === "true";
-        console.log("isSystem", isSystem);
+
         if (isSystem) {
             const body = (await req.json()) as SaveSystemIndexProps;
-            return await handleSaveSystemIndex(body, searchParams);
+            const indexOverview = await handleSaveSystemIndex(body, searchParams);
+            return NextResponse.json(
+                {indexOverview},
+                {
+                    status: 200,
+                }
+            );
         } else {
             const body = (await req.json()) as {name: string; assets: IndexOverviewAsset[]};
-            return await handleCreateIndexOverview(body);
+            const indexOverview = await handleCreateIndexOverview(body);
+
+            return NextResponse.json(
+                {indexOverview},
+                {
+                    status: 200,
+                }
+            );
         }
     } catch (error) {
         console.log(error);
@@ -54,48 +61,5 @@ const handleSaveSystemIndex = async (body: SaveSystemIndexProps, searchParams: U
         return NextResponse.json({error: "Invalid API key"}, {status: 403});
     }
 
-    await handleSaveSystemIndexOverview(body);
-
-    return NextResponse.json(
-        {success: true},
-        {
-            status: 200,
-        }
-    );
-};
-
-const handleCreateIndexOverview = async ({name, assets: propAssets}: Pick<IndexOverview, "name" | "assets">) => {
-    const systemId = "";
-
-    let assets = [];
-
-    const {assets: assetsWithHistories, startTime} = await getAssetsWithHistories({
-        assets: propAssets,
-    });
-
-    assets = assetsWithHistories;
-
-    assets = assets.map(asset => ({
-        ...asset,
-        portion: propAssets.find(a => a.id === asset.id)?.portion ?? 0,
-        maxDrawDown: getMaxDrawDownWithTimeRange(asset.history),
-    }));
-
-    const index = {
-        name,
-        assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
-    };
-
-    const history = await getIndexHistory(index);
-    const historyOverview = await getIndexHistoryOverview(index.assets);
-    const maxDrawDown = getMaxDrawDownWithTimeRange(history);
-
-    const indexOverview = await dbPostIndexOverview({systemId, name, assets, historyOverview, maxDrawDown, startTime});
-
-    return NextResponse.json(
-        {indexOverview},
-        {
-            status: 200,
-        }
-    );
+    return await handleSaveSystemIndexOverview(body);
 };

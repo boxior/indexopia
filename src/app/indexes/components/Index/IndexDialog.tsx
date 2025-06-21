@@ -8,27 +8,18 @@ import {IndexAssetsPortions} from "@/app/indexes/components/Index/IndexAssetsPor
 import {Button} from "@/components/ui/button";
 import {useEffect, useState} from "react";
 import {Asset, IndexOverview, IndexOverviewAsset} from "@/utils/types/general.types";
-import {updateCustomIndex} from "@/app/indexes/[id]/actions";
-import {clientApiGetAssets} from "@/utils/clientApi/index.clientApi";
 
 import {getIndexOverviewAsset} from "@/utils/heleprs/index/getIndexOverviewAsset.helper";
-import {clientApiCreateIndex} from "@/utils/clientApi/index.clientApi";
+import {handleCreateIndexOverview, handleUpdateIndexOverview} from "@/app/indexes/[id]/actions";
+import {handleGetAssets} from "@/app/indexes/components/Index/actions";
 
 // TODO: Define Create/Update helpers for IndexOverview
-export function IndexDialog({
-    closeDialog,
-    indexOverview,
-    setLocalData,
-}: {
-    closeDialog: () => void;
-    setLocalData?: React.Dispatch<React.SetStateAction<IndexOverview[]>>;
-    indexOverview?: IndexOverview;
-}) {
+export function IndexDialog({closeDialog, indexOverview}: {closeDialog: () => void; indexOverview?: IndexOverview}) {
     const [assets, setAssets] = useState<Asset[]>([]);
 
     useEffect(() => {
         (async () => {
-            setAssets((await clientApiGetAssets()).assets);
+            setAssets(await handleGetAssets());
         })();
     }, []);
 
@@ -39,18 +30,16 @@ export function IndexDialog({
 
     const handleSave = async () => {
         if (isUpdateMode) {
-            await updateCustomIndex({
+            await handleUpdateIndexOverview({
                 ...indexOverview,
                 name,
                 assets: selectedAssets,
             });
         } else {
-            const {indexOverview} = await clientApiCreateIndex({
+            await handleCreateIndexOverview({
                 name,
                 assets: selectedAssets.map(getIndexOverviewAsset),
             });
-
-            setLocalData?.(prev => [...prev, indexOverview]);
         }
 
         closeDialog();

@@ -5,9 +5,9 @@ import {Dialog} from "@/components/ui/dialog";
 import {IndexOverview} from "@/utils/types/general.types";
 import {useState} from "react";
 import {IndexDialog} from "@/app/indexes/components/Index/IndexDialog";
-import {clientApiDeleteIndex} from "@/utils/clientApi/index.clientApi";
 import {redirect} from "next/navigation";
 import {isNil} from "lodash";
+import {handleDeleteIndexOverview} from "@/app/indexes/[id]/actions";
 
 export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
     const [open, setOpen] = useState<boolean>(false);
@@ -30,7 +30,7 @@ export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
         if (!doDelete) {
             return;
         }
-        await clientApiDeleteIndex(indexOverview?.id ?? ""); // need tls
+        await handleDeleteIndexOverview(indexOverview?.id ?? ""); // need tls
         redirect("/indexes");
     };
 

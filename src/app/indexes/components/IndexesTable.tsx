@@ -31,9 +31,9 @@ import {ReactNode, useEffect} from "react";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
 import Link from "next/link";
 import {CreateIndex} from "@/app/indexes/components/Index/CreateIndex";
-import {clientApiDeleteIndex} from "@/utils/clientApi/index.clientApi";
 import {IndexHistoryOverviewChart} from "@/app/indexes/components/IndexHistoryOverviewChart";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
+import {handleDeleteIndexOverview} from "@/app/indexes/[id]/actions";
 
 export default function IndexesTable({data}: {data: IndexOverview[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -80,7 +80,7 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
             }
 
             setDeletingIndexId(index.id);
-            await clientApiDeleteIndex(index.id); // need tls
+            await handleDeleteIndexOverview(index.id); // need tls
             setLocalData(localData.filter(i => i.id !== index.id));
         } finally {
             setDeletingIndexId(undefined);
@@ -280,7 +280,7 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
                     onChange={event => table.getColumn("name")?.setFilterValue(event.target.value)}
                     className="max-w-sm"
                 />
-                <CreateIndex setLocalData={setLocalData} />
+                <CreateIndex />
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

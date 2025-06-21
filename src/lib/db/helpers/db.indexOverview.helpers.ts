@@ -141,6 +141,8 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
             data.id, // Add the ID for the WHERE clause
         ];
 
+        await mySqlPool.execute(query, values);
+
         // Revalidate cache to reflect updates
         revalidateTag(combineTags(CacheTag.INDEX_OVERVIEW, data.id));
 
