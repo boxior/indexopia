@@ -24,14 +24,14 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Asset, IndexOverview, MaxDrawDown} from "@/utils/types/general.types";
+import {Asset, Id, IndexOverview, MaxDrawDown} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode, useEffect} from "react";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
 import Link from "next/link";
 import {CreateIndex} from "@/app/indexes/components/Index/CreateIndex";
-import {clientApiDeleteCustomIndex} from "@/utils/clientApi/customIndex.clientApi";
+import {clientApiDeleteIndex} from "@/utils/clientApi/index.clientApi";
 import {IndexHistoryOverviewChart} from "@/app/indexes/components/IndexHistoryOverviewChart";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 
@@ -40,6 +40,8 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
+
+    const [deletingIndexId, setDeletingIndexId] = React.useState<Id>();
 
     // this `localData` is needed to provide local filter after DeleteItem.
     const [localData, setLocalData] = React.useState<IndexOverview[]>(data);
@@ -72,11 +74,17 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
         };
 
     const handleDeleteIndex = (index: IndexOverview) => async () => {
-        if (index.isSystem) {
-            return;
+        try {
+            if (index.isSystem) {
+                return;
+            }
+
+            setDeletingIndexId(index.id);
+            await clientApiDeleteIndex(index.id); // need tls
+            setLocalData(localData.filter(i => i.id !== index.id));
+        } finally {
+            setDeletingIndexId(undefined);
         }
-        await clientApiDeleteCustomIndex(index.id); // need tls
-        setLocalData(localData.filter(i => i.id !== index.id));
     };
 
     const columns: ColumnDef<IndexOverview>[] = [
@@ -228,7 +236,12 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
                 }
 
                 return (
-                    <button type={"button"} className="lowercase" onClick={handleDeleteIndex(index)}>
+                    <button
+                        type={"button"}
+                        className="lowercase bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
+                        onClick={handleDeleteIndex(index)}
+                        disabled={String(deletingIndexId) === String(index.id)}
+                    >
                         Delete
                     </button>
                 );
@@ -267,7 +280,7 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
                     onChange={event => table.getColumn("name")?.setFilterValue(event.target.value)}
                     className="max-w-sm"
                 />
-                <CreateIndex />
+                <CreateIndex setLocalData={setLocalData} />
 
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

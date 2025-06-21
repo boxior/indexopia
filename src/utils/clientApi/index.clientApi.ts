@@ -1,17 +1,41 @@
 "use client";
 
-import {Id, IndexOverview} from "@/utils/types/general.types";
+import {Id, IndexOverview, IndexOverviewAsset} from "@/utils/types/general.types";
 
-export const clientApiDeleteCustomIndex = async (customIndexId: Id) => {
+export const clientApiCreateIndex = async ({
+    name,
+    assets,
+}: {
+    name: string;
+    assets: IndexOverviewAsset[];
+}): Promise<{indexOverview: IndexOverview}> => {
     try {
-        const response = await fetch(`/api/indexes/${customIndexId}`, {
+        const response = await fetch(`/api/indexes`, {
+            method: "POST",
+            body: JSON.stringify({name, assets}),
+        });
+
+        if (!response.ok) {
+            throw new Error("Failed to delete custom index");
+        }
+
+        return response.json();
+    } catch (error) {
+        console.error("Error while deleting custom index:", error);
+        throw error;
+    }
+};
+
+export const clientApiDeleteIndex = async (indexId: Id) => {
+    try {
+        const response = await fetch(`/api/indexes/${indexId}`, {
             method: "DELETE",
         });
 
         if (!response.ok) {
             throw new Error("Failed to delete custom index");
         }
-        console.log("Deleted custom index:", customIndexId);
+        console.log("Deleted custom index:", indexId);
     } catch (error) {
         console.error("Error while deleting custom index:", error);
         throw error;

@@ -17,7 +17,8 @@ export default async function IndexesPage() {
 const IndexesPageComponent = async () => {
     await connection();
 
-    const indexesOverview = await dbGetIndexesOverview();
+    const systemIndexesOverview = await dbGetIndexesOverview();
+    const indexesOverview = await dbGetIndexesOverview(false);
 
-    return <IndexesTable data={indexesOverview} />;
+    return <IndexesTable data={[...systemIndexesOverview, ...indexesOverview]} />;
 };

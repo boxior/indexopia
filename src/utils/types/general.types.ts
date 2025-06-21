@@ -1,6 +1,11 @@
-import {HistoryOverview} from "@/lib/db/helpers/db.helpers";
-
 export type RecordWithId = Record<string, unknown> & {id: string};
+
+export type HistoryOverview = {
+    days1: number;
+    days7: number;
+    days30: number;
+    total: number;
+};
 
 export interface Asset {
     id: string; // "bitcoin"
@@ -85,13 +90,13 @@ export type NormalizedAssetHistory = Record<Asset["id"], AssetHistory[]>;
 
 export interface Index<A = Asset> {
     id: Id;
-    systemId?: string;
-    userId?: string;
     name: string;
     assets: A[];
     historyOverview: HistoryOverview;
     history: IndexHistory[];
     maxDrawDown: MaxDrawDown;
+    systemId?: string;
+    userId?: string;
     startTime?: number;
     endTime?: number;
     isSystem?: boolean; // means system one.

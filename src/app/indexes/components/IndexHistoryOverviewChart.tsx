@@ -3,7 +3,7 @@
 import {IndexHistory, IndexOverview} from "@/utils/types/general.types";
 import {HistoryOverviewChart} from "@/app/indexes/components/HistoryOverviewChart";
 import {useEffect, useState} from "react";
-import {clientApiGetIndexHistory} from "@/utils/clientApi/customIndex.clientApi";
+import {clientApiGetIndexHistory} from "@/utils/clientApi/index.clientApi";
 import {isEmpty} from "lodash";
 
 export function IndexHistoryOverviewChart({index}: {index: IndexOverview}) {

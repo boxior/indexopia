@@ -4,8 +4,9 @@ import {Button} from "@/components/ui/button";
 import {Dialog} from "@/components/ui/dialog";
 import {useState} from "react";
 import {IndexDialog} from "@/app/indexes/components/Index/IndexDialog";
+import {IndexOverview} from "@/utils/types/general.types";
 
-export function CreateIndex() {
+export function CreateIndex({setLocalData}: {setLocalData: React.Dispatch<React.SetStateAction<IndexOverview[]>>}) {
     const [open, setOpen] = useState<boolean>(false);
 
     const onOpenChange = (bool: boolean) => {
@@ -25,7 +26,7 @@ export function CreateIndex() {
             <Button variant="outline" onClick={openDialog}>
                 Create Custom Index
             </Button>
-            {open && <IndexDialog closeDialog={closeDialog} />}
+            {open && <IndexDialog closeDialog={closeDialog} setLocalData={setLocalData} />}
         </Dialog>
     );
 }

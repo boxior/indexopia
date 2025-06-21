@@ -1,3 +1,5 @@
+"use client";
+
 import {DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
@@ -5,11 +7,23 @@ import {IndexAssets} from "@/app/indexes/components/Index/IndexAssets";
 import {IndexAssetsPortions} from "@/app/indexes/components/Index/IndexAssetsPortions";
 import {Button} from "@/components/ui/button";
 import {useEffect, useState} from "react";
-import {CustomIndexAsset, Asset, CustomIndexType, IndexOverview} from "@/utils/types/general.types";
-import {createCustomIndex, updateCustomIndex} from "@/app/indexes/[id]/actions";
-import {clientApiGetAssets} from "@/utils/clientApi/customIndex.clientApi";
+import {Asset, IndexOverview, IndexOverviewAsset} from "@/utils/types/general.types";
+import {updateCustomIndex} from "@/app/indexes/[id]/actions";
+import {clientApiGetAssets} from "@/utils/clientApi/index.clientApi";
 
-export function IndexDialog({closeDialog, indexOverview}: {closeDialog: () => void; indexOverview?: IndexOverview}) {
+import {getIndexOverviewAsset} from "@/utils/heleprs/index/getIndexOverviewAsset.helper";
+import {clientApiCreateIndex} from "@/utils/clientApi/index.clientApi";
+
+// TODO: Define Create/Update helpers for IndexOverview
+export function IndexDialog({
+    closeDialog,
+    indexOverview,
+    setLocalData,
+}: {
+    closeDialog: () => void;
+    setLocalData?: React.Dispatch<React.SetStateAction<IndexOverview[]>>;
+    indexOverview?: IndexOverview;
+}) {
     const [assets, setAssets] = useState<Asset[]>([]);
 
     useEffect(() => {
@@ -18,7 +32,7 @@ export function IndexDialog({closeDialog, indexOverview}: {closeDialog: () => vo
         })();
     }, []);
 
-    const [selectedAssets, setSelectedAssets] = useState<CustomIndexAsset[]>(indexOverview?.assets ?? []);
+    const [selectedAssets, setSelectedAssets] = useState<IndexOverviewAsset[]>(indexOverview?.assets ?? []);
     const [name, setName] = useState<string>(indexOverview?.name ?? "");
 
     const isUpdateMode = !!indexOverview;
@@ -31,10 +45,12 @@ export function IndexDialog({closeDialog, indexOverview}: {closeDialog: () => vo
                 assets: selectedAssets,
             });
         } else {
-            await createCustomIndex({
+            const {indexOverview} = await clientApiCreateIndex({
                 name,
-                assets: selectedAssets,
+                assets: selectedAssets.map(getIndexOverviewAsset),
             });
+
+            setLocalData?.(prev => [...prev, indexOverview]);
         }
 
         closeDialog();
@@ -44,14 +60,19 @@ export function IndexDialog({closeDialog, indexOverview}: {closeDialog: () => vo
         setName(e.target.value);
     };
 
-    const handleChangeMultiselect = (value: CustomIndexAsset["id"][]) => {
-        setSelectedAssets(
-            value.map(id => {
+    const handleChangeMultiselect = (value: IndexOverviewAsset["id"][]) => {
+        const assetsToApply = value
+            .map(id => {
                 const selectedAsset = selectedAssets.find(item => item.id === id);
+                const asset = assets.find(item => item.id === id);
 
-                return {id, portion: selectedAsset?.portion ?? 0};
+                if (!asset) return null;
+
+                return getIndexOverviewAsset({...asset, portion: selectedAsset?.portion ?? 0});
             })
-        );
+            .filter(a => !!a);
+
+        setSelectedAssets(assetsToApply);
     };
 
     const handleChangeAssetPortion = (assetId: string, portion: number) => {

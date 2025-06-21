@@ -1,11 +1,12 @@
-// Define the table name
 import {Asset} from "@/utils/types/general.types";
 import {ENV_VARIABLES} from "@/env";
 import {mySqlPool} from "@/lib/db";
 import {revalidateTag, unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
+import {combineTags} from "@/utils/cache/helpers.cache";
 
 const TABLE_NAME_ASSETS = ENV_VARIABLES.MYSQL_TABLE_NAME_ASSETS; // Ensure this table exists in your database
+
 // Helper function: Insert data into the database
 export const dbPostAssets = async (data: Asset[]) => {
     try {
@@ -66,6 +67,9 @@ export const dbGetAssets = async (): Promise<Asset[]> => {
 };
 // Helper function: Fetch data by ID
 export const dbGetAssetById = async (id: string) => {
+    "use cache";
+    cacheTag(CacheTag.ASSETS, combineTags(CacheTag.ASSETS, id));
+
     try {
         const [rows] = (await mySqlPool.query(`SELECT * FROM ${TABLE_NAME_ASSETS} WHERE id = ?`, [id])) as unknown as [
             Asset[],
@@ -78,6 +82,9 @@ export const dbGetAssetById = async (id: string) => {
 };
 // Helper function: Fetch data by multiple IDs
 export const dbGetAssetsByIds = async (ids: string[]) => {
+    "use cache";
+    cacheTag(CacheTag.ASSETS, combineTags(CacheTag.ASSETS, combineTags(...ids)));
+
     try {
         if (ids.length === 0) return [];
         const placeholders = ids.map(() => "?").join(", "); // Generate placeholders (?, ?, ?)
@@ -91,6 +98,9 @@ export const dbGetAssetsByIds = async (ids: string[]) => {
 };
 // Helper function: Fetch data up to a specific rank
 export const dbGetAssetsByRank = async (upToRank: number) => {
+    "use cache";
+    cacheTag(CacheTag.ASSETS, combineTags(CacheTag.ASSETS, upToRank));
+
     try {
         const sql = `SELECT * FROM ${TABLE_NAME_ASSETS} WHERE CAST(rank AS UNSIGNED)
  <= ?`;

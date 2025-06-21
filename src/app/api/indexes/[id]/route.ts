@@ -1,5 +1,5 @@
 import {NextResponse, NextRequest} from "next/server";
-import {dbDeleteIndex, dbGetAssetsByCustomIndexId} from "@/lib/db/helpers/db.index.helpers";
+import {dbDeleteIndexOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 export const dynamic = "force-dynamic";
 
@@ -13,31 +13,7 @@ export async function DELETE(req: NextRequest) {
         const idIndex = urlParts.indexOf("indexes") + 1;
         const id = urlParts[idIndex];
 
-        await dbDeleteIndex(id);
-
-        return NextResponse.json(
-            {success: true},
-            {
-                status: 200,
-            }
-        );
-    } catch (error) {
-        console.log(error);
-        return NextResponse.json(
-            {data: JSON.parse(JSON.stringify(error))},
-            {
-                status: 400,
-            }
-        );
-    }
-}
-
-export async function GET(req: NextRequest) {
-    try {
-        const urlParts = req.nextUrl.pathname.split("/");
-        const id = urlParts[urlParts.length - 1]; // Get the last part of the path
-
-        await dbGetAssetsByCustomIndexId(id);
+        await dbDeleteIndexOverview(id);
 
         return NextResponse.json(
             {success: true},

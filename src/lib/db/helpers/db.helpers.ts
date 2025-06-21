@@ -1,6 +1,4 @@
 import {readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
-import fetchAssets from "@/app/actions/assets/fetchAssets";
-import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
 import {DbItems} from "@/lib/db/db.types";
 import {
     Asset,
@@ -8,6 +6,7 @@ import {
     AssetWithHistoryAndOverview,
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
     CustomIndexType,
+    HistoryOverview,
     Id,
     Index,
     IndexHistory,
@@ -16,216 +15,17 @@ import {
 } from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
-import {chunk, cloneDeep, flatten, get, pick, set} from "lodash";
+import {cloneDeep, flatten, get, pick, set} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
-import {dbPostAssets, dbGetAssets, dbGetAssetsByIds} from "@/lib/db/helpers/db.assets.helpers";
-import {dbPostAssetHistory, dbGetAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
-import {dbGetUniqueCustomIndexesAssetIds, dbHandleGetCustomIndexes} from "@/lib/db/helpers/db.index.helpers";
-import {unstable_cacheTag as cacheTag} from "next/cache";
-import {CacheTag} from "@/utils/cache/constants.cache";
-import {combineTags} from "@/utils/cache/helpers.cache";
+import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
+import {dbGetAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
 import {dbGetIndexOverviewById} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDEXES_FOLDER_PATH = "/db/indexes";
 export const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
 
-export const migrateAssetsHistoriesFromJsonToDb = async () => {
-    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
-    const assetsList = filterAssetsByOmitIds(assets?.data ?? [], MAX_ASSET_COUNT);
-
-    for (const asset of assetsList) {
-        try {
-            const assetHistory = (await readJsonFile(
-                `asset_${asset.id}_history`,
-                {},
-                ASSETS_HISTORY_FOLDER_PATH
-            )) as DbItems<Omit<AssetHistory, "assetId">>;
-            const normalizedAssetHistory = assetHistory.data.map(history => ({assetId: asset.id, ...history}));
-
-            await dbPostAssetHistory(normalizedAssetHistory);
-        } catch (err) {
-            console.error(err);
-            await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
-        }
-    }
-};
-
-export const manageAssets = async () => {
-    const limit = MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
-
-    const {data, timestamp} = await fetchAssets({limit});
-    const assets = filterAssetsByOmitIds(data);
-
-    const customIndexesAssetsIds = await dbGetUniqueCustomIndexesAssetIds();
-    const assetsIdsToFetchMore = customIndexesAssetsIds.filter(id => !assets.some(asset => asset.id === id));
-    const assetsToFetchMore = await dbGetAssetsByIds(assetsIdsToFetchMore);
-
-    const allAssets = [...assets, ...assetsToFetchMore];
-
-    await dbPostAssets(allAssets);
-    await writeJsonFile(`assets_fetch_${new Date(timestamp).toISOString()}`, allAssets, ASSETS_FOLDER_PATH);
-
-    return allAssets;
-};
-
-export const manageAssetHistory = async ({id}: {id: string}): Promise<AssetHistory[]> => {
-    const oldList = await dbGetAssetHistoryById(id);
-
-    let start = momentTimeZone.tz("UTC").startOf("day").add(-11, "year").add(1, "day").valueOf();
-
-    if (oldList.length > 0) {
-        start = momentTimeZone
-            .tz(oldList[oldList.length - 1].time, "UTC")
-            .startOf("day")
-            .add(1, "day")
-            .valueOf();
-    }
-
-    const end = momentTimeZone.tz("UTC").startOf("day").valueOf();
-
-    if (start === end) {
-        return oldList;
-    }
-
-    const {data: newData} = await fetchAssetHistory({
-        interval: "d1",
-        start,
-        end,
-        id,
-    });
-
-    const newList = (newData ?? []).map(history => ({...history, assetId: id}));
-
-    if (newList.length === 0) {
-        return oldList;
-    }
-    await writeJsonFile(`history_${id}`, newList, "/db/debug");
-    await dbPostAssetHistory(newList);
-
-    return [...oldList, ...newList];
-};
-
-const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
-    // Early return if the history is empty or has only one entry
-    if (history.length <= 1) {
-        return history;
-    }
-
-    // Sort the history array by time in ascending order to handle out-of-order data
-    const sortedHistory = [...history].sort((a, b) => a.time - b.time);
-
-    const fulfilledHistory: AssetHistory[] = [sortedHistory[0]];
-
-    // Iterate through sorted history and detect gaps
-    for (let i = 1; i < sortedHistory.length; i++) {
-        const previous = fulfilledHistory[fulfilledHistory.length - 1];
-        const current = sortedHistory[i];
-
-        // Get the UTC start of the day for current and previous entries
-        const previousDayStart = momentTimeZone.tz(previous.time, "UTC").startOf("day");
-        const currentDayStart = momentTimeZone.tz(current.time, "UTC").startOf("day");
-
-        // Calculate the difference in days
-        let dayDifference = currentDayStart.diff(previousDayStart, "days");
-
-        // Fill gaps with cloned entries
-        while (dayDifference > 1) {
-            const newEntry = {...previous}; // Clone the previous record
-            const nextDay = previousDayStart.add(1, "day"); // Move to the next day
-
-            // Update the time and date fields
-            newEntry.time = nextDay.valueOf();
-            newEntry.date = nextDay.toISOString();
-
-            // Add the new entry to the fulfilled history
-            fulfilledHistory.push(newEntry);
-
-            // Decrease the day difference counter
-            dayDifference--;
-        }
-
-        // Add the current entry to the fulfilled history
-        fulfilledHistory.push(current);
-    }
-
-    return fulfilledHistory;
-};
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-export const manageAssetsHistory = async (): Promise<AssetHistory[]> => {
-    const assets = await dbGetAssets();
-
-    const chunks = chunk(assets, 10);
-
-    const result = await Promise.all(
-        chunks.map(async chunk => {
-            return Promise.all(
-                chunk.map(async asset => {
-                    try {
-                        return manageAssetHistory({id: asset.id});
-                    } catch (err) {
-                        console.error(err);
-                        await writeJsonFile(
-                            `error_${(err as Error).name}`,
-                            JSON.parse(JSON.stringify(err)),
-                            `/db/errors`
-                        );
-
-                        return [];
-                    }
-                })
-            );
-        })
-    );
-
-    return flatten(flatten(result));
-};
-
-export const normalizeAssets = async (): Promise<NormalizedAssets> => {
-    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
-    const assetsList = assets?.data ?? [];
-
-    const normalizedAssets: NormalizedAssets = {};
-
-    for (const asset of assetsList) {
-        if (asset.id) {
-            normalizedAssets[asset.id] = asset;
-        }
-    }
-
-    return normalizedAssets;
-};
-
-export const normalizeAssetsHistory = async (): Promise<NormalizedAssetHistory> => {
-    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
-    const assetsList = assets?.data ?? [];
-
-    const normalizedAssetHistory: NormalizedAssetHistory = {};
-
-    for (const asset of assetsList) {
-        if (asset.id) {
-            const history = (await readJsonFile(
-                `asset_${asset.id}_history`,
-                {},
-                ASSETS_HISTORY_FOLDER_PATH
-            )) as DbItems<AssetHistory>;
-            const historyList = history?.data ?? [];
-
-            normalizedAssetHistory[asset.id] = historyList;
-        }
-    }
-
-    return normalizedAssetHistory;
-};
-
-export type HistoryOverview = {
-    days1: number;
-    days7: number;
-    days30: number;
-    total: number;
-};
 /**
  * Taking the last day from existed item, not the current last day as sometimes, it might be lack of data due to populating progress that we make regularly once per day.
  * Look at /populate API request where we fetch up-to-date top assets and their histories and all other assets that were fetched before as top ones.
@@ -410,8 +210,8 @@ export const getAssetHistoriesWithSmallestRange = async ({
     return {histories, startTime: minStartTime ?? undefined, endTime: maxEndTime ?? undefined};
 };
 
-export const getIndexHistory = async <A extends {id: Id; portion?: number}>(index: {
-    id: Id;
+export const getIndexHistory = async <A extends {id?: Id; portion?: number}>(index: {
+    id?: Id;
     name: string;
     assets: AssetWithHistoryAndOverview<A>[];
 }): Promise<IndexHistory[]> => {
@@ -427,7 +227,7 @@ export const getIndexHistory = async <A extends {id: Id; portion?: number}>(inde
 function mergeAssetHistories<A = Asset>(
     histories: AssetHistory[][],
     portions: number[],
-    index: {id: Id; name: string; assets: AssetWithHistoryAndOverview<A>[]}
+    index: {id?: Id; name: string; assets: AssetWithHistoryAndOverview<A>[]}
 ): IndexHistory[] {
     if (histories.length === 0 || histories[0].length === 0) {
         return [];
@@ -489,9 +289,6 @@ export const getIndex = async ({
     id: Id;
     indexOverview?: CustomIndexType;
 }): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null> => {
-    "use cache";
-    cacheTag(combineTags(CacheTag.INDEX, id));
-
     const indexOverview = propIndexOverview ?? (await dbGetIndexOverviewById(id));
 
     if (!indexOverview) {
@@ -537,17 +334,6 @@ export const getIndex = async ({
         maxDrawDown: indexMaxDrawDown,
     };
 };
-
-export async function getCustomIndexes(): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>[]> {
-    "use cache";
-    cacheTag(CacheTag.CUSTOM_INDEXES);
-
-    const cachedCustomIndexes = await dbHandleGetCustomIndexes();
-
-    const customIndexes = await Promise.all(cachedCustomIndexes.map(ci => getIndex({id: ci.id, indexOverview: ci})));
-
-    return customIndexes.filter(ci => ci !== null);
-}
 
 export async function getAssetsWithHistories<A extends {id: string} = Asset>({
     assets,
@@ -599,4 +385,87 @@ export const normalizeDbBoolean = <Input extends Record<string, unknown>, Output
         set(clonedEntity, key, Boolean(get(clonedEntity, key)));
     }
     return clonedEntity as unknown as Output;
+};
+
+const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
+    // Early return if the history is empty or has only one entry
+    if (history.length <= 1) {
+        return history;
+    }
+
+    // Sort the history array by time in ascending order to handle out-of-order data
+    const sortedHistory = [...history].sort((a, b) => a.time - b.time);
+
+    const fulfilledHistory: AssetHistory[] = [sortedHistory[0]];
+
+    // Iterate through sorted history and detect gaps
+    for (let i = 1; i < sortedHistory.length; i++) {
+        const previous = fulfilledHistory[fulfilledHistory.length - 1];
+        const current = sortedHistory[i];
+
+        // Get the UTC start of the day for current and previous entries
+        const previousDayStart = momentTimeZone.tz(previous.time, "UTC").startOf("day");
+        const currentDayStart = momentTimeZone.tz(current.time, "UTC").startOf("day");
+
+        // Calculate the difference in days
+        let dayDifference = currentDayStart.diff(previousDayStart, "days");
+
+        // Fill gaps with cloned entries
+        while (dayDifference > 1) {
+            const newEntry = {...previous}; // Clone the previous record
+            const nextDay = previousDayStart.add(1, "day"); // Move to the next day
+
+            // Update the time and date fields
+            newEntry.time = nextDay.valueOf();
+            newEntry.date = nextDay.toISOString();
+
+            // Add the new entry to the fulfilled history
+            fulfilledHistory.push(newEntry);
+
+            // Decrease the day difference counter
+            dayDifference--;
+        }
+
+        // Add the current entry to the fulfilled history
+        fulfilledHistory.push(current);
+    }
+
+    return fulfilledHistory;
+};
+
+export const normalizeAssets = async (): Promise<NormalizedAssets> => {
+    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
+    const assetsList = assets?.data ?? [];
+
+    const normalizedAssets: NormalizedAssets = {};
+
+    for (const asset of assetsList) {
+        if (asset.id) {
+            normalizedAssets[asset.id] = asset;
+        }
+    }
+
+    return normalizedAssets;
+};
+
+export const normalizeAssetsHistory = async (): Promise<NormalizedAssetHistory> => {
+    const assets = (await readJsonFile("assets", {}, ASSETS_FOLDER_PATH)) as DbItems<Asset>;
+    const assetsList = assets?.data ?? [];
+
+    const normalizedAssetHistory: NormalizedAssetHistory = {};
+
+    for (const asset of assetsList) {
+        if (asset.id) {
+            const history = (await readJsonFile(
+                `asset_${asset.id}_history`,
+                {},
+                ASSETS_HISTORY_FOLDER_PATH
+            )) as DbItems<AssetHistory>;
+            const historyList = history?.data ?? [];
+
+            normalizedAssetHistory[asset.id] = historyList;
+        }
+    }
+
+    return normalizedAssetHistory;
 };

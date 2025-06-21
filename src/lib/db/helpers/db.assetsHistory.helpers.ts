@@ -39,7 +39,7 @@ export const dbPostAssetHistory = async (data: AssetHistory[]) => {
 // Helper function: Fetch all history for a specific asset by `assetId`
 export const dbGetAssetHistoryById = async (assetId: string): Promise<AssetHistory[]> => {
     "use cache";
-    cacheTag(combineTags(CacheTag.ASSET_HISTORY, assetId));
+    cacheTag(CacheTag.ASSET_HISTORY, combineTags(CacheTag.ASSET_HISTORY, assetId));
 
     try {
         const sql = `
@@ -60,6 +60,9 @@ export const dbGetAssetHistoryByIdAndStartTime = async (
     assetId: string,
     startTime: number
 ): Promise<AssetHistory[]> => {
+    "use cache";
+    cacheTag(CacheTag.ASSET_HISTORY, combineTags(CacheTag.ASSET_HISTORY, assetId, startTime));
+
     try {
         const sql = `
             SELECT * FROM ${TABLE_NAME_ASSET_HISTORY} 

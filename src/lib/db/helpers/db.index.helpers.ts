@@ -1,115 +1,11 @@
 import {ENV_VARIABLES} from "@/env";
 import {mySqlPool} from "@/lib/db";
-import {
-    Asset,
-    AssetHistory,
-    CustomIndexAsset,
-    CustomIndexAssetWithCustomIndexId,
-    CustomIndexType,
-    CustomIndexTypeDb,
-    Id,
-} from "@/utils/types/general.types";
-import {revalidateTag, unstable_cacheTag as cacheTag} from "next/cache";
+import {CustomIndexAsset, CustomIndexType, Id} from "@/utils/types/general.types";
+import {revalidateTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
-import {combineTags} from "@/utils/cache/helpers.cache";
-import {normalizeDbBoolean} from "@/lib/db/helpers/db.helpers";
-import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
-import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
-import {chunk} from "lodash";
-import {SYSTEM_INDEXES_PROPS} from "@/app/api/populate/populate.constants";
-import {handlePrepareToSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
-import {dbDeleteSystemIndexes, dbPostIndexOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 const TABLE_NAME_CUSTOM_INDEX = ENV_VARIABLES.MYSQL_TABLE_NAME_CUSTOM_INDEX; // Ensure your database table exists
-const TABLE_NAME_CUSTOM_INDEX_ASSETS = ENV_VARIABLES.TABLE_NAME_CUSTOM_INDEX_ASSETS; // Ensure your database table exists
-
-// Fetch a custom index by ID
-const dbGetCustomIndexById = async (id: Id): Promise<Omit<CustomIndexType, "assets"> | null> => {
-    try {
-        const query = `
-    SELECT 
-      id,
-      name,
-      startTime,
-      isSystem
-    FROM ${TABLE_NAME_CUSTOM_INDEX}
-    WHERE id = ?;
-  `;
-
-        const [rows] = await mySqlPool.execute(query, [id]);
-        const customIndexes = rows as CustomIndexTypeDb[];
-
-        return customIndexes.length
-            ? normalizeDbBoolean<CustomIndexTypeDb, Omit<CustomIndexType, "assets">>(customIndexes[0], ["isSystem"])
-            : null; // Return the first result or null if not found
-    } catch (error) {
-        console.error("Error fetching custom index by ID:", error);
-        return null;
-        // throw error;
-    }
-};
-
-// Fetch all custom indexes
-export const dbGetCustomIndexes = async (): Promise<Omit<CustomIndexType, "assets">[]> => {
-    try {
-        const query = `
-    SELECT 
-      id,
-      name,
-      startTime,
-      isSystem
-    FROM ${TABLE_NAME_CUSTOM_INDEX};
-  `;
-
-        const [rows] = await mySqlPool.execute(query);
-        return (rows as CustomIndexTypeDb[]).map(row => normalizeDbBoolean(row, ["isSystem"])) as Omit<
-            CustomIndexType,
-            "assets"
-        >[]; // Return the list of indexes
-    } catch (error) {
-        console.error("Error fetching custom indexes:", error);
-        return [];
-        // throw error;
-    }
-};
-
-// Fetch assets belonging to a specific custom index
-export const dbGetAssetsByCustomIndexId = async (customIndexId: Id) => {
-    try {
-        const query = `
-    SELECT 
-      assetId AS id,
-      portion
-    FROM ${TABLE_NAME_CUSTOM_INDEX_ASSETS}
-    WHERE customIndexId = ?;
-  `;
-
-        const [rows] = await mySqlPool.execute(query, [customIndexId]);
-        return rows as CustomIndexAssetWithCustomIndexId[]; // Return all assets for the custom index
-    } catch (error) {
-        console.error("Error fetching assets by custom index ID:", error);
-        return [];
-        // throw error;
-    }
-};
-
-// Fetch all assets across all custom indexes
-export const dbGetCustomIndexAssets = async () => {
-    try {
-        const query = `
-    SELECT 
-      assetId AS id, customIndexId, portion, createdAt, updatedAt
-    FROM ${TABLE_NAME_CUSTOM_INDEX_ASSETS};
-  `;
-
-        const [rows] = await mySqlPool.execute(query);
-        return rows as CustomIndexAssetWithCustomIndexId[]; // Return the list of all assets
-    } catch (error) {
-        console.error("Error fetching custom index assets:", error);
-        return [];
-        // throw error;
-    }
-};
+const TABLE_NAME_CUSTOM_INDEX_ASSETS = ENV_VARIABLES.MYSQL_TABLE_NAME_CUSTOM_INDEX_OVERVIEW; // Ensure your database table exists
 
 // Create a custom index into the database
 export const dbPostCustomIndex = async (name: string, startTime: number | null, isSystem: boolean) => {
@@ -242,68 +138,6 @@ export const dbHandlePutCustomIndex = async (customIndex: CustomIndexType) => {
     }
 };
 
-// Fetch custom index details by ID, including its assets
-export const dbHandleGetCustomIndexById = async (id: Id): Promise<CustomIndexType | null> => {
-    "use cache";
-    cacheTag(combineTags(CacheTag.CUSTOM_INDEX, id));
-
-    try {
-        // Query custom index
-        const customIndex = await dbGetCustomIndexById(id);
-
-        if (!customIndex) {
-            return null; // Return null if the custom index is not found
-        }
-
-        // Query related assets
-        const assets = await dbGetAssetsByCustomIndexId(id);
-
-        // Combine custom index and its assets
-        return {
-            ...customIndex,
-            assets,
-        };
-    } catch (error) {
-        console.error("Error fetching custom index by ID:", error);
-        throw error;
-    }
-};
-
-// Fetch all custom indexes with their respective assets
-export const dbHandleGetCustomIndexes = async (): Promise<CustomIndexType[]> => {
-    try {
-        // Query all custom indexes
-        const customIndexes = await dbGetCustomIndexes();
-
-        // Query all assets
-        const allAssets = await dbGetCustomIndexAssets();
-
-        // Group assets by custom index ID
-        const assetsByCustomIndexId = allAssets.reduce(
-            (group, asset) => {
-                if (!group[asset.customIndexId]) {
-                    group[asset.customIndexId] = [];
-                }
-                group[asset.customIndexId].push({
-                    id: asset.id,
-                    portion: asset.portion,
-                });
-                return group;
-            },
-            {} as Record<Id, CustomIndexAsset[]>
-        );
-
-        // Combine custom indexes and their grouped assets
-        return customIndexes.map(customIndex => ({
-            ...customIndex,
-            assets: assetsByCustomIndexId[customIndex.id] ?? [],
-        }));
-    } catch (error) {
-        console.error("Error fetching custom indexes:", error);
-        throw error;
-    }
-};
-
 // Deletes a custom index and its related assets
 export const dbDeleteIndex = async (customIndexId: string): Promise<void> => {
     try {
@@ -339,59 +173,9 @@ export const dbDeleteIndex = async (customIndexId: string): Promise<void> => {
             connection.release();
         }
 
-        revalidateTag(CacheTag.CUSTOM_INDEXES);
-        revalidateTag(combineTags(CacheTag.CUSTOM_INDEX, customIndexId));
+        revalidateTag(CacheTag.INDEX_OVERVIEW);
     } catch (error) {
         console.error("Error deleting custom index and its related assets:", error);
         throw error;
-    }
-};
-
-export async function dbGetUniqueCustomIndexesAssetIds() {
-    const [rows] = (await mySqlPool.execute(
-        `SELECT DISTINCT assetId FROM ${TABLE_NAME_CUSTOM_INDEX_ASSETS}`
-    )) as unknown as [{assetId: string}[]];
-
-    return rows.map((row: {assetId: string}) => row.assetId);
-}
-
-export const manageSystemIndexes = async (
-    allAssets: Asset[] | undefined = [],
-    allAssetsHistory: AssetHistory[] | undefined = []
-) => {
-    try {
-        const assets = sortRankIndexAssets(allAssets).slice(0, MAX_ASSET_COUNT);
-        const normalizedAssetsHistory = allAssetsHistory.reduce(
-            (acc, assetHistory) => {
-                const hasNeededHistory = assets.some(item => item.id === assetHistory.assetId);
-
-                if (!hasNeededHistory) {
-                    return acc;
-                }
-
-                return {
-                    ...acc,
-                    [assetHistory.assetId]: [...(acc[assetHistory.assetId] ?? []), assetHistory],
-                };
-            },
-            {} as Record<string, AssetHistory[]>
-        );
-
-        const indexesToSave = [];
-        const chunksProps = chunk(SYSTEM_INDEXES_PROPS, 10);
-        for (const chunk of chunksProps) {
-            const indexesProps = await Promise.all(
-                chunk.map(item => handlePrepareToSaveSystemIndexOverview(item, assets, normalizedAssetsHistory))
-            );
-            indexesToSave.push(...indexesProps);
-        }
-
-        await dbDeleteSystemIndexes();
-        const chunksToSave = chunk(indexesToSave, 10);
-        for (const chunkToSave of chunksToSave) {
-            await Promise.all(chunkToSave.map(item => dbPostIndexOverview(item)));
-        }
-    } catch (error) {
-        console.log(error);
     }
 };
