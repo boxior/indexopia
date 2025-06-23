@@ -8,7 +8,7 @@ import momentTimeZone from "moment-timezone";
 import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
 import {ASSETS_FOLDER_PATH, filterAssetsByOmitIds} from "@/lib/db/helpers/db.helpers";
 import {chunk, flatten} from "lodash";
-import {dbGetUniqueCustomIndexesAssetIds} from "@/lib/db/helpers/db.indexOverview.helpers";
+import {dbGetUniqueIndexesOverviewsAssetIds} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 export const manageAssets = async () => {
     const limit = MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
@@ -16,8 +16,8 @@ export const manageAssets = async () => {
     const {data, timestamp} = await fetchAssets({limit});
     const assets = filterAssetsByOmitIds(data);
 
-    const customIndexesAssetsIds = await dbGetUniqueCustomIndexesAssetIds();
-    const assetsIdsToFetchMore = customIndexesAssetsIds.filter(id => !assets.some(asset => asset.id === id));
+    const indexesOverviewsAssetsIds = await dbGetUniqueIndexesOverviewsAssetIds();
+    const assetsIdsToFetchMore = indexesOverviewsAssetsIds.filter(id => !assets.some(asset => asset.id === id));
     const assetsToFetchMore = await dbGetAssetsByIds(assetsIdsToFetchMore);
 
     const allAssets = [...assets, ...assetsToFetchMore];

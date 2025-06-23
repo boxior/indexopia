@@ -2,9 +2,6 @@ import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 import {revalidateTag} from "next/cache";
 
-/**
- * Generate Default Custom Indexes
- */
 export async function POST(req: NextRequest) {
     try {
         // Get the URL and search parameters

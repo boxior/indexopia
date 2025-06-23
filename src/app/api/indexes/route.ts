@@ -1,14 +1,13 @@
 import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
-import {SaveSystemIndexProps} from "@/utils/heleprs/generators/handleSaveSystemCustomIndex.helper";
 import {handleSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
-import {IndexOverviewAsset} from "@/utils/types/general.types";
-import {handleCreateIndexOverview} from "@/app/indexes/[id]/actions";
+import {IndexOverviewAsset, SaveSystemIndexProps} from "@/utils/types/general.types";
+import {actionCreateIndexOverview} from "@/app/indexes/[id]/actions";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Generate Default Custom Indexes
+ * Generate Index
  */
 export async function POST(req: NextRequest) {
     try {
@@ -29,7 +28,7 @@ export async function POST(req: NextRequest) {
             );
         } else {
             const body = (await req.json()) as {name: string; assets: IndexOverviewAsset[]};
-            const indexOverview = await handleCreateIndexOverview(body);
+            const indexOverview = await actionCreateIndexOverview(body);
 
             return NextResponse.json(
                 {indexOverview},

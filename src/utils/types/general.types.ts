@@ -43,19 +43,9 @@ export type AssetWithMaxDrawDown = Asset & {maxDrawDown: {value: number; startTi
 
 export type AssetWithProfitAndMaxDrawDown = AssetWithProfit & AssetWithMaxDrawDown;
 
-export type CustomIndexAsset = Pick<Required<Asset>, "id" | "portion">;
-
-export type CustomIndexAssetWithCustomIndexId = Pick<Required<Asset>, "id" | "portion"> & {customIndexId: number};
-
 export type AssetWithHistory = Asset & {history: AssetHistory[]};
 
 export type AssetWithHistoryAndOverview<A = Asset> = A & {history: AssetHistory[]; historyOverview: HistoryOverview};
-
-export type AssetWithHistoryOverviewAndPortion = Asset & {
-    history: AssetHistory[];
-    historyOverview: HistoryOverview;
-    portion: number;
-};
 
 export type AssetWithHistoryOverviewPortionAndMaxDrawDown = Asset & {
     history: AssetHistory[];
@@ -109,16 +99,6 @@ export type IndexOverview = Pick<
     "id" | "systemId" | "userId" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime" | "isSystem"
 > & {assets: IndexOverviewAsset[]};
 
-export interface CustomIndexType {
-    id: Id;
-    name: string;
-    assets: CustomIndexAsset[];
-    startTime?: number;
-    isSystem?: boolean;
-}
-
-export type CustomIndexTypeDb = Omit<CustomIndexType, "isSystem" | "assets"> & {isSystem: number | null};
-
 /**
  * @link https://momentjscom.readthedocs.io/en/latest/moment/04-displaying/01-format/
  */
@@ -136,3 +116,13 @@ export type ServerPageProps<ID extends string = string> = {
 };
 
 export type Id = string | number;
+export type SaveSystemIndexProps = {
+    upToNumber?: number;
+    topAssetsCount?: number;
+    systemIndexBy?: SystemIndexBy;
+    systemIndexSortBy?: SystemIndexSortBy;
+    startTime?: number;
+    endTime?: number;
+    equalPortions?: boolean;
+    name?: string;
+};

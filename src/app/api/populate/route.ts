@@ -6,7 +6,7 @@ import {manageSystemIndexes} from "@/lib/db/helpers/db.indexOverview.helpers";
 export const dynamic = "force-dynamic";
 
 /**
- * Generate Default Custom Indexes
+ * Populate entities: Assets, History, and Indexes
  */
 export async function POST(req: NextRequest) {
     try {

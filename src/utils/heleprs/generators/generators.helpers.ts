@@ -1,4 +1,4 @@
-import {Asset, IndexOverviewAsset} from "@/utils/types/general.types";
+import {IndexOverviewAsset} from "@/utils/types/general.types";
 import {MAX_PORTION} from "@/app/indexes/components/Index/IndexAssetsPortions";
 
 /**

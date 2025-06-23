@@ -1,6 +1,5 @@
-import {SystemIndexBy, SystemIndexSortBy} from "@/utils/types/general.types";
+import {SaveSystemIndexProps, SystemIndexBy, SystemIndexSortBy} from "@/utils/types/general.types";
 import {capitalize} from "lodash";
-import {SaveSystemIndexProps} from "@/utils/heleprs/generators/handleSaveSystemCustomIndex.helper";
 import {MAX} from "uuid";
 import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
 

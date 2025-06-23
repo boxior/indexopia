@@ -5,11 +5,11 @@ import {
     AssetHistory,
     AssetWithHistoryAndOverview,
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
-    CustomIndexType,
     HistoryOverview,
     Id,
     Index,
     IndexHistory,
+    IndexOverview,
     NormalizedAssetHistory,
     NormalizedAssets,
 } from "@/utils/types/general.types";
@@ -287,7 +287,7 @@ export const getIndex = async ({
     indexOverview: propIndexOverview,
 }: {
     id: Id;
-    indexOverview?: CustomIndexType;
+    indexOverview?: IndexOverview;
 }): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null> => {
     const indexOverview = propIndexOverview ?? (await dbGetIndexOverviewById(id));
 

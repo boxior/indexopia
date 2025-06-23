@@ -7,7 +7,7 @@ import {useState} from "react";
 import {IndexDialog} from "@/app/indexes/components/Index/IndexDialog";
 import {redirect} from "next/navigation";
 import {isNil} from "lodash";
-import {handleDeleteIndexOverview} from "@/app/indexes/[id]/actions";
+import {actionDeleteIndexOverview} from "@/app/indexes/[id]/actions";
 
 export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
     const [open, setOpen] = useState<boolean>(false);
@@ -30,7 +30,7 @@ export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
         if (!doDelete) {
             return;
         }
-        await handleDeleteIndexOverview(indexOverview?.id ?? ""); // need tls
+        await actionDeleteIndexOverview(indexOverview?.id ?? ""); // need tls
         redirect("/indexes");
     };
 

@@ -33,7 +33,7 @@ import Link from "next/link";
 import {CreateIndex} from "@/app/indexes/components/Index/CreateIndex";
 import {IndexHistoryOverviewChart} from "@/app/indexes/components/IndexHistoryOverviewChart";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
-import {handleDeleteIndexOverview} from "@/app/indexes/[id]/actions";
+import {actionDeleteIndexOverview} from "@/app/indexes/[id]/actions";
 
 export default function IndexesTable({data}: {data: IndexOverview[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([]);
@@ -80,7 +80,7 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
             }
 
             setDeletingIndexId(index.id);
-            await handleDeleteIndexOverview(index.id); // need tls
+            await actionDeleteIndexOverview(index.id); // need tls
             setLocalData(localData.filter(i => i.id !== index.id));
         } finally {
             setDeletingIndexId(undefined);

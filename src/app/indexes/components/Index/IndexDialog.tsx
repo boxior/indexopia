@@ -10,10 +10,9 @@ import {useEffect, useState} from "react";
 import {Asset, IndexOverview, IndexOverviewAsset} from "@/utils/types/general.types";
 
 import {getIndexOverviewAsset} from "@/utils/heleprs/index/getIndexOverviewAsset.helper";
-import {handleCreateIndexOverview, handleUpdateIndexOverview} from "@/app/indexes/[id]/actions";
+import {actionCreateIndexOverview, actionUpdateIndexOverview} from "@/app/indexes/[id]/actions";
 import {handleGetAssets} from "@/app/indexes/components/Index/actions";
 
-// TODO: Define Create/Update helpers for IndexOverview
 export function IndexDialog({closeDialog, indexOverview}: {closeDialog: () => void; indexOverview?: IndexOverview}) {
     const [assets, setAssets] = useState<Asset[]>([]);
 
@@ -30,13 +29,13 @@ export function IndexDialog({closeDialog, indexOverview}: {closeDialog: () => vo
 
     const handleSave = async () => {
         if (isUpdateMode) {
-            await handleUpdateIndexOverview({
+            await actionUpdateIndexOverview({
                 ...indexOverview,
                 name,
                 assets: selectedAssets,
             });
         } else {
-            await handleCreateIndexOverview({
+            await actionCreateIndexOverview({
                 name,
                 assets: selectedAssets.map(getIndexOverviewAsset),
             });
@@ -78,8 +77,8 @@ export function IndexDialog({closeDialog, indexOverview}: {closeDialog: () => vo
     return (
         <DialogContent className="w-full max-w-lg">
             <DialogHeader>
-                <DialogTitle>{`${isUpdateMode ? "Update" : "Create"} Custom Index ${indexOverview ? `(${indexOverview.name})` : ""}`}</DialogTitle>
-                <DialogDescription>{`${isUpdateMode ? "" : "Create your custom Index"}`}</DialogDescription>
+                <DialogTitle>{`${isUpdateMode ? "Update" : "Create"} Index ${indexOverview ? `(${indexOverview.name})` : ""}`}</DialogTitle>
+                <DialogDescription>{`${isUpdateMode ? "" : "Create your Index"}`}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">

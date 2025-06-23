@@ -27,7 +27,7 @@ const IndexPageComponent = async (props: ServerPageProps) => {
     });
 
     if (!index) {
-        return <div>Custom index not found</div>;
+        return <div>Index not found</div>;
     }
 
     const doUpdate = index && !index.isSystem;

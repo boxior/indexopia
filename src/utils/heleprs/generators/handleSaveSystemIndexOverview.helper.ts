@@ -1,10 +1,15 @@
 import {handleGenerateSystemIndexOverviewAssetsWithStartEndTimes} from "@/utils/heleprs/generators/handleGenerateSystemIndexFromScratch.helper";
-import {SaveSystemIndexProps} from "@/utils/heleprs/generators/handleSaveSystemCustomIndex.helper";
 import {dbPostIndexOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {generateUuid} from "@/utils/heleprs/generateUuid.helper";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 import {getAssetsWithHistories, getIndexHistory, getIndexHistoryOverview} from "@/lib/db/helpers/db.helpers";
-import {Asset, AssetHistory, IndexOverview, IndexOverviewAsset} from "@/utils/types/general.types";
+import {
+    Asset,
+    AssetHistory,
+    IndexOverview,
+    IndexOverviewAsset,
+    SaveSystemIndexProps,
+} from "@/utils/types/general.types";
 import {pick} from "lodash";
 
 export const handleSaveSystemIndexOverview = async (props: SaveSystemIndexProps) => {
