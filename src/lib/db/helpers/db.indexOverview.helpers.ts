@@ -12,7 +12,7 @@ import {chunk} from "lodash";
 import {SYSTEM_INDEXES_PROPS} from "@/app/api/populate/populate.constants";
 import {handlePrepareToSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
 
-const TABLE_NAME_INDEX_OVERVIEW = ENV_VARIABLES.MYSQL_TABLE_NAME_INDEX_OVERVIEW; // Ensure your database table exists
+const TABLE_NAME_INDEXES_OVERVIEW = ENV_VARIABLES.MYSQL_TABLE_NAME_INDEXES_OVERVIEW; // Ensure your database table exists
 
 // Insert an IndexOverview record into the database
 export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Promise<IndexOverview | null> => {
@@ -20,7 +20,7 @@ export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Prom
 
     try {
         const query = `
-            INSERT INTO ${TABLE_NAME_INDEX_OVERVIEW}
+            INSERT INTO ${TABLE_NAME_INDEXES_OVERVIEW}
             (
                 name,
                 historyOverview,
@@ -71,7 +71,7 @@ export const dbGetIndexesOverview = async (isSystem: boolean | undefined = true)
                 startTime,
                 endTime,
                 isSystem
-            FROM ${TABLE_NAME_INDEX_OVERVIEW}
+            FROM ${TABLE_NAME_INDEXES_OVERVIEW}
         `;
 
         // Add condition to filter by isSystem if the parameter is provided
@@ -118,7 +118,7 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
 
     try {
         const query = `
-            UPDATE ${TABLE_NAME_INDEX_OVERVIEW}
+            UPDATE ${TABLE_NAME_INDEXES_OVERVIEW}
             SET 
                 name = ?,
                 historyOverview = ?,
@@ -160,7 +160,7 @@ export const dbDeleteSystemIndexes = async (): Promise<boolean> => {
     try {
         // Define the query to delete where isSystem = true
         const query = `
-            DELETE FROM ${TABLE_NAME_INDEX_OVERVIEW}
+            DELETE FROM ${TABLE_NAME_INDEXES_OVERVIEW}
             WHERE isSystem = ?
         `;
 
@@ -185,7 +185,7 @@ export const dbDeleteIndexOverview = async (id: Id): Promise<boolean> => {
     try {
         // Define the query to delete a record by id
         const query = `
-            DELETE FROM ${TABLE_NAME_INDEX_OVERVIEW}
+            DELETE FROM ${TABLE_NAME_INDEXES_OVERVIEW}
             WHERE id = ?
         `;
 
@@ -213,7 +213,7 @@ export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | nu
         const query = `
             SELECT 
                 *
-            FROM ${TABLE_NAME_INDEX_OVERVIEW}
+            FROM ${TABLE_NAME_INDEXES_OVERVIEW}
             WHERE id = ?;
         `;
         const [rows] = await mySqlPool.execute(query, [id]); // Parameterized query to prevent SQL injection
@@ -304,7 +304,7 @@ export const manageSystemIndexes = async (
 export async function dbGetUniqueIndexesOverviewsAssetIds(): Promise<string[]> {
     const query = `
         SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(assets, '$[*].id')) AS assetId
-        FROM ${TABLE_NAME_INDEX_OVERVIEW};
+        FROM ${TABLE_NAME_INDEXES_OVERVIEW};
     `;
 
     const [rows] = (await mySqlPool.execute(query)) as unknown as [{assetId: string}[]];
