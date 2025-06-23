@@ -111,9 +111,9 @@ export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Prom
 };
 
 // Fetch IndexOverview items from the database based on isSystem parameter
-export const dbGetIndexesOverview = async (isSystem: boolean | undefined = true): Promise<IndexOverview[]> => {
+export const dbGetIndexesOverview = async (userId?: string): Promise<IndexOverview[]> => {
     "use cache";
-    cacheTag(CacheTag.INDEXES_OVERVIEW, isSystem ? CacheTag.SYSTEM_INDEXES_OVERVIEW : CacheTag.USER_INDEXES_OVERVIEW);
+    cacheTag(CacheTag.INDEXES_OVERVIEW, userId ? CacheTag.USER_INDEXES_OVERVIEW : CacheTag.SYSTEM_INDEXES_OVERVIEW);
 
     try {
         // Base query
@@ -131,11 +131,16 @@ export const dbGetIndexesOverview = async (isSystem: boolean | undefined = true)
             FROM ${TABLE_NAME_INDEXES_OVERVIEW}
         `;
 
-        // Add condition to filter by isSystem if the parameter is provided
-        query += isSystem ? ` WHERE systemId IS NOT NULL` : ` WHERE systemId IS NULL`; // Use a parameterized query to prevent injection
+        const values: any[] = [];
+        if (userId) {
+            query += ` WHERE userId = ?`;
+            values.push(userId);
+        } else {
+            query += ` WHERE systemId IS NOT NULL`;
+        }
 
         // Execute the query
-        const [rows] = await mySqlPool.execute(query);
+        const [rows] = await mySqlPool.execute(query, values);
         const indexOverviews = rows as Array<{
             id: number;
             name: string;
@@ -182,7 +187,7 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
                 startTime = ?,
                 endTime = ?,
                 systemId = ?,
-                userId = ?,
+                userId = ?
             WHERE id = ?
         `;
 

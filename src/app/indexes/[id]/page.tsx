@@ -25,7 +25,7 @@ const IndexPageComponent = async (props: ServerPageProps) => {
     const index = await getIndex({
         id: params.id,
     });
-    console.log("index", index);
+
     if (!index) {
         return <div>Index not found</div>;
     }
