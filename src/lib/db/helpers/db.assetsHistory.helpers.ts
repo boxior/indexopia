@@ -28,7 +28,7 @@ export const dbPostAssetHistory = async (data: AssetHistory[]) => {
         await mySqlPool.execute(sql, values);
 
         // Invalidate cache after successful insertion/update
-        revalidateTag(combineTags(CacheTag.ASSET_HISTORY, data[0].assetId));
+        revalidateTag(combineTags(CacheTag.ASSETS_HISTORY, data[0].assetId));
         console.log("Asset histories inserted/updated successfully!");
     } catch (error) {
         console.error("Error inserting asset histories:", error);
@@ -39,7 +39,7 @@ export const dbPostAssetHistory = async (data: AssetHistory[]) => {
 // Helper function: Fetch all history for a specific asset by `assetId`
 export const dbGetAssetHistoryById = async (assetId: string): Promise<AssetHistory[]> => {
     "use cache";
-    cacheTag(CacheTag.ASSET_HISTORY, combineTags(CacheTag.ASSET_HISTORY, assetId));
+    cacheTag(CacheTag.ASSETS_HISTORY, combineTags(CacheTag.ASSETS_HISTORY, assetId));
 
     try {
         const sql = `
@@ -61,7 +61,7 @@ export const dbGetAssetHistoryByIdAndStartTime = async (
     startTime: number
 ): Promise<AssetHistory[]> => {
     "use cache";
-    cacheTag(CacheTag.ASSET_HISTORY, combineTags(CacheTag.ASSET_HISTORY, assetId, startTime));
+    cacheTag(CacheTag.ASSETS_HISTORY, combineTags(CacheTag.ASSETS_HISTORY, assetId, startTime));
 
     try {
         const sql = `

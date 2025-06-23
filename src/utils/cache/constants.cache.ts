@@ -1,7 +1,8 @@
 export enum CacheTag {
-    INDEX = "index",
     ASSETS = "assets",
-    ASSET_HISTORY = "assetHistory",
-    INDEX_OVERVIEW = "indexOverview",
-    INDEX_HISTORY = "indexHistory",
+    ASSETS_HISTORY = "assetsHistory",
+    INDEXES_OVERVIEW = "indexesOverview",
+    SYSTEM_INDEXES_OVERVIEW = "systemIndexesOverview",
+    USER_INDEXES_OVERVIEW = "userIndexesOverview",
+    INDEXES_HISTORY = "indexesHistory",
 }

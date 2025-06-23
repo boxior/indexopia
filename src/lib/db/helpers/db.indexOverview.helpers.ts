@@ -45,7 +45,7 @@ export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Prom
         const [result] = await mySqlPool.execute(query, values);
         const insertId = (result as any).insertId; // Extract the auto-generated ID
 
-        revalidateTag(CacheTag.INDEX_OVERVIEW);
+        revalidateTag(CacheTag.INDEXES_OVERVIEW);
 
         return await dbGetIndexOverviewById(insertId);
     } catch (error) {
@@ -57,7 +57,7 @@ export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Prom
 // Fetch IndexOverview items from the database based on isSystem parameter
 export const dbGetIndexesOverview = async (isSystem: boolean | undefined = true): Promise<IndexOverview[]> => {
     "use cache";
-    cacheTag(CacheTag.INDEX_OVERVIEW, isSystem ? "system" : "user");
+    cacheTag(CacheTag.INDEXES_OVERVIEW, isSystem ? "system" : "user");
 
     try {
         // Base query
@@ -144,7 +144,7 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
         await mySqlPool.execute(query, values);
 
         // Revalidate cache to reflect updates
-        revalidateTag(combineTags(CacheTag.INDEX_OVERVIEW, data.id));
+        revalidateTag(combineTags(CacheTag.INDEXES_OVERVIEW, data.id));
 
         return await dbGetIndexOverviewById(data.id);
     } catch (error) {
@@ -170,7 +170,7 @@ export const dbDeleteSystemIndexes = async (): Promise<boolean> => {
         // Check if rows were affected by the query
         const affectedRows = (result as any).affectedRows;
 
-        revalidateTag(CacheTag.INDEX_OVERVIEW);
+        revalidateTag(CacheTag.INDEXES_OVERVIEW);
 
         return affectedRows > 0; // Return true if records were deleted, false otherwise
     } catch (error) {
@@ -195,7 +195,7 @@ export const dbDeleteIndexOverview = async (id: Id): Promise<boolean> => {
         // Check if rows were affected by the query
         const affectedRows = (result as any).affectedRows;
 
-        revalidateTag(CacheTag.INDEX_OVERVIEW);
+        revalidateTag(CacheTag.INDEXES_OVERVIEW);
 
         return affectedRows > 0; // Return true if the record was deleted, false otherwise
     } catch (error) {
@@ -207,7 +207,7 @@ export const dbDeleteIndexOverview = async (id: Id): Promise<boolean> => {
 // Fetch an IndexOverview item from the database by ID
 export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | null> => {
     "use cache";
-    cacheTag(CacheTag.INDEX_OVERVIEW, combineTags(CacheTag.INDEX_OVERVIEW, id));
+    cacheTag(CacheTag.INDEXES_OVERVIEW, combineTags(CacheTag.INDEXES_OVERVIEW, id));
 
     try {
         const query = `
