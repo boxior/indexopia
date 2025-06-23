@@ -7,7 +7,7 @@ import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineTags} from "@/utils/cache/helpers.cache";
 import {revalidateTag} from "next/cache";
 import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
-import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
+import {MAX_ASSETS_COUNT} from "@/utils/constants/general.constants";
 import {chunk} from "lodash";
 import {SYSTEM_INDEXES_PROPS} from "@/app/api/populate/populate.constants";
 import {handlePrepareToSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
@@ -15,7 +15,7 @@ import {handlePrepareToSaveSystemIndexOverview} from "@/utils/heleprs/generators
 const TABLE_NAME_INDEXES_OVERVIEW = ENV_VARIABLES.MYSQL_TABLE_NAME_INDEXES_OVERVIEW; // Ensure your database table exists
 
 // Insert an IndexOverview record into the database
-export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Promise<IndexOverview | null> => {
+const dbPostUserIndexOverview = async (data: Omit<IndexOverview, "id">): Promise<IndexOverview | null> => {
     await connection();
 
     try {
@@ -28,7 +28,7 @@ export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Prom
                 assets,
                 startTime,
                 endTime,
-                isSystem
+                userId
             ) VALUES (?, ?, ?, ?, ?, ?, ?)
         `;
 
@@ -39,7 +39,7 @@ export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Prom
             JSON.stringify(data.assets || []), // Serialize assets array as JSON
             data.startTime || null,
             data.endTime || null,
-            data.isSystem || false,
+            data.userId || null,
         ];
 
         const [result] = await mySqlPool.execute(query, values);
@@ -54,10 +54,66 @@ export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Prom
     }
 };
 
+const dbPostSystemIndexOverview = async (data: Omit<IndexOverview, "id">): Promise<IndexOverview | null> => {
+    await connection();
+
+    try {
+        const existedSystemIndexOverview = await dbGetIndexOverviewBySystemId(data.systemId ?? "");
+
+        if (existedSystemIndexOverview) {
+            return await dbPutIndexOverview({id: existedSystemIndexOverview.id, ...data});
+        }
+
+        const query = `
+            INSERT INTO ${TABLE_NAME_INDEXES_OVERVIEW}
+            (
+                name,
+                historyOverview,
+                maxDrawDown,
+                assets,
+                startTime,
+                endTime,
+                systemId
+            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        `;
+
+        const values = [
+            data.name,
+            JSON.stringify(data.historyOverview || {}),
+            JSON.stringify(data.maxDrawDown || {}),
+            JSON.stringify(data.assets || []), // Serialize assets array as JSON
+            data.startTime || null,
+            data.endTime || null,
+            data.systemId || null,
+        ];
+
+        const [result] = await mySqlPool.execute(query, values);
+        const insertId = (result as any).insertId; // Extract the auto-generated ID
+
+        revalidateTag(CacheTag.INDEXES_OVERVIEW);
+
+        return await dbGetIndexOverviewById(insertId);
+    } catch (error) {
+        console.error("Error inserting IndexOverview record:", error);
+        return null;
+    }
+};
+
+export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Promise<IndexOverview | null> => {
+    switch (true) {
+        case !!data.systemId:
+            return await dbPostSystemIndexOverview(data);
+        case !!data.userId:
+            return await dbPostUserIndexOverview(data);
+        default:
+            throw new Error("No systemId or userId provided");
+    }
+};
+
 // Fetch IndexOverview items from the database based on isSystem parameter
 export const dbGetIndexesOverview = async (isSystem: boolean | undefined = true): Promise<IndexOverview[]> => {
     "use cache";
-    cacheTag(CacheTag.INDEXES_OVERVIEW, isSystem ? "system" : "user");
+    cacheTag(CacheTag.INDEXES_OVERVIEW, isSystem ? CacheTag.SYSTEM_INDEXES_OVERVIEW : CacheTag.USER_INDEXES_OVERVIEW);
 
     try {
         // Base query
@@ -70,19 +126,16 @@ export const dbGetIndexesOverview = async (isSystem: boolean | undefined = true)
                 assets,
                 startTime,
                 endTime,
-                isSystem
+                systemId,
+                userId
             FROM ${TABLE_NAME_INDEXES_OVERVIEW}
         `;
 
         // Add condition to filter by isSystem if the parameter is provided
-        const queryParams: Array<number | string | boolean> = [];
-        if (isSystem) {
-            query += ` WHERE isSystem = ?`; // Use a parameterized query to prevent injection
-            queryParams.push(isSystem ? 1 : 0);
-        }
+        query += isSystem ? ` WHERE systemId IS NOT NULL` : ` WHERE systemId IS NULL`; // Use a parameterized query to prevent injection
 
         // Execute the query
-        const [rows] = await mySqlPool.execute(query, queryParams);
+        const [rows] = await mySqlPool.execute(query);
         const indexOverviews = rows as Array<{
             id: number;
             name: string;
@@ -91,10 +144,11 @@ export const dbGetIndexesOverview = async (isSystem: boolean | undefined = true)
             assets: IndexOverview["assets"]; // JSON stored as string in the DB
             startTime: number;
             endTime: number;
-            isSystem: number; // Stored as tinyint in the DB
+            systemId?: string;
+            userId?: string;
         }>;
 
-        // Parse JSON fields and normalize isSystem
+        // Parse JSON fields and normalize
         const result: IndexOverview[] = indexOverviews.map(item => ({
             id: item.id,
             name: item.name,
@@ -103,7 +157,8 @@ export const dbGetIndexesOverview = async (isSystem: boolean | undefined = true)
             assets: item.assets, // Parse JSON array of assets
             startTime: item.startTime || undefined,
             endTime: item.endTime || undefined,
-            isSystem: !!item.isSystem, // Convert tinyint to boolean
+            systemId: item.systemId || undefined,
+            userId: item.userId || undefined,
         }));
 
         return result ?? []; // Return the parsed array of IndexOverview items
@@ -119,14 +174,15 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
     try {
         const query = `
             UPDATE ${TABLE_NAME_INDEXES_OVERVIEW}
-            SET 
+            SET
                 name = ?,
                 historyOverview = ?,
                 maxDrawDown = ?,
                 assets = ?,
                 startTime = ?,
                 endTime = ?,
-                isSystem = ?
+                systemId = ?,
+                userId = ?,
             WHERE id = ?
         `;
 
@@ -137,14 +193,21 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
             JSON.stringify(data.assets || []), // Serialize assets array as JSON
             data.startTime || null,
             data.endTime || null,
-            data.isSystem || false,
+            data.systemId || null,
+            data.userId || null,
             data.id, // Add the ID for the WHERE clause
         ];
 
         await mySqlPool.execute(query, values);
 
         // Revalidate cache to reflect updates
-        revalidateTag(combineTags(CacheTag.INDEXES_OVERVIEW, data.id));
+        const indexOverviewTag = data.systemId
+            ? combineTags(CacheTag.SYSTEM_INDEXES_OVERVIEW, data.id)
+            : data.userId
+              ? combineTags(CacheTag.USER_INDEXES_OVERVIEW, data.id)
+              : CacheTag.INDEXES_OVERVIEW;
+
+        revalidateTag(indexOverviewTag);
 
         return await dbGetIndexOverviewById(data.id);
     } catch (error) {
@@ -153,19 +216,16 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
     }
 };
 
-// Delete all IndexOverview records with isSystem = true
 export const dbDeleteSystemIndexes = async (): Promise<boolean> => {
     await connection();
 
     try {
-        // Define the query to delete where isSystem = true
         const query = `
             DELETE FROM ${TABLE_NAME_INDEXES_OVERVIEW}
-            WHERE isSystem = ?
+            WHERE systemId IS NOT NULL
         `;
 
-        // Execute the query with isSystem as true (1 for boolean representation in tinyint)
-        const [result] = await mySqlPool.execute(query, [1]);
+        const [result] = await mySqlPool.execute(query);
 
         // Check if rows were affected by the query
         const affectedRows = (result as any).affectedRows;
@@ -211,7 +271,7 @@ export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | nu
 
     try {
         const query = `
-            SELECT 
+            SELECT
                 *
             FROM ${TABLE_NAME_INDEXES_OVERVIEW}
             WHERE id = ?;
@@ -226,7 +286,8 @@ export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | nu
             assets: IndexOverview["assets"]; // JSON stored as string in the DB
             startTime: number;
             endTime: number;
-            isSystem: number; // Stored as tinyint in the DB
+            systemId?: string;
+            userId?: string;
         }>;
 
         if (indexOverviews.length === 0) {
@@ -235,7 +296,7 @@ export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | nu
 
         const item = indexOverviews[0]; // Get the first (and only) record
 
-        // Parse JSON fields and normalize `isSystem`
+        // Parse JSON fields and normalize
         const result: IndexOverview = {
             id: item.id,
             name: item.name,
@@ -244,12 +305,63 @@ export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | nu
             assets: item.assets, // Parse JSON array of assets
             startTime: item.startTime || undefined,
             endTime: item.endTime || undefined,
-            isSystem: !!item.isSystem, // Convert tinyint to boolean
+            systemId: item.systemId || undefined,
+            userId: item.userId || undefined,
         };
 
         return result; // Return the parsed IndexOverview item
     } catch (error) {
         console.error(`Error fetching IndexOverview with id ${id}:`, error);
+        return null; // Return null if there's an error
+    }
+};
+
+// Fetch an IndexOverview item from the database by ID
+export const dbGetIndexOverviewBySystemId = async (systemId: Id): Promise<IndexOverview | null> => {
+    "use cache";
+    cacheTag(CacheTag.INDEXES_OVERVIEW, combineTags(CacheTag.INDEXES_OVERVIEW, systemId));
+
+    try {
+        const query = `
+            SELECT
+                *
+            FROM ${TABLE_NAME_INDEXES_OVERVIEW}
+            WHERE systemId = ?;
+        `;
+        const [rows] = await mySqlPool.execute(query, [systemId]); // Parameterized query to prevent SQL injection
+
+        const indexOverviews = rows as Array<{
+            id: number;
+            name: string;
+            historyOverview: IndexOverview["historyOverview"]; // JSON stored as string in the DB
+            maxDrawDown: IndexOverview["maxDrawDown"]; // JSON stored as string in the DB
+            assets: IndexOverview["assets"]; // JSON stored as string in the DB
+            startTime: number;
+            endTime: number;
+            systemId?: string;
+        }>;
+
+        if (indexOverviews.length === 0) {
+            return null; // Return null if no record is found
+        }
+
+        const item = indexOverviews[0]; // Get the first (and only) record
+
+        // Parse JSON fields and normalize
+        const result: IndexOverview = {
+            id: item.id,
+            name: item.name,
+            historyOverview: item.historyOverview, // Parse JSON
+            maxDrawDown: item.maxDrawDown, // Parse JSON
+            assets: item.assets, // Parse JSON array of assets
+            startTime: item.startTime || undefined,
+            endTime: item.endTime || undefined,
+            systemId: item.systemId || undefined,
+        };
+
+        return result; // Return the parsed IndexOverview item
+    } catch (error) {
+        console.error(`Error fetching IndexOverview with systemId ${systemId}:`, error);
         return null; // Return null if there's an error
     }
 };
@@ -265,7 +377,7 @@ export const manageSystemIndexes = async (
     allAssetsHistory: AssetHistory[] | undefined = []
 ) => {
     try {
-        const assets = sortRankIndexAssets(allAssets).slice(0, MAX_ASSET_COUNT);
+        const assets = sortRankIndexAssets(allAssets).slice(0, MAX_ASSETS_COUNT);
         const normalizedAssetsHistory = allAssetsHistory.reduce(
             (acc, assetHistory) => {
                 const hasNeededHistory = assets.some(item => item.id === assetHistory.assetId);
@@ -291,7 +403,6 @@ export const manageSystemIndexes = async (
             indexesToSave.push(...indexesProps);
         }
 
-        await dbDeleteSystemIndexes();
         const chunksToSave = chunk(indexesToSave, 10);
         for (const chunkToSave of chunksToSave) {
             await Promise.all(chunkToSave.map(item => dbPostIndexOverview(item)));

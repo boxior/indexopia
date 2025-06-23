@@ -89,14 +89,13 @@ export interface Index<A = Asset> {
     userId?: string;
     startTime?: number;
     endTime?: number;
-    isSystem?: boolean; // means system one.
 }
 
 export type IndexOverviewAsset = Pick<Required<Asset>, "id" | "name" | "symbol" | "rank" | "portion">;
 
 export type IndexOverview = Pick<
     Index,
-    "id" | "systemId" | "userId" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime" | "isSystem"
+    "id" | "systemId" | "userId" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime"
 > & {assets: IndexOverviewAsset[]};
 
 /**
@@ -116,11 +115,12 @@ export type ServerPageProps<ID extends string = string> = {
 };
 
 export type Id = string | number;
+
 export type SaveSystemIndexProps = {
+    systemIndexBy: SystemIndexBy;
+    systemIndexSortBy: SystemIndexSortBy;
     upToNumber?: number;
     topAssetsCount?: number;
-    systemIndexBy?: SystemIndexBy;
-    systemIndexSortBy?: SystemIndexSortBy;
     startTime?: number;
     endTime?: number;
     equalPortions?: boolean;

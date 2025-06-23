@@ -25,12 +25,12 @@ const IndexPageComponent = async (props: ServerPageProps) => {
     const index = await getIndex({
         id: params.id,
     });
-
+    console.log("index", index);
     if (!index) {
         return <div>Index not found</div>;
     }
 
-    const doUpdate = index && !index.isSystem;
+    const doUpdate = index && !index.systemId;
 
     return (
         <div className={"flex flex-col gap-4"}>

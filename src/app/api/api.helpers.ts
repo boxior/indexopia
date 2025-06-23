@@ -1,4 +1,4 @@
-import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
+import {MAX_ASSETS_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
 import fetchAssets from "@/app/actions/assets/fetchAssets";
 import {dbGetAssets, dbGetAssetsByIds, dbPostAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {writeJsonFile} from "@/utils/heleprs/fs.helpers";
@@ -11,7 +11,7 @@ import {chunk, flatten} from "lodash";
 import {dbGetUniqueIndexesOverviewsAssetIds} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 export const manageAssets = async () => {
-    const limit = MAX_ASSET_COUNT + OMIT_ASSETS_IDS.length;
+    const limit = MAX_ASSETS_COUNT + OMIT_ASSETS_IDS.length;
 
     const {data, timestamp} = await fetchAssets({limit});
     const assets = filterAssetsByOmitIds(data);

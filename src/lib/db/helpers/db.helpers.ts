@@ -14,7 +14,7 @@ import {
     NormalizedAssets,
 } from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
-import {MAX_ASSET_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
+import {MAX_ASSETS_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
 import {cloneDeep, flatten, get, pick, set} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
@@ -70,7 +70,7 @@ export const getAssetHistoryOverview = async (
     };
 };
 
-export const getCachedTopAssets = async (limit: number | undefined = MAX_ASSET_COUNT): Promise<Asset[]> => {
+export const getCachedTopAssets = async (limit: number | undefined = MAX_ASSETS_COUNT): Promise<Asset[]> => {
     const assets = await dbGetAssets();
     return filterAssetsByOmitIds(assets ?? [], limit);
 };
@@ -80,9 +80,15 @@ export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
     return (assets ?? []).filter(asset => ids.includes(asset.id));
 };
 
-export const getIndexHistoryOverview = async <A extends {id: string; portion?: number} = Asset>(
-    assets: AssetWithHistoryAndOverview<A>[]
-): Promise<HistoryOverview> => {
+export const getIndexHistoryOverview = async <A extends {id: string; portion?: number} = Asset>({
+    id,
+    name,
+    assets,
+}: {
+    id?: Id;
+    name?: string;
+    assets: AssetWithHistoryAndOverview<A>[];
+}): Promise<HistoryOverview> => {
     // Read all assets
     if (assets.length === 0) {
         return {days1: 0, days7: 0, days30: 0, total: 0};
@@ -94,7 +100,9 @@ export const getIndexHistoryOverview = async <A extends {id: string; portion?: n
     // Ensure portions sum to 100%
     const portionSum = portions.reduce((sum, portion) => sum + portion, 0);
     if (Math.abs(portionSum - 100) > 1e-8) {
-        throw new Error("Asset portions must sum to 100%");
+        throw new Error(
+            `Asset portions must sum to 100%. id: ${id}; name: ${name}; portions: ${portions}; portionSum: ${portionSum}`
+        );
     }
 
     // Initialize cumulative weighted performance variables
@@ -315,13 +323,13 @@ export const getIndex = async ({
     }));
 
     const index: Omit<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>, "historyOverview" | "maxDrawDown"> = {
-        ...pick(indexOverview, ["id", "name", "startTime", "isSystem"]),
+        ...indexOverview,
         assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
         history: [],
     };
 
     const indexHistory = await getIndexHistory(index);
-    const indexHistoryOverview = await getIndexHistoryOverview(index.assets);
+    const indexHistoryOverview = await getIndexHistoryOverview(index);
     const indexMaxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
     return {

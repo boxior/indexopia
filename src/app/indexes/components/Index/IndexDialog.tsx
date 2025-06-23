@@ -9,7 +9,7 @@ import {Button} from "@/components/ui/button";
 import {useEffect, useState} from "react";
 import {Asset, IndexOverview, IndexOverviewAsset} from "@/utils/types/general.types";
 
-import {getIndexOverviewAsset} from "@/utils/heleprs/index/getIndexOverviewAsset.helper";
+import {getIndexOverviewAsset} from "@/utils/heleprs/index/index.helpers";
 import {actionCreateIndexOverview, actionUpdateIndexOverview} from "@/app/indexes/[id]/actions";
 import {handleGetAssets} from "@/app/indexes/components/Index/actions";
 

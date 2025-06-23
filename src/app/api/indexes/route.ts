@@ -15,9 +15,9 @@ export async function POST(req: NextRequest) {
         const {searchParams} = new URL(req.url);
 
         // Retrieve the apiKey from the query string
-        const isSystem = searchParams.get("isSystem") === "true";
+        const systemId = searchParams.get("systemId");
 
-        if (isSystem) {
+        if (systemId) {
             const body = (await req.json()) as SaveSystemIndexProps;
             const indexOverview = await handleSaveSystemIndex(body, searchParams);
             return NextResponse.json(

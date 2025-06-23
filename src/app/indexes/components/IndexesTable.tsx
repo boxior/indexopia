@@ -36,7 +36,7 @@ import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 import {actionDeleteIndexOverview} from "@/app/indexes/[id]/actions";
 
 export default function IndexesTable({data}: {data: IndexOverview[]}) {
-    const [sorting, setSorting] = React.useState<SortingState>([]);
+    const [sorting, setSorting] = React.useState<SortingState>([{desc: true, id: "historyOverview_total"}]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
@@ -75,7 +75,7 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
 
     const handleDeleteIndex = (index: IndexOverview) => async () => {
         try {
-            if (index.isSystem) {
+            if (index.systemId) {
                 return;
             }
 
@@ -231,7 +231,7 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
             cell: ({row}) => {
                 const index = row.original as unknown as IndexOverview;
 
-                if (index.isSystem) {
+                if (index.systemId) {
                     return null;
                 }
 

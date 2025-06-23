@@ -1,4 +1,4 @@
-export const MAX_ASSET_COUNT = 50;
+export const MAX_ASSETS_COUNT = 50;
 
 export const DEV_AUTH_NAME = "dev-auth";
 

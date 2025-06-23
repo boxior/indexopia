@@ -24,7 +24,7 @@ export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
         setOpen(false);
     };
 
-    const doDelete = !isNil(indexOverview?.id) && !indexOverview?.isSystem;
+    const doDelete = !isNil(indexOverview?.id) && !indexOverview?.systemId;
 
     const handleDelete = async () => {
         if (!doDelete) {
