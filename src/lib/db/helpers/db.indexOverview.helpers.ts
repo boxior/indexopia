@@ -112,10 +112,15 @@ export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Prom
 
 export const dbGetIndexesOverview = async (userId?: string): Promise<IndexOverview[]> => {
     "use cache";
-    cacheTag(
-        CacheTag.INDEXES_OVERVIEW,
-        userId ? combineCacheTags(CacheTag.USER_INDEXES_OVERVIEW, userId) : CacheTag.SYSTEM_INDEXES_OVERVIEW
-    );
+    if (userId) {
+        cacheTag(
+            CacheTag.INDEXES_OVERVIEW,
+            CacheTag.USER_INDEXES_OVERVIEW,
+            combineCacheTags(CacheTag.USER_INDEXES_OVERVIEW, userId)
+        );
+    } else {
+        cacheTag(CacheTag.INDEXES_OVERVIEW, CacheTag.SYSTEM_INDEXES_OVERVIEW);
+    }
 
     try {
         // Base query
