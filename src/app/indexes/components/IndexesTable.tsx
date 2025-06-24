@@ -27,7 +27,7 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import {Asset, Id, IndexOverview, MaxDrawDown} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
-import {ReactNode, useEffect} from "react";
+import {ReactNode} from "react";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
 import Link from "next/link";
 import {CreateIndex} from "@/app/indexes/components/Index/CreateIndex";
@@ -42,13 +42,6 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
     const [rowSelection, setRowSelection] = React.useState({});
 
     const [deletingIndexId, setDeletingIndexId] = React.useState<Id>();
-
-    // this `localData` is needed to provide local filter after DeleteItem.
-    const [localData, setLocalData] = React.useState<IndexOverview[]>(data);
-
-    useEffect(() => {
-        setLocalData(data);
-    }, [JSON.stringify(data)]);
 
     const renderColumnSortedHeader =
         (header: ReactNode): ColumnDef<IndexOverview>["header"] =>
@@ -81,7 +74,6 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
 
             setDeletingIndexId(index.id);
             await actionDeleteIndexOverview(index.id); // need tls
-            setLocalData(localData.filter(i => i.id !== index.id));
         } finally {
             setDeletingIndexId(undefined);
         }
@@ -253,7 +245,7 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
     ];
 
     const table = useReactTable({
-        data: localData,
+        data,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,

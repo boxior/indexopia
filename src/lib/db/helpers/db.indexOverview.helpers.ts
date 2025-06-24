@@ -45,7 +45,7 @@ const dbPostUserIndexOverview = async (data: Omit<IndexOverview, "id">): Promise
         const [result] = await mySqlPool.execute(query, values);
         const insertId = (result as any).insertId; // Extract the auto-generated ID
 
-        revalidateTag(CacheTag.INDEXES_OVERVIEW);
+        revalidateTag(combineCacheTags(CacheTag.USER_INDEXES_OVERVIEW, data.userId));
 
         return await dbGetIndexOverviewById(insertId);
     } catch (error) {
@@ -90,7 +90,7 @@ const dbPostSystemIndexOverview = async (data: Omit<IndexOverview, "id">): Promi
         const [result] = await mySqlPool.execute(query, values);
         const insertId = (result as any).insertId; // Extract the auto-generated ID
 
-        revalidateTag(CacheTag.INDEXES_OVERVIEW);
+        revalidateTag(CacheTag.SYSTEM_INDEXES_OVERVIEW);
 
         return await dbGetIndexOverviewById(insertId);
     } catch (error) {
@@ -110,10 +110,12 @@ export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Prom
     }
 };
 
-// Fetch IndexOverview items from the database based on isSystem parameter
 export const dbGetIndexesOverview = async (userId?: string): Promise<IndexOverview[]> => {
     "use cache";
-    cacheTag(CacheTag.INDEXES_OVERVIEW, userId ? CacheTag.USER_INDEXES_OVERVIEW : CacheTag.SYSTEM_INDEXES_OVERVIEW);
+    cacheTag(
+        CacheTag.INDEXES_OVERVIEW,
+        userId ? combineCacheTags(CacheTag.USER_INDEXES_OVERVIEW, userId) : CacheTag.SYSTEM_INDEXES_OVERVIEW
+    );
 
     try {
         // Base query
@@ -207,9 +209,9 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
 
         // Revalidate cache to reflect updates
         const indexOverviewTag = data.systemId
-            ? combineCacheTags(CacheTag.SYSTEM_INDEXES_OVERVIEW, data.id)
+            ? combineCacheTags(CacheTag.SYSTEM_INDEXES_OVERVIEW)
             : data.userId
-              ? combineCacheTags(CacheTag.USER_INDEXES_OVERVIEW, data.id)
+              ? combineCacheTags(CacheTag.USER_INDEXES_OVERVIEW, data.userId)
               : CacheTag.INDEXES_OVERVIEW;
 
         revalidateTag(indexOverviewTag);
@@ -235,7 +237,7 @@ export const dbDeleteSystemIndexes = async (): Promise<boolean> => {
         // Check if rows were affected by the query
         const affectedRows = (result as any).affectedRows;
 
-        revalidateTag(CacheTag.INDEXES_OVERVIEW);
+        revalidateTag(CacheTag.SYSTEM_INDEXES_OVERVIEW);
 
         return affectedRows > 0; // Return true if records were deleted, false otherwise
     } catch (error) {
@@ -248,6 +250,7 @@ export const dbDeleteIndexOverview = async (id: Id): Promise<boolean> => {
     await connection();
 
     try {
+        const existedIndexOverview = await dbGetIndexOverviewById(id);
         // Define the query to delete a record by id
         const query = `
             DELETE FROM ${TABLE_NAME_INDEXES_OVERVIEW}
@@ -260,7 +263,11 @@ export const dbDeleteIndexOverview = async (id: Id): Promise<boolean> => {
         // Check if rows were affected by the query
         const affectedRows = (result as any).affectedRows;
 
-        revalidateTag(CacheTag.INDEXES_OVERVIEW);
+        // revalidate tags
+        existedIndexOverview?.userId &&
+            revalidateTag(combineCacheTags(CacheTag.USER_INDEXES_OVERVIEW, existedIndexOverview?.userId));
+        existedIndexOverview?.systemId && revalidateTag(CacheTag.SYSTEM_INDEXES_OVERVIEW);
+        revalidateTag(combineCacheTags(CacheTag.INDEXES_OVERVIEW, id));
 
         return affectedRows > 0; // Return true if the record was deleted, false otherwise
     } catch (error) {
@@ -324,7 +331,11 @@ export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | nu
 // Fetch an IndexOverview item from the database by ID
 export const dbGetIndexOverviewBySystemId = async (systemId: Id): Promise<IndexOverview | null> => {
     "use cache";
-    cacheTag(CacheTag.INDEXES_OVERVIEW, combineCacheTags(CacheTag.INDEXES_OVERVIEW, systemId));
+    cacheTag(
+        CacheTag.INDEXES_OVERVIEW,
+        CacheTag.SYSTEM_INDEXES_OVERVIEW,
+        combineCacheTags(CacheTag.SYSTEM_INDEXES_OVERVIEW, systemId)
+    );
 
     try {
         const query = `
@@ -369,12 +380,6 @@ export const dbGetIndexOverviewBySystemId = async (systemId: Id): Promise<IndexO
         console.error(`Error fetching IndexOverview with systemId ${systemId}:`, error);
         return null; // Return null if there's an error
     }
-};
-
-export const handlePutIndexOverview = async (body: IndexOverview): Promise<Promise<IndexOverview | null>> => {
-    await connection();
-
-    return await dbPutIndexOverview(body);
 };
 
 export const manageSystemIndexes = async (
