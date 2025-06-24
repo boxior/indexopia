@@ -6,11 +6,11 @@ import {Id, IndexOverview, IndexOverviewAsset} from "@/utils/types/general.types
 import {pick} from "lodash";
 import {unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
-import {combineTags} from "@/utils/cache/helpers.cache";
+import {combineCacheTags} from "@/utils/cache/helpers.cache";
 
 export const handleGetIndexHistory = async (id: Id, propIndexOverview?: IndexOverview) => {
     "use cache";
-    cacheTag(CacheTag.INDEXES_OVERVIEW, combineTags(CacheTag.INDEXES_HISTORY, id));
+    cacheTag(CacheTag.INDEXES_OVERVIEW, combineCacheTags(CacheTag.INDEXES_HISTORY, id));
 
     const indexOverview = propIndexOverview ?? (await dbGetIndexOverviewById(id));
 

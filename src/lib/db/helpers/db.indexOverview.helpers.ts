@@ -4,7 +4,7 @@ import {ENV_VARIABLES} from "@/env";
 import {connection} from "next/server";
 import {cacheTag} from "next/dist/server/use-cache/cache-tag";
 import {CacheTag} from "@/utils/cache/constants.cache";
-import {combineTags} from "@/utils/cache/helpers.cache";
+import {combineCacheTags} from "@/utils/cache/helpers.cache";
 import {revalidateTag} from "next/cache";
 import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
 import {MAX_ASSETS_COUNT} from "@/utils/constants/general.constants";
@@ -207,9 +207,9 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
 
         // Revalidate cache to reflect updates
         const indexOverviewTag = data.systemId
-            ? combineTags(CacheTag.SYSTEM_INDEXES_OVERVIEW, data.id)
+            ? combineCacheTags(CacheTag.SYSTEM_INDEXES_OVERVIEW, data.id)
             : data.userId
-              ? combineTags(CacheTag.USER_INDEXES_OVERVIEW, data.id)
+              ? combineCacheTags(CacheTag.USER_INDEXES_OVERVIEW, data.id)
               : CacheTag.INDEXES_OVERVIEW;
 
         revalidateTag(indexOverviewTag);
@@ -272,7 +272,7 @@ export const dbDeleteIndexOverview = async (id: Id): Promise<boolean> => {
 // Fetch an IndexOverview item from the database by ID
 export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | null> => {
     "use cache";
-    cacheTag(CacheTag.INDEXES_OVERVIEW, combineTags(CacheTag.INDEXES_OVERVIEW, id));
+    cacheTag(CacheTag.INDEXES_OVERVIEW, combineCacheTags(CacheTag.INDEXES_OVERVIEW, id));
 
     try {
         const query = `
@@ -324,7 +324,7 @@ export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | nu
 // Fetch an IndexOverview item from the database by ID
 export const dbGetIndexOverviewBySystemId = async (systemId: Id): Promise<IndexOverview | null> => {
     "use cache";
-    cacheTag(CacheTag.INDEXES_OVERVIEW, combineTags(CacheTag.INDEXES_OVERVIEW, systemId));
+    cacheTag(CacheTag.INDEXES_OVERVIEW, combineCacheTags(CacheTag.INDEXES_OVERVIEW, systemId));
 
     try {
         const query = `
