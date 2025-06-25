@@ -17,6 +17,10 @@ interface IndexDB {
 
 export const indexDBFactory = (databaseName: IndexDBName): Promise<IndexDB> => {
     return new Promise<IndexDB>((resolve, reject) => {
+        if (!IndexedDB) {
+            return;
+        }
+
         const existingDBConnectionRequest = IndexedDB.open(databaseName);
 
         existingDBConnectionRequest.onupgradeneeded = () => {
@@ -29,7 +33,7 @@ export const indexDBFactory = (databaseName: IndexDBName): Promise<IndexDB> => {
 
             return resolve({
                 ...getIndexDBCrudFacade(database),
-                deleteDatabase: () => IndexedDB.deleteDatabase(database.name),
+                deleteDatabase: () => IndexedDB?.deleteDatabase(database.name),
             });
         };
 
