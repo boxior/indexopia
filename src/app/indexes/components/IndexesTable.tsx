@@ -147,13 +147,13 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
         },
         {
             id: `historyOverview_${HISTORY_OVERVIEW_DAYS}d_chart`,
-            accessorFn: index => index,
+            accessorFn: indexOverview => indexOverview,
             cell: ({row}) => {
-                const index = row.getValue(`historyOverview_${HISTORY_OVERVIEW_DAYS}d_chart`) as IndexOverview;
+                const indexOverview = row.getValue(`historyOverview_${HISTORY_OVERVIEW_DAYS}d_chart`) as IndexOverview;
 
                 return (
-                    <div className={`lowercase ${getChartColorClassname(index.historyOverview.days7)}`}>
-                        <IndexHistoryOverviewChart index={index} />
+                    <div className={`lowercase ${getChartColorClassname(indexOverview.historyOverview.days7)}`}>
+                        <IndexHistoryOverviewChart indexOverview={indexOverview} />
                     </div>
                 ); // Safely render the value
             },

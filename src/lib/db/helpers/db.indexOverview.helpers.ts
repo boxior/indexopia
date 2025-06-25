@@ -213,13 +213,9 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
         await mySqlPool.execute(query, values);
 
         // Revalidate cache to reflect updates
-        const indexOverviewTag = data.systemId
-            ? combineCacheTags(CacheTag.SYSTEM_INDEXES_OVERVIEW)
-            : data.userId
-              ? combineCacheTags(CacheTag.USER_INDEXES_OVERVIEW, data.userId)
-              : CacheTag.INDEXES_OVERVIEW;
-
-        revalidateTag(indexOverviewTag);
+        data.systemId && revalidateTag(CacheTag.SYSTEM_INDEXES_OVERVIEW);
+        data.userId && revalidateTag(CacheTag.USER_INDEXES_OVERVIEW);
+        revalidateTag(combineCacheTags(CacheTag.INDEXES_OVERVIEW, data.id));
 
         return await dbGetIndexOverviewById(data.id);
     } catch (error) {
@@ -268,11 +264,9 @@ export const dbDeleteIndexOverview = async (id: Id): Promise<boolean> => {
         // Check if rows were affected by the query
         const affectedRows = (result as any).affectedRows;
 
-        // revalidate tags
-        existedIndexOverview?.userId &&
-            revalidateTag(combineCacheTags(CacheTag.USER_INDEXES_OVERVIEW, existedIndexOverview?.userId));
         existedIndexOverview?.systemId && revalidateTag(CacheTag.SYSTEM_INDEXES_OVERVIEW);
-        revalidateTag(combineCacheTags(CacheTag.INDEXES_OVERVIEW, id));
+        existedIndexOverview?.userId && revalidateTag(CacheTag.USER_INDEXES_OVERVIEW);
+        revalidateTag(combineCacheTags(CacheTag.INDEXES_OVERVIEW, existedIndexOverview?.id));
 
         return affectedRows > 0; // Return true if the record was deleted, false otherwise
     } catch (error) {
