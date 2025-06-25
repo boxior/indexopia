@@ -16,6 +16,7 @@ export default async function fetchAssets(params: FetchAssetsParameters) {
             params
         );
 
+        // `revalidate` - to avoid fetching too often the limited free API
         return await fetch(strUrl, {next: {revalidate: secondsUntilNextMidnightUTC()}}).then(res => {
             return res.json();
         });

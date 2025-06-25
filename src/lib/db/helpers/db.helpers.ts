@@ -19,7 +19,7 @@ import {cloneDeep, flatten, get, pick, set} from "lodash";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 
 import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
-import {dbGetAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
+import {dbGetAssetHistoryById, dbGetAssetHistoryByIdAndStartTime} from "@/lib/db/helpers/db.assetsHistory.helpers";
 import {dbGetIndexOverviewById} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
@@ -159,7 +159,9 @@ export const getAssetHistoriesWithSmallestRange = async ({
                 assetIds.map(assetId => {
                     return (async () => {
                         try {
-                            return dbGetAssetHistoryById(assetId);
+                            return startTime
+                                ? dbGetAssetHistoryByIdAndStartTime(assetId, startTime)
+                                : dbGetAssetHistoryById(assetId);
                         } catch {
                             return [];
                         }

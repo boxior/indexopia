@@ -13,7 +13,7 @@ const getSystemIndexesProps = () => {
         const sortByProps = SORT_BY.reduce((ac, sortBy) => {
             const byProps = BY.map(by => {
                 return {
-                    upToNumber: upToNumber,
+                    upToNumber,
                     topAssetsCount: MAX_ASSETS_COUNT,
                     equalPortions: false,
                     name: `${capitalize(sortBy)} ${capitalize(by)} ${upToNumber}`,

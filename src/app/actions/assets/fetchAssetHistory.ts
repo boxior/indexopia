@@ -22,6 +22,7 @@ export default async function fetchAssetHistory(
             omit(params, "id")
         );
 
+        // `revalidate` - to avoid fetching too often the limited free API
         const history = await fetch(strUrl, {next: {revalidate: secondsUntilNextMidnightUTC()}}).then(res =>
             res.json()
         );

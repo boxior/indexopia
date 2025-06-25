@@ -83,7 +83,7 @@ export const dbGetAssetById = async (id: string) => {
 // Helper function: Fetch data by multiple IDs
 export const dbGetAssetsByIds = async (ids: string[]) => {
     "use cache";
-    cacheTag(CacheTag.ASSETS, combineCacheTags(CacheTag.ASSETS, ...ids));
+    cacheTag(CacheTag.ASSETS);
 
     try {
         if (ids.length === 0) return [];
