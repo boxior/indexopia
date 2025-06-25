@@ -18,9 +18,8 @@ export default async function IndexesPage() {
 const IndexesPageComponent = async () => {
     await connection();
 
-    // TODO: Try to fetch as a list of indexes by id and cache it. So that, after Creating/Deleting/Updating a specific one revalidate only the suitable one.
-    // const systemIndexesOverview = await dbGetIndexesOverview();
+    const systemIndexesOverview = await dbGetIndexesOverview();
     const userIndexesOverview = await dbGetIndexesOverview(MOCK_USER_ID);
 
-    return <IndexesTable data={[...[], ...userIndexesOverview]} />;
+    return <IndexesTable data={[...systemIndexesOverview, ...userIndexesOverview]} />;
 };
