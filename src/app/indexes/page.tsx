@@ -3,8 +3,9 @@
 import IndexesTable from "@/app/indexes/components/IndexesTable";
 import * as React from "react";
 import {SuspenseContainer} from "@/components/SuspenseContainer";
-import {dbGetListIndexOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
+import {dbGetIndexesOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {connection} from "next/server";
+import {MOCK_USER_ID} from "@/utils/constants/general.constants";
 
 export default async function IndexesPage() {
     return (
@@ -17,7 +18,8 @@ export default async function IndexesPage() {
 const IndexesPageComponent = async () => {
     await connection();
 
-    const customIndexes = await dbGetListIndexOverview();
+    const systemIndexesOverview = await dbGetIndexesOverview();
+    const userIndexesOverview = await dbGetIndexesOverview(MOCK_USER_ID);
 
-    return <IndexesTable data={customIndexes} />;
+    return <IndexesTable data={[...systemIndexesOverview, ...userIndexesOverview]} />;
 };

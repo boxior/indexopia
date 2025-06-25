@@ -1,4 +1,4 @@
-import {CustomIndexAsset, Asset} from "@/utils/types/general.types";
+import {Asset, IndexOverviewAsset} from "@/utils/types/general.types";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {ChangeEventHandler} from "react";
@@ -11,7 +11,7 @@ export function IndexAssetsPortions({
     onChangeAssetPortion,
 }: {
     assets: Asset[];
-    selectedAssets: CustomIndexAsset[];
+    selectedAssets: IndexOverviewAsset[];
     onChangeAssetPortion: (id: string, portion: number) => void;
 }) {
     const handleChangePortion =

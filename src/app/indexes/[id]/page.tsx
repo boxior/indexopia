@@ -7,6 +7,7 @@ import {IndexOverview} from "@/app/indexes/[id]/components/IndexOverview";
 import * as React from "react";
 import {SuspenseContainer} from "@/components/SuspenseContainer";
 import {UpdateIndex} from "@/app/indexes/components/Index/UpdateIndex";
+import {connection} from "next/server";
 
 export default async function IndexPage(props: ServerPageProps) {
     return (
@@ -17,6 +18,8 @@ export default async function IndexPage(props: ServerPageProps) {
 }
 
 const IndexPageComponent = async (props: ServerPageProps) => {
+    await connection();
+
     const params = await props.params;
 
     const index = await getIndex({
@@ -24,10 +27,10 @@ const IndexPageComponent = async (props: ServerPageProps) => {
     });
 
     if (!index) {
-        return <div>Custom index not found</div>;
+        return <div>Index not found</div>;
     }
 
-    const doUpdate = index && !index.isSystem;
+    const doUpdate = index && !index.systemId;
 
     return (
         <div className={"flex flex-col gap-4"}>

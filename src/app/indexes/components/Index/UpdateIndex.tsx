@@ -5,9 +5,9 @@ import {Dialog} from "@/components/ui/dialog";
 import {IndexOverview} from "@/utils/types/general.types";
 import {useState} from "react";
 import {IndexDialog} from "@/app/indexes/components/Index/IndexDialog";
-import {clientApiDeleteCustomIndex} from "@/utils/clientApi/customIndex.clientApi";
 import {redirect} from "next/navigation";
 import {isNil} from "lodash";
+import {actionDeleteIndexOverview} from "@/app/indexes/[id]/actions";
 
 export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
     const [open, setOpen] = useState<boolean>(false);
@@ -24,13 +24,13 @@ export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
         setOpen(false);
     };
 
-    const doDelete = !isNil(indexOverview?.id) && !indexOverview?.isSystem;
+    const doDelete = !isNil(indexOverview?.id) && !indexOverview?.systemId;
 
     const handleDelete = async () => {
         if (!doDelete) {
             return;
         }
-        await clientApiDeleteCustomIndex(indexOverview?.id ?? ""); // need tls
+        await actionDeleteIndexOverview(indexOverview?.id ?? ""); // need tls
         redirect("/indexes");
     };
 
@@ -47,7 +47,7 @@ export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
                 )}
             </div>
             <Dialog open={open} onOpenChange={onOpenChange}>
-                {open && <IndexDialog closeDialog={closeDialog} indexOverview={indexOverview} />}
+                {open && <IndexDialog closeDialogAction={closeDialog} indexOverview={indexOverview} />}
             </Dialog>
         </>
     );

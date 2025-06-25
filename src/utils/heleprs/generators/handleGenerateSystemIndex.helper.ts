@@ -1,7 +1,6 @@
 import {
     AssetWithHistory,
     AssetWithProfitAndMaxDrawDown,
-    CustomIndexAsset,
     IndexOverviewAsset,
     SystemIndexBy,
     SystemIndexSortBy,
