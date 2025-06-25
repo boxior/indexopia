@@ -126,3 +126,7 @@ export type SaveSystemIndexProps = {
     equalPortions?: boolean;
     name?: string;
 };
+
+export enum IndexDBName {
+    INDEX_HISTORY = "indexHistory",
+}
