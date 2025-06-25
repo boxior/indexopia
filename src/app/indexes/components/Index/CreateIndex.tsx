@@ -25,7 +25,7 @@ export function CreateIndex() {
             <Button variant="outline" onClick={openDialog}>
                 Create Index
             </Button>
-            {open && <IndexDialog closeDialog={closeDialog} />}
+            {open && <IndexDialog closeDialogAction={closeDialog} />}
         </Dialog>
     );
 }

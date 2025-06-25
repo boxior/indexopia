@@ -13,7 +13,7 @@ import {getIndexOverviewAsset} from "@/utils/heleprs/index/index.helpers";
 import {actionCreateIndexOverview, actionUpdateIndexOverview} from "@/app/indexes/[id]/actions";
 import {handleGetAssets} from "@/app/indexes/components/Index/actions";
 
-export function IndexDialog({closeDialog, indexOverview}: {closeDialog: () => void; indexOverview?: IndexOverview}) {
+export function IndexDialog({closeDialogAction, indexOverview}: {closeDialogAction: () => void; indexOverview?: IndexOverview}) {
     const [assets, setAssets] = useState<Asset[]>([]);
 
     useEffect(() => {
@@ -41,7 +41,7 @@ export function IndexDialog({closeDialog, indexOverview}: {closeDialog: () => vo
             });
         }
 
-        closeDialog();
+        closeDialogAction();
     };
 
     const handleChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {

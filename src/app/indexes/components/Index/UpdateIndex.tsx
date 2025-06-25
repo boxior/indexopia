@@ -47,7 +47,7 @@ export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
                 )}
             </div>
             <Dialog open={open} onOpenChange={onOpenChange}>
-                {open && <IndexDialog closeDialog={closeDialog} indexOverview={indexOverview} />}
+                {open && <IndexDialog closeDialogAction={closeDialog} indexOverview={indexOverview} />}
             </Dialog>
         </>
     );
