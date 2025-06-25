@@ -1,17 +1,33 @@
 "use client";
 
-import {IndexHistory, IndexOverview} from "@/utils/types/general.types";
+import {IndexDBName, IndexHistory, IndexOverview} from "@/utils/types/general.types";
 import {HistoryOverviewChart} from "@/app/indexes/components/HistoryOverviewChart";
 import {useEffect, useState} from "react";
 import {isEmpty} from "lodash";
-import {handleGetIndexHistory} from "@/app/indexes/actions";
+import {actionGetIndexHistory} from "@/app/indexes/actions";
+import {indexDBFactory} from "@/utils/heleprs/indexDBFactory.helper";
 
 export function IndexHistoryOverviewChart({index}: {index: IndexOverview}) {
     const [history, setHistory] = useState<IndexHistory[]>([]);
 
     useEffect(() => {
         (async () => {
-            index && setHistory(await handleGetIndexHistory(index.id, index));
+            if (!index) return;
+
+            const {get} = await indexDBFactory(IndexDBName.INDEX_HISTORY);
+            setHistory((await get<IndexHistory[]>(index.id)) ?? []);
+        })();
+    }, []);
+
+    useEffect(() => {
+        (async () => {
+            if (!index) return;
+
+            const indexHistory = await actionGetIndexHistory(index.id, index);
+            setHistory(indexHistory);
+
+            const {save} = await indexDBFactory(IndexDBName.INDEX_HISTORY);
+            await save(index.id, indexHistory);
         })();
     }, [JSON.stringify(index)]);
 
