@@ -38,7 +38,7 @@ import {getChartColorClassname} from "@/app/indexes/helpers";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 
 export function IndexAssetsTable({index}: {index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>}) {
-    const [sorting, setSorting] = React.useState<SortingState>([]);
+    const [sorting, setSorting] = React.useState<SortingState>([{desc: true, id: "portion"}]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
