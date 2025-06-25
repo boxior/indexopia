@@ -24,29 +24,24 @@ import {
 } from "@/components/ui/dropdown-menu";
 import {Input} from "@/components/ui/input";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
-import {Asset, IndexOverview, MaxDrawDown} from "@/utils/types/general.types";
+import {Asset, Id, IndexOverview, MaxDrawDown} from "@/utils/types/general.types";
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
-import {ReactNode, useEffect} from "react";
+import {ReactNode} from "react";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
 import Link from "next/link";
 import {CreateIndex} from "@/app/indexes/components/Index/CreateIndex";
-import {clientApiDeleteCustomIndex} from "@/utils/clientApi/customIndex.clientApi";
 import {IndexHistoryOverviewChart} from "@/app/indexes/components/IndexHistoryOverviewChart";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
+import {actionDeleteIndexOverview} from "@/app/indexes/[id]/actions";
 
 export default function IndexesTable({data}: {data: IndexOverview[]}) {
-    const [sorting, setSorting] = React.useState<SortingState>([]);
+    const [sorting, setSorting] = React.useState<SortingState>([{desc: true, id: "historyOverview_total"}]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
     const [rowSelection, setRowSelection] = React.useState({});
 
-    // this `localData` is needed to provide local filter after DeleteItem.
-    const [localData, setLocalData] = React.useState<IndexOverview[]>(data);
-
-    useEffect(() => {
-        setLocalData(data);
-    }, [JSON.stringify(data)]);
+    const [deletingIndexId, setDeletingIndexId] = React.useState<Id>();
 
     const renderColumnSortedHeader =
         (header: ReactNode): ColumnDef<IndexOverview>["header"] =>
@@ -72,11 +67,16 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
         };
 
     const handleDeleteIndex = (index: IndexOverview) => async () => {
-        if (index.isSystem) {
-            return;
+        try {
+            if (index.systemId) {
+                return;
+            }
+
+            setDeletingIndexId(index.id);
+            await actionDeleteIndexOverview(index.id); // need tls
+        } finally {
+            setDeletingIndexId(undefined);
         }
-        await clientApiDeleteCustomIndex(index.id); // need tls
-        setLocalData(localData.filter(i => i.id !== index.id));
     };
 
     const columns: ColumnDef<IndexOverview>[] = [
@@ -223,12 +223,17 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
             cell: ({row}) => {
                 const index = row.original as unknown as IndexOverview;
 
-                if (index.isSystem) {
+                if (index.systemId) {
                     return null;
                 }
 
                 return (
-                    <button type={"button"} className="lowercase" onClick={handleDeleteIndex(index)}>
+                    <button
+                        type={"button"}
+                        className="lowercase bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed"
+                        onClick={handleDeleteIndex(index)}
+                        disabled={String(deletingIndexId) === String(index.id)}
+                    >
                         Delete
                     </button>
                 );
@@ -240,7 +245,7 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
     ];
 
     const table = useReactTable({
-        data: localData,
+        data,
         columns,
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,

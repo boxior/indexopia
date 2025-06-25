@@ -1,12 +1,13 @@
 import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
-import {SaveSystemIndexProps} from "@/utils/heleprs/generators/handleSaveSystemCustomIndex.helper";
 import {handleSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
+import {IndexOverviewAsset, SaveSystemIndexProps} from "@/utils/types/general.types";
+import {actionCreateIndexOverview} from "@/app/indexes/[id]/actions";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Generate Default Custom Indexes
+ * Generate Index
  */
 export async function POST(req: NextRequest) {
     try {
@@ -14,27 +15,28 @@ export async function POST(req: NextRequest) {
         const {searchParams} = new URL(req.url);
 
         // Retrieve the apiKey from the query string
-        const apiKey = searchParams.get("apiKey");
+        const systemId = searchParams.get("systemId");
 
-        if (!apiKey) {
-            return NextResponse.json({error: "API key is missing"}, {status: 401});
+        if (systemId) {
+            const body = (await req.json()) as SaveSystemIndexProps;
+            const indexOverview = await handleSaveSystemIndex(body, searchParams);
+            return NextResponse.json(
+                {indexOverview},
+                {
+                    status: 200,
+                }
+            );
+        } else {
+            const body = (await req.json()) as {name: string; assets: IndexOverviewAsset[]};
+            const indexOverview = await actionCreateIndexOverview(body);
+
+            return NextResponse.json(
+                {indexOverview},
+                {
+                    status: 200,
+                }
+            );
         }
-
-        // Validate the API key
-        if (apiKey !== ENV_VARIABLES.API_KEY) {
-            return NextResponse.json({error: "Invalid API key"}, {status: 403});
-        }
-
-        const body = (await req.json()) as SaveSystemIndexProps;
-
-        await handleSaveSystemIndexOverview(body);
-
-        return NextResponse.json(
-            {success: true},
-            {
-                status: 200,
-            }
-        );
     } catch (error) {
         console.log(error);
         return NextResponse.json(
@@ -45,3 +47,18 @@ export async function POST(req: NextRequest) {
         );
     }
 }
+
+const handleSaveSystemIndex = async (body: SaveSystemIndexProps, searchParams: URLSearchParams) => {
+    const apiKey = searchParams.get("apiKey");
+
+    if (!apiKey) {
+        return NextResponse.json({error: "API key is missing"}, {status: 401});
+    }
+
+    // Validate the API key
+    if (apiKey !== ENV_VARIABLES.API_KEY) {
+        return NextResponse.json({error: "Invalid API key"}, {status: 403});
+    }
+
+    return await handleSaveSystemIndexOverview(body);
+};

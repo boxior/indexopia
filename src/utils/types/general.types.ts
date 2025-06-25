@@ -1,6 +1,11 @@
-import {HistoryOverview} from "@/lib/db/helpers/db.helpers";
-
 export type RecordWithId = Record<string, unknown> & {id: string};
+
+export type HistoryOverview = {
+    days1: number;
+    days7: number;
+    days30: number;
+    total: number;
+};
 
 export interface Asset {
     id: string; // "bitcoin"
@@ -38,19 +43,9 @@ export type AssetWithMaxDrawDown = Asset & {maxDrawDown: {value: number; startTi
 
 export type AssetWithProfitAndMaxDrawDown = AssetWithProfit & AssetWithMaxDrawDown;
 
-export type CustomIndexAsset = Pick<Required<Asset>, "id" | "portion">;
-
-export type CustomIndexAssetWithCustomIndexId = Pick<Required<Asset>, "id" | "portion"> & {customIndexId: number};
-
 export type AssetWithHistory = Asset & {history: AssetHistory[]};
 
 export type AssetWithHistoryAndOverview<A = Asset> = A & {history: AssetHistory[]; historyOverview: HistoryOverview};
-
-export type AssetWithHistoryOverviewAndPortion = Asset & {
-    history: AssetHistory[];
-    historyOverview: HistoryOverview;
-    portion: number;
-};
 
 export type AssetWithHistoryOverviewPortionAndMaxDrawDown = Asset & {
     history: AssetHistory[];
@@ -85,34 +80,23 @@ export type NormalizedAssetHistory = Record<Asset["id"], AssetHistory[]>;
 
 export interface Index<A = Asset> {
     id: Id;
-    systemId?: string;
-    userId?: string;
     name: string;
     assets: A[];
     historyOverview: HistoryOverview;
     history: IndexHistory[];
     maxDrawDown: MaxDrawDown;
+    systemId?: string;
+    userId?: string;
     startTime?: number;
     endTime?: number;
-    isSystem?: boolean; // means system one.
 }
 
 export type IndexOverviewAsset = Pick<Required<Asset>, "id" | "name" | "symbol" | "rank" | "portion">;
 
 export type IndexOverview = Pick<
     Index,
-    "id" | "systemId" | "userId" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime" | "isSystem"
+    "id" | "systemId" | "userId" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime"
 > & {assets: IndexOverviewAsset[]};
-
-export interface CustomIndexType {
-    id: Id;
-    name: string;
-    assets: CustomIndexAsset[];
-    startTime?: number;
-    isSystem?: boolean;
-}
-
-export type CustomIndexTypeDb = Omit<CustomIndexType, "isSystem" | "assets"> & {isSystem: number | null};
 
 /**
  * @link https://momentjscom.readthedocs.io/en/latest/moment/04-displaying/01-format/
@@ -131,3 +115,14 @@ export type ServerPageProps<ID extends string = string> = {
 };
 
 export type Id = string | number;
+
+export type SaveSystemIndexProps = {
+    systemIndexBy: SystemIndexBy;
+    systemIndexSortBy: SystemIndexSortBy;
+    upToNumber?: number;
+    topAssetsCount?: number;
+    startTime?: number;
+    endTime?: number;
+    equalPortions?: boolean;
+    name?: string;
+};

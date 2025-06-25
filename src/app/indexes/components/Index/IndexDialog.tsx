@@ -1,3 +1,5 @@
+"use client";
+
 import {DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
@@ -5,53 +7,60 @@ import {IndexAssets} from "@/app/indexes/components/Index/IndexAssets";
 import {IndexAssetsPortions} from "@/app/indexes/components/Index/IndexAssetsPortions";
 import {Button} from "@/components/ui/button";
 import {useEffect, useState} from "react";
-import {CustomIndexAsset, Asset, CustomIndexType, IndexOverview} from "@/utils/types/general.types";
-import {createCustomIndex, updateCustomIndex} from "@/app/indexes/[id]/actions";
-import {clientApiGetAssets} from "@/utils/clientApi/customIndex.clientApi";
+import {Asset, IndexOverview, IndexOverviewAsset} from "@/utils/types/general.types";
 
-export function IndexDialog({closeDialog, indexOverview}: {closeDialog: () => void; indexOverview?: IndexOverview}) {
+import {getIndexOverviewAsset} from "@/utils/heleprs/index/index.helpers";
+import {actionCreateIndexOverview, actionUpdateIndexOverview} from "@/app/indexes/[id]/actions";
+import {handleGetAssets} from "@/app/indexes/components/Index/actions";
+
+export function IndexDialog({closeDialogAction, indexOverview}: {closeDialogAction: () => void; indexOverview?: IndexOverview}) {
     const [assets, setAssets] = useState<Asset[]>([]);
 
     useEffect(() => {
         (async () => {
-            setAssets((await clientApiGetAssets()).assets);
+            setAssets(await handleGetAssets());
         })();
     }, []);
 
-    const [selectedAssets, setSelectedAssets] = useState<CustomIndexAsset[]>(indexOverview?.assets ?? []);
+    const [selectedAssets, setSelectedAssets] = useState<IndexOverviewAsset[]>(indexOverview?.assets ?? []);
     const [name, setName] = useState<string>(indexOverview?.name ?? "");
 
     const isUpdateMode = !!indexOverview;
 
     const handleSave = async () => {
         if (isUpdateMode) {
-            await updateCustomIndex({
+            await actionUpdateIndexOverview({
                 ...indexOverview,
                 name,
                 assets: selectedAssets,
             });
         } else {
-            await createCustomIndex({
+            await actionCreateIndexOverview({
                 name,
-                assets: selectedAssets,
+                assets: selectedAssets.map(getIndexOverviewAsset),
             });
         }
 
-        closeDialog();
+        closeDialogAction();
     };
 
     const handleChangeName = (e: React.ChangeEvent<HTMLInputElement>) => {
         setName(e.target.value);
     };
 
-    const handleChangeMultiselect = (value: CustomIndexAsset["id"][]) => {
-        setSelectedAssets(
-            value.map(id => {
+    const handleChangeMultiselect = (value: IndexOverviewAsset["id"][]) => {
+        const assetsToApply = value
+            .map(id => {
                 const selectedAsset = selectedAssets.find(item => item.id === id);
+                const asset = assets.find(item => item.id === id);
 
-                return {id, portion: selectedAsset?.portion ?? 0};
+                if (!asset) return null;
+
+                return getIndexOverviewAsset({...asset, portion: selectedAsset?.portion ?? 0});
             })
-        );
+            .filter(a => !!a);
+
+        setSelectedAssets(assetsToApply);
     };
 
     const handleChangeAssetPortion = (assetId: string, portion: number) => {
@@ -68,8 +77,8 @@ export function IndexDialog({closeDialog, indexOverview}: {closeDialog: () => vo
     return (
         <DialogContent className="w-full max-w-lg">
             <DialogHeader>
-                <DialogTitle>{`${isUpdateMode ? "Update" : "Create"} Custom Index ${indexOverview ? `(${indexOverview.name})` : ""}`}</DialogTitle>
-                <DialogDescription>{`${isUpdateMode ? "" : "Create your custom Index"}`}</DialogDescription>
+                <DialogTitle>{`${isUpdateMode ? "Update" : "Create"} Index ${indexOverview ? `(${indexOverview.name})` : ""}`}</DialogTitle>
+                <DialogDescription>{`${isUpdateMode ? "" : "Create your Index"}`}</DialogDescription>
             </DialogHeader>
             <div className="grid gap-4 py-4">
                 <div className="grid grid-cols-4 items-center gap-4">

@@ -1,13 +1,6 @@
 import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
-import {handlePrepareToSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
-import {SYSTEM_INDEXES_PROPS} from "@/app/api/populate/populate.constants";
-import {chunk} from "lodash";
-import {dbDeleteSystemIndexes, dbPostIndexOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
-import {Asset, AssetHistory} from "@/utils/types/general.types";
-import {MAX_ASSET_COUNT} from "@/utils/constants/general.constants";
-import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
-import {manageSystemIndexes} from "@/lib/db/helpers/db.index.helpers";
+import {manageSystemIndexes} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 export const dynamic = "force-dynamic";
 

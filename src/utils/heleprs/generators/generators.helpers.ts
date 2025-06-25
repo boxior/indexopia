@@ -1,11 +1,11 @@
-import {Asset, IndexOverviewAsset} from "@/utils/types/general.types";
+import {IndexOverviewAsset} from "@/utils/types/general.types";
 import {MAX_PORTION} from "@/app/indexes/components/Index/IndexAssetsPortions";
 
 /**
  * Assets portion should be strictly equal MAX_PORTION
  * @param assets
  */
-export const correctAssetPortions = (assets: IndexOverviewAsset[]) => {
+export const correctAssetPortions = (assets: IndexOverviewAsset[]): IndexOverviewAsset[] => {
     const draftSumm = assets.reduce((acc, r) => {
         return acc + r.portion;
     }, 0);
@@ -15,33 +15,37 @@ export const correctAssetPortions = (assets: IndexOverviewAsset[]) => {
     const sortedFilteredAssets = assets.toSorted((a, b) => b.portion - a.portion).filter(r => r.portion > 0);
 
     if (restSumm > 0) {
-        return sortedFilteredAssets.map(r => {
-            if (r.portion > 1 && restSumm > 0) {
-                restSumm -= 1;
+        return correctAssetPortions(
+            sortedFilteredAssets.map(r => {
+                if (r.portion > 1 && restSumm > 0) {
+                    restSumm -= 1;
 
-                return {
-                    ...r,
-                    portion: r.portion - 1,
-                };
-            }
+                    return {
+                        ...r,
+                        portion: r.portion - 1,
+                    };
+                }
 
-            return r;
-        });
+                return r;
+            })
+        );
     }
 
     if (restSumm < 0) {
-        return sortedFilteredAssets.map(r => {
-            if (r.portion > 1 && restSumm < 0) {
-                restSumm += 1;
+        return correctAssetPortions(
+            sortedFilteredAssets.map(r => {
+                if (r.portion > 1 && restSumm < 0) {
+                    restSumm += 1;
 
-                return {
-                    ...r,
-                    portion: r.portion + 1,
-                };
-            }
+                    return {
+                        ...r,
+                        portion: r.portion + 1,
+                    };
+                }
 
-            return r;
-        });
+                return r;
+            })
+        );
     }
 
     return sortedFilteredAssets;

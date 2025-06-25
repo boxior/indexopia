@@ -1,4 +1,4 @@
-import {Asset, CustomIndexAsset, IndexOverviewAsset} from "@/utils/types/general.types";
+import {Asset, IndexOverviewAsset} from "@/utils/types/general.types";
 
 /**
  * Helper function to assign a portion to each asset based on its rank.

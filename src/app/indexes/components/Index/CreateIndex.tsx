@@ -23,9 +23,9 @@ export function CreateIndex() {
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
             <Button variant="outline" onClick={openDialog}>
-                Create Custom Index
+                Create Index
             </Button>
-            {open && <IndexDialog closeDialog={closeDialog} />}
+            {open && <IndexDialog closeDialogAction={closeDialog} />}
         </Dialog>
     );
 }
