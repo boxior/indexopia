@@ -392,10 +392,10 @@ export const manageSystemIndexes = async (
     allAssetsHistory: AssetHistory[] | undefined = []
 ) => {
     try {
-        const assets = sortRankIndexAssets(allAssets).slice(0, MAX_ASSETS_COUNT);
+        const allTopAssets = sortRankIndexAssets(allAssets).slice(0, MAX_ASSETS_COUNT);
         const normalizedAssetsHistory = allAssetsHistory.reduce(
             (acc, assetHistory) => {
-                const hasNeededHistory = assets.some(item => item.id === assetHistory.assetId);
+                const hasNeededHistory = allTopAssets.some(item => item.id === assetHistory.assetId);
 
                 if (!hasNeededHistory) {
                     return acc;
@@ -413,7 +413,13 @@ export const manageSystemIndexes = async (
         const chunksProps = chunk(SYSTEM_INDEXES_PROPS, 10);
         for (const chunk of chunksProps) {
             const indexesProps = await Promise.all(
-                chunk.map(item => handlePrepareToSaveSystemIndexOverview(item, assets, normalizedAssetsHistory))
+                chunk.map(item =>
+                    handlePrepareToSaveSystemIndexOverview(
+                        item,
+                        allTopAssets.slice(0, item.upToNumber ?? item.topAssetsCount),
+                        normalizedAssetsHistory
+                    )
+                )
             );
             indexesToSave.push(...indexesProps);
         }
