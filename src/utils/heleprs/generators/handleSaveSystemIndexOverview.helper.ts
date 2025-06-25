@@ -25,15 +25,20 @@ export const handlePrepareToSaveSystemIndexOverview = async (
     const {name: propName} = props;
     //
 
-    const {assets, startTime: assetsStartTime} = await handleGenerateSystemIndexOverviewAssetsWithStartEndTimes(
-        props,
-        propAssets,
-        normalizedAssetsHistory
-    );
-
-    const {assets: assetsWithHistories, startTime} = await getAssetsWithHistories<IndexOverviewAsset>({
+    const {
         assets,
         startTime: assetsStartTime,
+        endTime: assetsEndTime,
+    } = await handleGenerateSystemIndexOverviewAssetsWithStartEndTimes(props, propAssets, normalizedAssetsHistory);
+
+    const {
+        assets: assetsWithHistories,
+        startTime,
+        endTime,
+    } = await getAssetsWithHistories<IndexOverviewAsset>({
+        assets,
+        startTime: assetsStartTime,
+        endTime: assetsEndTime,
         normalizedAssetsHistory,
     });
 
@@ -52,6 +57,7 @@ export const handlePrepareToSaveSystemIndexOverview = async (
         name,
         assets: assets.map(asset => pick(asset, ["id", "name", "rank", "symbol", "portion"])),
         startTime: startTime ?? performance.now(),
+        endTime: endTime ?? performance.now(),
         systemId,
         historyOverview,
         maxDrawDown,

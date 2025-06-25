@@ -129,4 +129,5 @@ export type SaveSystemIndexProps = {
 
 export enum IndexDBName {
     INDEX_HISTORY = "indexHistory",
+    INDEX_OVERVIEW = "indexOverview",
 }
