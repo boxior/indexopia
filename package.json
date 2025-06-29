@@ -10,7 +10,8 @@
         "start:local": "next start --port=3001",
         "b:s": "yarn build && yarn start:local",
         "lint": "next lint",
-        "format": "prettier --write ."
+        "format": "prettier --write .",
+        "mysql:connect":"mysql -h $MYSQL_HOST -P 3306 -u $MYSQL_USER -p"
     },
     "dependencies": {
         "@hookform/resolvers": "^4.1.3",

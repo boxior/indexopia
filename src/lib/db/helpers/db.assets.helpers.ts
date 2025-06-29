@@ -58,7 +58,9 @@ export const dbGetAssets = async (): Promise<Asset[]> => {
     cacheTag(CacheTag.ASSETS);
 
     try {
-        const [rows] = await mySqlPool.query(`SELECT * FROM ${TABLE_NAME_ASSETS}`);
+        const [rows] =
+            await mySqlPool.query(`SELECT * FROM ${TABLE_NAME_ASSETS} ORDER BY CAST(\`rank\` AS UNSIGNED) ASC;
+`);
         return rows as Asset[];
     } catch (error) {
         console.error("Error fetching data:", error);
@@ -88,7 +90,7 @@ export const dbGetAssetsByIds = async (ids: string[]) => {
     try {
         if (ids.length === 0) return [];
         const placeholders = ids.map(() => "?").join(", "); // Generate placeholders (?, ?, ?)
-        const sql = `SELECT * FROM ${TABLE_NAME_ASSETS} WHERE id IN (${placeholders})`;
+        const sql = `SELECT * FROM ${TABLE_NAME_ASSETS} WHERE id IN (${placeholders}) ORDER BY CAST(\`rank\` AS UNSIGNED) ASC;`;
         const [rows] = (await mySqlPool.query(sql, ids)) as unknown as [Asset[]];
         return rows;
     } catch (error) {
