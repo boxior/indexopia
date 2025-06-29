@@ -44,7 +44,8 @@ export const dbGetAssetHistoryById = async (assetId: string): Promise<AssetHisto
     try {
         const sql = `
             SELECT * FROM ${TABLE_NAME_ASSET_HISTORY} 
-            WHERE assetId = ? 
+            WHERE assetId = ?
+            ORDER BY time ASC 
             ;
         `;
         const [rows] = await mySqlPool.query(sql, [assetId]);
@@ -67,7 +68,7 @@ export const dbGetAssetHistoryByIdAndStartTime = async (
         const sql = `
             SELECT * FROM ${TABLE_NAME_ASSET_HISTORY} 
             WHERE assetId = ? AND time >= ?
-            ;
+            ORDER BY time ASC;
         `;
         const [rows] = await mySqlPool.query(sql, [assetId, startTime]);
         return rows as AssetHistory[];
