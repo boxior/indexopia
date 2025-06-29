@@ -11,7 +11,7 @@
         "b:s": "yarn build && yarn start:local",
         "lint": "next lint",
         "format": "prettier --write .",
-        "mysql:connect":"mysql -h main.cp8i6ieu80bp.eu-central-1.rds.amazonaws.com -P 3306 -u admin -p"
+        "mysql:connect":"mysql -h $MYSQL_HOST -P 3306 -u $MYSQL_USER -p"
     },
     "dependencies": {
         "@hookform/resolvers": "^4.1.3",
