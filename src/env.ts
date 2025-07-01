@@ -17,6 +17,10 @@ interface EnvVariables {
     MYSQL_TABLE_NAME_ASSET_HISTORY: string;
     MYSQL_TABLE_NAME_INDEXES_OVERVIEW: string;
     API_KEY: string;
+    // SSL
+    SSL_SECRET_KEY: string;
+    SSL_ALGORITHM: string;
+    SSL_CERT: string;
 }
 
 // Parse environment variables and ensure they have the correct types
@@ -45,6 +49,9 @@ export const ENV_VARIABLES: EnvVariables = {
         process.env.NEXT_PUBLIC_MYSQL_TABLE_NAME_INDEXES_OVERVIEW ??
         "",
     API_KEY: process.env.API_KEY ?? process.env.NEXT_PUBLIC_API_KEY ?? "",
+    SSL_SECRET_KEY: process.env.SSL_SECRET_KEY ?? process.env.SSL_SECRET_KEY ?? "",
+    SSL_ALGORITHM: process.env.SSL_ALGORITHM ?? process.env.SSL_ALGORITHM ?? "",
+    SSL_CERT: process.env.SSL_CERT ?? process.env.SSL_CERT ?? "",
 };
 
 console.log("ENV_VARIABLES", ENV_VARIABLES);
