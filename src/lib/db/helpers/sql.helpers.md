@@ -1,28 +1,25 @@
 # Create DBs
 
-## Custom Index
 ```sql
-CREATE TABLE custom_index (
-id VARCHAR(255) NOT NULL PRIMARY KEY, -- Represents the 'id' field
-name VARCHAR(255) NOT NULL,          -- Represents the 'name' field
-startTime BIGINT,                    -- Represents the optional 'startTime' field
-isDefault BOOLEAN DEFAULT FALSE      -- Represents the optional 'isDefault' field
-);
+CREATE TABLE assets (
+    id VARCHAR(50) NOT NULL PRIMARY KEY,      -- Primary key, shorter max length
+    rank VARCHAR(50) NOT NULL,   
+    symbol VARCHAR(50) NOT NULL,
+    name VARCHAR(255) NOT NULL,
+    supply DECIMAL(20, 8) NOT NULL,
+    maxSupply DECIMAL(20, 8),
+    marketCapUsd DECIMAL(20, 8) NOT NULL,
+    volumeUsd24Hr DECIMAL(20, 8) ,
+    priceUsd DECIMAL(20, 8) NOT NULL,
+    changePercent24Hr DECIMAL(20, 8) NOT NULL,
+    vwap24Hr DECIMAL(20, 8),
+    explorer VARCHAR(255)
+) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 ```
 
-```sql
-CREATE TABLE custom_index_assets (
-    id VARCHAR(255) NOT NULL,            -- Represents the asset 'id' field
-    customIndexId VARCHAR(255) NOT NULL, -- Foreign key to custom_index
-    portion FLOAT NOT NULL,              -- Represents the 'portion' field
-    PRIMARY KEY (id, customIndexId),     -- Composite primary key (one asset per custom index)
-    FOREIGN KEY (customIndexId) REFERENCES custom_index(id) ON DELETE CASCADE
-);
-
-```
 
 ```sql
-CREATE TABLE custom_index_overview (
+CREATE TABLE index_overview (
     id BIGINT UNSIGNED NOT NULL AUTO_INCREMENT, -- Auto-incremented primary key
     name VARCHAR(255) NOT NULL, -- Corresponds to the name field of Index
     historyOverview JSON NOT NULL, -- Storing JSON data for historyOverview object structure
@@ -38,8 +35,6 @@ CREATE TABLE custom_index_overview (
 
 
 ```
-
-
 
 /**
  * To create Assets View sorted by Rank Asc

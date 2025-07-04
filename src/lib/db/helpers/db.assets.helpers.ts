@@ -11,19 +11,21 @@ const TABLE_NAME_ASSETS = ENV_VARIABLES.MYSQL_TABLE_NAME_ASSETS; // Ensure this 
 export const dbPostAssets = async (data: Asset[]) => {
     try {
         // Prepare the SQL query with multiple VALUES clauses
+        // `rank` is reserved property in MySQL
+        // `id` is a primary key
         const sql = `
-            INSERT INTO ${TABLE_NAME_ASSETS} (id, rank, symbol, name, supply, maxSupply, 
-                                              marketCapUsd, volumeUsd24Hr, priceUsd, 
-                                              changePercent24Hr, vwap24Hr, explorer)
+            INSERT INTO ${TABLE_NAME_ASSETS} (\`id\`, \`rank\`, \`symbol\`, \`name\`, \`supply\`, \`maxSupply\`, 
+                                              \`marketCapUsd\`, \`volumeUsd24Hr\`, \`priceUsd\`, 
+                                              \`changePercent24Hr\`, \`vwap24Hr\`, \`explorer\`)
             VALUES ${data.map(() => "(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)").join(", ")}
             ON DUPLICATE KEY UPDATE
-                rank = VALUES(rank), symbol = VALUES(symbol), name = VALUES(name),
-                supply = VALUES(supply), maxSupply = VALUES(maxSupply), 
-                marketCapUsd = VALUES(marketCapUsd), volumeUsd24Hr = VALUES(volumeUsd24Hr),
-                priceUsd = VALUES(priceUsd), changePercent24Hr = VALUES(changePercent24Hr),
-                vwap24Hr = VALUES(vwap24Hr), explorer = VALUES(explorer);
+            
+                \`rank\` = VALUES(\`rank\`), \`symbol\` = VALUES(\`symbol\`), \`name\` = VALUES(\`name\`),
+                \`supply\` = VALUES(\`supply\`), \`maxSupply\` = VALUES(\`maxSupply\`), 
+                \`marketCapUsd\` = VALUES(\`marketCapUsd\`), \`volumeUsd24Hr\` = VALUES(\`volumeUsd24Hr\`),
+                \`priceUsd\` = VALUES(\`priceUsd\`), \`changePercent24Hr\` = VALUES(\`changePercent24Hr\`),
+                \`vwap24Hr\` = VALUES(\`vwap24Hr\`), \`explorer\` = VALUES(\`explorer\`);
         `;
-
         // Flatten the data array into a single set of values
         const values = data.flatMap(item => [
             item.id,
@@ -39,10 +41,8 @@ export const dbPostAssets = async (data: Asset[]) => {
             item.vwap24Hr,
             item.explorer,
         ]);
-
         // Execute the query once with the entire batch of data
         await mySqlPool.execute(sql, values);
-
         // Invalidate the cache after inserting/updating the data
         revalidateTag(CacheTag.ASSETS);
         console.log("Data inserted/updated successfully!");
