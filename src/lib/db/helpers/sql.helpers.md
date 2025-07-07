@@ -69,3 +69,17 @@ CREATE TABLE index_overview (
 // TRUNCATE TABLE assets;
  * Show Transactions
  // SHOW PROCESSLIST;
+
+## Prisma + Postgres
+
+### Connect via dBeaver
+- `yarn prisma:tunnel`
+- switch off ssl on dBeaver
+- specify the port on dBeaver
+- [Docs](https://www.prisma.io/docs/postgres/database/tooling#connecting-to-prisma-postgres-instance-with-3rd-party-database-editors)
+
+
+### Allow Prisma Session to be deleted:
+```sql
+ALTER TABLE "Session" REPLICA IDENTITY FULL;
+```

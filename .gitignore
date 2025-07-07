@@ -42,5 +42,6 @@ next-env.d.ts
 
 # DB
 /db
-/db
 /db-old
+
+/app/generated/prisma
