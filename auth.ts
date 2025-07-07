@@ -6,7 +6,6 @@ import {ENV_VARIABLES} from "@/env";
 
 export const {handlers, auth, signIn, signOut} = NextAuth({
     adapter: PrismaAdapter(prisma),
-    trustHost: true,
     providers: [
         Resend({
             // If your environment variable is named differently than default
