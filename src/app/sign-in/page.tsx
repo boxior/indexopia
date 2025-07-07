@@ -5,7 +5,7 @@ import React, {useState} from "react";
 import {actionSignIn} from "@/app/sign-in/actions";
 
 const SignIn: React.FC = () => {
-    const [email, setEmail] = useState("serhii.lyzun@gmail.com");
+    const [email, setEmail] = useState("");
 
     const [isLoading, setIsLoading] = useState(false);
 

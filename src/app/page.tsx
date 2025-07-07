@@ -1,3 +1,6 @@
+import {SuspenseContainer} from "@/components/SuspenseContainer";
+import {AppHeader} from "@/app/components/AppHeader/AppHeader";
+
 export default async function HomePage() {
     try {
         ////
@@ -5,5 +8,10 @@ export default async function HomePage() {
         console.log(err);
     }
 
-    return <>Home page</>;
+    return (
+        <SuspenseContainer>
+            <AppHeader />
+            Home page
+        </SuspenseContainer>
+    );
 }
