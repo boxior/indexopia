@@ -38,7 +38,7 @@ export const AppHeaderClient = ({session}: {session: Session | null}) => {
                     </Avatar>
                     {/* Dropdown inside avatar */}
                     {isDropdownOpen && (
-                        <div className="absolute top-full right-0 mt-2 w-32 bg-white shadow-md rounded-md border p-2">
+                        <div className="absolute top-full right-0 mt-2 w-32 bg-white shadow-md rounded-md border p-2 z-10">
                             <Button onClick={handleLogout} disabled={isLoading} className="w-full text-sm">
                                 {isLoading ? "Logging out..." : "Logout"}
                             </Button>

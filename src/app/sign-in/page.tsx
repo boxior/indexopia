@@ -45,7 +45,7 @@ const SignIn: React.FC = () => {
                         isLoading ? "bg-blue-300 cursor-not-allowed" : "bg-blue-500 hover:bg-blue-600"
                     }`}
                 >
-                    Sign in
+                    {isLoading ? "Signing in..." : "Sign in"}
                 </button>
             </form>
         </div>
