@@ -4,6 +4,11 @@ export const DEV_AUTH_NAME = "dev-auth";
 
 export const DEV_AUTH_PATH = `/${DEV_AUTH_NAME}`;
 
+export const PATH_URLS = {
+    signIn: "/sign-in",
+    indexes: "/indexes",
+    devAuth: `/${DEV_AUTH_NAME}`,
+};
 export const OMIT_ASSETS_IDS = [
     "tether",
     "usd-coin",
