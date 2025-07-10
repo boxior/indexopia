@@ -3,7 +3,7 @@
 import {Button} from "@/components/ui/button";
 import {Dialog} from "@/components/ui/dialog";
 import {useState} from "react";
-import {IndexDialog} from "@/app/indexes/components/Index/IndexDialog";
+import {IndexDialog} from "@/app/indices/components/Index/IndexDialog";
 
 export function CreateIndex() {
     const [open, setOpen] = useState<boolean>(false);

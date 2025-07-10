@@ -23,7 +23,7 @@ import {dbGetAssetHistoryById, dbGetAssetHistoryByIdAndStartTime} from "@/lib/db
 import {dbGetIndexOverviewById} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
-export const INDEXES_FOLDER_PATH = "/db/indexes";
+export const INDICES_FOLDER_PATH = "/db/indices";
 export const ASSETS_HISTORY_FOLDER_PATH = "/db/assets_history";
 
 /**

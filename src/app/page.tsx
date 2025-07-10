@@ -1,17 +1,14 @@
 import {SuspenseContainer} from "@/components/SuspenseContainer";
-import {AppHeader} from "@/app/components/AppHeader/AppHeader";
+import {HomeClient} from "@/app/pageClient";
 
-export default async function HomePage() {
-    try {
-        ////
-    } catch (err) {
-        console.log(err);
-    }
-
+export default async function HomeServer() {
     return (
         <SuspenseContainer>
-            <AppHeader />
-            Home page
+            <HomeServerSuspended />
         </SuspenseContainer>
     );
 }
+
+const HomeServerSuspended = async () => {
+    return <HomeClient />;
+};

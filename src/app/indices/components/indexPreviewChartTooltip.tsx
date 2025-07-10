@@ -1,7 +1,7 @@
 import {TooltipProps} from "recharts";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {NumeralFormat} from "@numeral";
-import {getChartColorClassname} from "@/app/indexes/helpers";
+import {getChartColorClassname} from "@/app/indices/helpers";
 
 export function IndexPreviewChartTooltip(props: TooltipProps<number | string, "date" | "price">) {
     const {payload} = props;

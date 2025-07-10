@@ -1,12 +1,12 @@
 import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 import {manageAssets, manageAssetsHistory} from "@/app/api/api.helpers";
-import {manageSystemIndexes} from "@/lib/db/helpers/db.indexOverview.helpers";
+import {manageSystemIndices} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Populate entities: Assets, History, and Indexes
+ * Populate entities: Assets, History, and Indices
  */
 export async function POST(req: NextRequest) {
     try {
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
         // Assets history
         const allAssetsHistory = await manageAssetsHistory();
 
-        await manageSystemIndexes(allAssets, allAssetsHistory);
+        await manageSystemIndices(allAssets, allAssetsHistory);
         return NextResponse.json(
             {success: true},
             {

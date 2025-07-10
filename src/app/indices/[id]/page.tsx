@@ -1,12 +1,12 @@
 import {ServerPageProps} from "@/utils/types/general.types";
-import {IndexChart} from "@/app/indexes/[id]/components/IndexChart";
-import {IndexAssetsTable} from "@/app/indexes/[id]/components/IndexAssetsTable";
+import {IndexChart} from "@/app/indices/[id]/components/IndexChart";
+import {IndexAssetsTable} from "@/app/indices/[id]/components/IndexAssetsTable";
 import {getIndex} from "@/lib/db/helpers/db.helpers";
 import {Card} from "@/components/ui/card";
-import {IndexOverview} from "@/app/indexes/[id]/components/IndexOverview";
+import {IndexOverview} from "@/app/indices/[id]/components/IndexOverview";
 import * as React from "react";
 import {SuspenseContainer} from "@/components/SuspenseContainer";
-import {UpdateIndex} from "@/app/indexes/components/Index/UpdateIndex";
+import {UpdateIndex} from "@/app/indices/components/Index/UpdateIndex";
 import {connection} from "next/server";
 
 export default async function IndexPage(props: ServerPageProps) {

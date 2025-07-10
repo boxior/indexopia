@@ -15,7 +15,7 @@ const SuspendedComponent = async () => {
     const isDevAuth = await devAuthCheck();
 
     if (isDevAuth) {
-        redirect("/indexes");
+        redirect("/indices");
     }
 
     return <DevAuthDialog />;

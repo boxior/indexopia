@@ -1,7 +1,7 @@
 import {IndexOverview as IndexOverviewType, MomentFormat} from "@/utils/types/general.types";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {NumeralFormat} from "@numeral";
-import {getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
+import {getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indices/helpers";
 import moment from "moment";
 
 export function IndexOverview({indexOverview}: {indexOverview: IndexOverviewType}) {

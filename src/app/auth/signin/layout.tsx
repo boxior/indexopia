@@ -3,35 +3,33 @@ import {auth} from "@/auth";
 import {PATH_URLS} from "@/utils/constants/general.constants";
 import {SuspenseContainer} from "@/components/SuspenseContainer";
 import {redirect} from "next/navigation";
-import {AppHeader} from "@/app/components/AppHeader/AppHeader";
 
 export const metadata: Metadata = {
-    title: "Indexes",
-    description: "Crypto indexes",
+    title: "Indices",
+    description: "Crypto indices",
 };
 
-export default async function IndexesLayout({
+export default async function SignInLayout({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) {
     return (
         <SuspenseContainer>
-            <AppHeader />
-            <IndexesLayoutComponent children={children} />
+            <SignInLayoutComponent children={children} />
         </SuspenseContainer>
     );
 }
 
-const IndexesLayoutComponent = async ({
+const SignInLayoutComponent = async ({
     children,
 }: Readonly<{
     children: React.ReactNode;
 }>) => {
     const session = await auth();
 
-    if (!session) {
-        return redirect(PATH_URLS.signIn);
+    if (session) {
+        return redirect(PATH_URLS.indices);
     }
 
     return children;

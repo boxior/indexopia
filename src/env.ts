@@ -15,7 +15,7 @@ interface EnvVariables {
     MYSQL_DATABASE: string;
     MYSQL_TABLE_NAME_ASSETS: string;
     MYSQL_TABLE_NAME_ASSET_HISTORY: string;
-    MYSQL_TABLE_NAME_INDEXES_OVERVIEW: string;
+    MYSQL_TABLE_NAME_INDICES_OVERVIEW: string;
     API_KEY: string;
     // SSL
     SSL_SECRET_KEY: string;
@@ -45,9 +45,9 @@ export const ENV_VARIABLES: EnvVariables = {
         process.env.MYSQL_TABLE_NAME_ASSETS ?? process.env.NEXT_PUBLIC_MYSQL_TABLE_NAME_ASSETS ?? "",
     MYSQL_TABLE_NAME_ASSET_HISTORY:
         process.env.MYSQL_TABLE_NAME_ASSET_HISTORY ?? process.env.NEXT_PUBLIC_MYSQL_TABLE_NAME_ASSET_HISTORY ?? "",
-    MYSQL_TABLE_NAME_INDEXES_OVERVIEW:
-        process.env.MYSQL_TABLE_NAME_INDEXES_OVERVIEW ??
-        process.env.NEXT_PUBLIC_MYSQL_TABLE_NAME_INDEXES_OVERVIEW ??
+    MYSQL_TABLE_NAME_INDICES_OVERVIEW:
+        process.env.MYSQL_TABLE_NAME_INDICES_OVERVIEW ??
+        process.env.NEXT_PUBLIC_MYSQL_TABLE_NAME_INDICES_OVERVIEW ??
         "",
     API_KEY: process.env.API_KEY ?? process.env.NEXT_PUBLIC_API_KEY ?? "",
     SSL_SECRET_KEY: process.env.SSL_SECRET_KEY ?? process.env.SSL_SECRET_KEY ?? "",

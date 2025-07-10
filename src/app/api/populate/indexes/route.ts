@@ -1,11 +1,11 @@
 import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
-import {manageSystemIndexes} from "@/lib/db/helpers/db.indexOverview.helpers";
+import {manageSystemIndices} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 export const dynamic = "force-dynamic";
 
 /**
- * Populate System Indexes
+ * Populate System Indices
  */
 export async function POST(req: NextRequest) {
     try {
@@ -24,8 +24,8 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
-        // Indexes
-        await manageSystemIndexes();
+        // Indices
+        await manageSystemIndices();
 
         return NextResponse.json(
             {success: true},

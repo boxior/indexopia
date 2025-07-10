@@ -2,7 +2,7 @@ import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 import {handleSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
 import {IndexOverviewAsset, SaveSystemIndexProps} from "@/utils/types/general.types";
-import {actionCreateIndexOverview} from "@/app/indexes/[id]/actions";
+import {actionCreateIndexOverview} from "@/app/indices/[id]/actions";
 
 export const dynamic = "force-dynamic";
 

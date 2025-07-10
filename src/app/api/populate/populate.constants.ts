@@ -8,7 +8,7 @@ const UP_TO_NUMBERS = [5, 25, 50];
 const SORT_BY = Object.values(SystemIndexSortBy);
 const BY = Object.values(SystemIndexBy);
 
-const getSystemIndexesProps = () => {
+const getSystemIndicesProps = () => {
     return UP_TO_NUMBERS.reduce((acc, upToNumber) => {
         const sortByProps = SORT_BY.reduce((ac, sortBy) => {
             const byProps = BY.map(by => {
@@ -29,4 +29,4 @@ const getSystemIndexesProps = () => {
     }, [] as SaveSystemIndexProps[]);
 };
 
-export const SYSTEM_INDEXES_PROPS: SaveSystemIndexProps[] = getSystemIndexesProps();
+export const SYSTEM_INDICES_PROPS: SaveSystemIndexProps[] = getSystemIndicesProps();
