@@ -10,7 +10,7 @@ import {combineCacheTags} from "@/utils/cache/helpers.cache";
 
 export const actionGetIndexHistory = async (id: Id, propIndexOverview?: IndexOverview) => {
     "use cache";
-    cacheTag(CacheTag.INDEXES_OVERVIEW, CacheTag.INDEXES_HISTORY, combineCacheTags(CacheTag.INDEXES_HISTORY, id));
+    cacheTag(CacheTag.INDICES_OVERVIEW, CacheTag.INDICES_HISTORY, combineCacheTags(CacheTag.INDICES_HISTORY, id));
 
     const indexOverview = propIndexOverview ?? (await dbGetIndexOverviewById(id));
 

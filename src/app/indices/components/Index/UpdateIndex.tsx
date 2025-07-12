@@ -4,10 +4,10 @@ import {Button} from "@/components/ui/button";
 import {Dialog} from "@/components/ui/dialog";
 import {IndexOverview} from "@/utils/types/general.types";
 import {useState} from "react";
-import {IndexDialog} from "@/app/indexes/components/Index/IndexDialog";
+import {IndexDialog} from "@/app/indices/components/Index/IndexDialog";
 import {redirect} from "next/navigation";
 import {isNil} from "lodash";
-import {actionDeleteIndexOverview} from "@/app/indexes/[id]/actions";
+import {actionDeleteIndexOverview} from "@/app/indices/[id]/actions";
 
 export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
     const [open, setOpen] = useState<boolean>(false);
@@ -31,7 +31,7 @@ export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
             return;
         }
         await actionDeleteIndexOverview(indexOverview?.id ?? ""); // need tls
-        redirect("/indexes");
+        redirect("/indices");
     };
 
     return (

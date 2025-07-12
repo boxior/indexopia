@@ -33,8 +33,8 @@ import {
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode} from "react";
-import {HistoryOverviewChart} from "@/app/indexes/components/HistoryOverviewChart";
-import {getChartColorClassname} from "@/app/indexes/helpers";
+import {HistoryOverviewChart} from "@/app/indices/components/HistoryOverviewChart";
+import {getChartColorClassname} from "@/app/indices/helpers";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 
 export function IndexAssetsTable({index}: {index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>}) {

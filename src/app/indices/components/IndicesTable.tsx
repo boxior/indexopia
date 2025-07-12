@@ -28,14 +28,14 @@ import {Asset, Id, IndexOverview, MaxDrawDown} from "@/utils/types/general.types
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode} from "react";
-import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indexes/helpers";
+import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indices/helpers";
 import Link from "next/link";
-import {CreateIndex} from "@/app/indexes/components/Index/CreateIndex";
-import {IndexHistoryOverviewChart} from "@/app/indexes/components/IndexHistoryOverviewChart";
+import {CreateIndex} from "@/app/indices/components/Index/CreateIndex";
+import {IndexHistoryOverviewChart} from "@/app/indices/components/IndexHistoryOverviewChart";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
-import {actionDeleteIndexOverview} from "@/app/indexes/[id]/actions";
+import {actionDeleteIndexOverview} from "@/app/indices/[id]/actions";
 
-export default function IndexesTable({data}: {data: IndexOverview[]}) {
+export default function IndicesTable({data}: {data: IndexOverview[]}) {
     const [sorting, setSorting] = React.useState<SortingState>([{desc: true, id: "historyOverview_total"}]);
     const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
     const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
@@ -88,7 +88,7 @@ export default function IndexesTable({data}: {data: IndexOverview[]}) {
         {
             accessorKey: "name",
             cell: ({row}) => (
-                <Link className="capitalize underline" href={`/indexes/${row.original.id}`}>
+                <Link className="capitalize underline" href={`/indices/${row.original.id}`}>
                     {row.getValue("name")}
                 </Link>
             ),

@@ -3,17 +3,23 @@
 import {DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle} from "@/components/ui/dialog";
 import {Label} from "@/components/ui/label";
 import {Input} from "@/components/ui/input";
-import {IndexAssets} from "@/app/indexes/components/Index/IndexAssets";
-import {IndexAssetsPortions} from "@/app/indexes/components/Index/IndexAssetsPortions";
+import {IndexAssets} from "@/app/indices/components/Index/IndexAssets";
+import {IndexAssetsPortions} from "@/app/indices/components/Index/IndexAssetsPortions";
 import {Button} from "@/components/ui/button";
 import {useEffect, useState} from "react";
 import {Asset, IndexOverview, IndexOverviewAsset} from "@/utils/types/general.types";
 
 import {getIndexOverviewAsset} from "@/utils/heleprs/index/index.helpers";
-import {actionCreateIndexOverview, actionUpdateIndexOverview} from "@/app/indexes/[id]/actions";
-import {handleGetAssets} from "@/app/indexes/components/Index/actions";
+import {actionCreateIndexOverview, actionUpdateIndexOverview} from "@/app/indices/[id]/actions";
+import {handleGetAssets} from "@/app/indices/components/Index/actions";
 
-export function IndexDialog({closeDialogAction, indexOverview}: {closeDialogAction: () => void; indexOverview?: IndexOverview}) {
+export function IndexDialog({
+    closeDialogAction,
+    indexOverview,
+}: {
+    closeDialogAction: () => void;
+    indexOverview?: IndexOverview;
+}) {
     const [assets, setAssets] = useState<Asset[]>([]);
 
     useEffect(() => {

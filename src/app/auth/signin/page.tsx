@@ -2,24 +2,26 @@
 "use client";
 
 import React, {useState} from "react";
-import {actionSignIn} from "@/app/sign-in/actions";
+import {signIn, useSession} from "next-auth/react";
+import {PATH_URLS} from "@/utils/constants/general.constants";
 
 const SignIn: React.FC = () => {
-    const [email, setEmail] = useState("");
-
+    const [email, setEmail] = useState("serhii.lyzun@gmail.com");
     const [isLoading, setIsLoading] = useState(false);
+
+    const {update} = useSession();
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
-        console.log("Email submitted:", email);
 
         try {
             setIsLoading(true);
-            await actionSignIn(email);
+
+            await signIn("resend", {redirectTo: PATH_URLS.indices, email});
+            await update();
         } finally {
             setIsLoading(false);
         }
-        // Add any submission logic here (e.g., API call)
     };
 
     return (

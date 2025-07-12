@@ -9,10 +9,10 @@ import {revalidateTag} from "next/cache";
 import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
 import {MAX_ASSETS_COUNT} from "@/utils/constants/general.constants";
 import {chunk} from "lodash";
-import {SYSTEM_INDEXES_PROPS} from "@/app/api/populate/populate.constants";
+import {SYSTEM_INDICES_PROPS} from "@/app/api/populate/populate.constants";
 import {handlePrepareToSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
 
-const TABLE_NAME_INDEXES_OVERVIEW = ENV_VARIABLES.MYSQL_TABLE_NAME_INDEXES_OVERVIEW; // Ensure your database table exists
+const TABLE_NAME_INDICES_OVERVIEW = ENV_VARIABLES.MYSQL_TABLE_NAME_INDICES_OVERVIEW; // Ensure your database table exists
 
 // Insert an IndexOverview record into the database
 const dbPostUserIndexOverview = async (data: Omit<IndexOverview, "id">): Promise<IndexOverview | null> => {
@@ -20,7 +20,7 @@ const dbPostUserIndexOverview = async (data: Omit<IndexOverview, "id">): Promise
 
     try {
         const query = `
-            INSERT INTO ${TABLE_NAME_INDEXES_OVERVIEW}
+            INSERT INTO ${TABLE_NAME_INDICES_OVERVIEW}
             (
                 name,
                 historyOverview,
@@ -45,7 +45,7 @@ const dbPostUserIndexOverview = async (data: Omit<IndexOverview, "id">): Promise
         const [result] = await mySqlPool.execute(query, values);
         const insertId = (result as any).insertId; // Extract the auto-generated ID
 
-        revalidateTag(combineCacheTags(CacheTag.USER_INDEXES_OVERVIEW, data.userId));
+        revalidateTag(combineCacheTags(CacheTag.USER_INDICES_OVERVIEW, data.userId));
 
         return await dbGetIndexOverviewById(insertId);
     } catch (error) {
@@ -65,7 +65,7 @@ const dbPostSystemIndexOverview = async (data: Omit<IndexOverview, "id">): Promi
         }
 
         const query = `
-            INSERT INTO ${TABLE_NAME_INDEXES_OVERVIEW}
+            INSERT INTO ${TABLE_NAME_INDICES_OVERVIEW}
             (
                 name,
                 historyOverview,
@@ -90,7 +90,7 @@ const dbPostSystemIndexOverview = async (data: Omit<IndexOverview, "id">): Promi
         const [result] = await mySqlPool.execute(query, values);
         const insertId = (result as any).insertId; // Extract the auto-generated ID
 
-        revalidateTag(CacheTag.SYSTEM_INDEXES_OVERVIEW);
+        revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW);
 
         return await dbGetIndexOverviewById(insertId);
     } catch (error) {
@@ -110,16 +110,16 @@ export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Prom
     }
 };
 
-export const dbGetIndexesOverview = async (userId?: string): Promise<IndexOverview[]> => {
+export const dbGetIndicesOverview = async (userId?: string): Promise<IndexOverview[]> => {
     "use cache";
     if (userId) {
         cacheTag(
-            CacheTag.INDEXES_OVERVIEW,
-            CacheTag.USER_INDEXES_OVERVIEW,
-            combineCacheTags(CacheTag.USER_INDEXES_OVERVIEW, userId)
+            CacheTag.INDICES_OVERVIEW,
+            CacheTag.USER_INDICES_OVERVIEW,
+            combineCacheTags(CacheTag.USER_INDICES_OVERVIEW, userId)
         );
     } else {
-        cacheTag(CacheTag.INDEXES_OVERVIEW, CacheTag.SYSTEM_INDEXES_OVERVIEW);
+        cacheTag(CacheTag.INDICES_OVERVIEW, CacheTag.SYSTEM_INDICES_OVERVIEW);
     }
 
     try {
@@ -135,7 +135,7 @@ export const dbGetIndexesOverview = async (userId?: string): Promise<IndexOvervi
                 endTime,
                 systemId,
                 userId
-            FROM ${TABLE_NAME_INDEXES_OVERVIEW}
+            FROM ${TABLE_NAME_INDICES_OVERVIEW}
         `;
 
         const values: any[] = [];
@@ -185,7 +185,7 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
 
     try {
         const query = `
-            UPDATE ${TABLE_NAME_INDEXES_OVERVIEW}
+            UPDATE ${TABLE_NAME_INDICES_OVERVIEW}
             SET
                 name = ?,
                 historyOverview = ?,
@@ -213,9 +213,9 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
         await mySqlPool.execute(query, values);
 
         // Revalidate cache to reflect updates
-        data.systemId && revalidateTag(CacheTag.SYSTEM_INDEXES_OVERVIEW);
-        data.userId && revalidateTag(CacheTag.USER_INDEXES_OVERVIEW);
-        revalidateTag(combineCacheTags(CacheTag.INDEXES_OVERVIEW, data.id));
+        data.systemId && revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW);
+        data.userId && revalidateTag(CacheTag.USER_INDICES_OVERVIEW);
+        revalidateTag(combineCacheTags(CacheTag.INDICES_OVERVIEW, data.id));
 
         return await dbGetIndexOverviewById(data.id);
     } catch (error) {
@@ -224,12 +224,12 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
     }
 };
 
-export const dbDeleteSystemIndexes = async (): Promise<boolean> => {
+export const dbDeleteSystemIndices = async (): Promise<boolean> => {
     await connection();
 
     try {
         const query = `
-            DELETE FROM ${TABLE_NAME_INDEXES_OVERVIEW}
+            DELETE FROM ${TABLE_NAME_INDICES_OVERVIEW}
             WHERE systemId IS NOT NULL
         `;
 
@@ -238,7 +238,7 @@ export const dbDeleteSystemIndexes = async (): Promise<boolean> => {
         // Check if rows were affected by the query
         const affectedRows = (result as any).affectedRows;
 
-        revalidateTag(CacheTag.SYSTEM_INDEXES_OVERVIEW);
+        revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW);
 
         return affectedRows > 0; // Return true if records were deleted, false otherwise
     } catch (error) {
@@ -254,7 +254,7 @@ export const dbDeleteIndexOverview = async (id: Id): Promise<boolean> => {
         const existedIndexOverview = await dbGetIndexOverviewById(id);
         // Define the query to delete a record by id
         const query = `
-            DELETE FROM ${TABLE_NAME_INDEXES_OVERVIEW}
+            DELETE FROM ${TABLE_NAME_INDICES_OVERVIEW}
             WHERE id = ?
         `;
 
@@ -264,9 +264,9 @@ export const dbDeleteIndexOverview = async (id: Id): Promise<boolean> => {
         // Check if rows were affected by the query
         const affectedRows = (result as any).affectedRows;
 
-        existedIndexOverview?.systemId && revalidateTag(CacheTag.SYSTEM_INDEXES_OVERVIEW);
-        existedIndexOverview?.userId && revalidateTag(CacheTag.USER_INDEXES_OVERVIEW);
-        revalidateTag(combineCacheTags(CacheTag.INDEXES_OVERVIEW, existedIndexOverview?.id));
+        existedIndexOverview?.systemId && revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW);
+        existedIndexOverview?.userId && revalidateTag(CacheTag.USER_INDICES_OVERVIEW);
+        revalidateTag(combineCacheTags(CacheTag.INDICES_OVERVIEW, existedIndexOverview?.id));
 
         return affectedRows > 0; // Return true if the record was deleted, false otherwise
     } catch (error) {
@@ -278,13 +278,13 @@ export const dbDeleteIndexOverview = async (id: Id): Promise<boolean> => {
 // Fetch an IndexOverview item from the database by ID
 export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | null> => {
     "use cache";
-    cacheTag(CacheTag.INDEXES_OVERVIEW, combineCacheTags(CacheTag.INDEXES_OVERVIEW, id));
+    cacheTag(CacheTag.INDICES_OVERVIEW, combineCacheTags(CacheTag.INDICES_OVERVIEW, id));
 
     try {
         const query = `
             SELECT
                 *
-            FROM ${TABLE_NAME_INDEXES_OVERVIEW}
+            FROM ${TABLE_NAME_INDICES_OVERVIEW}
             WHERE id = ?;
         `;
         const [rows] = await mySqlPool.execute(query, [id]); // Parameterized query to prevent SQL injection
@@ -331,16 +331,16 @@ export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | nu
 export const dbGetIndexOverviewBySystemId = async (systemId: Id): Promise<IndexOverview | null> => {
     "use cache";
     cacheTag(
-        CacheTag.INDEXES_OVERVIEW,
-        CacheTag.SYSTEM_INDEXES_OVERVIEW,
-        combineCacheTags(CacheTag.SYSTEM_INDEXES_OVERVIEW, systemId)
+        CacheTag.INDICES_OVERVIEW,
+        CacheTag.SYSTEM_INDICES_OVERVIEW,
+        combineCacheTags(CacheTag.SYSTEM_INDICES_OVERVIEW, systemId)
     );
 
     try {
         const query = `
             SELECT
                 *
-            FROM ${TABLE_NAME_INDEXES_OVERVIEW}
+            FROM ${TABLE_NAME_INDICES_OVERVIEW}
             WHERE systemId = ?;
         `;
         const [rows] = await mySqlPool.execute(query, [systemId]); // Parameterized query to prevent SQL injection
@@ -381,7 +381,7 @@ export const dbGetIndexOverviewBySystemId = async (systemId: Id): Promise<IndexO
     }
 };
 
-export const manageSystemIndexes = async (
+export const manageSystemIndices = async (
     allAssets: Asset[] | undefined = [],
     allAssetsHistory: AssetHistory[] | undefined = []
 ) => {
@@ -403,10 +403,10 @@ export const manageSystemIndexes = async (
             {} as Record<string, AssetHistory[]>
         );
 
-        const indexesToSave = [];
-        const chunksProps = chunk(SYSTEM_INDEXES_PROPS, 10);
+        const indicesToSave = [];
+        const chunksProps = chunk(SYSTEM_INDICES_PROPS, 10);
         for (const chunk of chunksProps) {
-            const indexesProps = await Promise.all(
+            const indicesProps = await Promise.all(
                 chunk.map(item =>
                     handlePrepareToSaveSystemIndexOverview(
                         item,
@@ -415,10 +415,10 @@ export const manageSystemIndexes = async (
                     )
                 )
             );
-            indexesToSave.push(...indexesProps);
+            indicesToSave.push(...indicesProps);
         }
 
-        const chunksToSave = chunk(indexesToSave, 10);
+        const chunksToSave = chunk(indicesToSave, 10);
         for (const chunkToSave of chunksToSave) {
             await Promise.all(chunkToSave.map(item => dbPostIndexOverview(item)));
         }
@@ -427,10 +427,10 @@ export const manageSystemIndexes = async (
     }
 };
 
-export async function dbGetUniqueIndexesOverviewsAssetIds(): Promise<string[]> {
+export async function dbGetUniqueIndicesOverviewsAssetIds(): Promise<string[]> {
     const query = `
         SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(assets, '$[*].id')) AS assetId
-        FROM ${TABLE_NAME_INDEXES_OVERVIEW};
+        FROM ${TABLE_NAME_INDICES_OVERVIEW};
     `;
 
     const [rows] = (await mySqlPool.execute(query)) as unknown as [{assetId: string}[]];

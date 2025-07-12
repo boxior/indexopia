@@ -2,7 +2,7 @@ import {setQueryParams} from "@/utils/heleprs/setQueryParams.helper";
 import {ENV_VARIABLES} from "@/env";
 import {omit} from "lodash";
 import {AssetHistory} from "@/utils/types/general.types";
-import {populateMissingAssetHistory} from "@/app/indexes/helpers";
+import {populateMissingAssetHistory} from "@/app/indices/helpers";
 import {writeJsonFile} from "@/utils/heleprs/fs.helpers";
 import {secondsUntilNextMidnightUTC} from "@/utils/heleprs/axios/axios.helpers";
 

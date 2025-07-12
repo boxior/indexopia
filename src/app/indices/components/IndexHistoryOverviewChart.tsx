@@ -1,10 +1,10 @@
 "use client";
 
 import {IndexDBName, IndexHistory, IndexOverview} from "@/utils/types/general.types";
-import {HistoryOverviewChart} from "@/app/indexes/components/HistoryOverviewChart";
+import {HistoryOverviewChart} from "@/app/indices/components/HistoryOverviewChart";
 import {useEffect, useState} from "react";
 import {isEmpty} from "lodash";
-import {actionGetIndexHistory} from "@/app/indexes/actions";
+import {actionGetIndexHistory} from "@/app/indices/actions";
 import {indexDBFactory} from "@/utils/heleprs/indexDBFactory.helper";
 
 export function IndexHistoryOverviewChart({indexOverview}: {indexOverview: IndexOverview}) {
