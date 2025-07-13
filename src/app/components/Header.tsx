@@ -83,7 +83,11 @@ export default function Header() {
                                         <p className="text-sm font-medium">{user.name || "User"}</p>
                                         <p className="text-xs text-gray-500">{user.email}</p>
                                     </div>
-                                    <DropdownMenuItem onClick={handleSignOut} disabled={status === "loading"}>
+                                    <DropdownMenuItem
+                                        className={"hover:cursor-pointer"}
+                                        onClick={handleSignOut}
+                                        disabled={status === "loading"}
+                                    >
                                         <LogOut className="mr-2 h-4 w-4" />
                                         Sign out
                                     </DropdownMenuItem>
