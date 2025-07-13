@@ -1,13 +1,13 @@
 import {devAuthCheck} from "@/app/actions/devAuth";
 import {redirect} from "next/navigation";
 import DevAuthDialog from "@/app/dev-auth/components/DevAuthDialog";
-import {SuspenseContainer} from "@/components/SuspenseContainer";
+import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 
 export default async function DevAuthPage() {
     return (
-        <SuspenseContainer>
+        <SuspenseWrapper>
             <SuspendedComponent />
-        </SuspenseContainer>
+        </SuspenseWrapper>
     );
 }
 

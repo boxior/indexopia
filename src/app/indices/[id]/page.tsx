@@ -5,15 +5,28 @@ import {getIndex} from "@/lib/db/helpers/db.helpers";
 import {Card} from "@/components/ui/card";
 import {IndexOverview} from "@/app/indices/[id]/components/IndexOverview";
 import * as React from "react";
-import {SuspenseContainer} from "@/components/SuspenseContainer";
 import {UpdateIndex} from "@/app/indices/components/Index/UpdateIndex";
 import {connection} from "next/server";
+import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
+import ContentLoader from "@/components/Suspense/ContentLoader";
 
 export default async function IndexPage(props: ServerPageProps) {
     return (
-        <SuspenseContainer>
+        <SuspenseWrapper
+            loadingMessage="Loading index details..."
+            variant="pulse"
+            showLogo={false}
+            fullScreen={false}
+            fallback={
+                <div className="container mx-auto px-4 py-8 space-y-8">
+                    <ContentLoader type="card" count={1} />
+                    <ContentLoader type="chart" count={1} />
+                    <ContentLoader type="table" count={3} />
+                </div>
+            }
+        >
             <IndexPageComponent {...props} />
-        </SuspenseContainer>
+        </SuspenseWrapper>
     );
 }
 

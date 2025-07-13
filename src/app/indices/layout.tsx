@@ -1,10 +1,10 @@
 import type {Metadata} from "next";
 import {auth} from "@/auth";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
-import {SuspenseContainer} from "@/components/SuspenseContainer";
 import {redirect} from "next/navigation";
 import Header from "@/app/components/Header";
 import Footer from "@/app/components/Footer";
+import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 
 export const metadata: Metadata = {
     title: "Indices",
@@ -17,9 +17,9 @@ export default async function IndicesLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <SuspenseContainer>
+        <SuspenseWrapper>
             <IndicesLayoutComponent children={children} />
-        </SuspenseContainer>
+        </SuspenseWrapper>
     );
 }
 

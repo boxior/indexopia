@@ -2,17 +2,27 @@
 
 import IndicesTable from "@/app/indices/components/IndicesTable";
 import * as React from "react";
-import {SuspenseContainer} from "@/components/SuspenseContainer";
 import {dbGetIndicesOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {connection} from "next/server";
 import {MOCK_USER_ID} from "@/utils/constants/general.constants";
-import Header from "@/app/components/Header";
+import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
+import ContentLoader from "@/components/Suspense/ContentLoader";
 
 export default async function IndicesPage() {
     return (
-        <SuspenseContainer>
+        <SuspenseWrapper
+            loadingMessage="Loading crypto indices..."
+            variant="dots"
+            showLogo={false}
+            fullScreen={false}
+            fallback={
+                <div className="container mx-auto px-4 py-8">
+                    <ContentLoader type="table" count={5} />
+                </div>
+            }
+        >
             <IndicesPageComponent />
-        </SuspenseContainer>
+        </SuspenseWrapper>
     );
 }
 

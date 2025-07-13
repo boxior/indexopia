@@ -1,8 +1,8 @@
 import type {Metadata} from "next";
 import {auth} from "@/auth";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
-import {SuspenseContainer} from "@/components/SuspenseContainer";
 import {redirect} from "next/navigation";
+import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 
 export const metadata: Metadata = {
     title: "Indices",
@@ -15,9 +15,9 @@ export default async function SignInLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <SuspenseContainer>
+        <SuspenseWrapper>
             <SignInLayoutComponent children={children} />
-        </SuspenseContainer>
+        </SuspenseWrapper>
     );
 }
 
