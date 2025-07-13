@@ -1,6 +1,6 @@
 import Link from "next/link";
 import {Twitter, Github, Youtube} from "lucide-react";
-import {PATH_URLS} from "@/utils/constants/general.constants";
+import {PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default function Footer() {
     return (
@@ -24,28 +24,38 @@ export default function Footer() {
                     <div>
                         <h3 className="font-semibold mb-4">About</h3>
                         <ul className="space-y-2 text-sm">
+                            {/* TODO: https://cryptofunds.atlassian.net/browse/SCRUM-28; https://cryptofunds.atlassian.net/browse/SCRUM-29*/}
+                            {/*<li>*/}
+                            {/*    <Link href="/about" className="text-gray-400 hover:text-white transition-colors">*/}
+                            {/*        About Us*/}
+                            {/*    </Link>*/}
+                            {/*</li>*/}
+                            {/*<li>*/}
+                            {/*    <Link href="/disclaimer" className="text-gray-400 hover:text-white transition-colors">*/}
+                            {/*        Disclaimer*/}
+                            {/*    </Link>*/}
+                            {/*</li>*/}
                             <li>
-                                <Link href="/about" className="text-gray-400 hover:text-white transition-colors">
-                                    About Us
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/disclaimer" className="text-gray-400 hover:text-white transition-colors">
-                                    Disclaimer
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/terms" className="text-gray-400 hover:text-white transition-colors">
+                                <Link
+                                    href={PAGES_URLS.terms}
+                                    className="text-gray-400 hover:text-white transition-colors"
+                                >
                                     Terms of Service
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/privacy" className="text-gray-400 hover:text-white transition-colors">
+                                <Link
+                                    href={PAGES_URLS.privacy}
+                                    className="text-gray-400 hover:text-white transition-colors"
+                                >
                                     Privacy Policy
                                 </Link>
                             </li>
                             <li>
-                                <Link href="/contact" className="text-gray-400 hover:text-white transition-colors">
+                                <Link
+                                    href={PAGES_URLS.contact}
+                                    className="text-gray-400 hover:text-white transition-colors"
+                                >
                                     Contact
                                 </Link>
                             </li>
@@ -58,32 +68,34 @@ export default function Footer() {
                         <ul className="space-y-2 text-sm">
                             <li>
                                 <Link
-                                    href={PATH_URLS.indices}
+                                    href={PAGES_URLS.indices}
                                     className="text-gray-400 hover:text-white transition-colors"
                                 >
                                     Free Crypto Indices
                                 </Link>
                             </li>
-                            <li>
-                                <Link href="/premium" className="text-gray-400 hover:text-white transition-colors">
-                                    Premium Crypto Indices
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/tracker" className="text-gray-400 hover:text-white transition-colors">
-                                    Crypto Portfolio Tracker
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/faq" className="text-gray-400 hover:text-white transition-colors">
-                                    FAQ
-                                </Link>
-                            </li>
-                            <li>
-                                <Link href="/blog" className="text-gray-400 hover:text-white transition-colors">
-                                    Blog
-                                </Link>
-                            </li>
+
+                            {/*<li>*/}
+                            {/*    <Link href="/premium" className="text-gray-400 hover:text-white transition-colors">*/}
+                            {/*        Premium Crypto Indices*/}
+                            {/*    </Link>*/}
+                            {/*</li>*/}
+                            {/*<li>*/}
+                            {/*    <Link href="/tracker" className="text-gray-400 hover:text-white transition-colors">*/}
+                            {/*        Crypto Portfolio Tracker*/}
+                            {/*    </Link>*/}
+                            {/*</li>*/}
+                            {/*TODO: https://cryptofunds.atlassian.net/browse/SCRUM-31*/}
+                            {/*<li>*/}
+                            {/*    <Link href="/faq" className="text-gray-400 hover:text-white transition-colors">*/}
+                            {/*        FAQ*/}
+                            {/*    </Link>*/}
+                            {/*</li>*/}
+                            {/*<li>*/}
+                            {/*    <Link href="/blog" className="text-gray-400 hover:text-white transition-colors">*/}
+                            {/*        Blog*/}
+                            {/*    </Link>*/}
+                            {/*</li>*/}
                         </ul>
                     </div>
 
@@ -94,9 +106,6 @@ export default function Footer() {
                             <Link href="#" className="text-gray-400 hover:text-white transition-colors">
                                 <Twitter className="h-5 w-5" />
                             </Link>
-                            {/*<Link href="#" className="text-gray-400 hover:text-white transition-colors">*/}
-                            {/*    <Telegram className="h-5 w-5" />*/}
-                            {/*</Link>*/}
                             <Link href="#" className="text-gray-400 hover:text-white transition-colors">
                                 <Youtube className="h-5 w-5" />
                             </Link>

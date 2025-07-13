@@ -1,6 +1,6 @@
 import type {Metadata} from "next";
 import {auth} from "@/auth";
-import {PATH_URLS} from "@/utils/constants/general.constants";
+import {PAGES_URLS} from "@/utils/constants/general.constants";
 import {SuspenseContainer} from "@/components/SuspenseContainer";
 import {redirect} from "next/navigation";
 
@@ -29,7 +29,7 @@ const SignInLayoutComponent = async ({
     const session = await auth();
 
     if (session) {
-        return redirect(PATH_URLS.indices);
+        return redirect(PAGES_URLS.indices);
     }
 
     return children;

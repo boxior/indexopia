@@ -1,9 +1,8 @@
-// SignIn.tsx
 "use client";
 
 import React, {useState} from "react";
 import {signIn, useSession} from "next-auth/react";
-import {PATH_URLS} from "@/utils/constants/general.constants";
+import {PAGES_URLS} from "@/utils/constants/general.constants";
 
 const SignIn: React.FC = () => {
     const [email, setEmail] = useState("serhii.lyzun@gmail.com");
@@ -17,7 +16,7 @@ const SignIn: React.FC = () => {
         try {
             setIsLoading(true);
 
-            await signIn("resend", {redirectTo: PATH_URLS.indices, email});
+            await signIn("resend", {redirectTo: PAGES_URLS.indices, email});
             await update();
         } finally {
             setIsLoading(false);

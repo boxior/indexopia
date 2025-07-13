@@ -1,8 +1,7 @@
-// components/hero-section.tsx
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
 import {TrendingUp, Shield, Zap} from "lucide-react";
-import {PATH_URLS} from "@/utils/constants/general.constants";
+import {PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default function HeroSection() {
     return (
@@ -22,7 +21,7 @@ export default function HeroSection() {
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                        <Link href={PATH_URLS.indices}>
+                        <Link href={PAGES_URLS.indices}>
                             <Button
                                 size="lg"
                                 className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700"
@@ -30,7 +29,7 @@ export default function HeroSection() {
                                 Explore Indices
                             </Button>
                         </Link>
-                        <Link href={PATH_URLS.signIn}>
+                        <Link href={PAGES_URLS.signIn}>
                             <Button size="lg" variant="outline">
                                 Sign Up Free
                             </Button>

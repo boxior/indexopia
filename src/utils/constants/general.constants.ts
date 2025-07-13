@@ -4,10 +4,14 @@ export const DEV_AUTH_NAME = "dev-auth";
 
 export const DEV_AUTH_PATH = `/${DEV_AUTH_NAME}`;
 
-export const PATH_URLS = {
+export const PAGES_URLS = {
     home: "/",
-    signIn: "/auth/signIn",
+    signIn: "/signin",
     indices: "/indices",
+    privacy: "/privacy",
+    terms: "/terms",
+    contact: "/contact",
+    //
     devAuth: `/${DEV_AUTH_NAME}`,
 };
 export const OMIT_ASSETS_IDS = [

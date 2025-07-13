@@ -6,6 +6,7 @@ import {SuspenseContainer} from "@/components/SuspenseContainer";
 import {dbGetIndicesOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {connection} from "next/server";
 import {MOCK_USER_ID} from "@/utils/constants/general.constants";
+import Header from "@/app/components/Header";
 
 export default async function IndicesPage() {
     return (

@@ -1,4 +1,3 @@
-// components/benefits-section.tsx
 import {Card, CardContent} from "@/components/ui/card";
 import {BarChart3, Shield, Globe, Users, Zap, TrendingUp} from "lucide-react";
 
