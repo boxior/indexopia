@@ -1,9 +1,10 @@
 import type {Metadata} from "next";
 import {auth} from "@/auth";
-import {PATH_URLS} from "@/utils/constants/general.constants";
-import {SuspenseContainer} from "@/components/SuspenseContainer";
+import {PAGES_URLS} from "@/utils/constants/general.constants";
 import {redirect} from "next/navigation";
-import Header from "@/app/components/Header/Header";
+import Header from "@/app/components/Header";
+import Footer from "@/app/components/Footer";
+import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 
 export const metadata: Metadata = {
     title: "Indices",
@@ -16,10 +17,9 @@ export default async function IndicesLayout({
     children: React.ReactNode;
 }>) {
     return (
-        <SuspenseContainer>
-            <Header />
+        <SuspenseWrapper>
             <IndicesLayoutComponent children={children} />
-        </SuspenseContainer>
+        </SuspenseWrapper>
     );
 }
 
@@ -31,8 +31,14 @@ const IndicesLayoutComponent = async ({
     const session = await auth();
 
     if (!session) {
-        return redirect(PATH_URLS.signIn);
+        return redirect(PAGES_URLS.signIn);
     }
 
-    return children;
+    return (
+        <>
+            <Header />
+            {children}
+            <Footer />
+        </>
+    );
 };

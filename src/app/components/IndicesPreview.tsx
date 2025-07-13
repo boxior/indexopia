@@ -1,4 +1,3 @@
-// components/indices-preview.tsx
 "use client";
 
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
@@ -7,7 +6,7 @@ import {Button} from "@/components/ui/button";
 import Link from "next/link";
 import {Eye, EyeOff} from "lucide-react";
 import {useSession} from "next-auth/react";
-import {PATH_URLS} from "@/utils/constants/general.constants";
+import {PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default function IndicesPreview() {
     const {status} = useSession();
@@ -131,7 +130,7 @@ export default function IndicesPreview() {
                 </div>
 
                 <div className="text-center mt-8">
-                    <Link href={PATH_URLS.indices}>
+                    <Link href={PAGES_URLS.indices}>
                         <Button size="lg" variant="outline">
                             View All Indices
                         </Button>

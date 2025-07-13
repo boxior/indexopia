@@ -8,7 +8,7 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 import {LogOut, Globe, Menu, X} from "lucide-react";
 import {useSession} from "next-auth/react";
 import {signOut} from "next-auth/react";
-import {PATH_URLS} from "@/utils/constants/general.constants";
+import {PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default function Header() {
     const {data, status, update} = useSession();
@@ -17,7 +17,7 @@ export default function Header() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const handleSignOut = async () => {
-        await signOut({redirectTo: PATH_URLS.home});
+        await signOut({redirectTo: PAGES_URLS.home});
         await update();
     };
 
@@ -26,7 +26,7 @@ export default function Header() {
             <div className="container mx-auto px-4">
                 <div className="flex h-16 items-center justify-between">
                     {/* Logo */}
-                    <Link href="/public" className="flex items-center space-x-2">
+                    <Link href={PAGES_URLS.home} className="flex items-center space-x-2">
                         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
                             <span className="text-white font-bold text-sm">IX</span>
                         </div>
@@ -35,18 +35,19 @@ export default function Header() {
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex items-center space-x-8">
-                        <Link href="/public" className="text-gray-700 hover:text-blue-600 transition-colors">
+                        <Link href={PAGES_URLS.home} className="text-gray-700 hover:text-blue-600 transition-colors">
                             Home
                         </Link>
-                        <Link href={PATH_URLS.indices} className="text-gray-700 hover:text-blue-600 transition-colors">
+                        <Link href={PAGES_URLS.indices} className="text-gray-700 hover:text-blue-600 transition-colors">
                             Indices
                         </Link>
-                        <Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors">
-                            About
-                        </Link>
-                        <Link href="/blog" className="text-gray-700 hover:text-blue-600 transition-colors">
-                            Blog
-                        </Link>
+                        {/* TODO: https://cryptofunds.atlassian.net/browse/SCRUM-28; https://cryptofunds.atlassian.net/browse/SCRUM-29*/}
+                        {/*<Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors">*/}
+                        {/*    About*/}
+                        {/*</Link>*/}
+                        {/*<Link href="/blog" className="text-gray-700 hover:text-blue-600 transition-colors">*/}
+                        {/*    Blog*/}
+                        {/*</Link>*/}
                     </nav>
 
                     {/* Right side - Language, Auth */}
@@ -82,14 +83,18 @@ export default function Header() {
                                         <p className="text-sm font-medium">{user.name || "User"}</p>
                                         <p className="text-xs text-gray-500">{user.email}</p>
                                     </div>
-                                    <DropdownMenuItem onClick={handleSignOut} disabled={status === "loading"}>
+                                    <DropdownMenuItem
+                                        className={"hover:cursor-pointer"}
+                                        onClick={handleSignOut}
+                                        disabled={status === "loading"}
+                                    >
                                         <LogOut className="mr-2 h-4 w-4" />
                                         Sign out
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         ) : (
-                            <Link href={PATH_URLS.signIn}>
+                            <Link href={PAGES_URLS.signIn}>
                                 <Button>Sign In</Button>
                             </Link>
                         )}
@@ -110,21 +115,25 @@ export default function Header() {
                 {isMenuOpen && (
                     <div className="md:hidden border-t py-4">
                         <nav className="flex flex-col space-y-2">
-                            <Link href="/public" className="text-gray-700 hover:text-blue-600 transition-colors p-2">
+                            <Link
+                                href={PAGES_URLS.home}
+                                className="text-gray-700 hover:text-blue-600 transition-colors p-2"
+                            >
                                 Home
                             </Link>
                             <Link
-                                href={PATH_URLS.indices}
+                                href={PAGES_URLS.indices}
                                 className="text-gray-700 hover:text-blue-600 transition-colors p-2"
                             >
                                 Indices
                             </Link>
-                            <Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors p-2">
-                                About
-                            </Link>
-                            <Link href="/blog" className="text-gray-700 hover:text-blue-600 transition-colors p-2">
-                                Blog
-                            </Link>
+                            {/* TODO: https://cryptofunds.atlassian.net/browse/SCRUM-28; https://cryptofunds.atlassian.net/browse/SCRUM-29*/}
+                            {/*<Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors p-2">*/}
+                            {/*    About*/}
+                            {/*</Link>*/}
+                            {/*<Link href="/blog" className="text-gray-700 hover:text-blue-600 transition-colors p-2">*/}
+                            {/*    Blog*/}
+                            {/*</Link>*/}
                         </nav>
                     </div>
                 )}
