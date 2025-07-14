@@ -6,7 +6,9 @@ export const DEV_AUTH_PATH = `/${DEV_AUTH_NAME}`;
 
 export const PAGES_URLS = {
     home: "/",
-    signIn: "/signin",
+    signIn: "/auth/signin",
+    authError: "/auth/error",
+    authVerifyRequest: "/auth/verify-request",
     indices: "/indices",
     privacy: "/privacy",
     terms: "/terms",
