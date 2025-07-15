@@ -9,7 +9,7 @@ export default function Footer() {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                     {/* Logo and Description */}
                     <div className="space-y-4">
-                        <Link href="/public" className="flex items-center space-x-2">
+                        <Link href={PAGES_URLS.home} className="flex items-center space-x-2">
                             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
                                 <span className="text-white font-bold text-sm">IX</span>
                             </div>
