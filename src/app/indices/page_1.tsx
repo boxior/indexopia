@@ -6,9 +6,10 @@ import {connection} from "next/server";
 import {MOCK_USER_ID} from "@/utils/constants/general.constants";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 import ContentLoader from "@/components/Suspense/ContentLoader";
+import {ENV_VARIABLES} from "@/env";
 import {auth} from "@/auth";
-import fetchAssets from "@/app/actions/assets/fetchAssets";
-import {IndexesPageClient} from "@/app/indices/IndicesPageClient";
+import Header from "@/app/components/Header";
+import IndicesTable from "@/app/indices/components/CLAUD/IndicesTable";
 
 export default async function IndicesPage() {
     return (
@@ -36,7 +37,7 @@ const IndicesPageComponent = async () => {
     const systemIndicesOverview = await dbGetIndicesOverview();
     const userIndicesOverview = await dbGetIndicesOverview(MOCK_USER_ID);
 
-    const {data: assets} = await fetchAssets({});
-    console.log("assets", assets);
-    return <IndexesPageClient data={[...systemIndicesOverview, ...userIndicesOverview]} assets={assets} />;
+    // const indices = [...systemIndicesOverview, ...userIndicesOverview];
+
+    return <IndicesTable indices={[...systemIndicesOverview, ...userIndicesOverview]} userId={session?.user?.id} />;
 };
