@@ -9,6 +9,7 @@ import {Label} from "@/components/ui/label";
 import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/components/ui/card";
 import {Alert, AlertDescription} from "@/components/ui/alert";
 import {Loader2, Mail, ArrowLeft, CheckCircle} from "lucide-react";
+import {PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default function SignInPage() {
     const [email, setEmail] = useState("serhii.lyzun@gmail.com");
@@ -84,7 +85,7 @@ export default function SignInPage() {
                         </Button>
 
                         <div className="text-center">
-                            <Link href="/public" className="text-sm text-blue-600 hover:text-blue-800">
+                            <Link href={PAGES_URLS.home} className="text-sm text-blue-600 hover:text-blue-800">
                                 Back to Home
                             </Link>
                         </div>
@@ -100,7 +101,7 @@ export default function SignInPage() {
                 {/* Back to Home Link */}
                 <div className="mb-8">
                     <Link
-                        href="/public"
+                        href={PAGES_URLS.home}
                         className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -169,11 +170,11 @@ export default function SignInPage() {
                         <div className="mt-6 text-center">
                             <p className="text-sm text-gray-600">
                                 By signing in, you agree to our{" "}
-                                <Link href="/terms" className="text-blue-600 hover:text-blue-800">
+                                <Link href={PAGES_URLS.terms} className="text-blue-600 hover:text-blue-800">
                                     Terms of Service
                                 </Link>{" "}
                                 and{" "}
-                                <Link href="/privacy" className="text-blue-600 hover:text-blue-800">
+                                <Link href={PAGES_URLS.privacy} className="text-blue-600 hover:text-blue-800">
                                     Privacy Policy
                                 </Link>
                             </p>

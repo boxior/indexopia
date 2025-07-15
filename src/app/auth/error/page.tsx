@@ -6,6 +6,7 @@ import {Button} from "@/components/ui/button";
 import {Alert, AlertDescription} from "@/components/ui/alert";
 import {AlertCircle, Home, RefreshCw} from "lucide-react";
 import Link from "next/link";
+import {PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default function ErrorPage() {
     const searchParams = useSearchParams();
@@ -64,13 +65,13 @@ export default function ErrorPage() {
                     </Alert>
 
                     <div className="flex flex-col gap-3">
-                        <Link href="/auth/signin">
+                        <Link href={PAGES_URLS.signIn}>
                             <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                                 <RefreshCw className="mr-2 h-4 w-4" />
                                 Try signing in again
                             </Button>
                         </Link>
-                        <Link href="/">
+                        <Link href={PAGES_URLS.home}>
                             <Button variant="outline" className="w-full">
                                 <Home className="mr-2 h-4 w-4" />
                                 Back to homepage
@@ -81,7 +82,7 @@ export default function ErrorPage() {
                     <div className="text-center text-sm text-gray-600">
                         <p>
                             Need help?{" "}
-                            <Link href="/contact" className="text-blue-600 hover:text-blue-700">
+                            <Link href={PAGES_URLS.contact} className="text-blue-600 hover:text-blue-700">
                                 Contact support
                             </Link>
                         </p>
