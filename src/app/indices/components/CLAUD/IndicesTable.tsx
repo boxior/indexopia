@@ -1,6 +1,5 @@
 "use client";
-
-import {useState} from "react";
+import {useState, useMemo} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
@@ -8,6 +7,7 @@ import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger
 import {MoreHorizontal, Copy, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown} from "lucide-react";
 import {Id, IndexOverview} from "@/utils/types/general.types";
 import {DeleteConfirmModal} from "@/app/indices/components/CLAUD/DeleteConfirmModal";
+import {Pagination} from "@/app/indices/components/CLAUD/Pagination";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
@@ -26,6 +26,10 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [indexToDelete, setIndexToDelete] = useState<IndexOverview | null>(null);
 
+    // Pagination state
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage, setItemsPerPage] = useState(20);
+
     const handleSort = (field: SortField) => {
         if (sortField === field) {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
@@ -33,6 +37,8 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
             setSortField(field);
             setSortOrder("asc");
         }
+        // Reset to first page when sorting changes
+        setCurrentPage(1);
     };
 
     const getSortIcon = (field: SortField) => {
@@ -40,41 +46,59 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
         return sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
     };
 
-    const sortedIndices = [...indices].sort((a, b) => {
-        let aValue: any, bValue: any;
+    const sortedIndices = useMemo(() => {
+        return [...indices].sort((a, b) => {
+            let aValue: any, bValue: any;
 
-        switch (sortField) {
-            case "name":
-                aValue = a.name.toLowerCase();
-                bValue = b.name.toLowerCase();
-                break;
-            case "total":
-                aValue = a.historyOverview.total;
-                bValue = b.historyOverview.total;
-                break;
-            case "days1":
-                aValue = a.historyOverview.days1;
-                bValue = b.historyOverview.days1;
-                break;
-            case "days7":
-                aValue = a.historyOverview.days7;
-                bValue = b.historyOverview.days7;
-                break;
-            case "maxDrawDown":
-                aValue = a.maxDrawDown.value;
-                bValue = b.maxDrawDown.value;
-                break;
-            default:
-                aValue = a.name.toLowerCase();
-                bValue = b.name.toLowerCase();
-        }
+            switch (sortField) {
+                case "name":
+                    aValue = a.name.toLowerCase();
+                    bValue = b.name.toLowerCase();
+                    break;
+                case "total":
+                    aValue = a.historyOverview.total;
+                    bValue = b.historyOverview.total;
+                    break;
+                case "days1":
+                    aValue = a.historyOverview.days1;
+                    bValue = b.historyOverview.days1;
+                    break;
+                case "days7":
+                    aValue = a.historyOverview.days7;
+                    bValue = b.historyOverview.days7;
+                    break;
+                case "maxDrawDown":
+                    aValue = a.maxDrawDown.value;
+                    bValue = b.maxDrawDown.value;
+                    break;
+                default:
+                    aValue = a.name.toLowerCase();
+                    bValue = b.name.toLowerCase();
+            }
 
-        if (sortOrder === "asc") {
-            return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-        } else {
-            return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
-        }
-    });
+            if (sortOrder === "asc") {
+                return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+            } else {
+                return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+            }
+        });
+    }, [indices, sortField, sortOrder]);
+
+    // Paginated data
+    const paginatedIndices = useMemo(() => {
+        const startIndex = (currentPage - 1) * itemsPerPage;
+        const endIndex = startIndex + itemsPerPage;
+        return sortedIndices.slice(startIndex, endIndex);
+    }, [sortedIndices, currentPage, itemsPerPage]);
+
+    const handlePageChange = (page: number) => {
+        setCurrentPage(page);
+    };
+
+    const handleItemsPerPageChange = (newItemsPerPage: number) => {
+        setItemsPerPage(newItemsPerPage);
+        setCurrentPage(1); // Reset to first page when changing items per page
+    };
 
     const formatPercentage = (value: number) => {
         const sign = value >= 0 ? "+" : "";
@@ -166,7 +190,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                         </TableRow>
                     </TableHeader>
                     <TableBody>
-                        {sortedIndices.map(index => (
+                        {paginatedIndices.map(index => (
                             <TableRow key={index.id}>
                                 <TableCell>
                                     <Badge variant={isSystemIndex(index) ? "default" : "secondary"}>
@@ -243,6 +267,14 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                     </TableBody>
                 </Table>
             </div>
+
+            <Pagination
+                currentPage={currentPage}
+                totalItems={sortedIndices.length}
+                itemsPerPage={itemsPerPage}
+                onPageChange={handlePageChange}
+                onItemsPerPageChange={handleItemsPerPageChange}
+            />
 
             <DeleteConfirmModal
                 isOpen={deleteModalOpen}
