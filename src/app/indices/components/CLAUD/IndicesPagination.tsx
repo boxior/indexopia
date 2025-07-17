@@ -9,7 +9,7 @@ interface PaginationProps {
     onItemsPerPageChange: (itemsPerPage: number) => void;
 }
 
-export function Pagination({
+export function IndicesPagination({
     currentPage,
     totalItems,
     itemsPerPage,

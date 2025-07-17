@@ -19,7 +19,7 @@ interface DeleteConfirmModalProps {
     indexName: string;
 }
 
-export function DeleteConfirmModal({isOpen, onCloseAction, onConfirmAction, indexName}: DeleteConfirmModalProps) {
+export function DeleteIndexConfirmModal({isOpen, onCloseAction, onConfirmAction, indexName}: DeleteConfirmModalProps) {
     return (
         <AlertDialog open={isOpen} onOpenChange={onCloseAction}>
             <AlertDialogContent>

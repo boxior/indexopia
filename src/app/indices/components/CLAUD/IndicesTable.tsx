@@ -6,8 +6,8 @@ import {Button} from "@/components/ui/button";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {MoreHorizontal, Copy, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown} from "lucide-react";
 import {Id, IndexOverview} from "@/utils/types/general.types";
-import {DeleteConfirmModal} from "@/app/indices/components/CLAUD/DeleteConfirmModal";
-import {Pagination} from "@/app/indices/components/CLAUD/Pagination";
+import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD/DeleteIndexConfirmModal";
+import {IndicesPagination} from "@/app/indices/components/CLAUD/IndicesPagination";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
@@ -268,7 +268,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                 </Table>
             </div>
 
-            <Pagination
+            <IndicesPagination
                 currentPage={currentPage}
                 totalItems={sortedIndices.length}
                 itemsPerPage={itemsPerPage}
@@ -276,7 +276,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                 onItemsPerPageChange={handleItemsPerPageChange}
             />
 
-            <DeleteConfirmModal
+            <DeleteIndexConfirmModal
                 isOpen={deleteModalOpen}
                 onCloseAction={() => setDeleteModalOpen(false)}
                 onConfirmAction={handleDeleteConfirm}
