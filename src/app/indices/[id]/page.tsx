@@ -1,14 +1,6 @@
-import {IndexPageClient} from "@/app/indices/[id]/components/CLAUD/IndexPageClient";
-import {Index} from "@/utils/types/general.types";
 import {connection} from "next/server";
 import {getIndex} from "@/lib/db/helpers/db.helpers";
-
-// This would be your data fetching function
-async function getIndexData(id: string): Promise<Index> {
-    // Fetch your index data here
-    // This is just a placeholder
-    throw new Error("Implement your data fetching logic");
-}
+import {IndexPageClient} from "@/app/indices/[id]/components/CLAUD_WEB/IndexPageClient";
 
 interface PageProps {
     params: Promise<{id: string}>;

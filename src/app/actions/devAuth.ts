@@ -3,7 +3,7 @@
 import {cookies} from "next/headers";
 import {ENV_VARIABLES} from "@/env";
 import {redirect} from "next/navigation";
-import {DEV_AUTH_NAME, DEV_AUTH_PATH} from "@/utils/constants/general.constants";
+import {DEV_AUTH_NAME, DEV_AUTH_PATH, PAGES_URLS} from "@/utils/constants/general.constants";
 
 const DEV_API_KEY = ENV_VARIABLES.DEV_API_KEY;
 
@@ -51,5 +51,5 @@ export async function handleDevAuthRedirect() {
         return redirect(DEV_AUTH_PATH);
     }
 
-    return redirect("/indices");
+    return redirect(PAGES_URLS.indices);
 }

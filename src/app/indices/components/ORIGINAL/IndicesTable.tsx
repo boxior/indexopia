@@ -31,7 +31,7 @@ import {ReactNode} from "react";
 import {getChartColorClassname, getIndexDurationLabel, getIndexStartFromLabel} from "@/app/indices/helpers";
 import Link from "next/link";
 import {CreateIndex} from "@/app/indices/components/Index/CreateIndex";
-import {IndexHistoryOverviewChart} from "@/app/indices/components/IndexHistoryOverviewChart";
+import {IndexHistoryOverviewChart} from "@/app/indices/components/ORIGINAL/IndexHistoryOverviewChart";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 import {actionDeleteIndexOverview} from "@/app/indices/[id]/actions";
 

@@ -7,7 +7,7 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Plus, TrendingUp, TrendingDown, BarChart} from "lucide-react";
 import {IndicesTable} from "@/app/indices/components/CLAUD/IndicesTable";
 import {IndicesFilters} from "@/app/indices/components/CLAUD/IndicesFilters";
-import {CreateIndexModal, CreateIndexData} from "@/app/indices/components/CLAUD/CreateIndexModal";
+import {CreateUpdateIndexModal, CreateIndexData} from "@/app/indices/components/CLAUD/CreateUpdateIndexModal";
 import {IndexOverview, Asset, Id} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
 
@@ -224,7 +224,7 @@ export const IndexesPageClient = ({data, assets}: {data: IndexOverview[]; assets
             </main>
 
             {/* Create Index Modal */}
-            <CreateIndexModal
+            <CreateUpdateIndexModal
                 isOpen={createModalOpen}
                 onCloseAction={() => setCreateModalOpen(false)}
                 onSaveAction={handleCreateIndex}

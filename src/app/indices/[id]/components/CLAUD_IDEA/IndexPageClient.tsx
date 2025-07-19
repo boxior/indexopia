@@ -1,17 +1,20 @@
 "use client";
 
 import {Index, AssetWithHistoryOverviewPortionAndMaxDrawDown} from "@/utils/types/general.types";
-import {IndexOverview} from "@/app/indices/[id]/components/CLAUD/IndexOverviewComponent";
-import {IndexChart} from "@/app/indices/[id]/components/CLAUD/IndexChartComponent";
-import {AssetsTable} from "@/app/indices/[id]/components/CLAUD/AssetsTableComponent";
+import {IndexOverview} from "@/app/indices/[id]/components/CLAUD_IDEA/IndexOverviewComponent";
+import {IndexChart} from "@/app/indices/[id]/components/CLAUD_IDEA/IndexChartComponent";
+import {AssetsTable} from "@/app/indices/[id]/components/CLAUD_IDEA/AssetsTableComponent";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 
 interface IndexPageProps {
-    index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
+    index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null;
 }
 
 export function IndexPageClient({index}: IndexPageProps) {
+    if (!index) {
+        return null;
+    }
     return (
         <div className="container mx-auto p-6 space-y-6">
             {/* Overview Section */}

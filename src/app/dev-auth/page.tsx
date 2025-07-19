@@ -2,6 +2,7 @@ import {devAuthCheck} from "@/app/actions/devAuth";
 import {redirect} from "next/navigation";
 import DevAuthDialog from "@/app/dev-auth/components/DevAuthDialog";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
+import {PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default async function DevAuthPage() {
     return (
@@ -15,7 +16,7 @@ const SuspendedComponent = async () => {
     const isDevAuth = await devAuthCheck();
 
     if (isDevAuth) {
-        redirect("/indices");
+        redirect(PAGES_URLS.indices);
     }
 
     return <DevAuthDialog />;

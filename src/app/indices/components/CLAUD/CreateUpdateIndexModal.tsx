@@ -1,6 +1,5 @@
 "use client";
-
-import {useState} from "react";
+import {useState, useEffect} from "react";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -8,13 +7,14 @@ import {Label} from "@/components/ui/label";
 import {Badge} from "@/components/ui/badge";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {Plus, X} from "lucide-react";
-import {Asset} from "@/utils/types/general.types";
+import {Asset, IndexOverview} from "@/utils/types/general.types";
 
-interface CreateIndexModalProps {
+interface CreateUpdateIndexModalProps {
     isOpen: boolean;
     onCloseAction: () => void;
     onSaveAction: (indexData: CreateIndexData) => void;
     availableAssets: Asset[];
+    indexOverview?: IndexOverview; // Optional prop - if provided, it's update mode
 }
 
 export interface CreateIndexData {
@@ -27,10 +27,30 @@ export interface CreateIndexData {
     }[];
 }
 
-export function CreateIndexModal({isOpen, onCloseAction, onSaveAction, availableAssets}: CreateIndexModalProps) {
+export function CreateUpdateIndexModal({
+    isOpen,
+    onCloseAction,
+    onSaveAction,
+    availableAssets,
+    indexOverview,
+}: CreateUpdateIndexModalProps) {
     const [indexName, setIndexName] = useState("");
     const [selectedAssets, setSelectedAssets] = useState<CreateIndexData["assets"]>([]);
     const [selectedAssetId, setSelectedAssetId] = useState("");
+
+    const isUpdateMode = Boolean(indexOverview);
+
+    // Initialize form with existing data when in update mode
+    useEffect(() => {
+        if (indexOverview) {
+            setIndexName(indexOverview.name);
+            setSelectedAssets(indexOverview.assets);
+        } else {
+            setIndexName("");
+            setSelectedAssets([]);
+        }
+        setSelectedAssetId("");
+    }, [indexOverview, isOpen]);
 
     const handleAddAsset = () => {
         if (!selectedAssetId) return;
@@ -83,8 +103,14 @@ export function CreateIndexModal({isOpen, onCloseAction, onSaveAction, available
     };
 
     const handleClose = () => {
-        setIndexName("");
-        setSelectedAssets([]);
+        // Reset to original values or clear form
+        if (indexOverview) {
+            setIndexName(indexOverview.name);
+            setSelectedAssets(indexOverview.assets);
+        } else {
+            setIndexName("");
+            setSelectedAssets([]);
+        }
         setSelectedAssetId("");
         onCloseAction();
     };
@@ -96,7 +122,7 @@ export function CreateIndexModal({isOpen, onCloseAction, onSaveAction, available
         <Dialog open={isOpen} onOpenChange={handleClose}>
             <DialogContent className="sm:max-w-[600px]">
                 <DialogHeader>
-                    <DialogTitle>Create Custom Index</DialogTitle>
+                    <DialogTitle>{isUpdateMode ? "Update Index" : "Create Custom Index"}</DialogTitle>
                 </DialogHeader>
 
                 <div className="space-y-6">
@@ -180,7 +206,7 @@ export function CreateIndexModal({isOpen, onCloseAction, onSaveAction, available
                         Cancel
                     </Button>
                     <Button onClick={handleSave} disabled={!isValid}>
-                        Create Index
+                        {isUpdateMode ? "Update Index" : "Create Index"}
                     </Button>
                 </DialogFooter>
             </DialogContent>

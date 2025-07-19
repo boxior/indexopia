@@ -33,7 +33,7 @@ import {
 import {NumeralFormat} from "@numeral";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {ReactNode} from "react";
-import {HistoryOverviewChart} from "@/app/indices/components/HistoryOverviewChart";
+import {HistoryOverviewChart} from "@/app/indices/components/ORIGINAL/HistoryOverviewChart";
 import {getChartColorClassname} from "@/app/indices/helpers";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 
