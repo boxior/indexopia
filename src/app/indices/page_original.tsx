@@ -3,7 +3,6 @@
 import * as React from "react";
 import {dbGetIndicesOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {connection} from "next/server";
-import {MOCK_USER_ID} from "@/utils/constants/general.constants";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 import ContentLoader from "@/components/Suspense/ContentLoader";
 import IndicesTable from "@/app/indices/components/ORIGINAL/IndicesTable";

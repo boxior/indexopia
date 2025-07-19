@@ -3,8 +3,8 @@ import {useState, useMemo} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
-import {MoreHorizontal, Copy, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown} from "lucide-react";
+import {Tooltip, TooltipContent, TooltipTrigger, TooltipProvider} from "@/components/ui/tooltip";
+import {Copy, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown} from "lucide-react";
 import {Id, IndexOverview} from "@/utils/types/general.types";
 import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import {IndicesPagination} from "@/app/indices/components/CLAUD_WEB/IndicesPagination";
@@ -128,7 +128,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     const isUserIndex = (index: IndexOverview) => !!index.userId;
 
     return (
-        <>
+        <TooltipProvider>
             <div className="rounded-md border">
                 <Table>
                     <TableHeader>
@@ -231,36 +231,59 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                     )}
                                 </TableCell>
                                 <TableCell className="text-right">
-                                    <DropdownMenu>
-                                        <DropdownMenuTrigger asChild>
-                                            <Button variant="ghost" className="h-8 w-8 p-0">
-                                                <MoreHorizontal className="h-4 w-4" />
-                                            </Button>
-                                        </DropdownMenuTrigger>
-                                        <DropdownMenuContent align="end">
-                                            {isSystemIndex(index) && (
-                                                <DropdownMenuItem onClick={() => onCloneAction(index)}>
-                                                    <Copy className="mr-2 h-4 w-4" />
-                                                    Clone
-                                                </DropdownMenuItem>
-                                            )}
-                                            {isUserIndex(index) && index.userId === currentUserId && (
-                                                <>
-                                                    <DropdownMenuItem onClick={() => onEditAction(index)}>
-                                                        <Edit className="mr-2 h-4 w-4" />
-                                                        Edit
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem
-                                                        onClick={() => handleDeleteClick(index)}
-                                                        className="text-red-600"
+                                    <div className="flex items-center justify-end gap-1">
+                                        {isSystemIndex(index) && (
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className="h-8 w-8 p-0"
+                                                        onClick={() => onCloneAction(index)}
                                                     >
-                                                        <Trash2 className="mr-2 h-4 w-4" />
-                                                        Delete
-                                                    </DropdownMenuItem>
-                                                </>
-                                            )}
-                                        </DropdownMenuContent>
-                                    </DropdownMenu>
+                                                        <Copy className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Clone index</p>
+                                                </TooltipContent>
+                                            </Tooltip>
+                                        )}
+                                        {isUserIndex(index) && index.userId === currentUserId && (
+                                            <>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-8 w-8 p-0"
+                                                            onClick={() => onEditAction(index)}
+                                                        >
+                                                            <Edit className="h-4 w-4" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Edit index</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                                            onClick={() => handleDeleteClick(index)}
+                                                        >
+                                                            <Trash2 className="h-4 w-4" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Delete index</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </>
+                                        )}
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ))}
@@ -282,6 +305,6 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                 onConfirmAction={handleDeleteConfirm}
                 indexName={indexToDelete?.name || ""}
             />
-        </>
+        </TooltipProvider>
     );
 }

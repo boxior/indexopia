@@ -3,11 +3,11 @@
 import * as React from "react";
 import {dbGetIndicesOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {connection} from "next/server";
-import {MOCK_USER_ID} from "@/utils/constants/general.constants";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 import ContentLoader from "@/components/Suspense/ContentLoader";
 import fetchAssets from "@/app/actions/assets/fetchAssets";
 import {IndexesPageClient} from "@/app/indices/IndicesPageClient";
+import {auth} from "@/auth";
 
 export default async function IndicesPage() {
     return (
@@ -30,8 +30,11 @@ export default async function IndicesPage() {
 const IndicesPageComponent = async () => {
     await connection();
 
+    const session = await auth();
+    const userId = session?.user?.id;
+
     const systemIndicesOverview = await dbGetIndicesOverview();
-    const userIndicesOverview = await dbGetIndicesOverview(MOCK_USER_ID);
+    const userIndicesOverview = userId ? await dbGetIndicesOverview(userId) : [];
 
     const {data: assets} = await fetchAssets({});
 

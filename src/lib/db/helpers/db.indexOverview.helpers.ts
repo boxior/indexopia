@@ -11,6 +11,7 @@ import {MAX_ASSETS_COUNT} from "@/utils/constants/general.constants";
 import {chunk} from "lodash";
 import {SYSTEM_INDICES_PROPS} from "@/app/api/populate/populate.constants";
 import {handlePrepareToSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
+import {auth} from "@/auth";
 
 const TABLE_NAME_INDICES_OVERVIEW = ENV_VARIABLES.MYSQL_TABLE_NAME_INDICES_OVERVIEW; // Ensure your database table exists
 

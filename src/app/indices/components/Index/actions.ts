@@ -2,6 +2,6 @@
 
 import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 
-export const handleGetAssets = async () => {
+export const actionGetAssets = async () => {
     return await dbGetAssets();
 };

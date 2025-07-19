@@ -20,7 +20,6 @@ export const IndexesPageClient = ({data, assets}: {data: IndexOverview[]; assets
     const [typeFilter, setTypeFilter] = useState("all");
     const [performanceFilter, setPerformanceFilter] = useState("all");
 
-    // Mock data - replace with actual API calls
     const [indices, setIndices] = useState<IndexOverview[]>(data);
 
     const availableAssets: Asset[] = assets;
