@@ -5,9 +5,9 @@ import {useState, useMemo} from "react";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Plus, TrendingUp, TrendingDown, BarChart} from "lucide-react";
-import {IndicesTable} from "@/app/indices/components/CLAUD/IndicesTable";
-import {IndicesFilters} from "@/app/indices/components/CLAUD/IndicesFilters";
-import {CreateUpdateIndexModal, CreateIndexData} from "@/app/indices/components/CLAUD/CreateUpdateIndexModal";
+import {IndicesTable} from "@/app/indices/components/CLAUD_WEB/IndicesTable";
+import {IndicesFilters} from "@/app/indices/components/CLAUD_WEB/IndicesFilters";
+import {CreateUpdateIndexModal, CreateIndexData} from "@/app/indices/components/CLAUD_WEB/CreateUpdateIndexModal";
 import {IndexOverview, Asset, Id} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
 

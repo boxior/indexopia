@@ -5,7 +5,7 @@ import {ArrowLeft} from "lucide-react";
 import {IndexOverview} from "@/app/indices/[id]/components/CLAUD_WEB/IndexOverview";
 import {IndexChart} from "@/app/indices/[id]/components/CLAUD_WEB/IndexChart";
 import {AssetsTable} from "@/app/indices/[id]/components/CLAUD_WEB/AssetsTable";
-import {CreateIndexData, CreateUpdateIndexModal} from "@/app/indices/components/CLAUD/CreateUpdateIndexModal";
+import {CreateIndexData, CreateUpdateIndexModal} from "@/app/indices/components/CLAUD_WEB/CreateUpdateIndexModal";
 import {Index, AssetWithHistoryOverviewPortionAndMaxDrawDown, Asset} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
 import {useState} from "react";

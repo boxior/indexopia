@@ -6,8 +6,8 @@ import {Button} from "@/components/ui/button";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {MoreHorizontal, Copy, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown} from "lucide-react";
 import {Id, IndexOverview} from "@/utils/types/general.types";
-import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD/DeleteIndexConfirmModal";
-import {IndicesPagination} from "@/app/indices/components/CLAUD/IndicesPagination";
+import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
+import {IndicesPagination} from "@/app/indices/components/CLAUD_WEB/IndicesPagination";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
