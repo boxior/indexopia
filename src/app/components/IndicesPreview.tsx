@@ -85,8 +85,8 @@ export default function IndicesPreview() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <div className="flex flex-wrap gap-1">
-                                                {index.assets.slice(0, 3).map((asset, i) => (
-                                                    <Badge key={i} variant="secondary" className="text-xs">
+                                                {index.assets.slice(0, 3).map(asset => (
+                                                    <Badge key={asset} variant="secondary" className="text-xs">
                                                         {asset}
                                                     </Badge>
                                                 ))}

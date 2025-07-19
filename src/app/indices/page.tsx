@@ -6,7 +6,7 @@ import {connection} from "next/server";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 import ContentLoader from "@/components/Suspense/ContentLoader";
 import fetchAssets from "@/app/actions/assets/fetchAssets";
-import {IndexesPageClient} from "@/app/indices/IndicesPageClient";
+import {IndexesPageClient} from "@/app/indices/components/CLAUD_WEB/IndicesPageClient";
 import {auth} from "@/auth";
 
 export default async function IndicesPage() {
@@ -38,5 +38,5 @@ const IndicesPageComponent = async () => {
 
     const {data: assets} = await fetchAssets({});
 
-    return <IndexesPageClient data={[...systemIndicesOverview, ...userIndicesOverview]} assets={assets} />;
+    return <IndexesPageClient indices={[...systemIndicesOverview, ...userIndicesOverview]} assets={assets} />;
 };

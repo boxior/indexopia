@@ -12,7 +12,7 @@ import {IndicesPagination} from "@/app/indices/components/CLAUD_WEB/IndicesPagin
 interface IndicesTableProps {
     indices: IndexOverview[];
     onEditAction: (index: IndexOverview) => void;
-    onDeleteAction: (indexId: Id) => void;
+    onDeleteAction: (indexId: Id) => Promise<void>;
     onCloneAction: (index: IndexOverview) => void;
     currentUserId?: string;
 }
@@ -25,6 +25,8 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [indexToDelete, setIndexToDelete] = useState<IndexOverview | null>(null);
+
+    const [isDeleting, setIsDeleting] = useState(false);
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -116,11 +118,16 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
         setDeleteModalOpen(true);
     };
 
-    const handleDeleteConfirm = () => {
-        if (indexToDelete) {
-            onDeleteAction(indexToDelete.id);
-            setDeleteModalOpen(false);
-            setIndexToDelete(null);
+    const handleDeleteConfirm = async () => {
+        try {
+            if (indexToDelete) {
+                setIsDeleting(true);
+                await onDeleteAction(indexToDelete.id);
+                setDeleteModalOpen(false);
+                setIndexToDelete(null);
+            }
+        } finally {
+            setIsDeleting(false);
         }
     };
 
@@ -201,7 +208,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                 <TableCell>
                                     <div className="flex flex-wrap gap-1">
                                         {index.assets.slice(0, 3).map((asset, i) => (
-                                            <Badge key={i} variant="outline" className="text-xs">
+                                            <Badge key={asset.id} variant="outline" className="text-xs">
                                                 {asset.symbol}
                                             </Badge>
                                         ))}
@@ -304,6 +311,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                 onCloseAction={() => setDeleteModalOpen(false)}
                 onConfirmAction={handleDeleteConfirm}
                 indexName={indexToDelete?.name || ""}
+                isDeleting={isDeleting}
             />
         </TooltipProvider>
     );

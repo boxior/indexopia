@@ -29,7 +29,7 @@ const IndicesPageComponent = async () => {
     await connection();
 
     const systemIndicesOverview = await dbGetIndicesOverview();
-    const userIndicesOverview = await dbGetIndicesOverview(MOCK_USER_ID);
+    const userIndicesOverview = await dbGetIndicesOverview("MOCK_USER_ID");
 
     const indices = [...systemIndicesOverview, ...userIndicesOverview];
 

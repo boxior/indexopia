@@ -17,9 +17,16 @@ interface DeleteConfirmModalProps {
     onCloseAction: () => void;
     onConfirmAction: () => void;
     indexName: string;
+    isDeleting: boolean;
 }
 
-export function DeleteIndexConfirmModal({isOpen, onCloseAction, onConfirmAction, indexName}: DeleteConfirmModalProps) {
+export function DeleteIndexConfirmModal({
+    isOpen,
+    onCloseAction,
+    onConfirmAction,
+    indexName,
+    isDeleting,
+}: DeleteConfirmModalProps) {
     return (
         <AlertDialog open={isOpen} onOpenChange={onCloseAction}>
             <AlertDialogContent>
@@ -31,8 +38,12 @@ export function DeleteIndexConfirmModal({isOpen, onCloseAction, onConfirmAction,
                 </AlertDialogHeader>
                 <AlertDialogFooter>
                     <AlertDialogCancel onClick={onCloseAction}>Cancel</AlertDialogCancel>
-                    <AlertDialogAction onClick={onConfirmAction} className="bg-red-600 hover:bg-red-700">
-                        Delete
+                    <AlertDialogAction
+                        onClick={onConfirmAction}
+                        disabled={isDeleting}
+                        className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        {isDeleting ? "Deleting..." : "Delete"}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>

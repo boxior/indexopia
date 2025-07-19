@@ -7,20 +7,24 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Plus, TrendingUp, TrendingDown, BarChart} from "lucide-react";
 import {IndicesTable} from "@/app/indices/components/CLAUD_WEB/IndicesTable";
 import {IndicesFilters} from "@/app/indices/components/CLAUD_WEB/IndicesFilters";
-import {CreateUpdateIndexModal, CreateIndexData} from "@/app/indices/components/CLAUD_WEB/CreateUpdateIndexModal";
-import {IndexOverview, Asset, Id} from "@/utils/types/general.types";
+import {IndexModal, ModalIndexData, IndexMode} from "@/app/indices/components/CLAUD_WEB/IndexModal";
+import {IndexOverview, Asset, Id, IndexOverviewForCreate} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
+import {actionCreateIndexOverview, actionDeleteIndexOverview} from "@/app/indices/[id]/actions";
+import {getIndexOverviewAsset} from "@/utils/heleprs/index/index.helpers";
+import {omit} from "lodash";
 
-export const IndexesPageClient = ({data, assets}: {data: IndexOverview[]; assets: Asset[]}) => {
+export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; assets: Asset[]}) => {
     const session = useSession();
     const currentUserId = session.data?.user?.id;
 
-    const [createModalOpen, setCreateModalOpen] = useState(false);
+    const [createUpdateModalOpen, setCreateUpdateModalOpen] = useState(false);
+    const [modalIndex, setModalIndex] = useState<IndexOverviewForCreate>();
+    const [indexMode, setIndexMode] = useState<IndexMode>();
+
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
     const [performanceFilter, setPerformanceFilter] = useState("all");
-
-    const [indices, setIndices] = useState<IndexOverview[]>(data);
 
     const availableAssets: Asset[] = assets;
 
@@ -52,51 +56,36 @@ export const IndexesPageClient = ({data, assets}: {data: IndexOverview[]; assets
         });
     }, [indices, searchTerm, typeFilter, performanceFilter]);
 
-    const handleCreateIndex = (indexData: CreateIndexData) => {
-        const newIndex: IndexOverview = {
-            id: `custom-${Date.now()}`,
+    const handleCreateCloneIndex = async (indexData: ModalIndexData) => {
+        await actionCreateIndexOverview({
+            ...indexData,
+            assets: indexData.assets.map(getIndexOverviewAsset),
             userId: currentUserId,
-            name: indexData.name,
-            assets: indexData.assets.map(asset => ({
-                id: asset.id,
-                name: asset.name,
-                symbol: asset.symbol,
-                rank: availableAssets.find(a => a.id === asset.id)?.rank || "0",
-                portion: asset.portion,
-            })),
-            historyOverview: {
-                total: 0,
-                days1: 0,
-                days7: 0,
-                days30: 0,
-            },
-            maxDrawDown: {value: 0, startTime: new Date().toISOString(), endTime: new Date().toISOString()},
-            startTime: Date.now(),
-            endTime: Date.now(),
-        };
-
-        setIndices([...indices, newIndex]);
+        });
     };
 
-    const handleEditIndex = (index: IndexOverview) => {
-        // TODO: Implement edit functionality
-        console.log("Edit index:", index);
+    const handleEditIndex = (editIndex: IndexOverview) => {
+        setCreateUpdateModalOpen(true);
+        setModalIndex(editIndex);
+        setIndexMode(IndexMode.EDIT);
     };
 
-    const handleDeleteIndex = (indexId: Id) => {
-        setIndices(indices.filter(index => index.id !== indexId));
+    const handleDeleteIndex = async (indexId: Id) => {
+        await actionDeleteIndexOverview(indexId);
     };
 
     const handleCloneIndex = (index: IndexOverview) => {
-        const clonedIndex: IndexOverview = {
-            ...index,
-            id: `clone-${Date.now()}`,
+        setCreateUpdateModalOpen(true);
+
+        const clonedIndex: IndexOverviewForCreate = {
+            ...omit(index, "id"),
             userId: currentUserId,
             name: `${index.name} (Clone)`,
             systemId: undefined,
         };
 
-        setIndices([...indices, clonedIndex]);
+        setModalIndex(clonedIndex);
+        setIndexMode(IndexMode.CLONE);
     };
 
     const handleClearFilters = () => {
@@ -181,7 +170,7 @@ export const IndexesPageClient = ({data, assets}: {data: IndexOverview[]; assets
                             onClearFilters={handleClearFilters}
                         />
 
-                        <Button onClick={() => setCreateModalOpen(true)}>
+                        <Button onClick={() => setCreateUpdateModalOpen(true)}>
                             <Plus className="h-4 w-4 mr-2" />
                             Create Custom Index
                         </Button>
@@ -223,11 +212,13 @@ export const IndexesPageClient = ({data, assets}: {data: IndexOverview[]; assets
             </main>
 
             {/* Create Index Modal */}
-            <CreateUpdateIndexModal
-                isOpen={createModalOpen}
-                onCloseAction={() => setCreateModalOpen(false)}
-                onSaveAction={handleCreateIndex}
+            <IndexModal
+                isOpen={createUpdateModalOpen}
+                onCloseAction={() => setCreateUpdateModalOpen(false)}
+                onSaveAction={handleCreateCloneIndex}
                 availableAssets={availableAssets}
+                indexOverview={modalIndex}
+                mode={indexMode}
             />
         </>
     );

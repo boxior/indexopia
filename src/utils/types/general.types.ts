@@ -98,6 +98,8 @@ export type IndexOverview = Pick<
     "id" | "systemId" | "userId" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime"
 > & {assets: IndexOverviewAsset[]};
 
+export type IndexOverviewForCreate = Omit<IndexOverview, "id"> & {id?: Id};
+
 /**
  * @link https://momentjscom.readthedocs.io/en/latest/moment/04-displaying/01-format/
  */

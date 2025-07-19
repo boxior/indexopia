@@ -5,7 +5,7 @@ import {ArrowLeft} from "lucide-react";
 import {IndexOverview} from "@/app/indices/[id]/components/CLAUD_WEB/IndexOverview";
 import {IndexChart} from "@/app/indices/[id]/components/CLAUD_WEB/IndexChart";
 import {AssetsTable} from "@/app/indices/[id]/components/CLAUD_WEB/AssetsTable";
-import {CreateIndexData, CreateUpdateIndexModal} from "@/app/indices/components/CLAUD_WEB/CreateUpdateIndexModal";
+import {ModalIndexData, IndexModal} from "@/app/indices/components/CLAUD_WEB/IndexModal";
 import {Index, AssetWithHistoryOverviewPortionAndMaxDrawDown, Asset} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
 import {useState} from "react";
@@ -44,7 +44,7 @@ export function IndexPageClient({index}: {index: Index<AssetWithHistoryOverviewP
         setIsModalOpen(false);
     };
 
-    const handleModalSave = async (indexData: CreateIndexData) => {
+    const handleModalSave = async (indexData: ModalIndexData) => {
         try {
             // TODO: Implement the API call to update the index
             console.log("Updating index:", index?.id, "with data:", indexData);
@@ -116,7 +116,7 @@ export function IndexPageClient({index}: {index: Index<AssetWithHistoryOverviewP
             </div>
 
             {/* Update Index Modal */}
-            <CreateUpdateIndexModal
+            <IndexModal
                 isOpen={isModalOpen}
                 onCloseAction={handleModalClose}
                 onSaveAction={handleModalSave}

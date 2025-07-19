@@ -75,8 +75,8 @@ export function IndexOverview({index}: IndexOverviewProps) {
                 <div className="mt-4">
                     <p className="text-sm text-muted-foreground mb-2">Assets ({index.assets.length})</p>
                     <div className="flex flex-wrap gap-2">
-                        {index.assets.map((asset, i) => (
-                            <Badge key={i} variant="outline" className="text-xs">
+                        {index.assets.map(asset => (
+                            <Badge key={asset.id} variant="outline" className="text-xs">
                                 {asset.symbol}
                                 <span className="ml-1 text-muted-foreground">
                                     ({(asset.portion * 100).toFixed(1)}%)
