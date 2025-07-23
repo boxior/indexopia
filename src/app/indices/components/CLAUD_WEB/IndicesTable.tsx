@@ -11,6 +11,8 @@ import {IndicesPagination} from "@/app/indices/components/CLAUD_WEB/IndicesPagin
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {NumeralFormat} from "@numeral";
 import {getIndexDurationLabel} from "@/app/indices/helpers";
+import Link from "next/link";
+import * as React from "react";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
@@ -209,7 +211,32 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                         {isSystemIndex(index) ? "System" : "Custom"}
                                     </Badge>
                                 </TableCell>
-                                <TableCell className="font-medium">{index.name}</TableCell>
+                                <TableCell className="font-medium">
+                                    {
+                                        <Link
+                                            className="group inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors duration-200 font-semibold capitalize"
+                                            href={`/indices/${index.id}`}
+                                        >
+                                            <span className="relative">
+                                                {index.name}
+                                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300 ease-out"></span>
+                                            </span>
+                                            <svg
+                                                className="w-4 h-4 opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all duration-200"
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path
+                                                    strokeLinecap="round"
+                                                    strokeLinejoin="round"
+                                                    strokeWidth={2}
+                                                    d="M9 5l7 7-7 7"
+                                                />
+                                            </svg>
+                                        </Link>
+                                    }
+                                </TableCell>
                                 <TableCell>
                                     <div className="flex flex-wrap gap-1">
                                         {index.assets.slice(0, 3).map(asset => (
