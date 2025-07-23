@@ -211,8 +211,9 @@ export default function IndicesTable({data}: {data: IndexOverview[]}) {
             header: "Duration",
             cell: ({row}) => {
                 const startTime = row.getValue("startTime") as number;
+                const endTime = row.getValue("endTime") as number;
 
-                return <div className="lowercase">{getIndexDurationLabel(startTime)}</div>;
+                return <div className="lowercase">{getIndexDurationLabel(startTime, endTime)}</div>;
             },
             meta: {
                 text: "Duration",
