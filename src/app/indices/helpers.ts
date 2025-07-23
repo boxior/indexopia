@@ -15,11 +15,11 @@ export const getIndexStartFromLabel = (startTime: number) => {
     return momentTimeZone.tz(startTime, "UTC").startOf("day").format(MomentFormat.DATE);
 };
 
-export const getIndexDurationLabel = (startTime: number) => {
+export const getIndexDurationLabel = (startTime: number, endTime: number) => {
     // Calculate the duration difference in days
-    const now = moment().utc().startOf("day");
+    const end = moment(endTime).utc().startOf("day");
     const start = moment(startTime).utc().startOf("day");
-    const duration = moment.duration(now.diff(start)); // Create a moment duration
+    const duration = moment.duration(end.diff(start)); // Create a moment duration
 
     // Break down the duration into years, months, and days
     const years = duration.years() > 0 ? `${duration.years()} year${duration.years() > 1 ? "s" : ""} ` : "";

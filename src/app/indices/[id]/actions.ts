@@ -43,7 +43,11 @@ export const actionCreateIndexOverview = async ({
 }: Pick<IndexOverview, "name" | "assets" | "userId">) => {
     let assets = [];
 
-    const {assets: assetsWithHistories, startTime} = await getAssetsWithHistories({
+    const {
+        assets: assetsWithHistories,
+        startTime,
+        endTime,
+    } = await getAssetsWithHistories({
         assets: propAssets,
     });
 
@@ -64,7 +68,7 @@ export const actionCreateIndexOverview = async ({
     const historyOverview = await getIndexHistoryOverview(index);
     const maxDrawDown = getMaxDrawDownWithTimeRange(history);
 
-    return await dbPostIndexOverview({name, assets, historyOverview, maxDrawDown, startTime, userId});
+    return await dbPostIndexOverview({name, assets, historyOverview, maxDrawDown, startTime, endTime, userId});
 };
 
 export const actionDeleteIndexOverview = async (id: Id) => {

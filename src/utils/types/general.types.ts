@@ -1,5 +1,8 @@
 export type RecordWithId = Record<string, unknown> & {id: string};
 
+/**
+ * In %
+ */
 export type HistoryOverview = {
     days1: number;
     days7: number;
@@ -23,7 +26,7 @@ export interface Asset {
     history?: AssetHistory[];
     historyOverview?: HistoryOverview;
     maxDrawDown?: MaxDrawDown;
-    portion?: number; // portion of Index
+    portion?: number; // portion of Index in %
 }
 
 export enum SystemIndexBy {

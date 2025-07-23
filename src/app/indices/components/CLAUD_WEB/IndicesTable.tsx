@@ -8,6 +8,9 @@ import {Copy, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown} from "lucide-react"
 import {Id, IndexOverview} from "@/utils/types/general.types";
 import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import {IndicesPagination} from "@/app/indices/components/CLAUD_WEB/IndicesPagination";
+import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
+import {NumeralFormat} from "@numeral";
+import {getIndexDurationLabel} from "@/app/indices/helpers";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
@@ -21,8 +24,9 @@ type SortField = "name" | "total" | "days1" | "days7" | "maxDrawDown";
 type SortOrder = "asc" | "desc";
 
 export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneAction, currentUserId}: IndicesTableProps) {
-    const [sortField, setSortField] = useState<SortField>("name");
-    const [sortOrder, setSortOrder] = useState<SortOrder>("asc");
+    const [sortField, setSortField] = useState<SortField>("total");
+    const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [indexToDelete, setIndexToDelete] = useState<IndexOverview | null>(null);
 
@@ -108,7 +112,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
         return (
             <span className={color}>
                 {sign}
-                {value.toFixed(2)}%
+                {renderSafelyNumber(value, NumeralFormat.NUMBER)}%
             </span>
         );
     };
@@ -123,6 +127,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
             if (indexToDelete) {
                 setIsDeleting(true);
                 await onDeleteAction(indexToDelete.id);
+
                 setDeleteModalOpen(false);
                 setIndexToDelete(null);
             }
@@ -200,14 +205,14 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                         {paginatedIndices.map(index => (
                             <TableRow key={index.id}>
                                 <TableCell>
-                                    <Badge variant={isSystemIndex(index) ? "default" : "secondary"}>
+                                    <Badge variant={isSystemIndex(index) ? "secondary" : "default"}>
                                         {isSystemIndex(index) ? "System" : "Custom"}
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="font-medium">{index.name}</TableCell>
                                 <TableCell>
                                     <div className="flex flex-wrap gap-1">
-                                        {index.assets.slice(0, 3).map((asset, i) => (
+                                        {index.assets.slice(0, 3).map(asset => (
                                             <Badge key={asset.id} variant="outline" className="text-xs">
                                                 {asset.symbol}
                                             </Badge>
@@ -228,10 +233,9 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                     </span>
                                 </TableCell>
                                 <TableCell>
-                                    {index.startTime && index.endTime ? (
+                                    {!!index.startTime && !!index.endTime ? (
                                         <span className="text-sm text-gray-500">
-                                            {Math.ceil((index.endTime - index.startTime) / (1000 * 60 * 60 * 24 * 30))}{" "}
-                                            months
+                                            {getIndexDurationLabel(index.startTime, index.endTime)}
                                         </span>
                                     ) : (
                                         <span className="text-sm text-gray-500">-</span>

@@ -10,7 +10,11 @@ import {IndicesFilters} from "@/app/indices/components/CLAUD_WEB/IndicesFilters"
 import {IndexModal, ModalIndexData, IndexMode} from "@/app/indices/components/CLAUD_WEB/IndexModal";
 import {IndexOverview, Asset, Id, IndexOverviewForCreate} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
-import {actionCreateIndexOverview, actionDeleteIndexOverview} from "@/app/indices/[id]/actions";
+import {
+    actionCreateIndexOverview,
+    actionDeleteIndexOverview,
+    actionUpdateIndexOverview,
+} from "@/app/indices/[id]/actions";
 import {getIndexOverviewAsset} from "@/utils/heleprs/index/index.helpers";
 import {omit} from "lodash";
 
@@ -19,7 +23,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
     const currentUserId = session.data?.user?.id;
 
     const [createUpdateModalOpen, setCreateUpdateModalOpen] = useState(false);
-    const [modalIndex, setModalIndex] = useState<IndexOverviewForCreate>();
+    const [modalIndex, setModalIndex] = useState<IndexOverviewForCreate | IndexOverview>();
     const [indexMode, setIndexMode] = useState<IndexMode>();
 
     const [searchTerm, setSearchTerm] = useState("");
@@ -56,12 +60,28 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
         });
     }, [indices, searchTerm, typeFilter, performanceFilter]);
 
-    const handleCreateCloneIndex = async (indexData: ModalIndexData) => {
+    const handleSaveAction = async (indexData: ModalIndexData) => {
+        if (indexMode === IndexMode.EDIT) {
+            await actionUpdateIndexOverview({
+                ...(modalIndex as IndexOverview),
+                ...indexData,
+                assets: indexData.assets.map(getIndexOverviewAsset),
+                userId: currentUserId,
+            });
+            return;
+        }
+
         await actionCreateIndexOverview({
             ...indexData,
             assets: indexData.assets.map(getIndexOverviewAsset),
             userId: currentUserId,
         });
+    };
+
+    const handleCloseAction = () => {
+        setModalIndex(undefined);
+        setIndexMode(undefined);
+        setCreateUpdateModalOpen(false);
     };
 
     const handleEditIndex = (editIndex: IndexOverview) => {
@@ -232,8 +252,8 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
             {/* Create Index Modal */}
             <IndexModal
                 isOpen={createUpdateModalOpen}
-                onCloseAction={() => setCreateUpdateModalOpen(false)}
-                onSaveAction={handleCreateCloneIndex}
+                onCloseAction={handleCloseAction}
+                onSaveAction={handleSaveAction}
                 availableAssets={availableAssets}
                 indexOverview={modalIndex}
                 mode={indexMode}

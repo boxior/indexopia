@@ -51,16 +51,16 @@ export const getAssetHistoryOverview = async (
     );
 
     const days1Profit = Number(lastDayItem?.priceUsd) - Number(oneDayAgo?.priceUsd);
-    const days1ProfitPercent = days1Profit / Number(oneDayAgo?.priceUsd);
+    const days1ProfitPercent = (days1Profit / Number(oneDayAgo?.priceUsd)) * 100;
 
     const days7Profit = Number(lastDayItem?.priceUsd) - Number(sevenDaysAgo?.priceUsd);
-    const days7ProfitPercent = days7Profit / Number(sevenDaysAgo?.priceUsd);
+    const days7ProfitPercent = (days7Profit / Number(sevenDaysAgo?.priceUsd)) * 100;
 
     const days30Profit = Number(lastDayItem?.priceUsd) - Number(thirtyDaysAgo?.priceUsd);
-    const days30ProfitPercent = days30Profit / Number(thirtyDaysAgo?.priceUsd);
+    const days30ProfitPercent = (days30Profit / Number(thirtyDaysAgo?.priceUsd)) * 100;
 
     const totalProfit = Number(lastDayItem?.priceUsd) - Number(historyList[0]?.priceUsd);
-    const totalProfitPercent = totalProfit / Number(historyList[0]?.priceUsd);
+    const totalProfitPercent = (totalProfit / Number(historyList[0]?.priceUsd)) * 100;
 
     return {
         days1: days1ProfitPercent,
