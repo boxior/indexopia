@@ -61,7 +61,7 @@ export function IndicesFilters({
                 />
             </div>
 
-            <div className="flex gap-2">
+            <div className="flex gap-2 items-center">
                 <Select value={typeFilter} onValueChange={handleTypeChange}>
                     <SelectTrigger className="w-32">
                         <SelectValue placeholder="Type" />
