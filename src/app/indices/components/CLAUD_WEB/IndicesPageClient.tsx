@@ -6,7 +6,7 @@ import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Plus, TrendingUp, TrendingDown, BarChart} from "lucide-react";
 import {IndicesTable} from "@/app/indices/components/CLAUD_WEB/IndicesTable";
-import {IndicesFilters} from "@/app/indices/components/CLAUD_WEB/IndicesFilters";
+import {IndicesFilters, TOP_PERFORMANCE_COUNT} from "@/app/indices/components/CLAUD_WEB/IndicesFilters";
 import {IndexModal, ModalIndexData, IndexMode} from "@/app/indices/components/CLAUD_WEB/IndexModal";
 import {IndexOverview, Asset, Id, IndexOverviewForCreate} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
@@ -32,7 +32,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
 
     const availableAssets: Asset[] = assets;
 
-    const filteredIndices = useMemo(() => {
+    const preFilteredIndices = useMemo(() => {
         return indices.filter(index => {
             // Search filter
             const matchesSearch =
@@ -54,11 +54,23 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                 performanceFilter === "all" ||
                 (performanceFilter === "positive" && index.historyOverview.days1 > 0) ||
                 (performanceFilter === "negative" && index.historyOverview.days1 < 0) ||
-                (performanceFilter === "top-performers" && index.historyOverview.total > 1000);
+                (performanceFilter === "top-performers" && !!index); // filter is below: topPerformanceIndices
 
             return matchesSearch && matchesType && matchesPerformance;
         });
     }, [indices, searchTerm, typeFilter, performanceFilter]);
+
+    const topPerformanceIndices =
+        performanceFilter === "top-performers"
+            ? preFilteredIndices
+                  .toSorted((a, b) => b.historyOverview.total - a.historyOverview.total)
+                  .slice(0, TOP_PERFORMANCE_COUNT)
+            : [];
+
+    const filteredIndices =
+        performanceFilter === "top-performers"
+            ? preFilteredIndices.filter(i => topPerformanceIndices.map(i => i.id).includes(i.id))
+            : preFilteredIndices;
 
     const handleSaveAction = async (indexData: ModalIndexData) => {
         if (indexMode === IndexMode.EDIT) {

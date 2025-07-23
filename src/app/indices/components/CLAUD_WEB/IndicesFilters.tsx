@@ -1,11 +1,10 @@
-// components/indices/indices-filters.tsx
 "use client";
 
 import {useState} from "react";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
-import {Search, Filter, X} from "lucide-react";
+import {Search, X} from "lucide-react";
 
 interface IndicesFiltersProps {
     onSearchChange: (search: string) => void;
@@ -13,6 +12,8 @@ interface IndicesFiltersProps {
     onPerformanceFilter: (performance: string) => void;
     onClearFilters: () => void;
 }
+
+export const TOP_PERFORMANCE_COUNT = 5;
 
 export function IndicesFilters({
     onSearchChange,
@@ -80,7 +81,7 @@ export function IndicesFilters({
                         <SelectItem value="all">All Performance</SelectItem>
                         <SelectItem value="positive">Positive 24h</SelectItem>
                         <SelectItem value="negative">Negative 24h</SelectItem>
-                        <SelectItem value="top-performers">Top Performers</SelectItem>
+                        <SelectItem value="top-performers">Top {TOP_PERFORMANCE_COUNT} Performers</SelectItem>
                     </SelectContent>
                 </Select>
 
