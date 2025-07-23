@@ -5,7 +5,7 @@ import {Area, AreaChart, CartesianGrid} from "recharts";
 import {ChartConfig, ChartContainer, ChartTooltip} from "@/components/ui/chart";
 import moment from "moment";
 import {ChartData, Index, MomentFormat} from "@/utils/types/general.types";
-import {IndexPreviewChartTooltip} from "@/app/indices/components/indexPreviewChartTooltip";
+import {IndexPreviewChartTooltip} from "@/app/indices/components/ORIGINAL/indexPreviewChartTooltip";
 import {getChartColor} from "@/app/indices/helpers";
 
 export function IndexChart({index}: {index: Index}) {

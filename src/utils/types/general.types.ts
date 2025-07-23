@@ -1,5 +1,8 @@
 export type RecordWithId = Record<string, unknown> & {id: string};
 
+/**
+ * In %
+ */
 export type HistoryOverview = {
     days1: number;
     days7: number;
@@ -23,7 +26,7 @@ export interface Asset {
     history?: AssetHistory[];
     historyOverview?: HistoryOverview;
     maxDrawDown?: MaxDrawDown;
-    portion?: number; // portion of Index
+    portion?: number; // portion of Index in %
 }
 
 export enum SystemIndexBy {
@@ -97,6 +100,8 @@ export type IndexOverview = Pick<
     Index,
     "id" | "systemId" | "userId" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime"
 > & {assets: IndexOverviewAsset[]};
+
+export type IndexOverviewForCreate = Omit<IndexOverview, "id"> & {id?: Id};
 
 /**
  * @link https://momentjscom.readthedocs.io/en/latest/moment/04-displaying/01-format/

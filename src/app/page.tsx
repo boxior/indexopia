@@ -13,16 +13,16 @@ export default async function HomePage() {
 const HomePageSuspended = async () => {
     return (
         <SuspenseWrapper loadingMessage="Loading Indexopia..." variant="spinner" showLogo={true}>
-            <>
+            <div className="min-h-screen flex flex-col">
                 <Header />
-                <main>
+                <main className="flex-1">
                     <HeroSection />
                     <IndicesPreview />
                     <BenefitsSection />
                     <CTASection />
                 </main>
                 <Footer />
-            </>
+            </div>
         </SuspenseWrapper>
     );
 };

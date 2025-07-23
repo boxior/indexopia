@@ -1,7 +1,7 @@
 "use client";
 
 import {IndexDBName, IndexHistory, IndexOverview} from "@/utils/types/general.types";
-import {HistoryOverviewChart} from "@/app/indices/components/HistoryOverviewChart";
+import {HistoryOverviewChart} from "@/app/indices/components/ORIGINAL/HistoryOverviewChart";
 import {useEffect, useState} from "react";
 import {isEmpty} from "lodash";
 import {actionGetIndexHistory} from "@/app/indices/actions";

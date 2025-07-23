@@ -11,7 +11,8 @@ import {Asset, IndexOverview, IndexOverviewAsset} from "@/utils/types/general.ty
 
 import {getIndexOverviewAsset} from "@/utils/heleprs/index/index.helpers";
 import {actionCreateIndexOverview, actionUpdateIndexOverview} from "@/app/indices/[id]/actions";
-import {handleGetAssets} from "@/app/indices/components/Index/actions";
+import {actionGetAssets} from "@/app/indices/components/Index/actions";
+import {useSession} from "next-auth/react";
 
 export function IndexDialog({
     closeDialogAction,
@@ -22,9 +23,11 @@ export function IndexDialog({
 }) {
     const [assets, setAssets] = useState<Asset[]>([]);
 
+    const {data} = useSession();
+
     useEffect(() => {
         (async () => {
-            setAssets(await handleGetAssets());
+            setAssets(await actionGetAssets());
         })();
     }, []);
 
@@ -44,6 +47,7 @@ export function IndexDialog({
             await actionCreateIndexOverview({
                 name,
                 assets: selectedAssets.map(getIndexOverviewAsset),
+                userId: data?.user?.id,
             });
         }
 

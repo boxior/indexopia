@@ -5,7 +5,7 @@ import {Area, AreaChart, CartesianGrid} from "recharts";
 import {ChartConfig, ChartContainer, ChartTooltip} from "@/components/ui/chart";
 import moment from "moment";
 import {AssetHistory, ChartData, IndexHistory, MomentFormat} from "@/utils/types/general.types";
-import {IndexPreviewChartTooltip} from "@/app/indices/components/indexPreviewChartTooltip";
+import {IndexPreviewChartTooltip} from "@/app/indices/components/ORIGINAL/indexPreviewChartTooltip";
 import {getChartColor} from "@/app/indices/helpers";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 

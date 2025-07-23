@@ -28,7 +28,11 @@ export function IndexOverview({indexOverview}: {indexOverview: IndexOverviewType
                 <span className={"font-bold"}>Start from:</span>
                 <span>{indexOverview.startTime ? getIndexStartFromLabel(indexOverview.startTime) : "N/A"}</span>
                 <span className={"font-bold"}>Duration:</span>
-                <span>{indexOverview.startTime ? getIndexDurationLabel(indexOverview.startTime) : "N/A"}</span>
+                <span>
+                    {indexOverview.startTime && indexOverview.endTime
+                        ? getIndexDurationLabel(indexOverview.startTime, indexOverview.endTime)
+                        : "N/A"}
+                </span>
             </div>
         </div>
     );

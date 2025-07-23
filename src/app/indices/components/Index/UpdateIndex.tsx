@@ -8,6 +8,7 @@ import {IndexDialog} from "@/app/indices/components/Index/IndexDialog";
 import {redirect} from "next/navigation";
 import {isNil} from "lodash";
 import {actionDeleteIndexOverview} from "@/app/indices/[id]/actions";
+import {PAGES_URLS} from "@/utils/constants/general.constants";
 
 export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
     const [open, setOpen] = useState<boolean>(false);
@@ -31,7 +32,7 @@ export function UpdateIndex({indexOverview}: {indexOverview: IndexOverview}) {
             return;
         }
         await actionDeleteIndexOverview(indexOverview?.id ?? ""); // need tls
-        redirect("/indices");
+        redirect(PAGES_URLS.indices);
     };
 
     return (

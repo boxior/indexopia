@@ -8,7 +8,6 @@ import {
     dbPostIndexOverview,
     dbPutIndexOverview,
 } from "@/lib/db/helpers/db.indexOverview.helpers";
-import {MOCK_USER_ID} from "@/utils/constants/general.constants";
 
 export const actionUpdateIndexOverview = async (indexOverview: IndexOverview) => {
     let assets = [];
@@ -34,13 +33,21 @@ export const actionUpdateIndexOverview = async (indexOverview: IndexOverview) =>
     const historyOverview = await getIndexHistoryOverview(index);
     const maxDrawDown = getMaxDrawDownWithTimeRange(history);
 
-    return await dbPutIndexOverview({...indexOverview, historyOverview, maxDrawDown, startTime, userId: MOCK_USER_ID});
+    return await dbPutIndexOverview({...indexOverview, historyOverview, maxDrawDown, startTime});
 };
 
-export const actionCreateIndexOverview = async ({name, assets: propAssets}: Pick<IndexOverview, "name" | "assets">) => {
+export const actionCreateIndexOverview = async ({
+    name,
+    assets: propAssets,
+    userId,
+}: Pick<IndexOverview, "name" | "assets" | "userId">) => {
     let assets = [];
 
-    const {assets: assetsWithHistories, startTime} = await getAssetsWithHistories({
+    const {
+        assets: assetsWithHistories,
+        startTime,
+        endTime,
+    } = await getAssetsWithHistories({
         assets: propAssets,
     });
 
@@ -61,7 +68,7 @@ export const actionCreateIndexOverview = async ({name, assets: propAssets}: Pick
     const historyOverview = await getIndexHistoryOverview(index);
     const maxDrawDown = getMaxDrawDownWithTimeRange(history);
 
-    return await dbPostIndexOverview({name, assets, historyOverview, maxDrawDown, startTime, userId: MOCK_USER_ID});
+    return await dbPostIndexOverview({name, assets, historyOverview, maxDrawDown, startTime, endTime, userId});
 };
 
 export const actionDeleteIndexOverview = async (id: Id) => {
