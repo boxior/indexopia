@@ -94,12 +94,30 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
         setPerformanceFilter("all");
     };
 
+    const getAvgReturn = (indices: IndexOverview[]) => {
+        return indices.reduce((sum, i) => sum + i.historyOverview.total, 0) / indices.length;
+    };
+
+    const systemIndices = indices.filter(i => i.systemId);
+    const useIndices = indices.filter(i => i.userId);
+
     // Calculate statistics
     const stats = {
         totalIndices: indices.length,
-        systemIndices: indices.filter(i => i.systemId).length,
+        systemIndices: systemIndices.length,
         customIndices: indices.filter(i => i.userId).length,
-        avgReturn: indices.reduce((sum, i) => sum + i.historyOverview.total, 0) / indices.length,
+
+        systemAvgReturn: getAvgReturn(systemIndices),
+        userAvrReturn: getAvgReturn(useIndices),
+        avgReturn: getAvgReturn(indices),
+    };
+
+    const renderArrow = (avgReturn: number) => {
+        return avgReturn > 0 ? (
+            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+        ) : (
+            <TrendingDown className="h-4 w-4 text-muted-foreground" />
+        );
     };
 
     return (
@@ -130,7 +148,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium">System Indices</CardTitle>
-                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                                {renderArrow(stats.systemAvgReturn)}
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{stats.systemIndices}</div>
@@ -141,7 +159,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium">Custom Indices</CardTitle>
-                                <TrendingDown className="h-4 w-4 text-muted-foreground" />
+                                {renderArrow(stats.userAvrReturn)}
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{stats.customIndices}</div>
@@ -152,7 +170,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                         <Card>
                             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                                 <CardTitle className="text-sm font-medium">Avg. Return</CardTitle>
-                                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+                                {renderArrow(stats.avgReturn)}
                             </CardHeader>
                             <CardContent>
                                 <div className="text-2xl font-bold">{stats.avgReturn.toFixed(1)}%</div>
