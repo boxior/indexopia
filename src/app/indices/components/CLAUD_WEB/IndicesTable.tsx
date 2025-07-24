@@ -147,7 +147,6 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Type</TableHead>
                             <TableHead>
                                 <Button
                                     variant="ghost"
@@ -205,21 +204,33 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                     </TableHeader>
                     <TableBody>
                         {paginatedIndices.map(index => (
-                            <TableRow key={index.id}>
-                                <TableCell>
-                                    <Badge variant={isSystemIndex(index) ? "secondary" : "default"}>
-                                        {isSystemIndex(index) ? "System" : "Custom"}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell className="font-medium">
+                            <TableRow
+                                key={index.id}
+                                className={
+                                    isUserIndex(index)
+                                        ? "bg-primary/5 hover:bg-primary/10 border-l-4 border-l-primary"
+                                        : ""
+                                }
+                            >
+                                <TableCell className={"font-medium"}>
                                     {
                                         <Link
-                                            className="group inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors duration-200 font-semibold capitalize"
+                                            className={
+                                                isUserIndex(index)
+                                                    ? "group inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors duration-200 font-semibold capitalize"
+                                                    : "group inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors duration-200 font-semibold capitalize"
+                                            }
                                             href={`/indices/${index.id}`}
                                         >
                                             <span className="relative">
                                                 {index.name}
-                                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300 ease-out"></span>
+                                                <span
+                                                    className={
+                                                        isUserIndex(index)
+                                                            ? "absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300 ease-out"
+                                                            : "absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300 ease-out"
+                                                    }
+                                                ></span>
                                             </span>
                                             <svg
                                                 className="w-4 h-4 opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all duration-200"

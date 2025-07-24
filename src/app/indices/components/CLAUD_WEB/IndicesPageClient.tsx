@@ -18,6 +18,8 @@ import {
 import {getIndexOverviewAsset} from "@/utils/heleprs/index/index.helpers";
 import {omit} from "lodash";
 
+// TODO: Add Chart Preview
+// Clear unused code, but leave ORIGINAL one
 export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; assets: Asset[]}) => {
     const session = useSession();
     const currentUserId = session.data?.user?.id;
