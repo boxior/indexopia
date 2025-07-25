@@ -13,7 +13,8 @@ interface IndicesFiltersProps {
     onClearFilters: () => void;
 }
 
-export const TOP_PERFORMANCE_COUNT = 5;
+export const TOP_PERFORMANCE_COUNT = 10;
+export const POSITIVE_NEGATIVE_DAYS = 7;
 
 export function IndicesFilters({
     onSearchChange,
@@ -79,8 +80,8 @@ export function IndicesFilters({
                     </SelectTrigger>
                     <SelectContent>
                         <SelectItem value="all">All Performance</SelectItem>
-                        <SelectItem value="positive">Positive 24h</SelectItem>
-                        <SelectItem value="negative">Negative 24h</SelectItem>
+                        <SelectItem value="positive">Positive {POSITIVE_NEGATIVE_DAYS}d</SelectItem>
+                        <SelectItem value="negative">Negative {POSITIVE_NEGATIVE_DAYS}d</SelectItem>
                         <SelectItem value="top-performers">Top {TOP_PERFORMANCE_COUNT} Performers</SelectItem>
                     </SelectContent>
                 </Select>

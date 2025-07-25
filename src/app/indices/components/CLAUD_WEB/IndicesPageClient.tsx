@@ -54,8 +54,8 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
             // Performance filter
             const matchesPerformance =
                 performanceFilter === "all" ||
-                (performanceFilter === "positive" && index.historyOverview.days1 > 0) ||
-                (performanceFilter === "negative" && index.historyOverview.days1 < 0) ||
+                (performanceFilter === "positive" && index.historyOverview.days7 > 0) ||
+                (performanceFilter === "negative" && index.historyOverview.days7 < 0) ||
                 (performanceFilter === "top-performers" && !!index); // filter is below: topPerformanceIndices
 
             return matchesSearch && matchesType && matchesPerformance;

@@ -22,7 +22,7 @@ interface IndicesTableProps {
     currentUserId?: string;
 }
 
-type SortField = "name" | "total" | "days1" | "days7" | "maxDrawDown";
+type SortField = "name" | "total" | "days7" | "days30" | "maxDrawDown";
 type SortOrder = "asc" | "desc";
 
 export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneAction, currentUserId}: IndicesTableProps) {
@@ -67,13 +67,13 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                     aValue = a.historyOverview.total;
                     bValue = b.historyOverview.total;
                     break;
-                case "days1":
-                    aValue = a.historyOverview.days1;
-                    bValue = b.historyOverview.days1;
-                    break;
                 case "days7":
                     aValue = a.historyOverview.days7;
                     bValue = b.historyOverview.days7;
+                    break;
+                case "days30":
+                    aValue = a.historyOverview.days30;
+                    bValue = b.historyOverview.days30;
                     break;
                 case "maxDrawDown":
                     aValue = a.maxDrawDown.value;
@@ -162,20 +162,20 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                 <Button
                                     variant="ghost"
                                     className="h-auto p-0 font-medium"
-                                    onClick={() => handleSort("days1")}
+                                    onClick={() => handleSort("days7")}
                                 >
-                                    24h
-                                    {getSortIcon("days1")}
+                                    7d
+                                    {getSortIcon("days7")}
                                 </Button>
                             </TableHead>
                             <TableHead>
                                 <Button
                                     variant="ghost"
                                     className="h-auto p-0 font-medium"
-                                    onClick={() => handleSort("days7")}
+                                    onClick={() => handleSort("days30")}
                                 >
-                                    7d
-                                    {getSortIcon("days7")}
+                                    30d
+                                    {getSortIcon("days30")}
                                 </Button>
                             </TableHead>
                             <TableHead>
@@ -262,8 +262,8 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                         )}
                                     </div>
                                 </TableCell>
-                                <TableCell>{formatPercentage(index.historyOverview.days1)}</TableCell>
                                 <TableCell>{formatPercentage(index.historyOverview.days7)}</TableCell>
+                                <TableCell>{formatPercentage(index.historyOverview.days30)}</TableCell>
                                 <TableCell>{formatPercentage(index.historyOverview.total)}</TableCell>
                                 <TableCell>
                                     <span className="text-red-600">
