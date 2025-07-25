@@ -144,7 +144,6 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
         setExpandedRows(newExpanded);
     };
 
-    const isSystemIndex = (index: IndexOverview) => !!index.systemId;
     const isUserIndex = (index: IndexOverview) => !!index.userId;
 
     // Mobile Card Component

@@ -169,47 +169,70 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                         <Card className="min-h-0">
                             <CardContent className="p-2 md:p-6">
                                 <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="text-sm md:text-2xl font-bold">{stats.totalIndices}</div>
-                                        <p className="text-xs md:text-sm font-medium text-muted-foreground">Total</p>
+                                    <div className="md:block">
+                                        <span className="text-xs md:hidden font-medium text-muted-foreground">
+                                            Total:{" "}
+                                            <span className="font-bold text-foreground">{stats.totalIndices}</span>
+                                        </span>
+                                        <div className="hidden md:block text-2xl font-bold">{stats.totalIndices}</div>
+                                        <p className="hidden md:block text-sm font-medium text-muted-foreground">
+                                            Total
+                                        </p>
                                     </div>
                                     <BarChart className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
                                 </div>
                             </CardContent>
                         </Card>
-
                         <Card className="min-h-0">
                             <CardContent className="p-2 md:p-6">
                                 <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="text-sm md:text-2xl font-bold">{stats.systemIndices}</div>
-                                        <p className="text-xs md:text-sm font-medium text-muted-foreground">System</p>
+                                    <div className="md:block">
+                                        <span className="text-xs md:hidden font-medium text-muted-foreground">
+                                            System:{" "}
+                                            <span className="font-bold text-foreground">{stats.systemIndices}</span>
+                                        </span>
+                                        <div className="hidden md:block text-2xl font-bold">{stats.systemIndices}</div>
+                                        <p className="hidden md:block text-sm font-medium text-muted-foreground">
+                                            System
+                                        </p>
                                     </div>
                                     <div className="flex-shrink-0">{renderArrow(stats.systemAvgReturn)}</div>
                                 </div>
                             </CardContent>
                         </Card>
-
                         <Card className="min-h-0">
                             <CardContent className="p-2 md:p-6">
                                 <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="text-sm md:text-2xl font-bold">{stats.customIndices}</div>
-                                        <p className="text-xs md:text-sm font-medium text-muted-foreground">Custom</p>
+                                    <div className="md:block">
+                                        <span className="text-xs md:hidden font-medium text-muted-foreground">
+                                            Custom:{" "}
+                                            <span className="font-bold text-foreground">{stats.customIndices}</span>
+                                        </span>
+                                        <div className="hidden md:block text-2xl font-bold">{stats.customIndices}</div>
+                                        <p className="hidden md:block text-sm font-medium text-muted-foreground">
+                                            Custom
+                                        </p>
                                     </div>
                                     <div className="flex-shrink-0">{renderArrow(stats.userAvrReturn)}</div>
                                 </div>
                             </CardContent>
                         </Card>
-
                         <Card className="min-h-0">
                             <CardContent className="p-2 md:p-6">
                                 <div className="flex items-center justify-between">
-                                    <div>
-                                        <div className="text-sm md:text-2xl font-bold">
+                                    <div className="md:block">
+                                        <span className="text-xs md:hidden font-medium text-muted-foreground">
+                                            Return:{" "}
+                                            <span className="font-bold text-foreground">
+                                                {stats.avgReturn.toFixed(1)}%
+                                            </span>
+                                        </span>
+                                        <div className="hidden md:block text-2xl font-bold">
                                             {stats.avgReturn.toFixed(1)}%
                                         </div>
-                                        <p className="text-xs md:text-sm font-medium text-muted-foreground">Return</p>
+                                        <p className="hidden md:block text-sm font-medium text-muted-foreground">
+                                            Return
+                                        </p>
                                     </div>
                                     <div className="flex-shrink-0">{renderArrow(stats.avgReturn)}</div>
                                 </div>
