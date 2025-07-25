@@ -165,67 +165,80 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                     </div>
 
                     {/* Statistics Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Indices</CardTitle>
-                                <BarChart className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.totalIndices}</div>
-                                <p className="text-xs text-muted-foreground">
-                                    {stats.systemIndices} system, {stats.customIndices} custom
-                                </p>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6 mb-4 md:mb-8">
+                        <Card className="min-h-0">
+                            <CardContent className="p-2 md:p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-sm md:text-2xl font-bold">{stats.totalIndices}</div>
+                                        <p className="text-xs md:text-sm font-medium text-muted-foreground">Total</p>
+                                    </div>
+                                    <BarChart className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                                </div>
                             </CardContent>
                         </Card>
 
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">System Indices</CardTitle>
-                                {renderArrow(stats.systemAvgReturn)}
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.systemIndices}</div>
-                                <p className="text-xs text-muted-foreground">Professional strategies</p>
+                        <Card className="min-h-0">
+                            <CardContent className="p-2 md:p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-sm md:text-2xl font-bold">{stats.systemIndices}</div>
+                                        <p className="text-xs md:text-sm font-medium text-muted-foreground">System</p>
+                                    </div>
+                                    <div className="flex-shrink-0">{renderArrow(stats.systemAvgReturn)}</div>
+                                </div>
                             </CardContent>
                         </Card>
 
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Custom Indices</CardTitle>
-                                {renderArrow(stats.userAvrReturn)}
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.customIndices}</div>
-                                <p className="text-xs text-muted-foreground">Your personal strategies</p>
+                        <Card className="min-h-0">
+                            <CardContent className="p-2 md:p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-sm md:text-2xl font-bold">{stats.customIndices}</div>
+                                        <p className="text-xs md:text-sm font-medium text-muted-foreground">Custom</p>
+                                    </div>
+                                    <div className="flex-shrink-0">{renderArrow(stats.userAvrReturn)}</div>
+                                </div>
                             </CardContent>
                         </Card>
 
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Avg. Return</CardTitle>
-                                {renderArrow(stats.avgReturn)}
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.avgReturn.toFixed(1)}%</div>
-                                <p className="text-xs text-muted-foreground">Across all indices</p>
+                        <Card className="min-h-0">
+                            <CardContent className="p-2 md:p-6">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-sm md:text-2xl font-bold">
+                                            {stats.avgReturn.toFixed(1)}%
+                                        </div>
+                                        <p className="text-xs md:text-sm font-medium text-muted-foreground">Return</p>
+                                    </div>
+                                    <div className="flex-shrink-0">{renderArrow(stats.avgReturn)}</div>
+                                </div>
                             </CardContent>
                         </Card>
                     </div>
 
                     {/* Filters and Actions */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                        <IndicesFilters
-                            onSearchChange={setSearchTerm}
-                            onTypeFilter={setTypeFilter}
-                            onPerformanceFilter={setPerformanceFilter}
-                            onClearFilters={handleClearFilters}
-                        />
+                    <div className="flex flex-col gap-2 mb-4 md:mb-6">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                            <div className="flex-1 min-w-0">
+                                <IndicesFilters
+                                    onSearchChange={setSearchTerm}
+                                    onTypeFilter={setTypeFilter}
+                                    onPerformanceFilter={setPerformanceFilter}
+                                    onClearFilters={handleClearFilters}
+                                />
+                            </div>
 
-                        <Button onClick={() => setCreateUpdateModalOpen(true)}>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Create Custom Index
-                        </Button>
+                            <Button
+                                onClick={() => setCreateUpdateModalOpen(true)}
+                                size="sm"
+                                className="w-full sm:w-auto flex-shrink-0 h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm"
+                            >
+                                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                                <span className="hidden xs:inline">Create Custom Index</span>
+                                <span className="xs:hidden">Create Index</span>
+                            </Button>
+                        </div>
                     </div>
 
                     {/* Results Info */}
