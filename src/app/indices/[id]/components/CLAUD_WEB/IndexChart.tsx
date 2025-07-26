@@ -3,11 +3,10 @@ import {useState, useMemo} from "react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import {AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps} from "recharts";
-import {IndexHistory} from "@/utils/types/general.types";
+import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Index, IndexHistory} from "@/utils/types/general.types";
 
 interface IndexChartProps {
-    history: IndexHistory[];
-    indexName: string;
+    index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
 }
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
@@ -26,7 +25,8 @@ const timeRanges = [
     {label: "All", days: null},
 ];
 
-export function IndexChart({history, indexName}: IndexChartProps) {
+export function IndexChart({index}: IndexChartProps) {
+    const {history, id} = index;
     const [selectedRange, setSelectedRange] = useState("1M");
 
     const getFilteredData = () => {
@@ -135,7 +135,7 @@ export function IndexChart({history, indexName}: IndexChartProps) {
 
     // Determine gradient colors based on performance
     const isPositive = performance >= 0;
-    const gradientId = `areaGradient-${indexName.replace(/\s+/g, "-")}`;
+    const gradientId = `areaGradient-${id}`;
 
     return (
         <Card className="mb-6">

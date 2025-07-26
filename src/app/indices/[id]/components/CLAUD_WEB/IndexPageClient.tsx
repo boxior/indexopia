@@ -108,7 +108,7 @@ export function IndexPageClient({index}: {index: Index<AssetWithHistoryOverviewP
                     />
 
                     {/* Chart */}
-                    <IndexChart history={index.history} indexName={index.name} />
+                    <IndexChart index={index} />
 
                     {/* Assets Table */}
                     <AssetsTable assets={index.assets} />
