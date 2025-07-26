@@ -21,6 +21,7 @@ const timeRanges = [
     {label: "1M", days: 30},
     {label: "3M", days: 90},
     {label: "6M", days: 180},
+    {label: "YTD", days: "ytd"},
     {label: "1Y", days: 365},
     {label: "All", days: null},
 ];
@@ -32,8 +33,17 @@ export function IndexChart({history, indexName}: IndexChartProps) {
         const range = timeRanges.find(r => r.label === selectedRange);
         if (!range || !range.days) return history;
 
+        if (range.days === "ytd") {
+            // Year to Date - from January 1st of current year
+            const currentYear = new Date().getFullYear();
+            const startOfYear = new Date(currentYear, 0, 1); // January 1st
+            const startOfYearTimestamp = startOfYear.getTime();
+
+            return history.filter(item => item.time >= startOfYearTimestamp);
+        }
+
         const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - range.days);
+        cutoffDate.setDate(cutoffDate.getDate() - (range.days as number));
         const cutoffTimestamp = cutoffDate.getTime();
 
         return history.filter(item => item.time >= cutoffTimestamp);
@@ -59,10 +69,12 @@ export function IndexChart({history, indexName}: IndexChartProps) {
 
     const formatDate = (timestamp: number | string) => {
         const date = new Date(timestamp);
+        const isYTDRange = selectedRange === "YTD";
+
         return date.toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
-            year: selectedRange === "All" || selectedRange === "1Y" ? "numeric" : undefined,
+            year: selectedRange === "All" || selectedRange === "1Y" || isYTDRange ? "numeric" : undefined,
         });
     };
 
