@@ -9,10 +9,10 @@ import {Id, IndexOverview} from "@/utils/types/general.types";
 import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import {IndicesPagination} from "@/app/indices/components/CLAUD_WEB/IndicesPagination";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
-import {NumeralFormat} from "@numeral";
 import {getIndexDurationLabel} from "@/app/indices/helpers";
 import Link from "next/link";
 import * as React from "react";
+import {IndexHistoryChartPreview} from "@/app/indices/components/CLAUD_WEB/IndexHistoryChartPreview";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
@@ -203,6 +203,11 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                 {/* Expanded content */}
                 {isExpanded && (
                     <div className="mt-4 pt-4 border-t space-y-3">
+                        {/* Chart Preview */}
+                        <div className="mb-4">
+                            <IndexHistoryChartPreview indexOverview={index} className="h-64" />
+                        </div>
+
                         {/* Performance metrics */}
                         <div className="grid grid-cols-2 gap-4">
                             <div className="text-center">
@@ -316,6 +321,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                     </Button>
                                 </TableHead>
                                 <TableHead>Assets</TableHead>
+                                <TableHead>Chart Preview</TableHead>
                                 <TableHead>
                                     <Button
                                         variant="ghost"
@@ -416,6 +422,14 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                                     +{index.assets.length - 3}
                                                 </Badge>
                                             )}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="w-32 h-16">
+                                            <IndexHistoryChartPreview
+                                                indexOverview={index}
+                                                className="h-full border-0 p-0 bg-transparent"
+                                            />
                                         </div>
                                     </TableCell>
                                     <TableCell>{formatPercentage(index.historyOverview.days7)}</TableCell>
