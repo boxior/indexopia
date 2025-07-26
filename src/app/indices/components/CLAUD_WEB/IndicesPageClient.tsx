@@ -349,7 +349,6 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                             onEditAction={handleEditIndex}
                             onDeleteAction={handleDeleteIndex}
                             onCloneAction={handleCloneIndex}
-                            currentUserId={currentUserId}
                             mode={EntityMode.VIEW}
                         />
                     </div>

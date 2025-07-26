@@ -1,10 +1,9 @@
 "use client";
 
-import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import Link from "next/link";
-import {Eye, EyeOff} from "lucide-react";
+import {EyeOff} from "lucide-react";
 import {useSession} from "next-auth/react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
 

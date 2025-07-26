@@ -15,6 +15,7 @@ import * as React from "react";
 import {IndexHistoryChartPreview} from "@/app/indices/components/CLAUD_WEB/IndexHistoryChartPreview";
 import {HISTORY_OVERVIEW_DAYS, PAGES_URLS} from "@/utils/constants/general.constants";
 import {useRouter} from "next/navigation";
+import {useSession} from "next-auth/react";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
@@ -22,20 +23,12 @@ interface IndicesTableProps {
     onEditAction?: (index: IndexOverview) => void;
     onDeleteAction?: (indexId: Id) => Promise<void>;
     onCloneAction?: (index: IndexOverview) => void;
-    currentUserId?: string;
 }
 
 type SortField = "name" | "total" | "days7" | "days30" | "maxDrawDown";
 type SortOrder = "asc" | "desc";
 
-export function IndicesTable({
-    indices,
-    onEditAction,
-    onDeleteAction,
-    onCloneAction,
-    currentUserId,
-    mode,
-}: IndicesTableProps) {
+export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneAction, mode}: IndicesTableProps) {
     const router = useRouter();
     const [sortField, setSortField] = useState<SortField>("total");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
@@ -44,8 +37,11 @@ export function IndicesTable({
     const [isDeleting, setIsDeleting] = useState(false);
     const [expandedRows, setExpandedRows] = useState<Set<Id>>(new Set());
 
+    const {data} = useSession();
+    const currentUserId = data?.user?.id;
+
     const isViewMode = mode === EntityMode.VIEW;
-    const hiddenOption = isViewMode && !!currentUserId;
+    const hiddenOption = isViewMode && !currentUserId;
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -240,7 +236,6 @@ export function IndicesTable({
                         {/* Chart Preview */}
                         <div className="mb-4 relative">
                             <IndexHistoryChartPreview indexOverview={index} className="h-64" />
-                            <ProtectedOverlay />
                             {hiddenOption && <ProtectedOverlay />}
                         </div>
 
@@ -280,59 +275,61 @@ export function IndicesTable({
                         </div>
 
                         {/* Actions */}
-                        <div className="flex items-center justify-center gap-2 pt-2">
-                            <Tooltip>
-                                <TooltipTrigger asChild>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        className="h-8 w-8 p-0"
-                                        onClick={() => onCloneAction?.(index)}
-                                    >
-                                        <Copy className="h-4 w-4" />
-                                    </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                    <p>Clone index</p>
-                                </TooltipContent>
-                            </Tooltip>
+                        {!isViewMode && (
+                            <div className="flex items-center justify-center gap-2 pt-2">
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 w-8 p-0"
+                                            onClick={() => onCloneAction?.(index)}
+                                        >
+                                            <Copy className="h-4 w-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Clone index</p>
+                                    </TooltipContent>
+                                </Tooltip>
 
-                            {isUserIndex(index) && index.userId === currentUserId && (
-                                <>
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="h-8 w-8 p-0"
-                                                onClick={() => onEditAction?.(index)}
-                                            >
-                                                <Edit className="h-4 w-4" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>Edit index</p>
-                                        </TooltipContent>
-                                    </Tooltip>
+                                {isUserIndex(index) && index.userId === currentUserId && (
+                                    <>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0"
+                                                    onClick={() => onEditAction?.(index)}
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Edit index</p>
+                                            </TooltipContent>
+                                        </Tooltip>
 
-                                    <Tooltip>
-                                        <TooltipTrigger asChild>
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
-                                                onClick={() => handleDeleteClick(index)}
-                                            >
-                                                <Trash2 className="h-4 w-4" />
-                                            </Button>
-                                        </TooltipTrigger>
-                                        <TooltipContent>
-                                            <p>Delete index</p>
-                                        </TooltipContent>
-                                    </Tooltip>
-                                </>
-                            )}
-                        </div>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+                                                    onClick={() => handleDeleteClick(index)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Delete index</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </>
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
