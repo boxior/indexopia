@@ -4,7 +4,7 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Tooltip, TooltipContent, TooltipTrigger, TooltipProvider} from "@/components/ui/tooltip";
-import {Copy, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight} from "lucide-react";
+import {Copy, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight, EyeOff} from "lucide-react";
 import {EntityMode, Id, IndexOverview} from "@/utils/types/general.types";
 import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import {IndicesPagination} from "@/app/indices/components/CLAUD_WEB/IndicesPagination";
@@ -13,7 +13,8 @@ import {getIndexDurationLabel} from "@/app/indices/helpers";
 import Link from "next/link";
 import * as React from "react";
 import {IndexHistoryChartPreview} from "@/app/indices/components/CLAUD_WEB/IndexHistoryChartPreview";
-import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
+import {HISTORY_OVERVIEW_DAYS, PAGES_URLS} from "@/utils/constants/general.constants";
+import {useRouter} from "next/navigation";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
@@ -35,6 +36,7 @@ export function IndicesTable({
     currentUserId,
     mode,
 }: IndicesTableProps) {
+    const router = useRouter();
     const [sortField, setSortField] = useState<SortField>("total");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -43,6 +45,7 @@ export function IndicesTable({
     const [expandedRows, setExpandedRows] = useState<Set<Id>>(new Set());
 
     const isViewMode = mode === EntityMode.VIEW;
+    const hiddenOption = isViewMode && !!currentUserId;
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -162,6 +165,20 @@ export function IndicesTable({
 
     const isUserIndex = (index: IndexOverview) => !!index.userId;
 
+    const handleSignInClick = () => {
+        router.push(PAGES_URLS.signIn);
+    };
+
+    // Overlay component for protected cells
+    const ProtectedOverlay = () => (
+        <div
+            className="absolute inset-0 bg-gray-300 rounded flex items-center justify-center cursor-pointer transition-colors z-10"
+            onClick={handleSignInClick}
+        >
+            <EyeOff className="h-4 w-4 text-gray-500" />
+        </div>
+    );
+
     // Mobile Card Component
     const MobileIndexCard = ({index}: {index: IndexOverview}) => {
         const isExpanded = expandedRows.has(index.id);
@@ -200,9 +217,10 @@ export function IndicesTable({
                     </div>
 
                     <div className="flex items-center gap-2 ml-2">
-                        <div className="text-right">
+                        <div className="text-right relative">
                             <div className="text-sm font-medium">{formatPercentage(index.historyOverview.total)}</div>
                             <div className="text-xs text-gray-500">Total</div>
+                            {hiddenOption && <ProtectedOverlay />}
                         </div>
 
                         <Button
@@ -220,8 +238,10 @@ export function IndicesTable({
                 {isExpanded && (
                     <div className="mt-4 pt-4 border-t space-y-3">
                         {/* Chart Preview */}
-                        <div className="mb-4">
+                        <div className="mb-4 relative">
                             <IndexHistoryChartPreview indexOverview={index} className="h-64" />
+                            <ProtectedOverlay />
+                            {hiddenOption && <ProtectedOverlay />}
                         </div>
 
                         {/* Performance metrics */}
@@ -242,11 +262,12 @@ export function IndicesTable({
 
                         {/* Additional metrics */}
                         <div className="grid grid-cols-2 gap-4">
-                            <div className="text-center">
+                            <div className="text-center relative">
                                 <div className="text-sm font-medium text-red-600">
                                     -{Math.abs(index.maxDrawDown.value).toFixed(2)}%
                                 </div>
                                 <div className="text-xs text-gray-500">Max Drawdown</div>
+                                {hiddenOption && <ProtectedOverlay />}
                             </div>
                             <div className="text-center">
                                 <div className="text-sm font-medium text-gray-600">
@@ -393,7 +414,7 @@ export function IndicesTable({
                                     }
                                 >
                                     <TableCell className={"font-medium"}>
-                                        {isViewMode && !currentUserId ? (
+                                        {hiddenOption ? (
                                             <span className="relative">
                                                 {index.name}
                                                 <span
@@ -454,20 +475,29 @@ export function IndicesTable({
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="w-32 h-16">
+                                        <div className="w-32 h-16 relative">
                                             <IndexHistoryChartPreview
                                                 indexOverview={index}
                                                 className="h-full border-0 p-0 bg-transparent"
                                             />
+                                            {hiddenOption && <ProtectedOverlay />}
                                         </div>
                                     </TableCell>
                                     <TableCell>{formatPercentage(index.historyOverview.days7)}</TableCell>
                                     <TableCell>{formatPercentage(index.historyOverview.days30)}</TableCell>
-                                    <TableCell>{formatPercentage(index.historyOverview.total)}</TableCell>
                                     <TableCell>
-                                        <span className="text-red-600">
-                                            -{Math.abs(index.maxDrawDown.value).toFixed(2)}%
-                                        </span>
+                                        <div className="relative">
+                                            {formatPercentage(index.historyOverview.total)}
+                                            {hiddenOption && <ProtectedOverlay />}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="relative">
+                                            <span className="text-red-600">
+                                                -{Math.abs(index.maxDrawDown.value).toFixed(2)}%
+                                            </span>
+                                            {hiddenOption && <ProtectedOverlay />}
+                                        </div>
                                     </TableCell>
                                     <TableCell>
                                         {!!index.startTime && !!index.endTime ? (
