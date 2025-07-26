@@ -1,5 +1,5 @@
 import React from "react";
-import {LineChart, Line, ResponsiveContainer, Tooltip, YAxis} from "recharts";
+import {AreaChart, Area, ResponsiveContainer, Tooltip, YAxis} from "recharts";
 import {Z_INDEXES} from "@/utils/constants/general.constants";
 
 export type IndexHistory = {
@@ -70,9 +70,13 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
     };
 
     // Determine trend direction and color
-    const {trendColor, isPositiveTrend} = React.useMemo(() => {
+    const {trendColor, isPositiveTrend, gradientId} = React.useMemo(() => {
         if (chartData.length < 2) {
-            return {trendColor: "#6b7280", isPositiveTrend: true}; // neutral gray
+            return {
+                trendColor: "#6b7280",
+                isPositiveTrend: true,
+                gradientId: "neutral-gradient",
+            }; // neutral gray
         }
 
         const firstPrice = chartData[0].price;
@@ -82,6 +86,7 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
         return {
             trendColor: isPositive ? "#10b981" : "#ef4444", // green or red
             isPositiveTrend: isPositive,
+            gradientId: isPositive ? "positive-gradient" : "negative-gradient",
         };
     }, [JSON.stringify(chartData)]);
 
@@ -106,7 +111,13 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
     return (
         <div className={`h-12 w-30 ${className}`} style={{position: "relative", overflow: "visible"}}>
             <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={chartData}>
+                <AreaChart data={chartData}>
+                    <defs>
+                        <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor={trendColor} stopOpacity={0.4} />
+                            <stop offset="95%" stopColor={trendColor} stopOpacity={0.05} />
+                        </linearGradient>
+                    </defs>
                     <YAxis hide={true} domain={yAxisDomain} type="number" />
                     <Tooltip
                         content={<CustomTooltip />}
@@ -114,11 +125,12 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
                         allowEscapeViewBox={{x: true, y: true}}
                         wrapperStyle={{zIndex: Z_INDEXES.tooltip}}
                     />
-                    <Line
+                    <Area
                         type="monotone"
                         dataKey="price"
                         stroke={trendColor}
                         strokeWidth={1.5}
+                        fill={`url(#${gradientId})`}
                         dot={false}
                         activeDot={{
                             r: 3,
@@ -128,7 +140,7 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
                         }}
                         isAnimationActive={false}
                     />
-                </LineChart>
+                </AreaChart>
             </ResponsiveContainer>
         </div>
     );
