@@ -1,5 +1,5 @@
 import React from "react";
-import {LineChart, Line, ResponsiveContainer, Tooltip} from "recharts";
+import {LineChart, Line, ResponsiveContainer, Tooltip, YAxis} from "recharts";
 import {Z_INDEXES} from "@/utils/constants/general.constants";
 
 export type IndexHistory = {
@@ -32,21 +32,35 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
             .sort((a, b) => a.time - b.time); // Ensure chronological order
     }, [JSON.stringify(data)]);
 
+    // Calculate Y-axis domain for better visualization
+    const yAxisDomain = React.useMemo(() => {
+        if (chartData.length === 0) return ["auto", "auto"];
+
+        const prices = chartData.map(item => item.price);
+        const minPrice = Math.min(...prices);
+        const maxPrice = Math.max(...prices);
+
+        // Add padding to make small changes more visible
+        const range = maxPrice - minPrice;
+        const padding = range * 0.1; // 10% padding
+
+        // If range is very small, set a minimum padding
+        const minPadding = maxPrice * 0.01; // 1% of max price as minimum padding
+        const finalPadding = Math.max(padding, minPadding);
+
+        return [
+            Math.max(0, minPrice - finalPadding), // Don't go below 0 for prices
+            maxPrice + finalPadding,
+        ];
+    }, [chartData]);
+
     // Custom tooltip component with smart positioning
     const CustomTooltip = ({active, payload, label, coordinate}: any) => {
         if (active && payload && payload.length && coordinate) {
             const data = payload[0].payload;
 
             return (
-                <div
-                    className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm pointer-events-none"
-                    // style={{
-                    //     position: "absolute",
-                    //     // transform: "translate(-50%, -100%)",
-                    //     marginTop: "-10px", // Additional offset from cursor
-                    //     zIndex: 1000,
-                    // }}
-                >
+                <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm pointer-events-none">
                     <p className="font-medium text-gray-900">${data.price.toFixed(4)}</p>
                     <p className="text-gray-600 text-xs">{data.formattedDate}</p>
                 </div>
@@ -93,6 +107,7 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
         <div className={`h-12 w-30 ${className}`} style={{position: "relative", overflow: "visible"}}>
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
+                    <YAxis hide={true} domain={yAxisDomain} type="number" />
                     <Tooltip
                         content={<CustomTooltip />}
                         cursor={{stroke: trendColor, strokeWidth: 1, strokeDasharray: "3 3"}}
