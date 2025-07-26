@@ -6,6 +6,7 @@ import {isEmpty} from "lodash";
 import {actionGetIndexHistory} from "@/app/indices/actions";
 import {indexDBFactory} from "@/utils/heleprs/indexDBFactory.helper";
 import {ChartPreview} from "@/app/indices/components/CLAUD_WEB/ChartPreview";
+import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 
 export function IndexHistoryChartPreview({
     indexOverview,
@@ -49,5 +50,5 @@ export function IndexHistoryChartPreview({
         return null;
     }
 
-    return <ChartPreview data={history} className={className} />;
+    return <ChartPreview data={history.slice(-HISTORY_OVERVIEW_DAYS)} className={className} />;
 }

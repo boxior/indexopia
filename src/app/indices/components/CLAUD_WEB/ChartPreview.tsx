@@ -1,5 +1,6 @@
 import React from "react";
 import {LineChart, Line, ResponsiveContainer, Tooltip} from "recharts";
+import {Z_INDEXES} from "@/utils/constants/general.constants";
 
 export type IndexHistory = {
     priceUsd: string;
@@ -31,12 +32,21 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
             .sort((a, b) => a.time - b.time); // Ensure chronological order
     }, [JSON.stringify(data)]);
 
-    // Custom tooltip component
-    const CustomTooltip = ({active, payload, label}: any) => {
-        if (active && payload && payload.length) {
+    // Custom tooltip component with smart positioning
+    const CustomTooltip = ({active, payload, label, coordinate}: any) => {
+        if (active && payload && payload.length && coordinate) {
             const data = payload[0].payload;
+
             return (
-                <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm">
+                <div
+                    className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm pointer-events-none"
+                    // style={{
+                    //     position: "absolute",
+                    //     // transform: "translate(-50%, -100%)",
+                    //     marginTop: "-10px", // Additional offset from cursor
+                    //     zIndex: 1000,
+                    // }}
+                >
                     <p className="font-medium text-gray-900">${data.price.toFixed(4)}</p>
                     <p className="text-gray-600 text-xs">{data.formattedDate}</p>
                 </div>
@@ -80,12 +90,14 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
     }
 
     return (
-        <div className={`h-12 w-30 ${className}`}>
+        <div className={`h-12 w-30 ${className}`} style={{position: "relative", overflow: "visible"}}>
             <ResponsiveContainer width="100%" height="100%">
                 <LineChart data={chartData}>
                     <Tooltip
                         content={<CustomTooltip />}
                         cursor={{stroke: trendColor, strokeWidth: 1, strokeDasharray: "3 3"}}
+                        allowEscapeViewBox={{x: true, y: true}}
+                        wrapperStyle={{zIndex: Z_INDEXES.tooltip}}
                     />
                     <Line
                         type="monotone"

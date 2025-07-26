@@ -13,6 +13,7 @@ import {getIndexDurationLabel} from "@/app/indices/helpers";
 import Link from "next/link";
 import * as React from "react";
 import {IndexHistoryChartPreview} from "@/app/indices/components/CLAUD_WEB/IndexHistoryChartPreview";
+import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
@@ -321,7 +322,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                     </Button>
                                 </TableHead>
                                 <TableHead>Assets</TableHead>
-                                <TableHead>Chart Preview</TableHead>
+                                <TableHead>{HISTORY_OVERVIEW_DAYS}d Chart</TableHead>
                                 <TableHead>
                                     <Button
                                         variant="ghost"

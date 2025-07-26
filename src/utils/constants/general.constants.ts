@@ -32,3 +32,7 @@ export const OMIT_ASSETS_IDS = [
 export const MAX_DB_CONNECTIONS = 50;
 
 export const HISTORY_OVERVIEW_DAYS = 30;
+
+export const Z_INDEXES = {
+    tooltip: 1000,
+};
