@@ -2,7 +2,7 @@
 import {useState, useMemo} from "react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
-import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps} from "recharts";
+import {AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps} from "recharts";
 import {IndexHistory} from "@/utils/types/general.types";
 
 interface IndexChartProps {
@@ -133,6 +133,10 @@ export function IndexChart({history, indexName}: IndexChartProps) {
     const initialValue = Number(filteredData[0]?.priceUsd) || 0;
     const performance = initialValue > 0 ? ((currentValue - initialValue) / initialValue) * 100 : 0;
 
+    // Determine gradient colors based on performance
+    const isPositive = performance >= 0;
+    const gradientId = `areaGradient-${indexName.replace(/\s+/g, "-")}`;
+
     return (
         <Card className="mb-6">
             <CardHeader>
@@ -166,7 +170,21 @@ export function IndexChart({history, indexName}: IndexChartProps) {
             <CardContent>
                 <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={chartData}>
+                        <AreaChart data={chartData}>
+                            <defs>
+                                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                                    <stop
+                                        offset="5%"
+                                        stopColor={isPositive ? "#10b981" : "#ef4444"}
+                                        stopOpacity={0.3}
+                                    />
+                                    <stop
+                                        offset="95%"
+                                        stopColor={isPositive ? "#10b981" : "#ef4444"}
+                                        stopOpacity={0.05}
+                                    />
+                                </linearGradient>
+                            </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="timestamp" tickFormatter={formatDate} stroke="#666" fontSize={12} />
                             <YAxis
@@ -176,15 +194,15 @@ export function IndexChart({history, indexName}: IndexChartProps) {
                                 tickFormatter={value => `$${Number(value).toFixed(2)}`}
                             />
                             <Tooltip content={<CustomTooltip />} />
-                            <Line
+                            <Area
                                 type="monotone"
                                 dataKey="value"
-                                stroke="#3b82f6"
+                                stroke={isPositive ? "#10b981" : "#ef4444"}
                                 strokeWidth={2}
-                                dot={false}
-                                activeDot={{r: 4, stroke: "#3b82f6", strokeWidth: 2}}
+                                fill={`url(#${gradientId})`}
+                                activeDot={{r: 4, stroke: isPositive ? "#10b981" : "#ef4444", strokeWidth: 2}}
                             />
-                        </LineChart>
+                        </AreaChart>
                     </ResponsiveContainer>
                 </div>
             </CardContent>
