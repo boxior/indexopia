@@ -1,6 +1,6 @@
 import {isNil} from "lodash";
-import numeral from "@numeral";
+import numeral, {NumeralFormat} from "@numeral";
 
-export const renderSafelyNumber = (number?: number | null, format?: string) => {
+export const renderSafelyNumber = (number?: number | null, format: string | undefined = NumeralFormat.NUMBER) => {
     return isNil(number) || isNaN(number) ? "N/A" : numeral(number).format(format);
 };

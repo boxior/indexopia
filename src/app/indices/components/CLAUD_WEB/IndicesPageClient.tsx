@@ -1,7 +1,7 @@
 // app/indexes/page.tsx
 "use client";
 
-import {useState, useMemo} from "react";
+import {useState, useMemo, useEffect} from "react";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Plus, TrendingUp, TrendingDown, BarChart} from "lucide-react";
@@ -17,6 +17,8 @@ import {
 } from "@/app/indices/[id]/actions";
 import {getIndexOverviewAsset} from "@/utils/heleprs/index/index.helpers";
 import {omit} from "lodash";
+import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
+import {NumeralFormat} from "@numeral";
 
 // TODO: Add Chart Preview
 // Clear unused code, but leave ORIGINAL one
@@ -143,7 +145,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
 
         systemAvgReturn: getAvgReturn(systemIndices),
         userAvrReturn: getAvgReturn(useIndices),
-        avgReturn: getAvgReturn(indices),
+        avgReturn: getAvgReturn(filteredIndices),
     };
 
     const renderArrow = (avgReturn: number) => {
@@ -172,9 +174,12 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                                     <BarChart className="h-4 w-4 text-muted-foreground" />
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">{stats.totalIndices}</div>
+                                    <div className="text-2xl font-bold">
+                                        {renderSafelyNumber(stats.totalIndices, NumeralFormat.INTEGER)}
+                                    </div>
                                     <p className="text-xs text-muted-foreground">
-                                        {stats.systemIndices} system, {stats.customIndices} custom
+                                        {renderSafelyNumber(stats.systemIndices, NumeralFormat.INTEGER)} system,{" "}
+                                        {renderSafelyNumber(stats.customIndices, NumeralFormat.INTEGER)} custom
                                     </p>
                                 </CardContent>
                             </Card>
@@ -185,7 +190,9 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                                     {renderArrow(stats.systemAvgReturn)}
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">{stats.systemIndices}</div>
+                                    <div className="text-2xl font-bold">
+                                        {renderSafelyNumber(stats.systemIndices, NumeralFormat.INTEGER)}
+                                    </div>
                                     <p className="text-xs text-muted-foreground">Professional strategies</p>
                                 </CardContent>
                             </Card>
@@ -196,7 +203,9 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                                     {renderArrow(stats.userAvrReturn)}
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">{stats.customIndices}</div>
+                                    <div className="text-2xl font-bold">
+                                        {renderSafelyNumber(stats.customIndices, NumeralFormat.INTEGER)}
+                                    </div>
                                     <p className="text-xs text-muted-foreground">Your personal strategies</p>
                                 </CardContent>
                             </Card>
@@ -207,8 +216,8 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                                     {renderArrow(stats.avgReturn)}
                                 </CardHeader>
                                 <CardContent>
-                                    <div className="text-2xl font-bold">{stats.avgReturn.toFixed(1)}%</div>
-                                    <p className="text-xs text-muted-foreground">Across all indices</p>
+                                    <div className="text-2xl font-bold">{renderSafelyNumber(stats.avgReturn)}%</div>
+                                    <p className="text-xs text-muted-foreground">Across all filtered indices</p>
                                 </CardContent>
                             </Card>
                         </div>
@@ -242,10 +251,12 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                                         <div className="md:block">
                                             <span className="text-xs md:hidden font-medium text-muted-foreground">
                                                 System:{" "}
-                                                <span className="font-bold text-foreground">{stats.systemIndices}</span>
+                                                <span className="font-bold text-foreground">
+                                                    {renderSafelyNumber(stats.systemIndices, NumeralFormat.INTEGER)}
+                                                </span>
                                             </span>
                                             <div className="hidden md:block text-2xl font-bold">
-                                                {stats.systemIndices}
+                                                {renderSafelyNumber(stats.systemIndices, NumeralFormat.INTEGER)}
                                             </div>
                                             <p className="hidden md:block text-sm font-medium text-muted-foreground">
                                                 System
@@ -261,10 +272,12 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                                         <div className="md:block">
                                             <span className="text-xs md:hidden font-medium text-muted-foreground">
                                                 Custom:{" "}
-                                                <span className="font-bold text-foreground">{stats.customIndices}</span>
+                                                <span className="font-bold text-foreground">
+                                                    {renderSafelyNumber(stats.customIndices, NumeralFormat.INTEGER)}
+                                                </span>
                                             </span>
                                             <div className="hidden md:block text-2xl font-bold">
-                                                {stats.customIndices}
+                                                {renderSafelyNumber(stats.customIndices, NumeralFormat.INTEGER)}
                                             </div>
                                             <p className="hidden md:block text-sm font-medium text-muted-foreground">
                                                 Custom
@@ -281,11 +294,11 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                                             <span className="text-xs md:hidden font-medium text-muted-foreground">
                                                 Return:{" "}
                                                 <span className="font-bold text-foreground">
-                                                    {stats.avgReturn.toFixed(1)}%
+                                                    {renderSafelyNumber(stats.avgReturn, NumeralFormat.INTEGER)}%
                                                 </span>
                                             </span>
                                             <div className="hidden md:block text-2xl font-bold">
-                                                {stats.avgReturn.toFixed(1)}%
+                                                {renderSafelyNumber(stats.avgReturn, NumeralFormat.INTEGER)}%
                                             </div>
                                             <p className="hidden md:block text-sm font-medium text-muted-foreground">
                                                 Return

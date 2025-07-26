@@ -111,7 +111,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
         return (
             <span className={color}>
                 {sign}
-                {renderSafelyNumber(value, NumeralFormat.NUMBER)}%
+                {renderSafelyNumber(value)}%
             </span>
         );
     };

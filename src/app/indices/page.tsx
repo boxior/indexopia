@@ -31,10 +31,10 @@ const IndicesPageComponent = async () => {
     await connection();
 
     const session = await auth();
-    const userId = session?.user?.id;
+    const currentUserId = session?.user?.id;
 
     const systemIndicesOverview = await dbGetIndicesOverview();
-    const userIndicesOverview = userId ? await dbGetIndicesOverview(userId) : [];
+    const userIndicesOverview = currentUserId ? await dbGetIndicesOverview(currentUserId) : [];
 
     const {data: assets} = await fetchAssets({});
 

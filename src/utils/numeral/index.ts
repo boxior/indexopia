@@ -21,6 +21,7 @@ const usLocale = {
 };
 
 export enum NumeralFormat {
+    INTEGER = "0",
     NUMBER = "0,0.00",
     PERCENT = "0,0.00%",
     CURRENCY_$ = "$0,0.00",
