@@ -5,7 +5,7 @@ import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Tooltip, TooltipContent, TooltipTrigger, TooltipProvider} from "@/components/ui/tooltip";
 import {Copy, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight} from "lucide-react";
-import {Id, IndexOverview} from "@/utils/types/general.types";
+import {EntityMode, Id, IndexOverview} from "@/utils/types/general.types";
 import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import {IndicesPagination} from "@/app/indices/components/CLAUD_WEB/IndicesPagination";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
@@ -17,16 +17,24 @@ import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
-    onEditAction: (index: IndexOverview) => void;
-    onDeleteAction: (indexId: Id) => Promise<void>;
-    onCloneAction: (index: IndexOverview) => void;
+    mode?: EntityMode;
+    onEditAction?: (index: IndexOverview) => void;
+    onDeleteAction?: (indexId: Id) => Promise<void>;
+    onCloneAction?: (index: IndexOverview) => void;
     currentUserId?: string;
 }
 
 type SortField = "name" | "total" | "days7" | "days30" | "maxDrawDown";
 type SortOrder = "asc" | "desc";
 
-export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneAction, currentUserId}: IndicesTableProps) {
+export function IndicesTable({
+    indices,
+    onEditAction,
+    onDeleteAction,
+    onCloneAction,
+    currentUserId,
+    mode,
+}: IndicesTableProps) {
     const [sortField, setSortField] = useState<SortField>("total");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -34,11 +42,15 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     const [isDeleting, setIsDeleting] = useState(false);
     const [expandedRows, setExpandedRows] = useState<Set<Id>>(new Set());
 
+    const isViewMode = mode === EntityMode.VIEW;
+
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
 
     const handleSort = (field: SortField) => {
+        if (isViewMode) return;
+
         if (sortField === field) {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
         } else {
@@ -50,7 +62,10 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     };
 
     const getSortIcon = (field: SortField) => {
+        if (isViewMode) return null;
+
         if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
+
         return sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
     };
 
@@ -126,7 +141,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
         try {
             if (indexToDelete) {
                 setIsDeleting(true);
-                await onDeleteAction(indexToDelete.id);
+                await onDeleteAction?.(indexToDelete.id);
                 setDeleteModalOpen(false);
                 setIndexToDelete(null);
             }
@@ -251,7 +266,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                         variant="outline"
                                         size="sm"
                                         className="h-8 w-8 p-0"
-                                        onClick={() => onCloneAction(index)}
+                                        onClick={() => onCloneAction?.(index)}
                                     >
                                         <Copy className="h-4 w-4" />
                                     </Button>
@@ -269,7 +284,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                                 variant="outline"
                                                 size="sm"
                                                 className="h-8 w-8 p-0"
-                                                onClick={() => onEditAction(index)}
+                                                onClick={() => onEditAction?.(index)}
                                             >
                                                 <Edit className="h-4 w-4" />
                                             </Button>
@@ -364,7 +379,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                     </Button>
                                 </TableHead>
                                 <TableHead>Duration</TableHead>
-                                <TableHead className="text-right">Actions</TableHead>
+                                {!isViewMode && <TableHead className="text-right">Actions</TableHead>}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -378,14 +393,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                     }
                                 >
                                     <TableCell className={"font-medium"}>
-                                        <Link
-                                            className={
-                                                isUserIndex(index)
-                                                    ? "group inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors duration-200 font-semibold capitalize"
-                                                    : "group inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors duration-200 font-semibold capitalize"
-                                            }
-                                            href={`/indices/${index.id}`}
-                                        >
+                                        {isViewMode && !currentUserId ? (
                                             <span className="relative">
                                                 {index.name}
                                                 <span
@@ -396,20 +404,40 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                                     }
                                                 ></span>
                                             </span>
-                                            <svg
-                                                className="w-4 h-4 opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all duration-200"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
+                                        ) : (
+                                            <Link
+                                                className={
+                                                    isUserIndex(index)
+                                                        ? "group inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors duration-200 font-semibold capitalize"
+                                                        : "group inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors duration-200 font-semibold capitalize"
+                                                }
+                                                href={`/indices/${index.id}`}
                                             >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M9 5l7 7-7 7"
-                                                />
-                                            </svg>
-                                        </Link>
+                                                <span className="relative">
+                                                    {index.name}
+                                                    <span
+                                                        className={
+                                                            isUserIndex(index)
+                                                                ? "absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300 ease-out"
+                                                                : "absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300 ease-out"
+                                                        }
+                                                    ></span>
+                                                </span>
+                                                <svg
+                                                    className="w-4 h-4 opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all duration-200"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M9 5l7 7-7 7"
+                                                    />
+                                                </svg>
+                                            </Link>
+                                        )}
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex flex-wrap gap-1">
@@ -450,59 +478,61 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                             <span className="text-sm text-gray-500">-</span>
                                         )}
                                     </TableCell>
-                                    <TableCell className="text-right">
-                                        <div className="flex items-center justify-end gap-1">
-                                            <Tooltip>
-                                                <TooltipTrigger asChild>
-                                                    <Button
-                                                        variant="ghost"
-                                                        size="sm"
-                                                        className="h-8 w-8 p-0"
-                                                        onClick={() => onCloneAction(index)}
-                                                    >
-                                                        <Copy className="h-4 w-4" />
-                                                    </Button>
-                                                </TooltipTrigger>
-                                                <TooltipContent>
-                                                    <p>Clone index</p>
-                                                </TooltipContent>
-                                            </Tooltip>
-                                            {isUserIndex(index) && index.userId === currentUserId && (
-                                                <>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-8 w-8 p-0"
-                                                                onClick={() => onEditAction(index)}
-                                                            >
-                                                                <Edit className="h-4 w-4" />
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            <p>Edit index</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                    <Tooltip>
-                                                        <TooltipTrigger asChild>
-                                                            <Button
-                                                                variant="ghost"
-                                                                size="sm"
-                                                                className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                                                onClick={() => handleDeleteClick(index)}
-                                                            >
-                                                                <Trash2 className="h-4 w-4" />
-                                                            </Button>
-                                                        </TooltipTrigger>
-                                                        <TooltipContent>
-                                                            <p>Delete index</p>
-                                                        </TooltipContent>
-                                                    </Tooltip>
-                                                </>
-                                            )}
-                                        </div>
-                                    </TableCell>
+                                    {!isViewMode && (
+                                        <TableCell className="text-right">
+                                            <div className="flex items-center justify-end gap-1">
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Button
+                                                            variant="ghost"
+                                                            size="sm"
+                                                            className="h-8 w-8 p-0"
+                                                            onClick={() => onCloneAction?.(index)}
+                                                        >
+                                                            <Copy className="h-4 w-4" />
+                                                        </Button>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Clone index</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                                {isUserIndex(index) && index.userId === currentUserId && (
+                                                    <>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-8 w-8 p-0"
+                                                                    onClick={() => onEditAction?.(index)}
+                                                                >
+                                                                    <Edit className="h-4 w-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Edit index</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                                                    onClick={() => handleDeleteClick(index)}
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Delete index</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                    )}
                                 </TableRow>
                             ))}
                         </TableBody>
@@ -519,21 +549,24 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                 </div>
             </div>
 
-            <IndicesPagination
-                currentPage={currentPage}
-                totalItems={sortedIndices.length}
-                itemsPerPage={itemsPerPage}
-                onPageChange={handlePageChange}
-                onItemsPerPageChange={handleItemsPerPageChange}
-            />
-
-            <DeleteIndexConfirmModal
-                isOpen={deleteModalOpen}
-                onCloseAction={() => setDeleteModalOpen(false)}
-                onConfirmAction={handleDeleteConfirm}
-                indexName={indexToDelete?.name || ""}
-                isDeleting={isDeleting}
-            />
+            {!isViewMode && (
+                <>
+                    <IndicesPagination
+                        currentPage={currentPage}
+                        totalItems={sortedIndices.length}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={handlePageChange}
+                        onItemsPerPageChange={handleItemsPerPageChange}
+                    />
+                    <DeleteIndexConfirmModal
+                        isOpen={deleteModalOpen}
+                        onCloseAction={() => setDeleteModalOpen(false)}
+                        onConfirmAction={handleDeleteConfirm}
+                        indexName={indexToDelete?.name || ""}
+                        isDeleting={isDeleting}
+                    />
+                </>
+            )}
         </TooltipProvider>
     );
 }

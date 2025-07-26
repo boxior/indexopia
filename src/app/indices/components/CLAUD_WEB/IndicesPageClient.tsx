@@ -1,14 +1,14 @@
 // app/indexes/page.tsx
 "use client";
 
-import {useState, useMemo, useEffect} from "react";
+import {useMemo, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Plus, TrendingUp, TrendingDown, BarChart} from "lucide-react";
+import {BarChart, Plus, TrendingDown, TrendingUp} from "lucide-react";
 import {IndicesTable} from "@/app/indices/components/CLAUD_WEB/IndicesTable";
 import {IndicesFilters, TOP_PERFORMANCE_COUNT} from "@/app/indices/components/CLAUD_WEB/IndicesFilters";
-import {IndexModal, ModalIndexData, IndexMode} from "@/app/indices/components/CLAUD_WEB/IndexModal";
-import {IndexOverview, Asset, Id, IndexOverviewForCreate} from "@/utils/types/general.types";
+import {IndexModal, IndexMode, ModalIndexData} from "@/app/indices/components/CLAUD_WEB/IndexModal";
+import {Asset, EntityMode, Id, IndexOverview, IndexOverviewForCreate} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
 import {
     actionCreateIndexOverview,
@@ -350,6 +350,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                             onDeleteAction={handleDeleteIndex}
                             onCloneAction={handleCloneIndex}
                             currentUserId={currentUserId}
+                            mode={EntityMode.VIEW}
                         />
                     </div>
 
