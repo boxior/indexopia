@@ -161,11 +161,12 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
             <main className="min-h-screen bg-gray-50">
                 <div className="container mx-auto px-4 py-8">
                     {/* Page Header */}
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Crypto Indices</h1>
-                        <p className="text-gray-600">Explore and manage your crypto investment indices</p>
+                    <div className="mb-6 md:mb-8">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Crypto Indices</h1>
+                        <p className="text-sm sm:text-base text-gray-600">
+                            Explore and manage your crypto investment indices
+                        </p>
                     </div>
-
                     <div className={"hidden md:block"}>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                             <Card>
