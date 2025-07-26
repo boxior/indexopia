@@ -1,7 +1,5 @@
-// components/index-detail/index-chart.tsx
 "use client";
-
-import {useState} from "react";
+import {useState, useMemo} from "react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps} from "recharts";
@@ -42,6 +40,22 @@ export function IndexChart({history, indexName}: IndexChartProps) {
     };
 
     const filteredData = getFilteredData();
+
+    // Calculate dynamic Y-axis domain
+    const yAxisDomain = useMemo(() => {
+        if (filteredData.length === 0) return [0, 100];
+
+        const values = filteredData.map(item => Number(item.priceUsd));
+        const minValue = Math.min(...values);
+        const maxValue = Math.max(...values);
+
+        // Add padding to the domain (5% on each side)
+        const padding = (maxValue - minValue) * 0.05;
+        const domainMin = Math.max(0, minValue - padding);
+        const domainMax = maxValue + padding;
+
+        return [domainMin, domainMax];
+    }, [filteredData]);
 
     const formatDate = (timestamp: number | string) => {
         const date = new Date(timestamp);
@@ -144,6 +158,7 @@ export function IndexChart({history, indexName}: IndexChartProps) {
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="timestamp" tickFormatter={formatDate} stroke="#666" fontSize={12} />
                             <YAxis
+                                domain={yAxisDomain}
                                 stroke="#666"
                                 fontSize={12}
                                 tickFormatter={value => `$${Number(value).toFixed(2)}`}
