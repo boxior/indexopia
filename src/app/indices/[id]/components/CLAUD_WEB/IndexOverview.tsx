@@ -1,4 +1,3 @@
-// components/index-detail/index-overview.tsx
 "use client";
 
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
@@ -6,6 +5,7 @@ import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {TrendingUp, TrendingDown, BarChart3, Calendar, Copy, Edit, Trash2} from "lucide-react";
 import {Index} from "@/utils/types/general.types";
+import {getIndexDurationLabel} from "@/app/indices/helpers";
 
 interface IndexOverviewProps {
     index: Index;
@@ -16,7 +16,6 @@ interface IndexOverviewProps {
 }
 
 export function IndexOverview({index, currentUserId, onEdit, onDelete, onClone}: IndexOverviewProps) {
-    const isSystemIndex = !!index.systemId;
     const isUserIndex = !!index.userId && index.userId === currentUserId;
 
     const formatPercentage = (value: number) => {
@@ -40,19 +39,8 @@ export function IndexOverview({index, currentUserId, onEdit, onDelete, onClone}:
 
     const getDuration = () => {
         if (!index.startTime || !index.endTime) return "N/A";
-        const duration = index.endTime - index.startTime;
-        const days = Math.floor(duration / (1000 * 60 * 60 * 24));
-        const months = Math.floor(days / 30);
-        const years = Math.floor(months / 12);
 
-        if (years > 0) {
-            const remainingMonths = months % 12;
-            return `${years}y ${remainingMonths}m`;
-        }
-        if (months > 0) {
-            return `${months} months`;
-        }
-        return `${days} days`;
+        return getIndexDurationLabel(index.startTime, index.endTime);
     };
 
     return (
@@ -61,17 +49,15 @@ export function IndexOverview({index, currentUserId, onEdit, onDelete, onClone}:
                 <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
                         <CardTitle className="text-2xl">{index.name}</CardTitle>
-                        <Badge variant={isSystemIndex ? "default" : "secondary"}>
-                            {isSystemIndex ? "System Index" : "Custom Index"}
+                        <Badge variant={isUserIndex ? "default" : "secondary"}>
+                            {isUserIndex ? "Custom Index" : "System Index"}
                         </Badge>
                     </div>
                     <div className="flex items-center space-x-2">
-                        {isSystemIndex && (
-                            <Button variant="outline" size="sm" onClick={onClone}>
-                                <Copy className="h-4 w-4 mr-2" />
-                                Clone
-                            </Button>
-                        )}
+                        <Button variant="outline" size="sm" onClick={onClone}>
+                            <Copy className="h-4 w-4 mr-2" />
+                            Clone
+                        </Button>
                         {isUserIndex && (
                             <>
                                 <Button variant="outline" size="sm" onClick={onEdit}>
