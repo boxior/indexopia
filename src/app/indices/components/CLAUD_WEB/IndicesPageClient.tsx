@@ -21,8 +21,6 @@ import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {NumeralFormat} from "@numeral";
 import {filterTopPerformance} from "@/app/indices/helpers";
 
-// TODO: Add Chart Preview
-// Clear unused code, but leave ORIGINAL one
 export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; assets: Asset[]}) => {
     const session = useSession();
     const currentUserId = session.data?.user?.id;
