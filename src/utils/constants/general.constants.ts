@@ -1,3 +1,5 @@
+import {Id} from "@/utils/types/general.types";
+
 export const MAX_ASSETS_COUNT = 50;
 
 export const DEV_AUTH_NAME = "dev-auth";
@@ -12,6 +14,9 @@ export const PAGES_URLS = {
     authVerifyRequest: "/auth/verify-request",
     // indices
     indices: "/indices",
+    index(id: Id) {
+        return `/indices/${id}`;
+    },
     // legal
     privacy: "/legal/privacy",
     terms: "/legal/terms",

@@ -8,6 +8,7 @@ import {Badge} from "@/components/ui/badge";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {Loader2, Plus, X} from "lucide-react";
 import {Asset, Id, IndexOverviewAsset, IndexOverviewForCreate} from "@/utils/types/general.types";
+import {UseIndexActionsReturns} from "@/app/indices/[id]/hooks/useIndexActions.hook";
 
 export enum IndexMode {
     CREATE = "create",
@@ -17,7 +18,7 @@ export enum IndexMode {
 interface CreateUpdateIndexModalProps {
     isOpen: boolean;
     onCancelAction: () => void;
-    onSaveAction: (indexData: ModalIndexData) => Promise<void>;
+    onSaveAction: UseIndexActionsReturns["onSave"];
     availableAssets: Asset[];
     indexOverview?: IndexOverviewForCreate; // Optional prop - if provided, it's used for edit/clone modes
     mode?: IndexMode; // New required prop to determine the context

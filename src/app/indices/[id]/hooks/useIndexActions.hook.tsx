@@ -17,7 +17,7 @@ export type UseIndexActionsReturns = {
     onClone: (index: IndexOverview) => void;
     onEdit: (editIndex: IndexOverview) => void;
     onCreate: () => void;
-    onSave: (indexData: ModalIndexData) => Promise<void>;
+    onSave: (indexData: ModalIndexData) => Promise<IndexOverview | null>;
     onCancel: () => void;
 
     // Delete action handlers
@@ -48,18 +48,17 @@ export const useIndexActions = (): UseIndexActionsReturns => {
     const [indexToDelete, setIndexToDelete] = useState<IndexOverview | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const handleSaveAction = async (indexData: ModalIndexData) => {
+    const handleSaveAction = async (indexData: ModalIndexData): Promise<IndexOverview | null> => {
         if (indexMode === IndexMode.EDIT) {
-            await actionUpdateIndexOverview({
+            return await actionUpdateIndexOverview({
                 ...(modalIndex as IndexOverview),
                 ...indexData,
                 assets: indexData.assets.map(getIndexOverviewAsset),
                 userId: currentUserId,
             });
-            return;
         }
 
-        await actionCreateIndexOverview({
+        return await actionCreateIndexOverview({
             ...indexData,
             assets: indexData.assets.map(getIndexOverviewAsset),
             userId: currentUserId,

@@ -1,15 +1,15 @@
 "use client";
-import {useRouter} from "next/navigation";
+import {redirect, useRouter} from "next/navigation";
 import {Button} from "@/components/ui/button";
 import {ArrowLeft} from "lucide-react";
 import {IndexOverview} from "@/app/indices/[id]/components/CLAUD_WEB/IndexOverview";
 import {IndexChart} from "@/app/indices/[id]/components/CLAUD_WEB/IndexChart";
 import {AssetsTable} from "@/app/indices/[id]/components/CLAUD_WEB/AssetsTable";
-import {IndexModal} from "@/app/indices/components/CLAUD_WEB/IndexModal";
-import {Index, AssetWithHistoryOverviewPortionAndMaxDrawDown, Asset} from "@/utils/types/general.types";
+import {IndexModal, IndexMode} from "@/app/indices/components/CLAUD_WEB/IndexModal";
+import {Asset, AssetWithHistoryOverviewPortionAndMaxDrawDown, Index} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
-import {useIndexActions} from "@/app/indices/[id]/hooks/useIndexActions.hook";
+import {useIndexActions, UseIndexActionsReturns} from "@/app/indices/[id]/hooks/useIndexActions.hook";
 import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import * as React from "react";
 
@@ -39,6 +39,21 @@ export function IndexPageClient({
         isDeleting,
         onDeleteCancel,
     } = useIndexActions();
+
+    const handleSave: UseIndexActionsReturns["onSave"] = async index => {
+        const savedIndex = await onSave(index);
+
+        if (indexMode === IndexMode.CLONE) {
+            savedIndex?.id && redirect(PAGES_URLS.index(savedIndex.id));
+        }
+
+        return savedIndex;
+    };
+
+    const handleDeleteConfirm: UseIndexActionsReturns["onDeleteConfirm"] = async () => {
+        await onDeleteConfirm();
+        redirect(PAGES_URLS.indices);
+    };
 
     if (!index) {
         return (
@@ -91,7 +106,7 @@ export function IndexPageClient({
             <IndexModal
                 isOpen={modalOpen}
                 onCancelAction={onCancel}
-                onSaveAction={onSave}
+                onSaveAction={handleSave}
                 availableAssets={availableAssets}
                 indexOverview={modalIndex}
                 mode={indexMode}
@@ -99,7 +114,7 @@ export function IndexPageClient({
             <DeleteIndexConfirmModal
                 isOpen={deleteModalOpen}
                 onCancelAction={onDeleteCancel}
-                onConfirmAction={onDeleteConfirm}
+                onConfirmAction={handleDeleteConfirm}
                 indexName={indexToDelete?.name || ""}
                 isDeleting={isDeleting}
             />
