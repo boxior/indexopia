@@ -1,7 +1,8 @@
-import {AssetHistory, MomentFormat} from "@/utils/types/general.types";
+import {AssetHistory, IndexOverview, MomentFormat} from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 import moment from "moment/moment";
 import {convertToUTC} from "@/utils/heleprs/convertToUTC.helper";
+import {TOP_PERFORMANCE_COUNT} from "@/app/indices/components/CLAUD_WEB/IndicesFilters";
 
 export const getChartColorClassname = (value: number) => {
     return value < 0 ? "text-red-500" : "text-green-500";
@@ -76,3 +77,7 @@ export function populateMissingAssetHistory<D extends Omit<AssetHistory, "assetI
 
     return filledRecords;
 }
+
+export const filterTopPerformance = (indices: IndexOverview[], count: number | undefined = TOP_PERFORMANCE_COUNT) => {
+    return indices.toSorted((a, b) => b.historyOverview.total - a.historyOverview.total).slice(0, count);
+};

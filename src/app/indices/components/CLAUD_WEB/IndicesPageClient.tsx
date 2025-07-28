@@ -19,6 +19,7 @@ import {getIndexOverviewAsset} from "@/utils/heleprs/index/index.helpers";
 import {omit} from "lodash";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {NumeralFormat} from "@numeral";
+import {filterTopPerformance} from "@/app/indices/helpers";
 
 // TODO: Add Chart Preview
 // Clear unused code, but leave ORIGINAL one
@@ -58,18 +59,14 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                 performanceFilter === "all" ||
                 (performanceFilter === "positive" && index.historyOverview.days7 > 0) ||
                 (performanceFilter === "negative" && index.historyOverview.days7 < 0) ||
-                (performanceFilter === "top-performers" && !!index); // filter is below: topPerformanceIndices
+                (performanceFilter === "top-performers" && !!index); // a filter is below: topPerformanceIndices
 
             return matchesSearch && matchesType && matchesPerformance;
         });
     }, [indices, searchTerm, typeFilter, performanceFilter]);
 
     const topPerformanceIndices =
-        performanceFilter === "top-performers"
-            ? preFilteredIndices
-                  .toSorted((a, b) => b.historyOverview.total - a.historyOverview.total)
-                  .slice(0, TOP_PERFORMANCE_COUNT)
-            : [];
+        performanceFilter === "top-performers" ? filterTopPerformance(preFilteredIndices) : [];
 
     const filteredIndices =
         performanceFilter === "top-performers"
