@@ -12,7 +12,7 @@ import {Loader2, Mail, ArrowLeft, CheckCircle} from "lucide-react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default function SignInPage() {
-    const [email, setEmail] = useState("serhii.lyzun@gmail.com");
+    const [email, setEmail] = useState("");
 
     const [isLoading, setIsLoading] = useState(false);
     const [isEmailSent, setIsEmailSent] = useState(false);

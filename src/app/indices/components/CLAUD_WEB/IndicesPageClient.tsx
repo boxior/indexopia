@@ -1,14 +1,14 @@
 // app/indexes/page.tsx
 "use client";
 
-import {useState, useMemo} from "react";
+import {useMemo, useState} from "react";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Plus, TrendingUp, TrendingDown, BarChart} from "lucide-react";
+import {BarChart, Plus, TrendingDown, TrendingUp} from "lucide-react";
 import {IndicesTable} from "@/app/indices/components/CLAUD_WEB/IndicesTable";
 import {IndicesFilters, TOP_PERFORMANCE_COUNT} from "@/app/indices/components/CLAUD_WEB/IndicesFilters";
-import {IndexModal, ModalIndexData, IndexMode} from "@/app/indices/components/CLAUD_WEB/IndexModal";
-import {IndexOverview, Asset, Id, IndexOverviewForCreate} from "@/utils/types/general.types";
+import {IndexModal, IndexMode, ModalIndexData} from "@/app/indices/components/CLAUD_WEB/IndexModal";
+import {Asset, EntityMode, Id, IndexOverview, IndexOverviewForCreate} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
 import {
     actionCreateIndexOverview,
@@ -17,6 +17,9 @@ import {
 } from "@/app/indices/[id]/actions";
 import {getIndexOverviewAsset} from "@/utils/heleprs/index/index.helpers";
 import {omit} from "lodash";
+import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
+import {NumeralFormat} from "@numeral";
+import {filterTopPerformance} from "@/app/indices/helpers";
 
 export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; assets: Asset[]}) => {
     const session = useSession();
@@ -52,20 +55,16 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
             // Performance filter
             const matchesPerformance =
                 performanceFilter === "all" ||
-                (performanceFilter === "positive" && index.historyOverview.days1 > 0) ||
-                (performanceFilter === "negative" && index.historyOverview.days1 < 0) ||
-                (performanceFilter === "top-performers" && !!index); // filter is below: topPerformanceIndices
+                (performanceFilter === "positive" && index.historyOverview.days7 > 0) ||
+                (performanceFilter === "negative" && index.historyOverview.days7 < 0) ||
+                (performanceFilter === "top-performers" && !!index); // a filter is below: topPerformanceIndices
 
             return matchesSearch && matchesType && matchesPerformance;
         });
     }, [indices, searchTerm, typeFilter, performanceFilter]);
 
     const topPerformanceIndices =
-        performanceFilter === "top-performers"
-            ? preFilteredIndices
-                  .toSorted((a, b) => b.historyOverview.total - a.historyOverview.total)
-                  .slice(0, TOP_PERFORMANCE_COUNT)
-            : [];
+        performanceFilter === "top-performers" ? filterTopPerformance(preFilteredIndices) : [];
 
     const filteredIndices =
         performanceFilter === "top-performers"
@@ -141,7 +140,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
 
         systemAvgReturn: getAvgReturn(systemIndices),
         userAvrReturn: getAvgReturn(useIndices),
-        avgReturn: getAvgReturn(indices),
+        avgReturn: getAvgReturn(filteredIndices),
     };
 
     const renderArrow = (avgReturn: number) => {
@@ -157,73 +156,178 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
             <main className="min-h-screen bg-gray-50">
                 <div className="container mx-auto px-4 py-8">
                     {/* Page Header */}
-                    <div className="mb-8">
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">Crypto Indices</h1>
-                        <p className="text-gray-600">Explore and manage your crypto investment indices</p>
+                    <div className="mb-6 md:mb-8">
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Crypto Indices</h1>
+                        <p className="text-sm sm:text-base text-gray-600">
+                            Explore and manage your crypto investment indices
+                        </p>
+                    </div>
+                    <div className={"hidden md:block"}>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">Total Indices</CardTitle>
+                                    <BarChart className="h-4 w-4 text-muted-foreground" />
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">
+                                        {renderSafelyNumber(stats.totalIndices, NumeralFormat.INTEGER)}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">
+                                        {renderSafelyNumber(stats.systemIndices, NumeralFormat.INTEGER)} system,{" "}
+                                        {renderSafelyNumber(stats.customIndices, NumeralFormat.INTEGER)} custom
+                                    </p>
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">System Indices</CardTitle>
+                                    {renderArrow(stats.systemAvgReturn)}
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">
+                                        {renderSafelyNumber(stats.systemIndices, NumeralFormat.INTEGER)}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">Professional strategies</p>
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">Custom Indices</CardTitle>
+                                    {renderArrow(stats.userAvrReturn)}
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">
+                                        {renderSafelyNumber(stats.customIndices, NumeralFormat.INTEGER)}
+                                    </div>
+                                    <p className="text-xs text-muted-foreground">Your personal strategies</p>
+                                </CardContent>
+                            </Card>
+
+                            <Card>
+                                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                                    <CardTitle className="text-sm font-medium">Avg. Return</CardTitle>
+                                    {renderArrow(stats.avgReturn)}
+                                </CardHeader>
+                                <CardContent>
+                                    <div className="text-2xl font-bold">{renderSafelyNumber(stats.avgReturn)}%</div>
+                                    <p className="text-xs text-muted-foreground">Across all filtered indices</p>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
 
                     {/* Statistics Cards */}
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Total Indices</CardTitle>
-                                <BarChart className="h-4 w-4 text-muted-foreground" />
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.totalIndices}</div>
-                                <p className="text-xs text-muted-foreground">
-                                    {stats.systemIndices} system, {stats.customIndices} custom
-                                </p>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">System Indices</CardTitle>
-                                {renderArrow(stats.systemAvgReturn)}
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.systemIndices}</div>
-                                <p className="text-xs text-muted-foreground">Professional strategies</p>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Custom Indices</CardTitle>
-                                {renderArrow(stats.userAvrReturn)}
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.customIndices}</div>
-                                <p className="text-xs text-muted-foreground">Your personal strategies</p>
-                            </CardContent>
-                        </Card>
-
-                        <Card>
-                            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                <CardTitle className="text-sm font-medium">Avg. Return</CardTitle>
-                                {renderArrow(stats.avgReturn)}
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">{stats.avgReturn.toFixed(1)}%</div>
-                                <p className="text-xs text-muted-foreground">Across all indices</p>
-                            </CardContent>
-                        </Card>
+                    <div className={"md:hidden"}>
+                        <div className=" grid grid-cols-2 md:grid-cols-4 gap-2 md:gap-6 mb-4 md:mb-8">
+                            <Card className="min-h-0">
+                                <CardContent className="p-2 md:p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="md:block">
+                                            <span className="text-xs md:hidden font-medium text-muted-foreground">
+                                                Total:{" "}
+                                                <span className="font-bold text-foreground">{stats.totalIndices}</span>
+                                            </span>
+                                            <div className="hidden md:block text-2xl font-bold">
+                                                {stats.totalIndices}
+                                            </div>
+                                            <p className="hidden md:block text-sm font-medium text-muted-foreground">
+                                                Total
+                                            </p>
+                                        </div>
+                                        <BarChart className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="min-h-0">
+                                <CardContent className="p-2 md:p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="md:block">
+                                            <span className="text-xs md:hidden font-medium text-muted-foreground">
+                                                System:{" "}
+                                                <span className="font-bold text-foreground">
+                                                    {renderSafelyNumber(stats.systemIndices, NumeralFormat.INTEGER)}
+                                                </span>
+                                            </span>
+                                            <div className="hidden md:block text-2xl font-bold">
+                                                {renderSafelyNumber(stats.systemIndices, NumeralFormat.INTEGER)}
+                                            </div>
+                                            <p className="hidden md:block text-sm font-medium text-muted-foreground">
+                                                System
+                                            </p>
+                                        </div>
+                                        <div className="flex-shrink-0">{renderArrow(stats.systemAvgReturn)}</div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="min-h-0">
+                                <CardContent className="p-2 md:p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="md:block">
+                                            <span className="text-xs md:hidden font-medium text-muted-foreground">
+                                                Custom:{" "}
+                                                <span className="font-bold text-foreground">
+                                                    {renderSafelyNumber(stats.customIndices, NumeralFormat.INTEGER)}
+                                                </span>
+                                            </span>
+                                            <div className="hidden md:block text-2xl font-bold">
+                                                {renderSafelyNumber(stats.customIndices, NumeralFormat.INTEGER)}
+                                            </div>
+                                            <p className="hidden md:block text-sm font-medium text-muted-foreground">
+                                                Custom
+                                            </p>
+                                        </div>
+                                        <div className="flex-shrink-0">{renderArrow(stats.userAvrReturn)}</div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                            <Card className="min-h-0">
+                                <CardContent className="p-2 md:p-6">
+                                    <div className="flex items-center justify-between">
+                                        <div className="md:block">
+                                            <span className="text-xs md:hidden font-medium text-muted-foreground">
+                                                Return:{" "}
+                                                <span className="font-bold text-foreground">
+                                                    {renderSafelyNumber(stats.avgReturn, NumeralFormat.INTEGER)}%
+                                                </span>
+                                            </span>
+                                            <div className="hidden md:block text-2xl font-bold">
+                                                {renderSafelyNumber(stats.avgReturn, NumeralFormat.INTEGER)}%
+                                            </div>
+                                            <p className="hidden md:block text-sm font-medium text-muted-foreground">
+                                                Return
+                                            </p>
+                                        </div>
+                                        <div className="flex-shrink-0">{renderArrow(stats.avgReturn)}</div>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        </div>
                     </div>
-
                     {/* Filters and Actions */}
-                    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
-                        <IndicesFilters
-                            onSearchChange={setSearchTerm}
-                            onTypeFilter={setTypeFilter}
-                            onPerformanceFilter={setPerformanceFilter}
-                            onClearFilters={handleClearFilters}
-                        />
+                    <div className="flex flex-col gap-2 mb-4 md:mb-6">
+                        <div className="flex flex-col sm:flex-row gap-2 sm:gap-4">
+                            <div className="flex-1 min-w-0">
+                                <IndicesFilters
+                                    onSearchChange={setSearchTerm}
+                                    onTypeFilter={setTypeFilter}
+                                    onPerformanceFilter={setPerformanceFilter}
+                                    onClearFilters={handleClearFilters}
+                                />
+                            </div>
 
-                        <Button onClick={() => setCreateUpdateModalOpen(true)}>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Create Custom Index
-                        </Button>
+                            <Button
+                                onClick={() => setCreateUpdateModalOpen(true)}
+                                size="sm"
+                                className="w-full sm:w-auto flex-shrink-0 h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm"
+                            >
+                                <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
+                                <span className="hidden xs:inline">Create Custom Index</span>
+                                <span className="xs:hidden">Create Index</span>
+                            </Button>
+                        </div>
                     </div>
 
                     {/* Results Info */}
@@ -240,7 +344,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                             onEditAction={handleEditIndex}
                             onDeleteAction={handleDeleteIndex}
                             onCloneAction={handleCloneIndex}
-                            currentUserId={currentUserId}
+                            mode={EntityMode.VIEW}
                         />
                     </div>
 

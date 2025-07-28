@@ -1,15 +1,13 @@
-// components/index-detail/index-chart.tsx
 "use client";
-
-import {useState} from "react";
+import {useState, useMemo} from "react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
-import {LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps} from "recharts";
-import {IndexHistory} from "@/utils/types/general.types";
+import {AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps} from "recharts";
+import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Index} from "@/utils/types/general.types";
+import {COLORS} from "@/utils/constants/general.constants";
 
 interface IndexChartProps {
-    history: IndexHistory[];
-    indexName: string;
+    index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
 }
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
@@ -23,19 +21,30 @@ const timeRanges = [
     {label: "1M", days: 30},
     {label: "3M", days: 90},
     {label: "6M", days: 180},
+    {label: "YTD", days: "ytd"},
     {label: "1Y", days: 365},
     {label: "All", days: null},
 ];
 
-export function IndexChart({history, indexName}: IndexChartProps) {
+export function IndexChart({index}: IndexChartProps) {
+    const {history, id} = index;
     const [selectedRange, setSelectedRange] = useState("1M");
 
     const getFilteredData = () => {
         const range = timeRanges.find(r => r.label === selectedRange);
         if (!range || !range.days) return history;
 
+        if (range.days === "ytd") {
+            // Year to Date - from January 1st of current year
+            const currentYear = new Date().getFullYear();
+            const startOfYear = new Date(currentYear, 0, 1); // January 1st
+            const startOfYearTimestamp = startOfYear.getTime();
+
+            return history.filter(item => item.time >= startOfYearTimestamp);
+        }
+
         const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - range.days);
+        cutoffDate.setDate(cutoffDate.getDate() - (range.days as number));
         const cutoffTimestamp = cutoffDate.getTime();
 
         return history.filter(item => item.time >= cutoffTimestamp);
@@ -43,12 +52,30 @@ export function IndexChart({history, indexName}: IndexChartProps) {
 
     const filteredData = getFilteredData();
 
+    // Calculate dynamic Y-axis domain
+    const yAxisDomain = useMemo(() => {
+        if (filteredData.length === 0) return [0, 100];
+
+        const values = filteredData.map(item => Number(item.priceUsd));
+        const minValue = Math.min(...values);
+        const maxValue = Math.max(...values);
+
+        // Add padding to the domain (5% on each side)
+        const padding = (maxValue - minValue) * 0.05;
+        const domainMin = Math.max(0, minValue - padding);
+        const domainMax = maxValue + padding;
+
+        return [domainMin, domainMax];
+    }, [filteredData]);
+
     const formatDate = (timestamp: number | string) => {
         const date = new Date(timestamp);
+        const isYTDRange = selectedRange === "YTD";
+
         return date.toLocaleDateString("en-US", {
             month: "short",
             day: "numeric",
-            year: selectedRange === "All" || selectedRange === "1Y" ? "numeric" : undefined,
+            year: selectedRange === "All" || selectedRange === "1Y" || isYTDRange ? "numeric" : undefined,
         });
     };
 
@@ -107,6 +134,10 @@ export function IndexChart({history, indexName}: IndexChartProps) {
     const initialValue = Number(filteredData[0]?.priceUsd) || 0;
     const performance = initialValue > 0 ? ((currentValue - initialValue) / initialValue) * 100 : 0;
 
+    // Determine gradient colors based on performance
+    const isPositive = performance >= 0;
+    const gradientId = `areaGradient-${id}`;
+
     return (
         <Card className="mb-6">
             <CardHeader>
@@ -140,24 +171,43 @@ export function IndexChart({history, indexName}: IndexChartProps) {
             <CardContent>
                 <div className="h-80">
                     <ResponsiveContainer width="100%" height="100%">
-                        <LineChart data={chartData}>
+                        <AreaChart data={chartData}>
+                            <defs>
+                                <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                                    <stop
+                                        offset="5%"
+                                        stopColor={isPositive ? COLORS.positive : COLORS.negative}
+                                        stopOpacity={0.3}
+                                    />
+                                    <stop
+                                        offset="95%"
+                                        stopColor={isPositive ? COLORS.positive : COLORS.negative}
+                                        stopOpacity={0.05}
+                                    />
+                                </linearGradient>
+                            </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
                             <XAxis dataKey="timestamp" tickFormatter={formatDate} stroke="#666" fontSize={12} />
                             <YAxis
+                                domain={yAxisDomain}
                                 stroke="#666"
                                 fontSize={12}
                                 tickFormatter={value => `$${Number(value).toFixed(2)}`}
                             />
                             <Tooltip content={<CustomTooltip />} />
-                            <Line
+                            <Area
                                 type="monotone"
                                 dataKey="value"
-                                stroke="#3b82f6"
+                                stroke={isPositive ? COLORS.positive : COLORS.negative}
                                 strokeWidth={2}
-                                dot={false}
-                                activeDot={{r: 4, stroke: "#3b82f6", strokeWidth: 2}}
+                                fill={`url(#${gradientId})`}
+                                activeDot={{
+                                    r: 4,
+                                    stroke: isPositive ? COLORS.positive : COLORS.negative,
+                                    strokeWidth: 2,
+                                }}
                             />
-                        </LineChart>
+                        </AreaChart>
                     </ResponsiveContainer>
                 </div>
             </CardContent>

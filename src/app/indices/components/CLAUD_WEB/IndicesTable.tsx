@@ -4,41 +4,63 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Tooltip, TooltipContent, TooltipTrigger, TooltipProvider} from "@/components/ui/tooltip";
-import {Copy, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown} from "lucide-react";
-import {Id, IndexOverview} from "@/utils/types/general.types";
+import {
+    Copy,
+    Edit,
+    Trash2,
+    ArrowUpDown,
+    ArrowUp,
+    ArrowDown,
+    ChevronDown,
+    ChevronRight,
+    EyeOff,
+    Eye,
+} from "lucide-react";
+import {EntityMode, Id, IndexOverview} from "@/utils/types/general.types";
 import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import {IndicesPagination} from "@/app/indices/components/CLAUD_WEB/IndicesPagination";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
-import {NumeralFormat} from "@numeral";
 import {getIndexDurationLabel} from "@/app/indices/helpers";
 import Link from "next/link";
 import * as React from "react";
+import {IndexHistoryChartPreview} from "@/app/indices/components/CLAUD_WEB/IndexHistoryChartPreview";
+import {HISTORY_OVERVIEW_DAYS, PAGES_URLS} from "@/utils/constants/general.constants";
+import {useRouter} from "next/navigation";
+import {useSession} from "next-auth/react";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
-    onEditAction: (index: IndexOverview) => void;
-    onDeleteAction: (indexId: Id) => Promise<void>;
-    onCloneAction: (index: IndexOverview) => void;
-    currentUserId?: string;
+    mode?: EntityMode;
+    onEditAction?: (index: IndexOverview) => void;
+    onDeleteAction?: (indexId: Id) => Promise<void>;
+    onCloneAction?: (index: IndexOverview) => void;
 }
 
-type SortField = "name" | "total" | "days1" | "days7" | "maxDrawDown";
+type SortField = "name" | "total" | "days7" | "days30" | "maxDrawDown";
 type SortOrder = "asc" | "desc";
 
-export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneAction, currentUserId}: IndicesTableProps) {
+export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneAction, mode}: IndicesTableProps) {
+    const router = useRouter();
     const [sortField, setSortField] = useState<SortField>("total");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
-
     const [deleteModalOpen, setDeleteModalOpen] = useState(false);
     const [indexToDelete, setIndexToDelete] = useState<IndexOverview | null>(null);
-
     const [isDeleting, setIsDeleting] = useState(false);
+    const [expandedRows, setExpandedRows] = useState<Set<Id>>(new Set());
+
+    const {data} = useSession();
+    const currentUserId = data?.user?.id;
+
+    const isViewMode = mode === EntityMode.VIEW;
+    const hiddenOption = isViewMode && !currentUserId;
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
     const [itemsPerPage, setItemsPerPage] = useState(20);
 
     const handleSort = (field: SortField) => {
+        if (isViewMode) return;
+
         if (sortField === field) {
             setSortOrder(sortOrder === "asc" ? "desc" : "asc");
         } else {
@@ -50,14 +72,16 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     };
 
     const getSortIcon = (field: SortField) => {
+        if (isViewMode) return null;
+
         if (sortField !== field) return <ArrowUpDown className="h-4 w-4" />;
+
         return sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
     };
 
     const sortedIndices = useMemo(() => {
         return [...indices].sort((a, b) => {
             let aValue: any, bValue: any;
-
             switch (sortField) {
                 case "name":
                     aValue = a.name.toLowerCase();
@@ -67,13 +91,13 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                     aValue = a.historyOverview.total;
                     bValue = b.historyOverview.total;
                     break;
-                case "days1":
-                    aValue = a.historyOverview.days1;
-                    bValue = b.historyOverview.days1;
-                    break;
                 case "days7":
                     aValue = a.historyOverview.days7;
                     bValue = b.historyOverview.days7;
+                    break;
+                case "days30":
+                    aValue = a.historyOverview.days30;
+                    bValue = b.historyOverview.days30;
                     break;
                 case "maxDrawDown":
                     aValue = a.maxDrawDown.value;
@@ -83,7 +107,6 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                     aValue = a.name.toLowerCase();
                     bValue = b.name.toLowerCase();
             }
-
             if (sortOrder === "asc") {
                 return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
             } else {
@@ -114,7 +137,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
         return (
             <span className={color}>
                 {sign}
-                {renderSafelyNumber(value, NumeralFormat.NUMBER)}%
+                {renderSafelyNumber(value)}%
             </span>
         );
     };
@@ -128,8 +151,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
         try {
             if (indexToDelete) {
                 setIsDeleting(true);
-                await onDeleteAction(indexToDelete.id);
-
+                await onDeleteAction?.(indexToDelete.id);
                 setDeleteModalOpen(false);
                 setIndexToDelete(null);
             }
@@ -138,210 +160,452 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
         }
     };
 
-    const isSystemIndex = (index: IndexOverview) => !!index.systemId;
+    const toggleRowExpansion = (indexId: Id) => {
+        const newExpanded = new Set(expandedRows);
+        if (newExpanded.has(indexId)) {
+            newExpanded.delete(indexId);
+        } else {
+            newExpanded.add(indexId);
+        }
+        setExpandedRows(newExpanded);
+    };
+
     const isUserIndex = (index: IndexOverview) => !!index.userId;
 
-    return (
-        <TooltipProvider>
-            <div className="rounded-md border">
-                <Table>
-                    <TableHeader>
-                        <TableRow>
-                            <TableHead>Type</TableHead>
-                            <TableHead>
-                                <Button
-                                    variant="ghost"
-                                    className="h-auto p-0 font-medium"
-                                    onClick={() => handleSort("name")}
-                                >
-                                    Index Name
-                                    {getSortIcon("name")}
-                                </Button>
-                            </TableHead>
-                            <TableHead>Assets</TableHead>
-                            <TableHead>
-                                <Button
-                                    variant="ghost"
-                                    className="h-auto p-0 font-medium"
-                                    onClick={() => handleSort("days1")}
-                                >
-                                    24h
-                                    {getSortIcon("days1")}
-                                </Button>
-                            </TableHead>
-                            <TableHead>
-                                <Button
-                                    variant="ghost"
-                                    className="h-auto p-0 font-medium"
-                                    onClick={() => handleSort("days7")}
-                                >
-                                    7d
-                                    {getSortIcon("days7")}
-                                </Button>
-                            </TableHead>
-                            <TableHead>
-                                <Button
-                                    variant="ghost"
-                                    className="h-auto p-0 font-medium"
-                                    onClick={() => handleSort("total")}
-                                >
-                                    Total Return
-                                    {getSortIcon("total")}
-                                </Button>
-                            </TableHead>
-                            <TableHead>
-                                <Button
-                                    variant="ghost"
-                                    className="h-auto p-0 font-medium"
-                                    onClick={() => handleSort("maxDrawDown")}
-                                >
-                                    Max Drawdown
-                                    {getSortIcon("maxDrawDown")}
-                                </Button>
-                            </TableHead>
-                            <TableHead>Duration</TableHead>
-                            <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                        {paginatedIndices.map(index => (
-                            <TableRow key={index.id}>
-                                <TableCell>
-                                    <Badge variant={isSystemIndex(index) ? "secondary" : "default"}>
-                                        {isSystemIndex(index) ? "System" : "Custom"}
-                                    </Badge>
-                                </TableCell>
-                                <TableCell className="font-medium">
-                                    {
-                                        <Link
-                                            className="group inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors duration-200 font-semibold capitalize"
-                                            href={`/indices/${index.id}`}
+    const handleSignInClick = () => {
+        router.push(PAGES_URLS.signIn);
+    };
+
+    // Overlay component for protected cells
+    const ProtectedOverlay = () => (
+        <div
+            className="absolute inset-0 bg-gray-300 rounded flex items-center justify-center cursor-pointer transition-colors z-10 group"
+            onClick={handleSignInClick}
+        >
+            <EyeOff className="h-4 w-4 text-gray-500 group-hover:hidden" />
+            <Eye className="h-4 w-4 text-gray-500 hidden group-hover:block" />
+        </div>
+    );
+
+    // Mobile Card Component
+    const MobileIndexCard = ({index}: {index: IndexOverview}) => {
+        const isExpanded = expandedRows.has(index.id);
+
+        return (
+            <div
+                className={`border rounded-lg p-4 mb-4 ${
+                    isUserIndex(index) ? "bg-primary/5 border-l-4 border-l-primary" : ""
+                }`}
+            >
+                {/* Main row - always visible */}
+                <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                        <Link
+                            className={`block font-semibold text-sm truncate ${
+                                isUserIndex(index)
+                                    ? "text-primary hover:text-primary/80"
+                                    : "text-blue-600 hover:text-blue-800"
+                            }`}
+                            href={`/indices/${index.id}`}
+                        >
+                            {index.name}
+                        </Link>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                            {index.assets.slice(0, 2).map(asset => (
+                                <Badge key={asset.id} variant="outline" className="text-xs">
+                                    {asset.symbol}
+                                </Badge>
+                            ))}
+                            {index.assets.length > 2 && (
+                                <Badge variant="outline" className="text-xs">
+                                    +{index.assets.length - 2}
+                                </Badge>
+                            )}
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 ml-2">
+                        <div className="text-right relative">
+                            <div className="text-sm font-medium">{formatPercentage(index.historyOverview.total)}</div>
+                            <div className="text-xs text-gray-500">Total</div>
+                            {hiddenOption && <ProtectedOverlay />}
+                        </div>
+
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => toggleRowExpansion(index.id)}
+                        >
+                            {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Expanded content */}
+                {isExpanded && (
+                    <div className="mt-4 pt-4 border-t space-y-3">
+                        {/* Chart Preview */}
+                        <div className="mb-4 relative">
+                            <IndexHistoryChartPreview indexOverview={index} className="h-64" />
+                            {hiddenOption && <ProtectedOverlay />}
+                        </div>
+
+                        {/* Performance metrics */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="text-center">
+                                <div className="text-sm font-medium">
+                                    {formatPercentage(index.historyOverview.days7)}
+                                </div>
+                                <div className="text-xs text-gray-500">7 days</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-sm font-medium">
+                                    {formatPercentage(index.historyOverview.days30)}
+                                </div>
+                                <div className="text-xs text-gray-500">30 days</div>
+                            </div>
+                        </div>
+
+                        {/* Additional metrics */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="text-center relative">
+                                <div className="text-sm font-medium text-red-600">
+                                    -{Math.abs(index.maxDrawDown.value).toFixed(2)}%
+                                </div>
+                                <div className="text-xs text-gray-500">Max Drawdown</div>
+                                {hiddenOption && <ProtectedOverlay />}
+                            </div>
+                            <div className="text-center">
+                                <div className="text-sm font-medium text-gray-600">
+                                    {!!index.startTime && !!index.endTime
+                                        ? getIndexDurationLabel(index.startTime, index.endTime)
+                                        : "-"}
+                                </div>
+                                <div className="text-xs text-gray-500">Duration</div>
+                            </div>
+                        </div>
+
+                        {/* Actions */}
+                        {!isViewMode && (
+                            <div className="flex items-center justify-center gap-2 pt-2">
+                                <Tooltip>
+                                    <TooltipTrigger asChild>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="h-8 w-8 p-0"
+                                            onClick={() => onCloneAction?.(index)}
                                         >
-                                            <span className="relative">
-                                                {index.name}
-                                                <span className="absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300 ease-out"></span>
-                                            </span>
-                                            <svg
-                                                className="w-4 h-4 opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all duration-200"
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path
-                                                    strokeLinecap="round"
-                                                    strokeLinejoin="round"
-                                                    strokeWidth={2}
-                                                    d="M9 5l7 7-7 7"
-                                                />
-                                            </svg>
-                                        </Link>
-                                    }
-                                </TableCell>
-                                <TableCell>
-                                    <div className="flex flex-wrap gap-1">
-                                        {index.assets.slice(0, 3).map(asset => (
-                                            <Badge key={asset.id} variant="outline" className="text-xs">
-                                                {asset.symbol}
-                                            </Badge>
-                                        ))}
-                                        {index.assets.length > 3 && (
-                                            <Badge variant="outline" className="text-xs">
-                                                +{index.assets.length - 3}
-                                            </Badge>
-                                        )}
-                                    </div>
-                                </TableCell>
-                                <TableCell>{formatPercentage(index.historyOverview.days1)}</TableCell>
-                                <TableCell>{formatPercentage(index.historyOverview.days7)}</TableCell>
-                                <TableCell>{formatPercentage(index.historyOverview.total)}</TableCell>
-                                <TableCell>
-                                    <span className="text-red-600">
-                                        -{Math.abs(index.maxDrawDown.value).toFixed(2)}%
-                                    </span>
-                                </TableCell>
-                                <TableCell>
-                                    {!!index.startTime && !!index.endTime ? (
-                                        <span className="text-sm text-gray-500">
-                                            {getIndexDurationLabel(index.startTime, index.endTime)}
-                                        </span>
-                                    ) : (
-                                        <span className="text-sm text-gray-500">-</span>
-                                    )}
-                                </TableCell>
-                                <TableCell className="text-right">
-                                    <div className="flex items-center justify-end gap-1">
+                                            <Copy className="h-4 w-4" />
+                                        </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                        <p>Clone index</p>
+                                    </TooltipContent>
+                                </Tooltip>
+
+                                {isUserIndex(index) && index.userId === currentUserId && (
+                                    <>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
                                                 <Button
-                                                    variant="ghost"
+                                                    variant="outline"
                                                     size="sm"
                                                     className="h-8 w-8 p-0"
-                                                    onClick={() => onCloneAction(index)}
+                                                    onClick={() => onEditAction?.(index)}
                                                 >
-                                                    <Copy className="h-4 w-4" />
+                                                    <Edit className="h-4 w-4" />
                                                 </Button>
                                             </TooltipTrigger>
                                             <TooltipContent>
-                                                <p>Clone index</p>
+                                                <p>Edit index</p>
                                             </TooltipContent>
                                         </Tooltip>
-                                        {isUserIndex(index) && index.userId === currentUserId && (
-                                            <>
+
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
+                                                    onClick={() => handleDeleteClick(index)}
+                                                >
+                                                    <Trash2 className="h-4 w-4" />
+                                                </Button>
+                                            </TooltipTrigger>
+                                            <TooltipContent>
+                                                <p>Delete index</p>
+                                            </TooltipContent>
+                                        </Tooltip>
+                                    </>
+                                )}
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
+        );
+    };
+
+    return (
+        <TooltipProvider>
+            {/* Desktop Table */}
+            <div className="hidden lg:block">
+                <div className="rounded-md border">
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>
+                                    <Button
+                                        variant="ghost"
+                                        className="h-auto p-0 font-medium"
+                                        onClick={() => handleSort("name")}
+                                    >
+                                        Index Name
+                                        {getSortIcon("name")}
+                                    </Button>
+                                </TableHead>
+                                <TableHead>Assets</TableHead>
+                                <TableHead>{HISTORY_OVERVIEW_DAYS}d Chart</TableHead>
+                                <TableHead>
+                                    <Button
+                                        variant="ghost"
+                                        className="h-auto p-0 font-medium"
+                                        onClick={() => handleSort("days7")}
+                                    >
+                                        7d
+                                        {getSortIcon("days7")}
+                                    </Button>
+                                </TableHead>
+                                <TableHead>
+                                    <Button
+                                        variant="ghost"
+                                        className="h-auto p-0 font-medium"
+                                        onClick={() => handleSort("days30")}
+                                    >
+                                        30d
+                                        {getSortIcon("days30")}
+                                    </Button>
+                                </TableHead>
+                                <TableHead>
+                                    <Button
+                                        variant="ghost"
+                                        className="h-auto p-0 font-medium"
+                                        onClick={() => handleSort("total")}
+                                    >
+                                        Total Return
+                                        {getSortIcon("total")}
+                                    </Button>
+                                </TableHead>
+                                <TableHead>
+                                    <Button
+                                        variant="ghost"
+                                        className="h-auto p-0 font-medium"
+                                        onClick={() => handleSort("maxDrawDown")}
+                                    >
+                                        Max Drawdown
+                                        {getSortIcon("maxDrawDown")}
+                                    </Button>
+                                </TableHead>
+                                <TableHead>Duration</TableHead>
+                                {!isViewMode && <TableHead className="text-right">Actions</TableHead>}
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {paginatedIndices.map(index => (
+                                <TableRow
+                                    key={index.id}
+                                    className={
+                                        isUserIndex(index)
+                                            ? "bg-primary/5 hover:bg-primary/10 border-l-4 border-l-primary"
+                                            : ""
+                                    }
+                                >
+                                    <TableCell className={"font-medium"}>
+                                        {hiddenOption ? (
+                                            <span className="relative">
+                                                {index.name}
+                                                <span
+                                                    className={
+                                                        isUserIndex(index)
+                                                            ? "absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300 ease-out"
+                                                            : "absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300 ease-out"
+                                                    }
+                                                ></span>
+                                            </span>
+                                        ) : (
+                                            <Link
+                                                className={
+                                                    isUserIndex(index)
+                                                        ? "group inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors duration-200 font-semibold capitalize"
+                                                        : "group inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors duration-200 font-semibold capitalize"
+                                                }
+                                                href={`/indices/${index.id}`}
+                                            >
+                                                <span className="relative">
+                                                    {index.name}
+                                                    <span
+                                                        className={
+                                                            isUserIndex(index)
+                                                                ? "absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300 ease-out"
+                                                                : "absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300 ease-out"
+                                                        }
+                                                    ></span>
+                                                </span>
+                                                <svg
+                                                    className="w-4 h-4 opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all duration-200"
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path
+                                                        strokeLinecap="round"
+                                                        strokeLinejoin="round"
+                                                        strokeWidth={2}
+                                                        d="M9 5l7 7-7 7"
+                                                    />
+                                                </svg>
+                                            </Link>
+                                        )}
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="flex flex-wrap gap-1">
+                                            {index.assets.slice(0, 3).map(asset => (
+                                                <Badge key={asset.id} variant="outline" className="text-xs">
+                                                    {asset.symbol}
+                                                </Badge>
+                                            ))}
+                                            {index.assets.length > 3 && (
+                                                <Badge variant="outline" className="text-xs">
+                                                    +{index.assets.length - 3}
+                                                </Badge>
+                                            )}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="w-32 h-16 relative">
+                                            <IndexHistoryChartPreview
+                                                indexOverview={index}
+                                                className="h-full border-0 p-0 bg-transparent"
+                                            />
+                                            {hiddenOption && <ProtectedOverlay />}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>{formatPercentage(index.historyOverview.days7)}</TableCell>
+                                    <TableCell>{formatPercentage(index.historyOverview.days30)}</TableCell>
+                                    <TableCell>
+                                        <div className="relative">
+                                            {formatPercentage(index.historyOverview.total)}
+                                            {hiddenOption && <ProtectedOverlay />}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        <div className="relative">
+                                            <span className="text-red-600">
+                                                -{Math.abs(index.maxDrawDown.value).toFixed(2)}%
+                                            </span>
+                                            {hiddenOption && <ProtectedOverlay />}
+                                        </div>
+                                    </TableCell>
+                                    <TableCell>
+                                        {!!index.startTime && !!index.endTime ? (
+                                            <span className="text-sm text-gray-500">
+                                                {getIndexDurationLabel(index.startTime, index.endTime)}
+                                            </span>
+                                        ) : (
+                                            <span className="text-sm text-gray-500">-</span>
+                                        )}
+                                    </TableCell>
+                                    {!isViewMode && (
+                                        <TableCell className="text-right">
+                                            <div className="flex items-center justify-end gap-1">
                                                 <Tooltip>
                                                     <TooltipTrigger asChild>
                                                         <Button
                                                             variant="ghost"
                                                             size="sm"
                                                             className="h-8 w-8 p-0"
-                                                            onClick={() => onEditAction(index)}
+                                                            onClick={() => onCloneAction?.(index)}
                                                         >
-                                                            <Edit className="h-4 w-4" />
+                                                            <Copy className="h-4 w-4" />
                                                         </Button>
                                                     </TooltipTrigger>
                                                     <TooltipContent>
-                                                        <p>Edit index</p>
+                                                        <p>Clone index</p>
                                                     </TooltipContent>
                                                 </Tooltip>
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                                            onClick={() => handleDeleteClick(index)}
-                                                        >
-                                                            <Trash2 className="h-4 w-4" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <p>Delete index</p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                            </>
-                                        )}
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-                        ))}
-                    </TableBody>
-                </Table>
+                                                {isUserIndex(index) && index.userId === currentUserId && (
+                                                    <>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-8 w-8 p-0"
+                                                                    onClick={() => onEditAction?.(index)}
+                                                                >
+                                                                    <Edit className="h-4 w-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Edit index</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                        <Tooltip>
+                                                            <TooltipTrigger asChild>
+                                                                <Button
+                                                                    variant="ghost"
+                                                                    size="sm"
+                                                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                                                    onClick={() => handleDeleteClick(index)}
+                                                                >
+                                                                    <Trash2 className="h-4 w-4" />
+                                                                </Button>
+                                                            </TooltipTrigger>
+                                                            <TooltipContent>
+                                                                <p>Delete index</p>
+                                                            </TooltipContent>
+                                                        </Tooltip>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </TableCell>
+                                    )}
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                </div>
             </div>
 
-            <IndicesPagination
-                currentPage={currentPage}
-                totalItems={sortedIndices.length}
-                itemsPerPage={itemsPerPage}
-                onPageChange={handlePageChange}
-                onItemsPerPageChange={handleItemsPerPageChange}
-            />
+            {/* Mobile Cards */}
+            <div className="lg:hidden">
+                <div className="space-y-4">
+                    {paginatedIndices.map(index => (
+                        <MobileIndexCard key={index.id} index={index} />
+                    ))}
+                </div>
+            </div>
 
-            <DeleteIndexConfirmModal
-                isOpen={deleteModalOpen}
-                onCloseAction={() => setDeleteModalOpen(false)}
-                onConfirmAction={handleDeleteConfirm}
-                indexName={indexToDelete?.name || ""}
-                isDeleting={isDeleting}
-            />
+            {!isViewMode && (
+                <>
+                    <IndicesPagination
+                        currentPage={currentPage}
+                        totalItems={sortedIndices.length}
+                        itemsPerPage={itemsPerPage}
+                        onPageChange={handlePageChange}
+                        onItemsPerPageChange={handleItemsPerPageChange}
+                    />
+                    <DeleteIndexConfirmModal
+                        isOpen={deleteModalOpen}
+                        onCloseAction={() => setDeleteModalOpen(false)}
+                        onConfirmAction={handleDeleteConfirm}
+                        indexName={indexToDelete?.name || ""}
+                        isDeleting={isDeleting}
+                    />
+                </>
+            )}
         </TooltipProvider>
     );
 }

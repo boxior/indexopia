@@ -136,3 +136,7 @@ export enum IndexDBName {
     INDEX_HISTORY = "indexHistory",
     INDEX_OVERVIEW = "indexOverview",
 }
+
+export enum EntityMode {
+    VIEW = "view",
+}
