@@ -3,7 +3,8 @@ import {useState, useMemo} from "react";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Button} from "@/components/ui/button";
 import {AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps} from "recharts";
-import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Index, IndexHistory} from "@/utils/types/general.types";
+import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Index} from "@/utils/types/general.types";
+import {COLORS} from "@/utils/constants/general.constants";
 
 interface IndexChartProps {
     index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
@@ -175,12 +176,12 @@ export function IndexChart({index}: IndexChartProps) {
                                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                                     <stop
                                         offset="5%"
-                                        stopColor={isPositive ? "#10b981" : "#ef4444"}
+                                        stopColor={isPositive ? COLORS.positive : COLORS.negative}
                                         stopOpacity={0.3}
                                     />
                                     <stop
                                         offset="95%"
-                                        stopColor={isPositive ? "#10b981" : "#ef4444"}
+                                        stopColor={isPositive ? COLORS.positive : COLORS.negative}
                                         stopOpacity={0.05}
                                     />
                                 </linearGradient>
@@ -197,10 +198,14 @@ export function IndexChart({index}: IndexChartProps) {
                             <Area
                                 type="monotone"
                                 dataKey="value"
-                                stroke={isPositive ? "#10b981" : "#ef4444"}
+                                stroke={isPositive ? COLORS.positive : COLORS.negative}
                                 strokeWidth={2}
                                 fill={`url(#${gradientId})`}
-                                activeDot={{r: 4, stroke: isPositive ? "#10b981" : "#ef4444", strokeWidth: 2}}
+                                activeDot={{
+                                    r: 4,
+                                    stroke: isPositive ? COLORS.positive : COLORS.negative,
+                                    strokeWidth: 2,
+                                }}
                             />
                         </AreaChart>
                     </ResponsiveContainer>

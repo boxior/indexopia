@@ -3,13 +3,14 @@ import momentTimeZone from "moment-timezone";
 import moment from "moment/moment";
 import {convertToUTC} from "@/utils/heleprs/convertToUTC.helper";
 import {TOP_PERFORMANCE_COUNT} from "@/app/indices/components/CLAUD_WEB/IndicesFilters";
+import {COLORS} from "@/utils/constants/general.constants";
 
 export const getChartColorClassname = (value: number) => {
     return value < 0 ? "text-red-500" : "text-green-500";
 };
 
 export const getChartColor = (value: number) => {
-    return value < 0 ? "#ef4444" : "#22c55e";
+    return value < 0 ? COLORS.negative : "#22c55e";
 };
 
 export const getIndexStartFromLabel = (startTime: number) => {

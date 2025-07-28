@@ -36,3 +36,8 @@ export const HISTORY_OVERVIEW_DAYS = 30;
 export const Z_INDEXES = {
     tooltip: 1000,
 };
+
+export const COLORS = {
+    negative: "#ef4444",
+    positive: "#10b981",
+};

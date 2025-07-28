@@ -1,6 +1,6 @@
 import React from "react";
 import {AreaChart, Area, ResponsiveContainer, Tooltip, YAxis} from "recharts";
-import {Z_INDEXES} from "@/utils/constants/general.constants";
+import {COLORS, Z_INDEXES} from "@/utils/constants/general.constants";
 
 export type IndexHistory = {
     priceUsd: string;
@@ -55,7 +55,7 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
     }, [chartData]);
 
     // Custom tooltip component with smart positioning
-    const CustomTooltip = ({active, payload, label, coordinate}: any) => {
+    const CustomTooltip = ({active, payload, coordinate}: any) => {
         if (active && payload && payload.length && coordinate) {
             const data = payload[0].payload;
 
@@ -70,7 +70,7 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
     };
 
     // Determine trend direction and color
-    const {trendColor, isPositiveTrend, gradientId} = React.useMemo(() => {
+    const {trendColor, gradientId} = React.useMemo(() => {
         if (chartData.length < 2) {
             return {
                 trendColor: "#6b7280",
@@ -84,7 +84,7 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
         const isPositive = lastPrice >= firstPrice;
 
         return {
-            trendColor: isPositive ? "#10b981" : "#ef4444", // green or red
+            trendColor: isPositive ? COLORS.positive : COLORS.negative, // green or red
             isPositiveTrend: isPositive,
             gradientId: isPositive ? "positive-gradient" : "negative-gradient",
         };
