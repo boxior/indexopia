@@ -31,7 +31,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
         onDeleteConfirm,
         isDeleting,
         onDeleteCancel,
-    } = useIndexActions({});
+    } = useIndexActions();
 
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
