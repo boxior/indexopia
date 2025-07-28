@@ -4,18 +4,19 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {TrendingUp, TrendingDown, BarChart3, Calendar, Copy, Edit, Trash2} from "lucide-react";
-import {Index} from "@/utils/types/general.types";
+import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Index} from "@/utils/types/general.types";
 import {getIndexDurationLabel} from "@/app/indices/helpers";
+import {UseIndexActionsReturns} from "@/app/indices/[id]/hooks/useIndexActions.hook";
 
 interface IndexOverviewProps {
-    index: Index;
+    index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
     currentUserId?: string;
-    onEdit?: () => void;
-    onDelete?: () => void;
-    onClone?: () => void;
+    onEditAction?: UseIndexActionsReturns["onEdit"];
+    onDeleteAction?: UseIndexActionsReturns["onDeleteClick"];
+    onCloneAction?: UseIndexActionsReturns["onClone"];
 }
 
-export function IndexOverview({index, currentUserId, onEdit, onDelete, onClone}: IndexOverviewProps) {
+export function IndexOverview({index, currentUserId, onEditAction, onDeleteAction, onCloneAction}: IndexOverviewProps) {
     const isUserIndex = !!index.userId && index.userId === currentUserId;
 
     const formatPercentage = (value: number) => {
@@ -54,17 +55,17 @@ export function IndexOverview({index, currentUserId, onEdit, onDelete, onClone}:
                         </Badge>
                     </div>
                     <div className="flex items-center space-x-2">
-                        <Button variant="outline" size="sm" onClick={onClone}>
+                        <Button variant="outline" size="sm" onClick={() => onCloneAction?.(index)}>
                             <Copy className="h-4 w-4 mr-2" />
                             Clone
                         </Button>
                         {isUserIndex && (
                             <>
-                                <Button variant="outline" size="sm" onClick={onEdit}>
+                                <Button variant="outline" size="sm" onClick={() => onEditAction?.(index)}>
                                     <Edit className="h-4 w-4 mr-2" />
                                     Edit
                                 </Button>
-                                <Button variant="outline" size="sm" onClick={onDelete}>
+                                <Button variant="outline" size="sm" onClick={() => onDeleteAction?.(index)}>
                                     <Trash2 className="h-4 w-4 mr-2" />
                                     Delete
                                 </Button>

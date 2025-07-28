@@ -5,67 +5,41 @@ import {ArrowLeft} from "lucide-react";
 import {IndexOverview} from "@/app/indices/[id]/components/CLAUD_WEB/IndexOverview";
 import {IndexChart} from "@/app/indices/[id]/components/CLAUD_WEB/IndexChart";
 import {AssetsTable} from "@/app/indices/[id]/components/CLAUD_WEB/AssetsTable";
-import {ModalIndexData, IndexModal} from "@/app/indices/components/CLAUD_WEB/IndexModal";
+import {IndexModal} from "@/app/indices/components/CLAUD_WEB/IndexModal";
 import {Index, AssetWithHistoryOverviewPortionAndMaxDrawDown, Asset} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
 import {useState} from "react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
+import {useIndexActions} from "@/app/indices/[id]/hooks/useIndexActions.hook";
+import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
+import * as React from "react";
 
 export function IndexPageClient({index}: {index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null}) {
     const router = useRouter();
     const session = useSession();
     const currentUserId = session.data?.user?.id;
 
-    // Modal state
-    const [isModalOpen, setIsModalOpen] = useState(false);
+    const {
+        onSave,
+        onClone,
+        onEdit,
+        onDeleteClick,
+        modalOpen,
+        onCancel,
+        modalIndex,
+        indexMode,
+        indexToDelete,
+        deleteModalOpen,
+        onDeleteConfirm,
+        isDeleting,
+        onDeleteCancel,
+    } = useIndexActions();
 
     // Mock available assets - replace with actual data fetch
     const [availableAssets] = useState<Asset[]>([
         // You'll need to fetch this data from your API
         // For now, using placeholder data
     ]);
-
-    const handleEdit = () => {
-        setIsModalOpen(true);
-    };
-
-    const handleDelete = () => {
-        // TODO: Implement delete functionality
-        console.log("Delete index:", index?.id);
-        router.push(PAGES_URLS.indices);
-    };
-
-    const handleClone = () => {
-        // TODO: Implement clone functionality
-        console.log("Clone index:", index?.id);
-    };
-
-    const handleModalClose = () => {
-        setIsModalOpen(false);
-    };
-
-    const handleModalSave = async (indexData: ModalIndexData) => {
-        try {
-            // TODO: Implement the API call to update the index
-            console.log("Updating index:", index?.id, "with data:", indexData);
-
-            // Example API call structure:
-            // const response = await fetch(`/api/indexes/${index?.id}`, {
-            //     method: 'PUT',
-            //     headers: { 'Content-Type': 'application/json' },
-            //     body: JSON.stringify(indexData)
-            // });
-
-            // if (response.ok) {
-            //     // Refresh the page data or update local state
-            //     router.refresh();
-            // }
-
-            setIsModalOpen(false);
-        } catch (error) {
-            console.error("Error updating index:", error);
-        }
-    };
 
     if (!index) {
         return (
@@ -102,9 +76,9 @@ export function IndexPageClient({index}: {index: Index<AssetWithHistoryOverviewP
                     <IndexOverview
                         index={index}
                         currentUserId={currentUserId}
-                        onEdit={handleEdit}
-                        onDelete={handleDelete}
-                        onClone={handleClone}
+                        onEditAction={onEdit}
+                        onDeleteAction={onDeleteClick}
+                        onCloneAction={onClone}
                     />
 
                     {/* Chart */}
@@ -115,13 +89,20 @@ export function IndexPageClient({index}: {index: Index<AssetWithHistoryOverviewP
                 </main>
             </div>
 
-            {/* Update Index Modal */}
             <IndexModal
-                isOpen={isModalOpen}
-                onCancelAction={handleModalClose}
-                onSaveAction={handleModalSave}
+                isOpen={modalOpen}
+                onCancelAction={onCancel}
+                onSaveAction={onSave}
                 availableAssets={availableAssets}
-                indexOverview={index}
+                indexOverview={modalIndex}
+                mode={indexMode}
+            />
+            <DeleteIndexConfirmModal
+                isOpen={deleteModalOpen}
+                onCancelAction={onDeleteCancel}
+                onConfirmAction={onDeleteConfirm}
+                indexName={indexToDelete?.name || ""}
+                isDeleting={isDeleting}
             />
         </>
     );
