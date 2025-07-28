@@ -124,6 +124,7 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
                         cursor={{stroke: trendColor, strokeWidth: 1, strokeDasharray: "3 3"}}
                         allowEscapeViewBox={{x: true, y: true}}
                         wrapperStyle={{zIndex: Z_INDEXES.tooltip}}
+                        reverseDirection={{x: true, y: true}}
                     />
                     <Area
                         type="monotone"
