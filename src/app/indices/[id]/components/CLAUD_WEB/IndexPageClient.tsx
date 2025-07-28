@@ -8,13 +8,18 @@ import {AssetsTable} from "@/app/indices/[id]/components/CLAUD_WEB/AssetsTable";
 import {IndexModal} from "@/app/indices/components/CLAUD_WEB/IndexModal";
 import {Index, AssetWithHistoryOverviewPortionAndMaxDrawDown, Asset} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
-import {useState} from "react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
 import {useIndexActions} from "@/app/indices/[id]/hooks/useIndexActions.hook";
 import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import * as React from "react";
 
-export function IndexPageClient({index}: {index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null}) {
+export function IndexPageClient({
+    index,
+    assets: availableAssets,
+}: {
+    index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null;
+    assets: Asset[];
+}) {
     const router = useRouter();
     const session = useSession();
     const currentUserId = session.data?.user?.id;
@@ -34,12 +39,6 @@ export function IndexPageClient({index}: {index: Index<AssetWithHistoryOverviewP
         isDeleting,
         onDeleteCancel,
     } = useIndexActions();
-
-    // Mock available assets - replace with actual data fetch
-    const [availableAssets] = useState<Asset[]>([
-        // You'll need to fetch this data from your API
-        // For now, using placeholder data
-    ]);
 
     if (!index) {
         return (
