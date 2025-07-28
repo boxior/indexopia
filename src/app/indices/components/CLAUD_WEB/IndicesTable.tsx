@@ -4,7 +4,18 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Tooltip, TooltipContent, TooltipTrigger, TooltipProvider} from "@/components/ui/tooltip";
-import {Copy, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight, EyeOff} from "lucide-react";
+import {
+    Copy,
+    Edit,
+    Trash2,
+    ArrowUpDown,
+    ArrowUp,
+    ArrowDown,
+    ChevronDown,
+    ChevronRight,
+    EyeOff,
+    Eye,
+} from "lucide-react";
 import {EntityMode, Id, IndexOverview} from "@/utils/types/general.types";
 import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import {IndicesPagination} from "@/app/indices/components/CLAUD_WEB/IndicesPagination";
@@ -168,10 +179,11 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     // Overlay component for protected cells
     const ProtectedOverlay = () => (
         <div
-            className="absolute inset-0 bg-gray-300 rounded flex items-center justify-center cursor-pointer transition-colors z-10"
+            className="absolute inset-0 bg-gray-300 rounded flex items-center justify-center cursor-pointer transition-colors z-10 group"
             onClick={handleSignInClick}
         >
-            <EyeOff className="h-4 w-4 text-gray-500" />
+            <EyeOff className="h-4 w-4 text-gray-500 group-hover:hidden" />
+            <Eye className="h-4 w-4 text-gray-500 hidden group-hover:block" />
         </div>
     );
 
