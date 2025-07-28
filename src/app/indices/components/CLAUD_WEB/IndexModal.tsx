@@ -16,7 +16,7 @@ export enum IndexMode {
 }
 interface CreateUpdateIndexModalProps {
     isOpen: boolean;
-    onCloseAction: () => void;
+    onCancelAction: () => void;
     onSaveAction: (indexData: ModalIndexData) => Promise<void>;
     availableAssets: Asset[];
     indexOverview?: IndexOverviewForCreate; // Optional prop - if provided, it's used for edit/clone modes
@@ -29,7 +29,7 @@ export interface ModalIndexData {
 }
 export function IndexModal({
     isOpen,
-    onCloseAction,
+    onCancelAction,
     onSaveAction,
     availableAssets,
     indexOverview,
@@ -128,7 +128,7 @@ export function IndexModal({
             setIndexName("");
             setSelectedAssets([]);
             setSelectedAssetId("");
-            onCloseAction();
+            onCancelAction();
         } finally {
             setIsLoading(false);
         }
@@ -143,7 +143,7 @@ export function IndexModal({
             setSelectedAssets([]);
         }
         setSelectedAssetId("");
-        onCloseAction();
+        onCancelAction();
     };
 
     const totalPortion = getTotalPortion();

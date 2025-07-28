@@ -17,7 +17,6 @@ import {
     Eye,
 } from "lucide-react";
 import {EntityMode, Id, IndexOverview} from "@/utils/types/general.types";
-import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import {IndicesPagination} from "@/app/indices/components/CLAUD_WEB/IndicesPagination";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {getIndexDurationLabel} from "@/app/indices/helpers";
@@ -32,7 +31,7 @@ interface IndicesTableProps {
     indices: IndexOverview[];
     mode?: EntityMode;
     onEditAction?: (index: IndexOverview) => void;
-    onDeleteAction?: (indexId: Id) => Promise<void>;
+    onDeleteAction?: (index: IndexOverview) => void;
     onCloneAction?: (index: IndexOverview) => void;
 }
 
@@ -41,11 +40,9 @@ type SortOrder = "asc" | "desc";
 
 export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneAction, mode}: IndicesTableProps) {
     const router = useRouter();
+
     const [sortField, setSortField] = useState<SortField>("total");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
-    const [deleteModalOpen, setDeleteModalOpen] = useState(false);
-    const [indexToDelete, setIndexToDelete] = useState<IndexOverview | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
     const [expandedRows, setExpandedRows] = useState<Set<Id>>(new Set());
 
     const {data} = useSession();
@@ -140,24 +137,6 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                 {renderSafelyNumber(value)}%
             </span>
         );
-    };
-
-    const handleDeleteClick = (index: IndexOverview) => {
-        setIndexToDelete(index);
-        setDeleteModalOpen(true);
-    };
-
-    const handleDeleteConfirm = async () => {
-        try {
-            if (indexToDelete) {
-                setIsDeleting(true);
-                await onDeleteAction?.(indexToDelete.id);
-                setDeleteModalOpen(false);
-                setIndexToDelete(null);
-            }
-        } finally {
-            setIsDeleting(false);
-        }
     };
 
     const toggleRowExpansion = (indexId: Id) => {
@@ -329,7 +308,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                                     variant="outline"
                                                     size="sm"
                                                     className="h-8 w-8 p-0 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
-                                                    onClick={() => handleDeleteClick(index)}
+                                                    onClick={() => onDeleteAction?.(index)}
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -558,7 +537,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                                                     variant="ghost"
                                                                     size="sm"
                                                                     className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                                                    onClick={() => handleDeleteClick(index)}
+                                                                    onClick={() => onDeleteAction?.(index)}
                                                                 >
                                                                     <Trash2 className="h-4 w-4" />
                                                                 </Button>
@@ -596,13 +575,6 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                         itemsPerPage={itemsPerPage}
                         onPageChange={handlePageChange}
                         onItemsPerPageChange={handleItemsPerPageChange}
-                    />
-                    <DeleteIndexConfirmModal
-                        isOpen={deleteModalOpen}
-                        onCloseAction={() => setDeleteModalOpen(false)}
-                        onConfirmAction={handleDeleteConfirm}
-                        indexName={indexToDelete?.name || ""}
-                        isDeleting={isDeleting}
                     />
                 </>
             )}

@@ -118,7 +118,7 @@ export function IndexPageClient({index}: {index: Index<AssetWithHistoryOverviewP
             {/* Update Index Modal */}
             <IndexModal
                 isOpen={isModalOpen}
-                onCloseAction={handleModalClose}
+                onCancelAction={handleModalClose}
                 onSaveAction={handleModalSave}
                 availableAssets={availableAssets}
                 indexOverview={index}

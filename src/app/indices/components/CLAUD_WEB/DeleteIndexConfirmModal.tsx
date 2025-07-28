@@ -14,7 +14,7 @@ import {
 
 interface DeleteConfirmModalProps {
     isOpen: boolean;
-    onCloseAction: () => void;
+    onCancelAction: () => void;
     onConfirmAction: () => void;
     indexName: string;
     isDeleting: boolean;
@@ -22,13 +22,13 @@ interface DeleteConfirmModalProps {
 
 export function DeleteIndexConfirmModal({
     isOpen,
-    onCloseAction,
+    onCancelAction,
     onConfirmAction,
     indexName,
     isDeleting,
 }: DeleteConfirmModalProps) {
     return (
-        <AlertDialog open={isOpen} onOpenChange={onCloseAction}>
+        <AlertDialog open={isOpen} onOpenChange={onCancelAction}>
             <AlertDialogContent>
                 <AlertDialogHeader>
                     <AlertDialogTitle>Delete Index</AlertDialogTitle>
@@ -37,7 +37,7 @@ export function DeleteIndexConfirmModal({
                     </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel onClick={onCloseAction}>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel onClick={onCancelAction}>Cancel</AlertDialogCancel>
                     <AlertDialogAction
                         onClick={onConfirmAction}
                         disabled={isDeleting}

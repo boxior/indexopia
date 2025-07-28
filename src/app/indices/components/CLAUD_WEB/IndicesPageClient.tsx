@@ -1,4 +1,3 @@
-// app/indexes/page.tsx
 "use client";
 
 import {useMemo, useState} from "react";
@@ -6,28 +5,33 @@ import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {BarChart, Plus, TrendingDown, TrendingUp} from "lucide-react";
 import {IndicesTable} from "@/app/indices/components/CLAUD_WEB/IndicesTable";
-import {IndicesFilters, TOP_PERFORMANCE_COUNT} from "@/app/indices/components/CLAUD_WEB/IndicesFilters";
-import {IndexModal, IndexMode, ModalIndexData} from "@/app/indices/components/CLAUD_WEB/IndexModal";
-import {Asset, EntityMode, Id, IndexOverview, IndexOverviewForCreate} from "@/utils/types/general.types";
-import {useSession} from "next-auth/react";
-import {
-    actionCreateIndexOverview,
-    actionDeleteIndexOverview,
-    actionUpdateIndexOverview,
-} from "@/app/indices/[id]/actions";
-import {getIndexOverviewAsset} from "@/utils/heleprs/index/index.helpers";
-import {omit} from "lodash";
+import {IndicesFilters} from "@/app/indices/components/CLAUD_WEB/IndicesFilters";
+import {IndexModal} from "@/app/indices/components/CLAUD_WEB/IndexModal";
+import {Asset, IndexOverview} from "@/utils/types/general.types";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {NumeralFormat} from "@numeral";
 import {filterTopPerformance} from "@/app/indices/helpers";
+import {useIndexActions} from "@/app/indices/[id]/hooks/useIndexActions.hook";
+import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
+import * as React from "react";
 
 export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; assets: Asset[]}) => {
-    const session = useSession();
-    const currentUserId = session.data?.user?.id;
-
-    const [createUpdateModalOpen, setCreateUpdateModalOpen] = useState(false);
-    const [modalIndex, setModalIndex] = useState<IndexOverviewForCreate | IndexOverview>();
-    const [indexMode, setIndexMode] = useState<IndexMode>();
+    const {
+        onSave,
+        onClone,
+        onEdit,
+        onDeleteClick,
+        onCreate,
+        modalOpen,
+        onCancel,
+        modalIndex,
+        indexMode,
+        indexToDelete,
+        deleteModalOpen,
+        onDeleteConfirm,
+        isDeleting,
+        onDeleteCancel,
+    } = useIndexActions({});
 
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
@@ -70,54 +74,6 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
         performanceFilter === "top-performers"
             ? preFilteredIndices.filter(i => topPerformanceIndices.map(i => i.id).includes(i.id))
             : preFilteredIndices;
-
-    const handleSaveAction = async (indexData: ModalIndexData) => {
-        if (indexMode === IndexMode.EDIT) {
-            await actionUpdateIndexOverview({
-                ...(modalIndex as IndexOverview),
-                ...indexData,
-                assets: indexData.assets.map(getIndexOverviewAsset),
-                userId: currentUserId,
-            });
-            return;
-        }
-
-        await actionCreateIndexOverview({
-            ...indexData,
-            assets: indexData.assets.map(getIndexOverviewAsset),
-            userId: currentUserId,
-        });
-    };
-
-    const handleCloseAction = () => {
-        setModalIndex(undefined);
-        setIndexMode(undefined);
-        setCreateUpdateModalOpen(false);
-    };
-
-    const handleEditIndex = (editIndex: IndexOverview) => {
-        setCreateUpdateModalOpen(true);
-        setModalIndex(editIndex);
-        setIndexMode(IndexMode.EDIT);
-    };
-
-    const handleDeleteIndex = async (indexId: Id) => {
-        await actionDeleteIndexOverview(indexId);
-    };
-
-    const handleCloneIndex = (index: IndexOverview) => {
-        setCreateUpdateModalOpen(true);
-
-        const clonedIndex: IndexOverviewForCreate = {
-            ...omit(index, "id"),
-            userId: currentUserId,
-            name: `${index.name} (Clone)`,
-            systemId: undefined,
-        };
-
-        setModalIndex(clonedIndex);
-        setIndexMode(IndexMode.CLONE);
-    };
 
     const handleClearFilters = () => {
         setSearchTerm("");
@@ -319,7 +275,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                             </div>
 
                             <Button
-                                onClick={() => setCreateUpdateModalOpen(true)}
+                                onClick={onCreate}
                                 size="sm"
                                 className="w-full sm:w-auto flex-shrink-0 h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm"
                             >
@@ -341,10 +297,9 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                     <div className="bg-white rounded-lg shadow">
                         <IndicesTable
                             indices={filteredIndices}
-                            onEditAction={handleEditIndex}
-                            onDeleteAction={handleDeleteIndex}
-                            onCloneAction={handleCloneIndex}
-                            mode={EntityMode.VIEW}
+                            onEditAction={onEdit}
+                            onDeleteAction={onDeleteClick}
+                            onCloneAction={onClone}
                         />
                     </div>
 
@@ -365,14 +320,20 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverview[]; 
                 </div>
             </main>
 
-            {/* Create Index Modal */}
             <IndexModal
-                isOpen={createUpdateModalOpen}
-                onCloseAction={handleCloseAction}
-                onSaveAction={handleSaveAction}
+                isOpen={modalOpen}
+                onCancelAction={onCancel}
+                onSaveAction={onSave}
                 availableAssets={availableAssets}
                 indexOverview={modalIndex}
                 mode={indexMode}
+            />
+            <DeleteIndexConfirmModal
+                isOpen={deleteModalOpen}
+                onCancelAction={onDeleteCancel}
+                onConfirmAction={onDeleteConfirm}
+                indexName={indexToDelete?.name || ""}
+                isDeleting={isDeleting}
             />
         </>
     );
