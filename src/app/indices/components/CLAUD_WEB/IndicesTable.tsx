@@ -319,7 +319,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     };
 
     return (
-        <TooltipProvider>
+        <>
             {/* Desktop Table */}
             <div className="hidden lg:block">
                 <div className="rounded-md border">
@@ -542,6 +542,6 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                     />
                 </>
             )}
-        </TooltipProvider>
+        </>
     );
 }

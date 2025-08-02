@@ -9,6 +9,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 import {Loader2, Plus, X} from "lucide-react";
 import {Asset, Id, IndexOverviewAsset, IndexOverviewForCreate} from "@/utils/types/general.types";
 import {UseIndexActionsReturns} from "@/app/indices/[id]/hooks/useIndexActions.hook";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 export enum IndexMode {
     CREATE = "create",
@@ -148,7 +149,23 @@ export function IndexModal({
     };
 
     const totalPortion = getTotalPortion();
-    const isValid = indexName.trim() && selectedAssets.length > 0 && totalPortion === 100;
+
+    const getSubmitDisabledReason = (): string | false => {
+        switch (true) {
+            case !indexName.trim():
+                return "Please enter an index name";
+            case selectedAssets.length === 0:
+                return "Please select at least one asset";
+            case totalPortion !== 100:
+                return "Please ensure that the total allocation is 100%";
+            case isLoading:
+                return "Please wait for the request to complete";
+            default:
+                return false;
+        }
+    };
+
+    const disabledReason = getSubmitDisabledReason();
 
     return (
         <Dialog open={isOpen} onOpenChange={handleClose}>
@@ -163,7 +180,7 @@ export function IndexModal({
                 </DialogHeader>
                 <div className="space-y-6">
                     <div className="space-y-2">
-                        <Label htmlFor="index-name">Index Name</Label>
+                        <Label htmlFor="index-name">Index Name*</Label>
                         <Input
                             id="index-name"
                             value={indexName}
@@ -173,7 +190,7 @@ export function IndexModal({
                         />
                     </div>
                     <div className="space-y-4">
-                        <Label>Assets & Allocation</Label>
+                        <Label>Assets & Allocation*</Label>
                         <div className="flex gap-2">
                             <Select value={selectedAssetId} onValueChange={setSelectedAssetId} disabled={isLoading}>
                                 <SelectTrigger className="flex-1">
@@ -206,7 +223,7 @@ export function IndexModal({
                                             type="number"
                                             min="0"
                                             max="100"
-                                            step="0.01"
+                                            step="1"
                                             value={asset.portion}
                                             onChange={e =>
                                                 handlePortionChange(asset.id, parseFloat(e.target.value) || 0)
@@ -216,6 +233,7 @@ export function IndexModal({
                                         />
                                         <span className="text-sm text-gray-500">%</span>
                                     </div>
+
                                     <Button
                                         variant="ghost"
                                         size="sm"
@@ -243,20 +261,35 @@ export function IndexModal({
                     <Button variant="outline" onClick={handleClose} disabled={isLoading}>
                         Cancel
                     </Button>
-                    <Button onClick={handleSave} disabled={!isValid || isLoading}>
-                        {isLoading ? (
-                            <>
-                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                {mode === IndexMode.CREATE
-                                    ? "Creating..."
-                                    : mode === IndexMode.EDIT
-                                      ? "Updating..."
-                                      : "Cloning..."}
-                            </>
-                        ) : (
-                            labels.action
+                    <Tooltip>
+                        <TooltipTrigger asChild>
+                            <span className={disabledReason ? "cursor-not-allowed" : ""}>
+                                <Button
+                                    onClick={handleSave}
+                                    disabled={!!disabledReason || isLoading}
+                                    className={disabledReason ? "pointer-events-none" : ""}
+                                >
+                                    {isLoading ? (
+                                        <>
+                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                            {mode === IndexMode.CREATE
+                                                ? "Creating..."
+                                                : mode === IndexMode.EDIT
+                                                  ? "Updating..."
+                                                  : "Cloning..."}
+                                        </>
+                                    ) : (
+                                        labels.action
+                                    )}
+                                </Button>
+                            </span>
+                        </TooltipTrigger>
+                        {disabledReason && (
+                            <TooltipContent>
+                                <p>{disabledReason}</p>
+                            </TooltipContent>
                         )}
-                    </Button>
+                    </Tooltip>
                 </DialogFooter>
             </DialogContent>
         </Dialog>
