@@ -102,16 +102,20 @@ export function IndexChart({index}: IndexChartProps) {
                     : 0;
 
             return (
-                <div className="bg-white p-4 border border-gray-200 rounded-lg shadow-lg">
-                    <div className="font-medium text-gray-900 mb-2">{formatTooltipDate(timestamp)}</div>
+                <div className="bg-white p-3 sm:p-4 border border-gray-200 rounded-lg shadow-lg max-w-xs">
+                    <div className="font-medium text-gray-900 mb-2 text-sm sm:text-base">
+                        {formatTooltipDate(timestamp)}
+                    </div>
                     <div className="space-y-1">
                         <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-500">Index Value:</span>
-                            <span className="font-medium">${Number(value).toFixed(2)}</span>
+                            <span className="text-xs sm:text-sm text-gray-500">Index Value:</span>
+                            <span className="font-medium text-sm sm:text-base">${Number(value).toFixed(2)}</span>
                         </div>
                         <div className="flex justify-between items-center">
-                            <span className="text-sm text-gray-500">Change:</span>
-                            <span className={`font-medium ${change >= 0 ? "text-green-600" : "text-red-600"}`}>
+                            <span className="text-xs sm:text-sm text-gray-500">Change:</span>
+                            <span
+                                className={`font-medium text-sm sm:text-base ${change >= 0 ? "text-green-600" : "text-red-600"}`}
+                            >
                                 {change >= 0 ? "+" : ""}
                                 {change.toFixed(2)}%
                             </span>
@@ -140,12 +144,13 @@ export function IndexChart({index}: IndexChartProps) {
 
     return (
         <Card className="mb-6">
-            <CardHeader>
-                <div className="flex items-center justify-between">
-                    <div>
-                        <CardTitle className="text-lg">Price Chart</CardTitle>
-                        <div className="flex items-center space-x-4 mt-2">
-                            <div className="text-2xl font-bold">${currentValue.toFixed(2)}</div>
+            <CardHeader className="pb-4">
+                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                    {/* Title and Performance */}
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                        <CardTitle className="text-lg sm:text-xl">Price Chart</CardTitle>
+                        <div className="flex items-center gap-2 sm:gap-4">
+                            <div className="text-xl sm:text-2xl font-bold">${currentValue.toFixed(2)}</div>
                             <div
                                 className={`text-sm font-medium ${performance >= 0 ? "text-green-600" : "text-red-600"}`}
                             >
@@ -154,24 +159,45 @@ export function IndexChart({index}: IndexChartProps) {
                             </div>
                         </div>
                     </div>
-                    <div className="flex items-center space-x-1">
-                        {timeRanges.map(range => (
-                            <Button
-                                key={range.label}
-                                variant={selectedRange === range.label ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => setSelectedRange(range.label)}
-                            >
-                                {range.label}
-                            </Button>
-                        ))}
+
+                    {/* Time Range Buttons */}
+                    <div className="flex flex-wrap items-center gap-1 sm:gap-2 justify-end">
+                        {/* Mobile: Compact buttons */}
+                        <div className="flex flex-1  sm:hidden flex-wrap gap-1">
+                            {timeRanges.map(range => (
+                                <Button
+                                    key={range.label}
+                                    variant={selectedRange === range.label ? "default" : "outline"}
+                                    size="sm"
+                                    className="h-8 px-2 text-xs flex-1 min-w-0"
+                                    onClick={() => setSelectedRange(range.label)}
+                                >
+                                    {range.label}
+                                </Button>
+                            ))}
+                        </div>
+
+                        {/* Desktop: Normal buttons */}
+                        <div className="hidden sm:flex flex-wrap gap-1">
+                            {timeRanges.map(range => (
+                                <Button
+                                    key={range.label}
+                                    variant={selectedRange === range.label ? "default" : "outline"}
+                                    size="sm"
+                                    onClick={() => setSelectedRange(range.label)}
+                                >
+                                    {range.label}
+                                </Button>
+                            ))}
+                        </div>
                     </div>
                 </div>
             </CardHeader>
-            <CardContent>
-                <div className="h-80">
+            <CardContent className="pt-0">
+                {/* Chart Container with Responsive Height */}
+                <div className="h-64 sm:h-80 lg:h-96">
                     <ResponsiveContainer width="100%" height="100%">
-                        <AreaChart data={chartData}>
+                        <AreaChart data={chartData} margin={{top: 5, right: 5, left: 5, bottom: 5}}>
                             <defs>
                                 <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                                     <stop
@@ -187,12 +213,22 @@ export function IndexChart({index}: IndexChartProps) {
                                 </linearGradient>
                             </defs>
                             <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" />
-                            <XAxis dataKey="timestamp" tickFormatter={formatDate} stroke="#666" fontSize={12} />
+                            <XAxis
+                                dataKey="timestamp"
+                                tickFormatter={formatDate}
+                                stroke="#666"
+                                fontSize={10}
+                                className="sm:text-xs"
+                                tick={{fontSize: 10}}
+                            />
                             <YAxis
                                 domain={yAxisDomain}
                                 stroke="#666"
-                                fontSize={12}
+                                fontSize={10}
+                                className="sm:text-xs"
+                                tick={{fontSize: 10}}
                                 tickFormatter={value => `$${Number(value).toFixed(2)}`}
+                                width={60}
                             />
                             <Tooltip content={<CustomTooltip />} />
                             <Area
