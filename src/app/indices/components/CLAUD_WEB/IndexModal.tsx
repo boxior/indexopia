@@ -1,5 +1,5 @@
 "use client";
-import {Formik, Form, Field, FieldArray, FormikProps} from "formik";
+import {Formik, Form, Field, FieldArray} from "formik";
 import * as Yup from "yup";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
@@ -8,9 +8,10 @@ import {Label} from "@/components/ui/label";
 import {Badge} from "@/components/ui/badge";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {Tooltip, TooltipContent, TooltipTrigger, TooltipProvider} from "@/components/ui/tooltip";
-import {Loader2, Plus, X} from "lucide-react";
+import {Loader2, X} from "lucide-react";
 import {Asset, Id, IndexOverviewAsset, IndexOverviewForCreate} from "@/utils/types/general.types";
 import {UseIndexActionsReturns} from "@/app/indices/[id]/hooks/useIndexActions.hook";
+
 export enum IndexMode {
     CREATE = "create",
     EDIT = "edit",
@@ -145,22 +146,6 @@ export function IndexModal({
         return false;
     };
 
-    const handleAddAsset = (values: FormValues, setFieldValue: (field: string, value: any) => void) => {
-        if (!values.selectedAssetId) return;
-        const asset = availableAssets.find(a => a.id === values.selectedAssetId);
-        if (!asset) return;
-        const alreadyExists = values.assets.some(a => a.id === values.selectedAssetId);
-        if (alreadyExists) return;
-        const newAsset: IndexOverviewAsset = {
-            id: asset.id,
-            symbol: asset.symbol,
-            name: asset.name,
-            rank: asset.rank,
-            portion: 0,
-        };
-        setFieldValue("assets", [...values.assets, newAsset]);
-        setFieldValue("selectedAssetId", "");
-    };
     const handleRemoveAsset = (
         assetId: string,
         values: FormValues,
