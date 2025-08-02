@@ -7,15 +7,16 @@ type LinkRefererProps = {
     children: React.ReactNode;
     view: "primary" | "secondary";
     target?: "_blank" | "_self" | "_parent" | "_top" | string;
+    className?: string;
 };
-export const LinkReferer: FC<LinkRefererProps> = ({view, href, children, target}) => {
+export const LinkReferer: FC<LinkRefererProps> = ({view, href, children, target, className}) => {
     return (
         <Link
-            className={
+            className={`${
                 view === "primary"
                     ? "group inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors duration-200 font-semibold capitalize"
                     : "group inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors duration-200 font-semibold capitalize"
-            }
+            } ${className ?? ""}`}
             href={href}
             target={target}
         >

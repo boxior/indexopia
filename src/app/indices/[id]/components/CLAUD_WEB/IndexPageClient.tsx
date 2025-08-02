@@ -99,9 +99,9 @@ export function IndexPageClient({
                 </div>
 
                 {/* Assets Table */}
-                {/*<div className="mb-8">*/}
-                {/*    <AssetsTable assets={index.assets} />*/}
-                {/*</div>*/}
+                <div className="mb-8">
+                    <AssetsTable assets={index.assets} />
+                </div>
             </div>
 
             <IndexModal
