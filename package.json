@@ -40,6 +40,7 @@
         "clsx": "^2.1.1",
         "cmdk": "1.0.0",
         "date-fns": "^4.1.0",
+        "formik": "^2.4.6",
         "fs": "^0.0.1-security",
         "lodash": "^4.17.21",
         "lucide-react": "^0.475.0",
@@ -59,6 +60,7 @@
         "tailwind-merge": "^3.0.1",
         "tailwindcss-animate": "^1.0.7",
         "uuid": "^11.1.0",
+        "yup": "^1.7.0",
         "zod": "^3.24.2"
     },
     "devDependencies": {

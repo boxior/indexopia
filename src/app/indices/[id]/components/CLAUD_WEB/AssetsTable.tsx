@@ -1,13 +1,19 @@
-// components/index-detail/assets-table.tsx
 "use client";
 
-import {useState} from "react";
+import {useState, useMemo} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {ArrowUpDown, ArrowUp, ArrowDown, ExternalLink} from "lucide-react";
+import {ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight} from "lucide-react";
 import {AssetWithHistoryOverviewPortionAndMaxDrawDown} from "@/utils/types/general.types";
+import * as React from "react";
+import {LinkReferer} from "@/app/components/LinkReferer";
+import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
+import {NumeralFormat} from "@numeral";
+import {formatPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
+import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
+import {ChartPreview} from "@/app/indices/components/CLAUD_WEB/ChartPreview";
 
 interface AssetsTableProps {
     assets: AssetWithHistoryOverviewPortionAndMaxDrawDown[];
@@ -18,17 +24,17 @@ type SortField =
     | "portion"
     | "rank"
     | "priceUsd"
-    | "changePercent24Hr"
-    | "marketCapUsd"
-    | "days1"
     | "days7"
+    | "days30"
     | "total"
-    | "maxDrawDown";
+    | "maxDrawDown"
+    | "marketCapUsd";
 type SortOrder = "asc" | "desc";
 
 export function AssetsTable({assets}: AssetsTableProps) {
     const [sortField, setSortField] = useState<SortField>("portion");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
+    const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -44,86 +50,170 @@ export function AssetsTable({assets}: AssetsTableProps) {
         return sortOrder === "asc" ? <ArrowUp className="h-4 w-4" /> : <ArrowDown className="h-4 w-4" />;
     };
 
-    const sortedAssets = [...assets].sort((a, b) => {
-        let aValue: any, bValue: any;
-
-        switch (sortField) {
-            case "name":
-                aValue = a.name.toLowerCase();
-                bValue = b.name.toLowerCase();
-                break;
-            case "portion":
-                aValue = a.portion;
-                bValue = b.portion;
-                break;
-            case "rank":
-                aValue = parseInt(a.rank);
-                bValue = parseInt(b.rank);
-                break;
-            case "priceUsd":
-                aValue = parseFloat(a.priceUsd);
-                bValue = parseFloat(b.priceUsd);
-                break;
-            case "changePercent24Hr":
-                aValue = parseFloat(a.changePercent24Hr);
-                bValue = parseFloat(b.changePercent24Hr);
-                break;
-            case "marketCapUsd":
-                aValue = parseFloat(a.marketCapUsd);
-                bValue = parseFloat(b.marketCapUsd);
-                break;
-            case "days1":
-                aValue = a.historyOverview.days1;
-                bValue = b.historyOverview.days1;
-                break;
-            case "days7":
-                aValue = a.historyOverview.days7;
-                bValue = b.historyOverview.days7;
-                break;
-            case "total":
-                aValue = a.historyOverview.total;
-                bValue = b.historyOverview.total;
-                break;
-            case "maxDrawDown":
-                aValue = a.maxDrawDown.value;
-                bValue = b.maxDrawDown.value;
-                break;
-            default:
-                aValue = a.portion;
-                bValue = b.portion;
-        }
-
-        if (sortOrder === "asc") {
-            return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+    const toggleRowExpansion = (assetId: string) => {
+        const newExpanded = new Set(expandedRows);
+        if (newExpanded.has(assetId)) {
+            newExpanded.delete(assetId);
         } else {
-            return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+            newExpanded.add(assetId);
         }
-    });
+        setExpandedRows(newExpanded);
+    };
 
-    const formatPercentage = (value: number) => {
-        const sign = value >= 0 ? "+" : "";
-        const color = value >= 0 ? "text-green-600" : "text-red-600";
+    const sortedAssets = useMemo(() => {
+        return [...assets].sort((a, b) => {
+            let aValue: any, bValue: any;
+
+            switch (sortField) {
+                case "name":
+                    aValue = a.name.toLowerCase();
+                    bValue = b.name.toLowerCase();
+                    break;
+                case "portion":
+                    aValue = a.portion;
+                    bValue = b.portion;
+                    break;
+                case "rank":
+                    aValue = parseInt(a.rank);
+                    bValue = parseInt(b.rank);
+                    break;
+                case "priceUsd":
+                    aValue = parseFloat(a.priceUsd);
+                    bValue = parseFloat(b.priceUsd);
+                    break;
+                case "days7":
+                    aValue = a.historyOverview.days7;
+                    bValue = b.historyOverview.days7;
+                    break;
+                case "days30":
+                    aValue = a.historyOverview.days30;
+                    bValue = b.historyOverview.days30;
+                    break;
+                case "total":
+                    aValue = a.historyOverview.total;
+                    bValue = b.historyOverview.total;
+                    break;
+                case "maxDrawDown":
+                    aValue = a.maxDrawDown.value;
+                    bValue = b.maxDrawDown.value;
+                    break;
+                case "marketCapUsd":
+                    aValue = parseFloat(a.marketCapUsd);
+                    bValue = parseFloat(b.marketCapUsd);
+                    break;
+                default:
+                    aValue = a.portion;
+                    bValue = b.portion;
+            }
+
+            if (sortOrder === "asc") {
+                return aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
+            } else {
+                return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
+            }
+        });
+    }, [assets, sortField, sortOrder]);
+
+    // Mobile Card Component
+    const MobileAssetCard = ({asset}: {asset: AssetWithHistoryOverviewPortionAndMaxDrawDown}) => {
+        const isExpanded = expandedRows.has(asset.id);
+
         return (
-            <span className={color}>
-                {sign}
-                {value.toFixed(2)}%
-            </span>
+            <div className="border rounded-lg p-4 mb-4">
+                {/* Main row - always visible */}
+                <div className="flex items-center justify-between">
+                    <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline" className="text-xs">
+                                #{asset.rank}
+                            </Badge>
+                            <span className="font-semibold text-sm truncate">
+                                {asset.name} ({asset.symbol})
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-2 text-xs text-gray-500">
+                            <span>{renderSafelyNumber(asset.portion, NumeralFormat.INTEGER)}%</span>
+                            <span>•</span>
+                            <span>{renderSafelyNumber(asset.priceUsd, NumeralFormat.CURRENCY_$)}</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 ml-2">
+                        <div className="text-right">
+                            <div className="text-sm font-medium">{formatPercentage(asset.historyOverview.total)}</div>
+                            <div className="text-xs text-gray-500">Total</div>
+                        </div>
+
+                        <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0"
+                            onClick={() => toggleRowExpansion(asset.id)}
+                        >
+                            {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
+                        </Button>
+                    </div>
+                </div>
+
+                {/* Expanded content */}
+                {isExpanded && (
+                    <div className="mt-4 pt-4 border-t space-y-3">
+                        {/* Chart Preview */}
+                        <div className="mb-4">
+                            <div className="text-xs text-gray-500 mb-2">30d Chart</div>
+                            <ChartPreview data={asset.history.slice(-HISTORY_OVERVIEW_DAYS)} className="w-full h-32" />
+                        </div>
+
+                        {/* Performance metrics */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="text-center">
+                                <div className="text-sm font-medium">
+                                    {formatPercentage(asset.historyOverview.days7)}
+                                </div>
+                                <div className="text-xs text-gray-500">7 days</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-sm font-medium">
+                                    {formatPercentage(asset.historyOverview.days30)}
+                                </div>
+                                <div className="text-xs text-gray-500">30 days</div>
+                            </div>
+                        </div>
+
+                        {/* Additional metrics */}
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="text-center">
+                                <div className="text-sm font-medium text-red-600">
+                                    -{Math.abs(asset.maxDrawDown.value).toFixed(2)}%
+                                </div>
+                                <div className="text-xs text-gray-500">Max Drawdown</div>
+                            </div>
+                            <div className="text-center">
+                                <div className="text-sm font-medium">
+                                    {(renderSafelyNumber(asset.marketCapUsd, NumeralFormat.HUGE) ?? "")
+                                        .toString()
+                                        .toUpperCase()}
+                                </div>
+                                <div className="text-xs text-gray-500">Market Cap</div>
+                            </div>
+                        </div>
+
+                        {/* Explorer link if available */}
+                        {asset.explorer && (
+                            <div className="pt-2">
+                                <LinkReferer
+                                    href={asset.explorer}
+                                    view="secondary"
+                                    children="View on Explorer"
+                                    target="_blank"
+                                    className="text-sm"
+                                />
+                            </div>
+                        )}
+                    </div>
+                )}
+            </div>
         );
-    };
-
-    const formatCurrency = (value: string) => {
-        const num = parseFloat(value);
-        if (num >= 1e9) return `$${(num / 1e9).toFixed(2)}B`;
-        if (num >= 1e6) return `$${(num / 1e6).toFixed(2)}M`;
-        if (num >= 1e3) return `$${(num / 1e3).toFixed(2)}K`;
-        return `$${num.toFixed(2)}`;
-    };
-
-    const formatPrice = (value: string) => {
-        const num = parseFloat(value);
-        if (num < 0.01) return `$${num.toFixed(6)}`;
-        if (num < 1) return `$${num.toFixed(4)}`;
-        return `$${num.toFixed(2)}`;
     };
 
     return (
@@ -132,143 +222,170 @@ export function AssetsTable({assets}: AssetsTableProps) {
                 <CardTitle className="text-lg">Assets Breakdown</CardTitle>
             </CardHeader>
             <CardContent>
-                <div className="rounded-md border">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Rank</TableHead>
-                                <TableHead>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-auto p-0 font-medium"
-                                        onClick={() => handleSort("name")}
-                                    >
-                                        Asset
-                                        {getSortIcon("name")}
-                                    </Button>
-                                </TableHead>
-                                <TableHead>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-auto p-0 font-medium"
-                                        onClick={() => handleSort("portion")}
-                                    >
-                                        Allocation
-                                        {getSortIcon("portion")}
-                                    </Button>
-                                </TableHead>
-                                <TableHead>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-auto p-0 font-medium"
-                                        onClick={() => handleSort("priceUsd")}
-                                    >
-                                        Price
-                                        {getSortIcon("priceUsd")}
-                                    </Button>
-                                </TableHead>
-                                <TableHead>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-auto p-0 font-medium"
-                                        onClick={() => handleSort("changePercent24Hr")}
-                                    >
-                                        24h Change
-                                        {getSortIcon("changePercent24Hr")}
-                                    </Button>
-                                </TableHead>
-                                <TableHead>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-auto p-0 font-medium"
-                                        onClick={() => handleSort("days7")}
-                                    >
-                                        7d Performance
-                                        {getSortIcon("days7")}
-                                    </Button>
-                                </TableHead>
-                                <TableHead>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-auto p-0 font-medium"
-                                        onClick={() => handleSort("total")}
-                                    >
-                                        Total Return
-                                        {getSortIcon("total")}
-                                    </Button>
-                                </TableHead>
-                                <TableHead>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-auto p-0 font-medium"
-                                        onClick={() => handleSort("marketCapUsd")}
-                                    >
-                                        Market Cap
-                                        {getSortIcon("marketCapUsd")}
-                                    </Button>
-                                </TableHead>
-                                <TableHead>
-                                    <Button
-                                        variant="ghost"
-                                        className="h-auto p-0 font-medium"
-                                        onClick={() => handleSort("maxDrawDown")}
-                                    >
-                                        Max Drawdown
-                                        {getSortIcon("maxDrawDown")}
-                                    </Button>
-                                </TableHead>
-                                <TableHead>Explorer</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {sortedAssets.map(asset => (
-                                <TableRow key={asset.id}>
-                                    <TableCell>
-                                        <Badge variant="outline">#{asset.rank}</Badge>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex items-center space-x-3">
-                                            <div>
-                                                <div className="font-medium">{asset.symbol}</div>
-                                                <div className="text-sm text-gray-500">{asset.name}</div>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="font-medium">{asset.portion.toFixed(1)}%</div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="font-medium">{formatPrice(asset.priceUsd)}</div>
-                                    </TableCell>
-                                    <TableCell>{formatPercentage(parseFloat(asset.changePercent24Hr))}</TableCell>
-                                    <TableCell>{formatPercentage(asset.historyOverview.days7)}</TableCell>
-                                    <TableCell>{formatPercentage(asset.historyOverview.total)}</TableCell>
-                                    <TableCell>
-                                        <div className="font-medium">{formatCurrency(asset.marketCapUsd)}</div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <span className="text-red-600">
-                                            -{Math.abs(asset.maxDrawDown.value).toFixed(2)}%
-                                        </span>
-                                    </TableCell>
-                                    <TableCell>
-                                        {asset.explorer && (
-                                            <Button variant="ghost" size="sm" asChild>
-                                                <a
-                                                    href={asset.explorer}
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                    className="flex items-center"
-                                                >
-                                                    <ExternalLink className="h-4 w-4" />
-                                                </a>
-                                            </Button>
-                                        )}
-                                    </TableCell>
+                {/* Desktop Table */}
+                <div className="hidden lg:block">
+                    <div className="rounded-md border">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead>
+                                        <Button
+                                            variant="ghost"
+                                            className="h-auto p-0 font-medium"
+                                            onClick={() => handleSort("rank")}
+                                        >
+                                            Rank
+                                            {getSortIcon("rank")}
+                                        </Button>
+                                    </TableHead>
+                                    <TableHead>
+                                        <Button
+                                            variant="ghost"
+                                            className="h-auto p-0 font-medium"
+                                            onClick={() => handleSort("name")}
+                                        >
+                                            Asset
+                                            {getSortIcon("name")}
+                                        </Button>
+                                    </TableHead>
+                                    <TableHead>
+                                        <Button
+                                            variant="ghost"
+                                            className="h-auto p-0 font-medium"
+                                            onClick={() => handleSort("portion")}
+                                        >
+                                            Allocation
+                                            {getSortIcon("portion")}
+                                        </Button>
+                                    </TableHead>
+                                    <TableHead>
+                                        <Button
+                                            variant="ghost"
+                                            className="h-auto p-0 font-medium"
+                                            onClick={() => handleSort("priceUsd")}
+                                        >
+                                            Price
+                                            {getSortIcon("priceUsd")}
+                                        </Button>
+                                    </TableHead>
+                                    <TableHead>30d Chart</TableHead>
+                                    <TableHead>
+                                        <Button
+                                            variant="ghost"
+                                            className="h-auto p-0 font-medium"
+                                            onClick={() => handleSort("days7")}
+                                        >
+                                            7d
+                                            {getSortIcon("days7")}
+                                        </Button>
+                                    </TableHead>
+                                    <TableHead>
+                                        <Button
+                                            variant="ghost"
+                                            className="h-auto p-0 font-medium"
+                                            onClick={() => handleSort("days30")}
+                                        >
+                                            30d
+                                            {getSortIcon("days30")}
+                                        </Button>
+                                    </TableHead>
+                                    <TableHead>
+                                        <Button
+                                            variant="ghost"
+                                            className="h-auto p-0 font-medium"
+                                            onClick={() => handleSort("total")}
+                                        >
+                                            Total Return
+                                            {getSortIcon("total")}
+                                        </Button>
+                                    </TableHead>
+                                    <TableHead>
+                                        <Button
+                                            variant="ghost"
+                                            className="h-auto p-0 font-medium"
+                                            onClick={() => handleSort("maxDrawDown")}
+                                        >
+                                            Max Drawdown
+                                            {getSortIcon("maxDrawDown")}
+                                        </Button>
+                                    </TableHead>
+                                    <TableHead>
+                                        <Button
+                                            variant="ghost"
+                                            className="h-auto p-0 font-medium"
+                                            onClick={() => handleSort("marketCapUsd")}
+                                        >
+                                            Market Cap
+                                            {getSortIcon("marketCapUsd")}
+                                        </Button>
+                                    </TableHead>
                                 </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
+                            </TableHeader>
+                            <TableBody>
+                                {sortedAssets.map(asset => (
+                                    <TableRow key={asset.id}>
+                                        <TableCell>
+                                            <Badge variant="outline">#{asset.rank}</Badge>
+                                        </TableCell>
+                                        <TableCell>
+                                            {asset.explorer ? (
+                                                <LinkReferer
+                                                    href={asset.explorer}
+                                                    view="secondary"
+                                                    children={`${asset.name} (${asset.symbol})`}
+                                                    target="_blank"
+                                                />
+                                            ) : (
+                                                <span>
+                                                    {asset.name} ({asset.symbol})
+                                                </span>
+                                            )}
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="font-medium">
+                                                {renderSafelyNumber(asset.portion, NumeralFormat.INTEGER)}%
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="font-medium">
+                                                {renderSafelyNumber(asset.priceUsd, NumeralFormat.CURRENCY_$)}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <ChartPreview
+                                                data={asset.history.slice(-HISTORY_OVERVIEW_DAYS)}
+                                                className="w-32 h-16 relative"
+                                            />
+                                        </TableCell>
+                                        <TableCell>{formatPercentage(asset.historyOverview.days7)}</TableCell>
+                                        <TableCell>{formatPercentage(asset.historyOverview.days30)}</TableCell>
+                                        <TableCell>{formatPercentage(asset.historyOverview.total)}</TableCell>
+                                        <TableCell>
+                                            <span className="text-red-600">
+                                                -{Math.abs(asset.maxDrawDown.value).toFixed(2)}%
+                                            </span>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="font-medium">
+                                                {(renderSafelyNumber(asset.marketCapUsd, NumeralFormat.HUGE) ?? "")
+                                                    .toString()
+                                                    .toUpperCase()}
+                                            </div>
+                                        </TableCell>
+                                    </TableRow>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="lg:hidden">
+                    <div className="space-y-4">
+                        {sortedAssets.map(asset => (
+                            <MobileAssetCard key={asset.id} asset={asset} />
+                        ))}
+                    </div>
                 </div>
             </CardContent>
         </Card>

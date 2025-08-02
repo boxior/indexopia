@@ -12,10 +12,31 @@ import {omit} from "lodash";
 import {useSession} from "next-auth/react";
 import {useState} from "react";
 
-type UseIndexActionsProps = {
-    //
+export type UseIndexActionsReturns = {
+    // Action handlers
+    onClone: (index: IndexOverview) => void;
+    onEdit: (editIndex: IndexOverview) => void;
+    onCreate: () => void;
+    onSave: (indexData: ModalIndexData) => Promise<IndexOverview | null>;
+    onCancel: () => void;
+
+    // Delete action handlers
+    onDeleteClick: (index: IndexOverview) => void;
+    onDeleteConfirm: () => Promise<void>;
+    onDeleteCancel: () => void;
+
+    // Modal state
+    modalOpen: boolean;
+    modalIndex: IndexOverviewForCreate | IndexOverview | undefined;
+    indexMode: IndexMode | undefined;
+
+    // Delete modal state
+    deleteModalOpen: boolean;
+    indexToDelete: IndexOverview | null;
+    isDeleting: boolean;
 };
-export const useIndexActions = ({}: UseIndexActionsProps) => {
+
+export const useIndexActions = (): UseIndexActionsReturns => {
     const {data} = useSession();
     const currentUserId = data?.user?.id;
 
@@ -27,18 +48,17 @@ export const useIndexActions = ({}: UseIndexActionsProps) => {
     const [indexToDelete, setIndexToDelete] = useState<IndexOverview | null>(null);
     const [isDeleting, setIsDeleting] = useState(false);
 
-    const handleSaveAction = async (indexData: ModalIndexData) => {
+    const handleSaveAction = async (indexData: ModalIndexData): Promise<IndexOverview | null> => {
         if (indexMode === IndexMode.EDIT) {
-            await actionUpdateIndexOverview({
+            return await actionUpdateIndexOverview({
                 ...(modalIndex as IndexOverview),
                 ...indexData,
                 assets: indexData.assets.map(getIndexOverviewAsset),
                 userId: currentUserId,
             });
-            return;
         }
 
-        await actionCreateIndexOverview({
+        return await actionCreateIndexOverview({
             ...indexData,
             assets: indexData.assets.map(getIndexOverviewAsset),
             userId: currentUserId,

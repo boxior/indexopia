@@ -26,6 +26,8 @@ import {IndexHistoryChartPreview} from "@/app/indices/components/CLAUD_WEB/Index
 import {HISTORY_OVERVIEW_DAYS, PAGES_URLS} from "@/utils/constants/general.constants";
 import {useRouter} from "next/navigation";
 import {useSession} from "next-auth/react";
+import {LinkReferer} from "@/app/components/LinkReferer";
+import {formatPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
@@ -126,17 +128,6 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     const handleItemsPerPageChange = (newItemsPerPage: number) => {
         setItemsPerPage(newItemsPerPage);
         setCurrentPage(1); // Reset to first page when changing items per page
-    };
-
-    const formatPercentage = (value: number) => {
-        const sign = value >= 0 ? "+" : "";
-        const color = value >= 0 ? "text-green-600" : "text-red-600";
-        return (
-            <span className={color}>
-                {sign}
-                {renderSafelyNumber(value)}%
-            </span>
-        );
     };
 
     const toggleRowExpansion = (indexId: Id) => {
@@ -328,7 +319,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     };
 
     return (
-        <TooltipProvider>
+        <>
             {/* Desktop Table */}
             <div className="hidden lg:block">
                 <div className="rounded-md border">
@@ -414,38 +405,11 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                                 ></span>
                                             </span>
                                         ) : (
-                                            <Link
-                                                className={
-                                                    isUserIndex(index)
-                                                        ? "group inline-flex items-center gap-2 text-primary hover:text-primary/80 transition-colors duration-200 font-semibold capitalize"
-                                                        : "group inline-flex items-center gap-2 text-blue-600 hover:text-blue-800 transition-colors duration-200 font-semibold capitalize"
-                                                }
+                                            <LinkReferer
                                                 href={`/indices/${index.id}`}
-                                            >
-                                                <span className="relative">
-                                                    {index.name}
-                                                    <span
-                                                        className={
-                                                            isUserIndex(index)
-                                                                ? "absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300 ease-out"
-                                                                : "absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300 ease-out"
-                                                        }
-                                                    ></span>
-                                                </span>
-                                                <svg
-                                                    className="w-4 h-4 opacity-0 group-hover:opacity-100 transform translate-x-0 group-hover:translate-x-1 transition-all duration-200"
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path
-                                                        strokeLinecap="round"
-                                                        strokeLinejoin="round"
-                                                        strokeWidth={2}
-                                                        d="M9 5l7 7-7 7"
-                                                    />
-                                                </svg>
-                                            </Link>
+                                                view={isUserIndex(index) ? "primary" : "secondary"}
+                                                children={index.name}
+                                            />
                                         )}
                                     </TableCell>
                                     <TableCell>
@@ -482,7 +446,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                     <TableCell>
                                         <div className="relative">
                                             <span className="text-red-600">
-                                                -{Math.abs(index.maxDrawDown.value).toFixed(2)}%
+                                                -{renderSafelyNumber(index.maxDrawDown.value)}%
                                             </span>
                                             {hiddenOption && <ProtectedOverlay />}
                                         </div>
@@ -578,6 +542,6 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                     />
                 </>
             )}
-        </TooltipProvider>
+        </>
     );
 }
