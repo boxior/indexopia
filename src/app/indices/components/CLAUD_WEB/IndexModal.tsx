@@ -1,5 +1,6 @@
 "use client";
-import {useState, useEffect} from "react";
+import {Formik, Form, Field, FieldArray, FormikProps} from "formik";
+import * as Yup from "yup";
 import {Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter} from "@/components/ui/dialog";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
@@ -9,26 +10,61 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 import {Loader2, Plus, X} from "lucide-react";
 import {Asset, Id, IndexOverviewAsset, IndexOverviewForCreate} from "@/utils/types/general.types";
 import {UseIndexActionsReturns} from "@/app/indices/[id]/hooks/useIndexActions.hook";
-import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 
 export enum IndexMode {
     CREATE = "create",
     EDIT = "edit",
     CLONE = "clone",
 }
+
 interface CreateUpdateIndexModalProps {
     isOpen: boolean;
     onCancelAction: () => void;
     onSaveAction: UseIndexActionsReturns["onSave"];
     availableAssets: Asset[];
-    indexOverview?: IndexOverviewForCreate; // Optional prop - if provided, it's used for edit/clone modes
-    mode?: IndexMode; // New required prop to determine the context
+    indexOverview?: IndexOverviewForCreate;
+    mode?: IndexMode;
 }
+
 export interface ModalIndexData {
     id?: Id;
     name: string;
     assets: IndexOverviewAsset[];
 }
+
+interface FormValues {
+    name: string;
+    assets: IndexOverviewAsset[];
+    selectedAssetId: string;
+}
+
+const validationSchema = Yup.object().shape({
+    name: Yup.string()
+        .trim()
+        .required("Index name is required")
+        .min(2, "Index name must be at least 2 characters")
+        .max(100, "Index name must be less than 100 characters"),
+    assets: Yup.array()
+        .of(
+            Yup.object().shape({
+                id: Yup.string().required(),
+                symbol: Yup.string().required(),
+                name: Yup.string().required(),
+                rank: Yup.number().required(),
+                portion: Yup.number()
+                    .min(0, "Portion must be at least 0%")
+                    .max(100, "Portion cannot exceed 100%")
+                    .required("Portion is required"),
+            })
+        )
+        .min(1, "At least one asset is required")
+        .test("total-allocation", "Total allocation must equal 100%", function (assets) {
+            if (!assets || assets.length === 0) return true;
+            const total = assets.reduce((sum, asset) => sum + (asset.portion || 0), 0);
+            return Math.abs(total - 100) < 0.01; // Allow for small floating point differences
+        }),
+});
+
 export function IndexModal({
     isOpen,
     onCancelAction,
@@ -37,12 +73,6 @@ export function IndexModal({
     indexOverview,
     mode = IndexMode.CREATE,
 }: CreateUpdateIndexModalProps) {
-    const [indexName, setIndexName] = useState("");
-    const [selectedAssets, setSelectedAssets] = useState<ModalIndexData["assets"]>([]);
-    const [selectedAssetId, setSelectedAssetId] = useState("");
-
-    const [isLoading, setIsLoading] = useState(false);
-
     // Get context-aware labels based on mode
     const getLabels = () => {
         switch (mode) {
@@ -72,225 +102,285 @@ export function IndexModal({
                 };
         }
     };
-    const labels = getLabels();
-    // Initialize form with existing data when in edit/clone mode
-    useEffect(() => {
-        if (indexOverview && (mode === IndexMode.EDIT || mode === IndexMode.CLONE)) {
-            setIndexName(indexOverview.name);
-            setSelectedAssets(indexOverview.assets);
-        } else {
-            setIndexName("");
-            setSelectedAssets([]);
-        }
-        setSelectedAssetId("");
-    }, [indexOverview, isOpen, mode]);
 
-    const handleAddAsset = () => {
-        if (!selectedAssetId) return;
-        const asset = availableAssets.find(a => a.id === selectedAssetId);
+    const labels = getLabels();
+
+    const getInitialValues = (): FormValues => {
+        if (indexOverview && (mode === IndexMode.EDIT || mode === IndexMode.CLONE)) {
+            return {
+                name: indexOverview.name,
+                assets: indexOverview.assets,
+                selectedAssetId: "",
+            };
+        }
+        return {
+            name: "",
+            assets: [],
+            selectedAssetId: "",
+        };
+    };
+
+    const handleAddAsset = (values: FormValues, setFieldValue: (field: string, value: any) => void) => {
+        if (!values.selectedAssetId) return;
+
+        const asset = availableAssets.find(a => a.id === values.selectedAssetId);
         if (!asset) return;
-        const alreadyExists = selectedAssets.some(a => a.id === selectedAssetId);
+
+        const alreadyExists = values.assets.some(a => a.id === values.selectedAssetId);
         if (alreadyExists) return;
 
-        setSelectedAssets([
-            ...selectedAssets,
-            {
-                id: asset.id,
-                symbol: asset.symbol,
-                name: asset.name,
-                rank: asset.rank,
-                portion: 0,
-            },
-        ]);
-        setSelectedAssetId("");
-    };
-    const handleRemoveAsset = (assetId: string) => {
-        setSelectedAssets(selectedAssets.filter(a => a.id !== assetId));
-    };
-    const handlePortionChange = (assetId: string, portion: number) => {
-        setSelectedAssets(selectedAssets.map(asset => (asset.id === assetId ? {...asset, portion} : asset)));
-    };
-    const getTotalPortion = () => {
-        return selectedAssets.reduce((sum, asset) => sum + asset.portion, 0);
-    };
-    const handleSave = async () => {
-        if (!indexName.trim()) return;
-        if (selectedAssets.length === 0) return;
-        if (getTotalPortion() !== 100) return;
+        const newAsset: IndexOverviewAsset = {
+            id: asset.id,
+            symbol: asset.symbol,
+            name: asset.name,
+            rank: asset.rank,
+            portion: 0,
+        };
 
+        setFieldValue("assets", [...values.assets, newAsset]);
+        setFieldValue("selectedAssetId", "");
+    };
+
+    const handleRemoveAsset = (
+        assetId: string,
+        values: FormValues,
+        setFieldValue: (field: string, value: any) => void
+    ) => {
+        const updatedAssets = values.assets.filter(a => a.id !== assetId);
+        setFieldValue("assets", updatedAssets);
+    };
+
+    const getTotalPortion = (assets: IndexOverviewAsset[]) => {
+        return assets.reduce((sum, asset) => sum + (asset.portion || 0), 0);
+    };
+
+    const handleSubmit = async (
+        values: FormValues,
+        {setSubmitting}: {setSubmitting: (isSubmitting: boolean) => void}
+    ) => {
         try {
-            setIsLoading(true);
             await onSaveAction({
                 id: indexOverview?.id,
-                name: indexName,
-                assets: selectedAssets,
+                name: values.name,
+                assets: values.assets,
             });
-            setIsLoading(false);
-            // Reset form
-            setIndexName("");
-            setSelectedAssets([]);
-            setSelectedAssetId("");
             onCancelAction();
+        } catch (error) {
+            console.error("Error saving index:", error);
         } finally {
-            setIsLoading(false);
+            setSubmitting(false);
         }
     };
-    const handleClose = () => {
-        // Reset to original values or clear form based on mode
-        if (indexOverview && (mode === IndexMode.EDIT || mode === IndexMode.CLONE)) {
-            setIndexName(indexOverview.name);
-            setSelectedAssets(indexOverview.assets);
-        } else {
-            setIndexName("");
-            setSelectedAssets([]);
-        }
-        setSelectedAssetId("");
-        onCancelAction();
-    };
-
-    const totalPortion = getTotalPortion();
-
-    const getSubmitDisabledReason = (): string | false => {
-        switch (true) {
-            case !indexName.trim():
-                return "Please enter an index name";
-            case selectedAssets.length === 0:
-                return "Please select at least one asset";
-            case totalPortion !== 100:
-                return "Please ensure that the total allocation is 100%";
-            case isLoading:
-                return "Please wait for the request to complete";
-            default:
-                return false;
-        }
-    };
-
-    const disabledReason = getSubmitDisabledReason();
 
     return (
-        <Dialog open={isOpen} onOpenChange={handleClose}>
+        <Dialog open={isOpen} onOpenChange={onCancelAction}>
             <DialogContent className="sm:max-w-[600px]">
-                <DialogHeader>
-                    <DialogTitle>{labels.title}</DialogTitle>
-                    {mode === IndexMode.CLONE && (
-                        <p className="text-sm text-gray-600 mt-2">
-                            Create a custom copy of this index with your own asset allocation and portfolio composition.
-                        </p>
-                    )}
-                </DialogHeader>
-                <div className="space-y-6">
-                    <div className="space-y-2">
-                        <Label htmlFor="index-name">Index Name*</Label>
-                        <Input
-                            id="index-name"
-                            value={indexName}
-                            onChange={e => setIndexName(e.target.value)}
-                            placeholder={labels.namePlaceholder}
-                            disabled={isLoading}
-                        />
-                    </div>
-                    <div className="space-y-4">
-                        <Label>Assets & Allocation*</Label>
-                        <div className="flex gap-2">
-                            <Select value={selectedAssetId} onValueChange={setSelectedAssetId} disabled={isLoading}>
-                                <SelectTrigger className="flex-1">
-                                    <SelectValue placeholder="Select asset to add" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {availableAssets
-                                        .filter(asset => !selectedAssets.some(selected => selected.id === asset.id))
-                                        .map(asset => (
-                                            <SelectItem key={asset.id} value={asset.id}>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-medium">{asset.symbol}</span>
-                                                    <span className="text-sm text-gray-500">{asset.name}</span>
-                                                </div>
-                                            </SelectItem>
-                                        ))}
-                                </SelectContent>
-                            </Select>
-                            <Button onClick={handleAddAsset} disabled={!selectedAssetId || isLoading}>
-                                <Plus className="h-4 w-4" />
-                            </Button>
-                        </div>
-                        <div className="space-y-2 max-h-60 overflow-y-auto">
-                            {selectedAssets.map(asset => (
-                                <div key={asset.id} className="flex items-center gap-2 p-3 border rounded-lg">
-                                    <Badge variant="outline">{asset.symbol}</Badge>
-                                    <span className="flex-1 text-sm">{asset.name}</span>
-                                    <div className="flex items-center gap-2">
-                                        <Input
-                                            type="number"
-                                            min="0"
-                                            max="100"
-                                            step="1"
-                                            value={asset.portion}
-                                            onChange={e =>
-                                                handlePortionChange(asset.id, parseFloat(e.target.value) || 0)
-                                            }
-                                            className="w-20"
-                                            disabled={isLoading}
-                                        />
-                                        <span className="text-sm text-gray-500">%</span>
+                <Formik
+                    initialValues={getInitialValues()}
+                    validationSchema={validationSchema}
+                    onSubmit={handleSubmit}
+                    enableReinitialize
+                >
+                    {formik => {
+                        const totalPortion = getTotalPortion(formik.values.assets);
+
+                        return (
+                            <Form>
+                                <DialogHeader>
+                                    <DialogTitle>{labels.title}</DialogTitle>
+                                    {mode === IndexMode.CLONE && (
+                                        <p className="text-sm text-gray-600 mt-2">
+                                            Create a custom copy of this index with your own asset allocation and
+                                            portfolio composition.
+                                        </p>
+                                    )}
+                                </DialogHeader>
+
+                                <div className="space-y-6">
+                                    {/* Name Input */}
+                                    <div className="space-y-2">
+                                        <Label htmlFor="name">Index Name*</Label>
+                                        <Field name="name">
+                                            {({field, meta}: any) => (
+                                                <>
+                                                    <Input
+                                                        {...field}
+                                                        id="name"
+                                                        placeholder={labels.namePlaceholder}
+                                                        disabled={formik.isSubmitting}
+                                                        className={meta.touched && meta.error ? "border-red-500" : ""}
+                                                    />
+                                                    {meta.touched && meta.error && (
+                                                        <p className="text-sm text-red-500">{meta.error}</p>
+                                                    )}
+                                                </>
+                                            )}
+                                        </Field>
                                     </div>
 
-                                    <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        onClick={() => handleRemoveAsset(asset.id)}
-                                        disabled={isLoading}
-                                    >
-                                        <X className="h-4 w-4" />
-                                    </Button>
+                                    {/* Assets & Allocation */}
+                                    <div className="space-y-4">
+                                        <Label>Assets & Allocation*</Label>
+
+                                        {/* Asset Selector */}
+                                        <div className="flex gap-2">
+                                            <Field name="selectedAssetId">
+                                                {({field}: any) => (
+                                                    <Select
+                                                        value={field.value}
+                                                        onValueChange={value =>
+                                                            formik.setFieldValue("selectedAssetId", value)
+                                                        }
+                                                        disabled={formik.isSubmitting}
+                                                    >
+                                                        <SelectTrigger className="flex-1">
+                                                            <SelectValue placeholder="Select asset to add" />
+                                                        </SelectTrigger>
+                                                        <SelectContent>
+                                                            {availableAssets
+                                                                .filter(
+                                                                    asset =>
+                                                                        !formik.values.assets.some(
+                                                                            selected => selected.id === asset.id
+                                                                        )
+                                                                )
+                                                                .map(asset => (
+                                                                    <SelectItem key={asset.id} value={asset.id}>
+                                                                        <div className="flex items-center gap-2">
+                                                                            <span className="font-medium">
+                                                                                {asset.symbol}
+                                                                            </span>
+                                                                            <span className="text-sm text-gray-500">
+                                                                                {asset.name}
+                                                                            </span>
+                                                                        </div>
+                                                                    </SelectItem>
+                                                                ))}
+                                                        </SelectContent>
+                                                    </Select>
+                                                )}
+                                            </Field>
+                                            <Button
+                                                type="button"
+                                                onClick={() => handleAddAsset(formik.values, formik.setFieldValue)}
+                                                disabled={!formik.values.selectedAssetId || formik.isSubmitting}
+                                            >
+                                                <Plus className="h-4 w-4" />
+                                            </Button>
+                                        </div>
+
+                                        {/* Selected Assets */}
+                                        <FieldArray name="assets">
+                                            {() => (
+                                                <div className="space-y-2 max-h-60 overflow-y-auto">
+                                                    {formik.values.assets.map((asset, index) => (
+                                                        <div
+                                                            key={asset.id}
+                                                            className="flex items-center gap-2 p-3 border rounded-lg"
+                                                        >
+                                                            <Badge variant="outline">{asset.symbol}</Badge>
+                                                            <span className="flex-1 text-sm">{asset.name}</span>
+                                                            <div className="flex items-center gap-2">
+                                                                <Field name={`assets.${index}.portion`}>
+                                                                    {({field, meta}: any) => (
+                                                                        <>
+                                                                            <Input
+                                                                                {...field}
+                                                                                type="number"
+                                                                                min="0"
+                                                                                max="100"
+                                                                                step="1"
+                                                                                className={`w-20 ${meta.touched && meta.error ? "border-red-500" : ""}`}
+                                                                                disabled={formik.isSubmitting}
+                                                                                onChange={e => {
+                                                                                    const value =
+                                                                                        parseFloat(e.target.value) || 0;
+                                                                                    formik.setFieldValue(
+                                                                                        `assets.${index}.portion`,
+                                                                                        value
+                                                                                    );
+                                                                                }}
+                                                                            />
+                                                                        </>
+                                                                    )}
+                                                                </Field>
+                                                                <span className="text-sm text-gray-500">%</span>
+                                                            </div>
+                                                            <Button
+                                                                type="button"
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                onClick={() =>
+                                                                    handleRemoveAsset(
+                                                                        asset.id,
+                                                                        formik.values,
+                                                                        formik.setFieldValue
+                                                                    )
+                                                                }
+                                                                disabled={formik.isSubmitting}
+                                                            >
+                                                                <X className="h-4 w-4" />
+                                                            </Button>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            )}
+                                        </FieldArray>
+
+                                        {/* Total Allocation Display */}
+                                        {formik.values.assets.length > 0 && (
+                                            <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+                                                <span className="font-medium">Total Allocation:</span>
+                                                <span
+                                                    className={`font-medium ${
+                                                        Math.abs(totalPortion - 100) < 0.01
+                                                            ? "text-green-600"
+                                                            : "text-red-600"
+                                                    }`}
+                                                >
+                                                    {totalPortion.toFixed(2)}%
+                                                </span>
+                                            </div>
+                                        )}
+
+                                        {/* Assets Validation Error */}
+                                        {formik.touched.assets &&
+                                            formik.errors.assets &&
+                                            typeof formik.errors.assets === "string" && (
+                                                <p className="text-sm text-red-500">{formik.errors.assets}</p>
+                                            )}
+                                    </div>
                                 </div>
-                            ))}
-                        </div>
-                        {selectedAssets.length > 0 && (
-                            <div className={`flex justify-between items-center p-3 bg-gray-50 rounded-lg`}>
-                                <span className="font-medium">Total Allocation:</span>
-                                <span
-                                    className={`font-medium ${totalPortion === 100 ? "text-green-600" : "text-red-600"}`}
-                                >
-                                    {totalPortion.toFixed(2)}%
-                                </span>
-                            </div>
-                        )}
-                    </div>
-                </div>
-                <DialogFooter>
-                    <Button variant="outline" onClick={handleClose} disabled={isLoading}>
-                        Cancel
-                    </Button>
-                    <Tooltip>
-                        <TooltipTrigger asChild>
-                            <span className={disabledReason ? "cursor-not-allowed" : ""}>
-                                <Button
-                                    onClick={handleSave}
-                                    disabled={!!disabledReason || isLoading}
-                                    className={disabledReason ? "pointer-events-none" : ""}
-                                >
-                                    {isLoading ? (
-                                        <>
-                                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                            {mode === IndexMode.CREATE
-                                                ? "Creating..."
-                                                : mode === IndexMode.EDIT
-                                                  ? "Updating..."
-                                                  : "Cloning..."}
-                                        </>
-                                    ) : (
-                                        labels.action
-                                    )}
-                                </Button>
-                            </span>
-                        </TooltipTrigger>
-                        {disabledReason && (
-                            <TooltipContent>
-                                <p>{disabledReason}</p>
-                            </TooltipContent>
-                        )}
-                    </Tooltip>
-                </DialogFooter>
+
+                                <DialogFooter>
+                                    <Button
+                                        type="button"
+                                        variant="outline"
+                                        onClick={onCancelAction}
+                                        disabled={formik.isSubmitting}
+                                    >
+                                        Cancel
+                                    </Button>
+
+                                    <Button type="submit">
+                                        {formik.isSubmitting ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                {mode === IndexMode.CREATE
+                                                    ? "Creating..."
+                                                    : mode === IndexMode.EDIT
+                                                      ? "Updating..."
+                                                      : "Cloning..."}
+                                            </>
+                                        ) : (
+                                            labels.action
+                                        )}
+                                    </Button>
+                                </DialogFooter>
+                            </Form>
+                        );
+                    }}
+                </Formik>
             </DialogContent>
         </Dialog>
     );
