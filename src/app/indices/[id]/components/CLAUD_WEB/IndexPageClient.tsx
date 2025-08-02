@@ -12,6 +12,7 @@ import {PAGES_URLS} from "@/utils/constants/general.constants";
 import {useIndexActions, UseIndexActionsReturns} from "@/app/indices/[id]/hooks/useIndexActions.hook";
 import {DeleteIndexConfirmModal} from "@/app/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import * as React from "react";
+import {TooltipProvider} from "@/components/ui/tooltip";
 
 export function IndexPageClient({
     index,
@@ -57,36 +58,32 @@ export function IndexPageClient({
 
     if (!index) {
         return (
-            <>
-                <div className="flex min-h-screen bg-gray-50">
-                    <main className="flex-1 p-8">
-                        <div className="text-center py-12">
-                            <h1 className="text-2xl font-bold text-gray-900 mb-4">Index not found</h1>
-                            <p className="text-gray-600 mb-8">The index you're looking for doesn't exist.</p>
-                            <Button onClick={() => router.push(PAGES_URLS.indices)}>
-                                <ArrowLeft className="h-4 w-4 mr-2" />
-                                Back to Indices
-                            </Button>
-                        </div>
-                    </main>
+            <div className="container mx-auto px-4 py-8">
+                <div className="text-center py-12">
+                    <h1 className="text-2xl font-bold text-gray-900 mb-4">Index not found</h1>
+                    <p className="text-gray-600 mb-8">The index you're looking for doesn't exist.</p>
+                    <Button onClick={() => router.push(PAGES_URLS.indices)}>
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to Indices
+                    </Button>
                 </div>
-            </>
+            </div>
         );
     }
 
     return (
-        <>
-            <div className="flex min-h-screen bg-gray-50">
-                <main className="flex-1 p-8">
-                    {/* Back Navigation */}
-                    <div className="mb-6">
-                        <Button variant="outline" onClick={() => router.push(PAGES_URLS.indices)} className="mb-4">
-                            <ArrowLeft className="h-4 w-4 mr-2" />
-                            Back to Indices
-                        </Button>
-                    </div>
+        <TooltipProvider>
+            <div className="container mx-auto px-4 py-8">
+                {/* Back Navigation */}
+                <div className="mb-6">
+                    <Button variant="outline" onClick={() => router.push(PAGES_URLS.indices)} className="mb-4">
+                        <ArrowLeft className="h-4 w-4 mr-2" />
+                        Back to Indices
+                    </Button>
+                </div>
 
-                    {/* Index Overview */}
+                {/* Index Overview */}
+                <div className="mb-8">
                     <IndexOverview
                         index={index}
                         currentUserId={currentUserId}
@@ -94,13 +91,17 @@ export function IndexPageClient({
                         onDeleteAction={onDeleteClick}
                         onCloneAction={onClone}
                     />
+                </div>
 
-                    {/* Chart */}
+                {/* Chart */}
+                <div className="mb-8">
                     <IndexChart index={index} />
+                </div>
 
-                    {/* Assets Table */}
+                {/* Assets Table */}
+                <div className="mb-8">
                     <AssetsTable assets={index.assets} />
-                </main>
+                </div>
             </div>
 
             <IndexModal
@@ -118,6 +119,6 @@ export function IndexPageClient({
                 indexName={indexToDelete?.name || ""}
                 isDeleting={isDeleting}
             />
-        </>
+        </TooltipProvider>
     );
 }
