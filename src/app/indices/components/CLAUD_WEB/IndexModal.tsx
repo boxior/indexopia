@@ -370,32 +370,56 @@ export function IndexModal({
                                             )}
                                     </div>
                                 </div>
-                                <DialogFooter>
+                                <DialogFooter className="flex-col-reverse sm:flex-row gap-2 sm:gap-0">
                                     <Button
                                         type="button"
                                         variant="outline"
                                         onClick={onCancelAction}
                                         disabled={formik.isSubmitting}
+                                        className="w-full sm:w-auto"
                                     >
                                         Cancel
                                     </Button>
-
                                     <TooltipProvider>
                                         <Tooltip>
                                             <TooltipTrigger asChild>
-                                                <span>
-                                                    <Button type="submit" disabled={isSubmitDisabled}>
+                                                <span className="w-full sm:w-auto">
+                                                    <Button
+                                                        type="submit"
+                                                        disabled={isSubmitDisabled}
+                                                        className="w-full sm:w-auto"
+                                                    >
                                                         {formik.isSubmitting ? (
                                                             <>
                                                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                                {mode === IndexMode.CREATE
-                                                                    ? "Creating..."
-                                                                    : mode === IndexMode.EDIT
-                                                                      ? "Updating..."
-                                                                      : "Cloning..."}
+                                                                <span className="hidden xs:inline">
+                                                                    {mode === IndexMode.CREATE
+                                                                        ? "Creating..."
+                                                                        : mode === IndexMode.EDIT
+                                                                          ? "Updating..."
+                                                                          : "Cloning..."}
+                                                                </span>
+                                                                <span className="xs:hidden">
+                                                                    {mode === IndexMode.CREATE
+                                                                        ? "Creating"
+                                                                        : mode === IndexMode.EDIT
+                                                                          ? "Updating"
+                                                                          : "Cloning"}
+                                                                </span>
                                                             </>
                                                         ) : (
-                                                            labels.action
+                                                            <>
+                                                                <span className="hidden xs:inline">
+                                                                    {labels.action}
+                                                                </span>
+                                                                <span className="xs:hidden">
+                                                                    {mode === IndexMode.CREATE
+                                                                        ? "Create"
+                                                                        : mode === IndexMode.EDIT
+                                                                          ? "Update"
+                                                                          : "Clone"}
+                                                                </span>
+                                                            </>
                                                         )}
                                                     </Button>
                                                 </span>
