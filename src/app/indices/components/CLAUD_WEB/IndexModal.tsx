@@ -7,16 +7,15 @@ import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Badge} from "@/components/ui/badge";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
+import {Tooltip, TooltipContent, TooltipTrigger, TooltipProvider} from "@/components/ui/tooltip";
 import {Loader2, Plus, X} from "lucide-react";
 import {Asset, Id, IndexOverviewAsset, IndexOverviewForCreate} from "@/utils/types/general.types";
 import {UseIndexActionsReturns} from "@/app/indices/[id]/hooks/useIndexActions.hook";
-
 export enum IndexMode {
     CREATE = "create",
     EDIT = "edit",
     CLONE = "clone",
 }
-
 interface CreateUpdateIndexModalProps {
     isOpen: boolean;
     onCancelAction: () => void;
@@ -25,19 +24,16 @@ interface CreateUpdateIndexModalProps {
     indexOverview?: IndexOverviewForCreate;
     mode?: IndexMode;
 }
-
 export interface ModalIndexData {
     id?: Id;
     name: string;
     assets: IndexOverviewAsset[];
 }
-
 interface FormValues {
     name: string;
     assets: IndexOverviewAsset[];
     selectedAssetId: string;
 }
-
 const validationSchema = Yup.object().shape({
     name: Yup.string()
         .trim()
@@ -64,7 +60,6 @@ const validationSchema = Yup.object().shape({
             return Math.abs(total - 100) < 0.01; // Allow for small floating point differences
         }),
 });
-
 export function IndexModal({
     isOpen,
     onCancelAction,
@@ -102,9 +97,7 @@ export function IndexModal({
                 };
         }
     };
-
     const labels = getLabels();
-
     const getInitialValues = (): FormValues => {
         if (indexOverview && (mode === IndexMode.EDIT || mode === IndexMode.CLONE)) {
             return {
@@ -120,15 +113,44 @@ export function IndexModal({
         };
     };
 
+    // Function to check if there are changes in edit mode
+    const hasChanges = (currentValues: FormValues): boolean => {
+        if (mode !== IndexMode.EDIT || !indexOverview) {
+            return true; // Always allow submit for non-edit modes
+        }
+
+        // Check if name has changed
+        if (currentValues.name.trim() !== indexOverview.name.trim()) {
+            return true;
+        }
+
+        // Check if assets have changed
+        if (currentValues.assets.length !== indexOverview.assets.length) {
+            return true;
+        }
+
+        // Check if any asset details have changed
+        const currentAssetsSorted = [...currentValues.assets].sort((a, b) => a.id.localeCompare(b.id));
+        const originalAssetsSorted = [...indexOverview.assets].sort((a, b) => a.id.localeCompare(b.id));
+
+        for (let i = 0; i < currentAssetsSorted.length; i++) {
+            const current = currentAssetsSorted[i];
+            const original = originalAssetsSorted[i];
+
+            if (current.id !== original.id || current.portion !== original.portion) {
+                return true;
+            }
+        }
+
+        return false;
+    };
+
     const handleAddAsset = (values: FormValues, setFieldValue: (field: string, value: any) => void) => {
         if (!values.selectedAssetId) return;
-
         const asset = availableAssets.find(a => a.id === values.selectedAssetId);
         if (!asset) return;
-
         const alreadyExists = values.assets.some(a => a.id === values.selectedAssetId);
         if (alreadyExists) return;
-
         const newAsset: IndexOverviewAsset = {
             id: asset.id,
             symbol: asset.symbol,
@@ -136,11 +158,9 @@ export function IndexModal({
             rank: asset.rank,
             portion: 0,
         };
-
         setFieldValue("assets", [...values.assets, newAsset]);
         setFieldValue("selectedAssetId", "");
     };
-
     const handleRemoveAsset = (
         assetId: string,
         values: FormValues,
@@ -149,11 +169,9 @@ export function IndexModal({
         const updatedAssets = values.assets.filter(a => a.id !== assetId);
         setFieldValue("assets", updatedAssets);
     };
-
     const getTotalPortion = (assets: IndexOverviewAsset[]) => {
         return assets.reduce((sum, asset) => sum + (asset.portion || 0), 0);
     };
-
     const handleSubmit = async (
         values: FormValues,
         {setSubmitting}: {setSubmitting: (isSubmitting: boolean) => void}
@@ -171,7 +189,6 @@ export function IndexModal({
             setSubmitting(false);
         }
     };
-
     return (
         <Dialog open={isOpen} onOpenChange={onCancelAction}>
             <DialogContent className="sm:max-w-[600px]">
@@ -183,6 +200,8 @@ export function IndexModal({
                 >
                     {formik => {
                         const totalPortion = getTotalPortion(formik.values.assets);
+                        const formHasChanges = hasChanges(formik.values);
+                        const isSubmitDisabled = formik.isSubmitting || (mode === IndexMode.EDIT && !formHasChanges);
 
                         return (
                             <Form>
@@ -195,7 +214,6 @@ export function IndexModal({
                                         </p>
                                     )}
                                 </DialogHeader>
-
                                 <div className="space-y-6">
                                     {/* Name Input */}
                                     <div className="space-y-2">
@@ -217,20 +235,39 @@ export function IndexModal({
                                             )}
                                         </Field>
                                     </div>
-
                                     {/* Assets & Allocation */}
                                     <div className="space-y-4">
                                         <Label>Assets & Allocation*</Label>
-
                                         {/* Asset Selector */}
                                         <div className="flex gap-2">
                                             <Field name="selectedAssetId">
                                                 {({field}: any) => (
                                                     <Select
                                                         value={field.value}
-                                                        onValueChange={value =>
-                                                            formik.setFieldValue("selectedAssetId", value)
-                                                        }
+                                                        onValueChange={value => {
+                                                            formik.setFieldValue("selectedAssetId", value);
+                                                            // Immediately add the asset when selected
+                                                            if (value) {
+                                                                const asset = availableAssets.find(a => a.id === value);
+                                                                if (
+                                                                    asset &&
+                                                                    !formik.values.assets.some(a => a.id === value)
+                                                                ) {
+                                                                    const newAsset: IndexOverviewAsset = {
+                                                                        id: asset.id,
+                                                                        symbol: asset.symbol,
+                                                                        name: asset.name,
+                                                                        rank: asset.rank,
+                                                                        portion: 0,
+                                                                    };
+                                                                    formik.setFieldValue("assets", [
+                                                                        ...formik.values.assets,
+                                                                        newAsset,
+                                                                    ]);
+                                                                    formik.setFieldValue("selectedAssetId", "");
+                                                                }
+                                                            }
+                                                        }}
                                                         disabled={formik.isSubmitting}
                                                     >
                                                         <SelectTrigger className="flex-1">
@@ -244,9 +281,13 @@ export function IndexModal({
                                                                             selected => selected.id === asset.id
                                                                         )
                                                                 )
+                                                                .sort((a, b) => Number(a.rank) - Number(b.rank)) // Sort by rank ascending with type safety
                                                                 .map(asset => (
                                                                     <SelectItem key={asset.id} value={asset.id}>
                                                                         <div className="flex items-center gap-2">
+                                                                            <span className="text-xs text-gray-400 min-w-[2rem]">
+                                                                                #{asset.rank}
+                                                                            </span>
                                                                             <span className="font-medium">
                                                                                 {asset.symbol}
                                                                             </span>
@@ -260,15 +301,7 @@ export function IndexModal({
                                                     </Select>
                                                 )}
                                             </Field>
-                                            <Button
-                                                type="button"
-                                                onClick={() => handleAddAsset(formik.values, formik.setFieldValue)}
-                                                disabled={!formik.values.selectedAssetId || formik.isSubmitting}
-                                            >
-                                                <Plus className="h-4 w-4" />
-                                            </Button>
                                         </div>
-
                                         {/* Selected Assets */}
                                         <FieldArray name="assets">
                                             {() => (
@@ -278,6 +311,9 @@ export function IndexModal({
                                                             key={asset.id}
                                                             className="flex items-center gap-2 p-3 border rounded-lg"
                                                         >
+                                                            <span className="text-xs text-gray-400 min-w-[2rem]">
+                                                                #{asset.rank}
+                                                            </span>
                                                             <Badge variant="outline">{asset.symbol}</Badge>
                                                             <span className="flex-1 text-sm">{asset.name}</span>
                                                             <div className="flex items-center gap-2">
@@ -326,7 +362,6 @@ export function IndexModal({
                                                 </div>
                                             )}
                                         </FieldArray>
-
                                         {/* Total Allocation Display */}
                                         {formik.values.assets.length > 0 && (
                                             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
@@ -342,7 +377,6 @@ export function IndexModal({
                                                 </span>
                                             </div>
                                         )}
-
                                         {/* Assets Validation Error */}
                                         {formik.touched.assets &&
                                             formik.errors.assets &&
@@ -351,7 +385,6 @@ export function IndexModal({
                                             )}
                                     </div>
                                 </div>
-
                                 <DialogFooter>
                                     <Button
                                         type="button"
@@ -362,20 +395,33 @@ export function IndexModal({
                                         Cancel
                                     </Button>
 
-                                    <Button type="submit">
-                                        {formik.isSubmitting ? (
-                                            <>
-                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                                {mode === IndexMode.CREATE
-                                                    ? "Creating..."
-                                                    : mode === IndexMode.EDIT
-                                                      ? "Updating..."
-                                                      : "Cloning..."}
-                                            </>
-                                        ) : (
-                                            labels.action
-                                        )}
-                                    </Button>
+                                    <TooltipProvider>
+                                        <Tooltip>
+                                            <TooltipTrigger asChild>
+                                                <span>
+                                                    <Button type="submit" disabled={isSubmitDisabled}>
+                                                        {formik.isSubmitting ? (
+                                                            <>
+                                                                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                                {mode === IndexMode.CREATE
+                                                                    ? "Creating..."
+                                                                    : mode === IndexMode.EDIT
+                                                                      ? "Updating..."
+                                                                      : "Cloning..."}
+                                                            </>
+                                                        ) : (
+                                                            labels.action
+                                                        )}
+                                                    </Button>
+                                                </span>
+                                            </TooltipTrigger>
+                                            {mode === IndexMode.EDIT && !formHasChanges && !formik.isSubmitting && (
+                                                <TooltipContent>
+                                                    <p>No changes detected</p>
+                                                </TooltipContent>
+                                            )}
+                                        </Tooltip>
+                                    </TooltipProvider>
                                 </DialogFooter>
                             </Form>
                         );
