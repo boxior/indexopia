@@ -7,6 +7,8 @@ import {TrendingUp, TrendingDown, BarChart3, Calendar, Copy, Edit, Trash2} from 
 import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Index} from "@/utils/types/general.types";
 import {getIndexDurationLabel} from "@/app/indices/helpers";
 import {UseIndexActionsReturns} from "@/app/indices/[id]/hooks/useIndexActions.hook";
+import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
+import {NumeralFormat} from "@numeral";
 
 interface IndexOverviewProps {
     index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
@@ -137,7 +139,9 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
                                 <Badge variant="outline" className="text-xs">
                                     {asset.symbol}
                                 </Badge>
-                                <span className="text-sm text-gray-600">{asset?.portion?.toFixed(1)}%</span>
+                                <span className="text-sm text-gray-600">
+                                    {renderSafelyNumber(asset?.portion, NumeralFormat.INTEGER)}%
+                                </span>
                             </div>
                         ))}
                     </div>
