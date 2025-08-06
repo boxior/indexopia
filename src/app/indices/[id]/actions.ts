@@ -12,7 +12,11 @@ import {
 export const actionUpdateIndexOverview = async (indexOverview: IndexOverview) => {
     let assets = [];
 
-    const {assets: assetsWithHistories, startTime} = await getAssetsWithHistories({
+    const {
+        assets: assetsWithHistories,
+        startTime,
+        endTime,
+    } = await getAssetsWithHistories({
         assets: indexOverview.assets,
     });
 
@@ -33,7 +37,7 @@ export const actionUpdateIndexOverview = async (indexOverview: IndexOverview) =>
     const historyOverview = await getIndexHistoryOverview(index);
     const maxDrawDown = getMaxDrawDownWithTimeRange(history);
 
-    return await dbPutIndexOverview({...indexOverview, historyOverview, maxDrawDown, startTime});
+    return await dbPutIndexOverview({...indexOverview, historyOverview, maxDrawDown, startTime, endTime});
 };
 
 export const actionCreateIndexOverview = async ({
