@@ -10,7 +10,6 @@ interface QueuedTask<T = any> {
 
 class TaskQueue {
     private queue: QueuedTask[] = [];
-    private isProcessing = false;
     private maxConcurrentTasks = 2; // Process 2 tasks at a time
     private activeTasks = 0;
 
