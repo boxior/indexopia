@@ -1,12 +1,15 @@
 "use client";
+
 import {IndexDBName, IndexHistory, IndexOverview} from "@/utils/types/general.types";
-import {useEffect, useState} from "react";
+import {useEffect, useState, useRef} from "react";
 import {isEmpty, omit} from "lodash";
 import {actionGetIndexHistory} from "@/app/indices/actions";
 import {indexDBFactory} from "@/utils/heleprs/indexDBFactory.helper";
 import {ChartPreview} from "@/app/indices/components/CLAUD_WEB/ChartPreview";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 import ContentLoader from "@/components/Suspense/ContentLoader";
+import {globalTaskQueue} from "@/utils/queue/taskQueue";
+import {useIntersectionObserver} from "@/utils/hooks/useIntersectionObserver.hook";
 
 export function IndexHistoryChartPreview({
     indexOverview,
@@ -16,50 +19,94 @@ export function IndexHistoryChartPreview({
     className?: string;
 }) {
     const [history, setHistory] = useState<IndexHistory[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
+    const taskIdRef = useRef<string>(`chart-preview-${indexOverview?.id}`);
+
+    // Use intersection observer to prioritize visible components
+    const {targetRef, isIntersecting} = useIntersectionObserver();
 
     useEffect(() => {
-        // Defer execution to next tick to avoid blocking UI
-        const timeoutId = setTimeout(() => {
-            (async () => {
-                if (!indexOverview) return;
+        if (!indexOverview) {
+            setIsLoading(false);
+            return;
+        }
 
-                // get cached Index History
-                const {get} = await indexDBFactory(IndexDBName.INDEX_HISTORY);
-                const cachedIndexHistory = (await get<IndexHistory[]>(indexOverview.id)) ?? [];
-                setHistory(cachedIndexHistory);
+        const taskId = taskIdRef.current;
 
-                // get browser cached Index
-                const {get: getIndex} = await indexDBFactory(IndexDBName.INDEX_OVERVIEW);
-                const cachedIndex = await getIndex<IndexOverview>(indexOverview.id);
+        // Create the async task
+        const loadHistoryTask = async () => {
+            // get cached Index History
+            const {get} = await indexDBFactory(IndexDBName.INDEX_HISTORY);
+            const cachedIndexHistory = (await get<IndexHistory[]>(indexOverview.id)) ?? [];
 
-                const isFullHistory = cachedIndexHistory?.slice(-1)?.[0]?.time === indexOverview.endTime;
+            // Set cached data immediately to show something quickly
+            setHistory(cachedIndexHistory);
+            if (cachedIndexHistory.length > 0) {
+                setIsLoading(false);
+            }
 
-                const hasChangedHistoryRelatedProperties =
-                    JSON.stringify(omit(indexOverview, "name")) !== JSON.stringify(omit(cachedIndex, "name"));
+            // get browser cached Index
+            const {get: getIndex} = await indexDBFactory(IndexDBName.INDEX_OVERVIEW);
+            const cachedIndex = await getIndex<IndexOverview>(indexOverview.id);
 
-                const doFetch = !cachedIndex || hasChangedHistoryRelatedProperties || !isFullHistory;
+            const isFullHistory = cachedIndexHistory?.slice(-1)?.[0]?.time === indexOverview.endTime;
 
-                // cache Index
-                const {save: saveIndex} = await indexDBFactory(IndexDBName.INDEX_OVERVIEW);
-                await saveIndex(indexOverview.id, indexOverview);
+            const hasChangedHistoryRelatedProperties =
+                JSON.stringify(omit(indexOverview, "name")) !== JSON.stringify(omit(cachedIndex, "name"));
 
-                // fetch Index
-                if (doFetch) {
-                    const indexHistory = await actionGetIndexHistory(indexOverview.id, indexOverview);
-                    setHistory(indexHistory);
+            const doFetch = !cachedIndex || hasChangedHistoryRelatedProperties || !isFullHistory;
 
-                    const {save: saveIndexHistory} = await indexDBFactory(IndexDBName.INDEX_HISTORY);
-                    await saveIndexHistory(indexOverview.id, indexHistory);
-                }
-            })();
-        }, 0);
+            // cache Index
+            const {save: saveIndex} = await indexDBFactory(IndexDBName.INDEX_OVERVIEW);
+            await saveIndex(indexOverview.id, indexOverview);
 
-        return () => clearTimeout(timeoutId);
-    }, [JSON.stringify(indexOverview)]);
+            // fetch Index if needed
+            if (doFetch) {
+                const indexHistory = await actionGetIndexHistory(indexOverview.id, indexOverview);
+                setHistory(indexHistory);
 
-    if (isEmpty(history)) {
-        return <ContentLoader type={"chartPreview"} />;
+                const {save: saveIndexHistory} = await indexDBFactory(IndexDBName.INDEX_HISTORY);
+                await saveIndexHistory(indexOverview.id, indexHistory);
+            }
+
+            setIsLoading(false);
+            return history;
+        };
+
+        // Higher priority for visible items, lower for non-visible
+        const priority = isIntersecting ? 10 : 1;
+
+        globalTaskQueue.addTask(taskId, loadHistoryTask, priority).catch(error => {
+            if (error.message !== "Task cancelled") {
+                console.error("Chart preview loading failed:", error);
+            }
+            setIsLoading(false);
+        });
+
+        return () => {
+            globalTaskQueue.cancelTask(taskId);
+        };
+    }, [JSON.stringify(indexOverview), isIntersecting]);
+
+    if (isEmpty(history) && isLoading) {
+        return (
+            <div ref={targetRef}>
+                <ContentLoader type={"chartPreview"} />
+            </div>
+        );
     }
 
-    return <ChartPreview data={history.slice(-HISTORY_OVERVIEW_DAYS)} className={className} />;
+    if (isEmpty(history)) {
+        return (
+            <div ref={targetRef} className="flex items-center justify-center h-32 text-gray-500">
+                No data available
+            </div>
+        );
+    }
+
+    return (
+        <div ref={targetRef}>
+            <ChartPreview data={history.slice(-HISTORY_OVERVIEW_DAYS)} className={className} />
+        </div>
+    );
 }
