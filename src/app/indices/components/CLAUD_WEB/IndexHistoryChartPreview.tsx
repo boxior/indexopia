@@ -2,7 +2,7 @@
 
 import {IndexDBName, IndexHistory, IndexOverview} from "@/utils/types/general.types";
 import {useEffect, useState} from "react";
-import {isEmpty} from "lodash";
+import {isEmpty, omit} from "lodash";
 import {actionGetIndexHistory} from "@/app/indices/actions";
 import {indexDBFactory} from "@/utils/heleprs/indexDBFactory.helper";
 import {ChartPreview} from "@/app/indices/components/CLAUD_WEB/ChartPreview";
@@ -23,13 +23,19 @@ export function IndexHistoryChartPreview({
 
             // get cached Index History
             const {get} = await indexDBFactory(IndexDBName.INDEX_HISTORY);
-            setHistory((await get<IndexHistory[]>(indexOverview.id)) ?? []);
+            const cachedIndexHistory = (await get<IndexHistory[]>(indexOverview.id)) ?? [];
+            setHistory(cachedIndexHistory);
 
-            // get cached Index
+            // get browser cached Index
             const {get: getIndex} = await indexDBFactory(IndexDBName.INDEX_OVERVIEW);
-            const cachedIndex = await getIndex(indexOverview.id);
+            const cachedIndex = await getIndex<IndexOverview>(indexOverview.id);
 
-            const doFetch = !cachedIndex || JSON.stringify(indexOverview) !== JSON.stringify(cachedIndex);
+            const isFullHistory = cachedIndexHistory?.slice(-1)?.[0]?.time === indexOverview.endTime;
+
+            const hasChangedHistoryRelatedProperties =
+                JSON.stringify(omit(indexOverview, "name")) !== JSON.stringify(omit(cachedIndex, "name"));
+
+            const doFetch = !cachedIndex || hasChangedHistoryRelatedProperties || !isFullHistory;
 
             // cache Index
             const {save: saveIndex} = await indexDBFactory(IndexDBName.INDEX_OVERVIEW);
