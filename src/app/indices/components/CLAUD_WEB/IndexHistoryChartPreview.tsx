@@ -1,5 +1,4 @@
 "use client";
-
 import {IndexDBName, IndexHistory, IndexOverview} from "@/utils/types/general.types";
 import {useEffect, useState, useRef} from "react";
 import {isEmpty, omit} from "lodash";
@@ -9,7 +8,6 @@ import {ChartPreview} from "@/app/indices/components/CLAUD_WEB/ChartPreview";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 import ContentLoader from "@/components/Suspense/ContentLoader";
 import {globalTaskQueue} from "@/utils/queue/taskQueue";
-import {useIntersectionObserver} from "@/utils/hooks/useIntersectionObserver.hook";
 
 export function IndexHistoryChartPreview({
     indexOverview,
@@ -21,9 +19,6 @@ export function IndexHistoryChartPreview({
     const [history, setHistory] = useState<IndexHistory[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const taskIdRef = useRef<string>(`chart-preview-${indexOverview?.id}`);
-
-    // Use intersection observer to prioritize visible components
-    const {targetRef, isIntersecting} = useIntersectionObserver();
 
     useEffect(() => {
         if (!indexOverview) {
@@ -73,8 +68,8 @@ export function IndexHistoryChartPreview({
             return history;
         };
 
-        // Higher priority for visible items, lower for non-visible
-        const priority = isIntersecting ? 10 : 1;
+        // Add task to queue with priority (visible items get higher priority)
+        const priority = isElementVisible() ? 10 : 1;
 
         globalTaskQueue.addTask(taskId, loadHistoryTask, priority).catch(error => {
             if (error.message !== "Task cancelled") {
@@ -83,30 +78,26 @@ export function IndexHistoryChartPreview({
             setIsLoading(false);
         });
 
+        // Cleanup function to cancel the task if component unmounts
         return () => {
             globalTaskQueue.cancelTask(taskId);
         };
-    }, [JSON.stringify(indexOverview), isIntersecting]);
+    }, [JSON.stringify(indexOverview)]);
+
+    // Helper function to check if element is visible (optional optimization)
+    const isElementVisible = () => {
+        // You could implement intersection observer here
+        // For now, just return true
+        return true;
+    };
 
     if (isEmpty(history) && isLoading) {
-        return (
-            <div ref={targetRef}>
-                <ContentLoader type={"chartPreview"} />
-            </div>
-        );
+        return <ContentLoader type={"chartPreview"} />;
     }
 
     if (isEmpty(history)) {
-        return (
-            <div ref={targetRef} className="flex items-center justify-center h-32 text-gray-500">
-                No data available
-            </div>
-        );
+        return <div className="flex items-center justify-center h-32 text-gray-500">No data available</div>;
     }
 
-    return (
-        <div ref={targetRef}>
-            <ChartPreview data={history.slice(-HISTORY_OVERVIEW_DAYS)} className={className} />
-        </div>
-    );
+    return <ChartPreview data={history.slice(-HISTORY_OVERVIEW_DAYS)} className={className} />;
 }

@@ -55,7 +55,7 @@ class TaskQueue {
             this.activeTasks--;
 
             // Process next task after a small delay to keep UI responsive
-            setTimeout(() => this.processQueue(), 10);
+            setTimeout(() => this.processQueue(), 100);
         }
     }
 
