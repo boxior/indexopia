@@ -7,6 +7,7 @@ import {actionGetIndexHistory} from "@/app/indices/actions";
 import {indexDBFactory} from "@/utils/heleprs/indexDBFactory.helper";
 import {ChartPreview} from "@/app/indices/components/CLAUD_WEB/ChartPreview";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
+import ContentLoader from "@/components/Suspense/ContentLoader";
 
 export function IndexHistoryChartPreview({
     indexOverview,
@@ -53,7 +54,7 @@ export function IndexHistoryChartPreview({
     }, [JSON.stringify(indexOverview)]);
 
     if (isEmpty(history)) {
-        return null;
+        return <ContentLoader type={"chartPreview"} />;
     }
 
     return <ChartPreview data={history.slice(-HISTORY_OVERVIEW_DAYS)} className={className} />;
