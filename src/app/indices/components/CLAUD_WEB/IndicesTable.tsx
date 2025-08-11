@@ -3,7 +3,7 @@ import {useState, useMemo} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
-import {Tooltip, TooltipContent, TooltipTrigger, TooltipProvider} from "@/components/ui/tooltip";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import {
     Copy,
     Edit,
@@ -16,7 +16,7 @@ import {
     EyeOff,
     Eye,
 } from "lucide-react";
-import {EntityMode, Id, IndexOverview} from "@/utils/types/general.types";
+import {EntityMode, Id, IndexOverviewWithHistory} from "@/utils/types/general.types";
 import {IndicesPagination} from "@/app/indices/components/CLAUD_WEB/IndicesPagination";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {getIndexDurationLabel} from "@/app/indices/helpers";
@@ -30,11 +30,11 @@ import {LinkReferer} from "@/app/components/LinkReferer";
 import {formatPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 
 interface IndicesTableProps {
-    indices: IndexOverview[];
+    indices: IndexOverviewWithHistory[];
     mode?: EntityMode;
-    onEditAction?: (index: IndexOverview) => void;
-    onDeleteAction?: (index: IndexOverview) => void;
-    onCloneAction?: (index: IndexOverview) => void;
+    onEditAction?: (index: IndexOverviewWithHistory) => void;
+    onDeleteAction?: (index: IndexOverviewWithHistory) => void;
+    onCloneAction?: (index: IndexOverviewWithHistory) => void;
 }
 
 type SortField = "name" | "total" | "days7" | "days30" | "maxDrawDown";
@@ -140,7 +140,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
         setExpandedRows(newExpanded);
     };
 
-    const isUserIndex = (index: IndexOverview) => !!index.userId;
+    const isUserIndex = (index: IndexOverviewWithHistory) => !!index.userId;
 
     const handleSignInClick = () => {
         router.push(PAGES_URLS.signIn);
@@ -158,7 +158,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     );
 
     // Mobile Card Component
-    const MobileIndexCard = ({index}: {index: IndexOverview}) => {
+    const MobileIndexCard = ({index}: {index: IndexOverviewWithHistory}) => {
         const isExpanded = expandedRows.has(index.id);
 
         return (

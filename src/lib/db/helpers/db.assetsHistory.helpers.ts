@@ -77,3 +77,54 @@ export const dbGetAssetHistoryByIdAndStartTime = async (
         throw error;
     }
 };
+
+// Helper function: Fetch history for multiple assets by array of assetIds with startTime
+export const dbGetMultipleAssetHistoryByStartTime = async (
+    assetIds: string[],
+    startTime: number
+): Promise<Record<string, AssetHistory[]>> => {
+    "use cache";
+    // Create a combined cache tag for all asset IDs
+    const cacheTagKey = combineCacheTags(CacheTag.ASSETS_HISTORY, CacheTag.ASSETS_HISTORY_OVERVIEW, startTime);
+    cacheTag(CacheTag.ASSETS_HISTORY, cacheTagKey);
+
+    try {
+        // Early return if no asset IDs provided
+        if (!assetIds || assetIds.length === 0) {
+            return {};
+        }
+
+        // Create placeholders for SQL IN clause
+        const placeholders = assetIds.map(() => "?").join(", ");
+
+        const sql = `
+            SELECT * FROM ${TABLE_NAME_ASSET_HISTORY} 
+            WHERE assetId IN (${placeholders}) AND time >= ?
+            ORDER BY assetId ASC, time ASC;
+        `;
+
+        // Combine assetIds and startTime for query parameters
+        const queryParams = [...assetIds, startTime];
+
+        const [rows] = await mySqlPool.query(sql, queryParams);
+        const histories = rows as AssetHistory[];
+
+        // Group histories by assetId
+        const result: Record<string, AssetHistory[]> = {};
+
+        // Initialize all assetIds with empty arrays to ensure all requested IDs are in result
+        assetIds.forEach(assetId => {
+            result[assetId] = [];
+        });
+
+        // Populate the result with actual data
+        histories.forEach(history => {
+            result[history.assetId].push(history);
+        });
+
+        return result;
+    } catch (error) {
+        console.error("Error fetching multiple asset histories by start time:", error);
+        throw error;
+    }
+};

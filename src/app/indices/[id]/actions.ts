@@ -33,7 +33,7 @@ export const actionUpdateIndexOverview = async (indexOverview: IndexOverview) =>
         assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
     };
 
-    const history = await getIndexHistory(index);
+    const history = getIndexHistory(index);
     const historyOverview = await getIndexHistoryOverview(index);
     const maxDrawDown = getMaxDrawDownWithTimeRange(history);
 
@@ -68,7 +68,7 @@ export const actionCreateIndexOverview = async ({
         assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
     };
 
-    const history = await getIndexHistory(index);
+    const history = getIndexHistory(index);
     const historyOverview = await getIndexHistoryOverview(index);
     const maxDrawDown = getMaxDrawDownWithTimeRange(history);
 

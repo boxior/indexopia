@@ -220,11 +220,11 @@ export const getAssetHistoriesWithSmallestRange = async ({
     return {histories, startTime: minStartTime ?? undefined, endTime: maxEndTime ?? undefined};
 };
 
-export const getIndexHistory = async <A extends {id?: Id; portion?: number}>(index: {
+export const getIndexHistory = <A extends {id?: Id; portion?: number}>(index: {
     id?: Id;
     name: string;
     assets: AssetWithHistoryAndOverview<A>[];
-}): Promise<IndexHistory[]> => {
+}): IndexHistory[] => {
     const portions = index.assets.map(asset => asset.portion ?? 0);
 
     return mergeAssetHistories(
@@ -330,7 +330,7 @@ export const getIndex = async ({
         history: [],
     };
 
-    const indexHistory = await getIndexHistory(index);
+    const indexHistory = getIndexHistory(index);
     const indexHistoryOverview = await getIndexHistoryOverview(index);
     const indexMaxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 

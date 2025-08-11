@@ -25,5 +25,5 @@ export const actionGetIndexHistory = async (id: Id, propIndexOverview?: IndexOve
         startTime: moment().utc().startOf("d").add(-HISTORY_OVERVIEW_DAYS, "days").valueOf(),
     });
 
-    return await getIndexHistory({...pick(indexOverview, ["id", "name"]), assets: assetsWithHistories});
+    return getIndexHistory({...pick(indexOverview, ["id", "name"]), assets: assetsWithHistories});
 };
