@@ -57,7 +57,7 @@ const getIndicesWithHistoryOverview = async (indices: IndexOverview[]): Promise<
         }, [] as IndexOverviewAsset[])
         .map(a => pick(a, ["id"]));
 
-    const startTime = moment().utc().startOf("d").add(-HISTORY_OVERVIEW_DAYS, "days").valueOf();
+    const startTime = moment().utc().endOf("d").add(-HISTORY_OVERVIEW_DAYS, "days").valueOf();
     const normalizedAssetsHistory = await dbGetMultipleAssetHistoryByStartTime(
         allUsedAssets.map(a => a.id),
         startTime

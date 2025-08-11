@@ -5,6 +5,7 @@ import {Button} from "@/components/ui/button";
 import {AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, TooltipProps} from "recharts";
 import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Index} from "@/utils/types/general.types";
 import {COLORS} from "@/utils/constants/general.constants";
+import moment from "moment";
 
 interface IndexChartProps {
     index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
@@ -36,16 +37,15 @@ export function IndexChart({index}: IndexChartProps) {
 
         if (range.days === "ytd") {
             // Year to Date - from January 1st of current year
-            const currentYear = new Date().getFullYear();
-            const startOfYear = new Date(currentYear, 0, 1); // January 1st
-            const startOfYearTimestamp = startOfYear.getTime();
+            const currentYear = moment.utc().year();
+            const startOfYear = moment.utc().year(currentYear).startOf("year");
+            const startOfYearTimestamp = startOfYear.valueOf();
 
             return history.filter(item => item.time >= startOfYearTimestamp);
         }
 
-        const cutoffDate = new Date();
-        cutoffDate.setDate(cutoffDate.getDate() - (range.days as number));
-        const cutoffTimestamp = cutoffDate.getTime();
+        const cutoffDate = moment.utc().subtract(range.days as number, "days");
+        const cutoffTimestamp = cutoffDate.valueOf();
 
         return history.filter(item => item.time >= cutoffTimestamp);
     };
@@ -69,7 +69,7 @@ export function IndexChart({index}: IndexChartProps) {
     }, [filteredData]);
 
     const formatDate = (timestamp: number | string) => {
-        const date = new Date(timestamp);
+        const date = moment.utc(timestamp).toDate();
         const isYTDRange = selectedRange === "YTD";
 
         return date.toLocaleDateString("en-US", {
@@ -80,7 +80,7 @@ export function IndexChart({index}: IndexChartProps) {
     };
 
     const formatTooltipDate = (timestamp: number) => {
-        const date = new Date(timestamp);
+        const date = moment.utc(timestamp).toDate();
         return date.toLocaleDateString("en-US", {
             weekday: "long",
             year: "numeric",
@@ -94,7 +94,7 @@ export function IndexChart({index}: IndexChartProps) {
     const CustomTooltip = ({active, payload, label}: CustomTooltipProps) => {
         if (active && payload && payload.length && label) {
             const value = payload[0].value;
-            console.log("value", value);
+
             const timestamp = parseInt(label);
             const change =
                 filteredData.length > 1
