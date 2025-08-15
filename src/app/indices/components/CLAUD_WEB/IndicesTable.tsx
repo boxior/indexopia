@@ -3,7 +3,7 @@ import {useState, useMemo} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
-import {Tooltip, TooltipContent, TooltipTrigger, TooltipProvider} from "@/components/ui/tooltip";
+import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
 import {
     Copy,
     Edit,
@@ -16,7 +16,7 @@ import {
     EyeOff,
     Eye,
 } from "lucide-react";
-import {EntityMode, Id, IndexOverview} from "@/utils/types/general.types";
+import {EntityMode, Id, IndexOverviewWithHistory} from "@/utils/types/general.types";
 import {IndicesPagination} from "@/app/indices/components/CLAUD_WEB/IndicesPagination";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {getIndexDurationLabel} from "@/app/indices/helpers";
@@ -27,14 +27,14 @@ import {HISTORY_OVERVIEW_DAYS, PAGES_URLS} from "@/utils/constants/general.const
 import {useRouter} from "next/navigation";
 import {useSession} from "next-auth/react";
 import {LinkReferer} from "@/app/components/LinkReferer";
-import {formatPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
+import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 
 interface IndicesTableProps {
-    indices: IndexOverview[];
+    indices: IndexOverviewWithHistory[];
     mode?: EntityMode;
-    onEditAction?: (index: IndexOverview) => void;
-    onDeleteAction?: (index: IndexOverview) => void;
-    onCloneAction?: (index: IndexOverview) => void;
+    onEditAction?: (index: IndexOverviewWithHistory) => void;
+    onDeleteAction?: (index: IndexOverviewWithHistory) => void;
+    onCloneAction?: (index: IndexOverviewWithHistory) => void;
 }
 
 type SortField = "name" | "total" | "days7" | "days30" | "maxDrawDown";
@@ -140,7 +140,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
         setExpandedRows(newExpanded);
     };
 
-    const isUserIndex = (index: IndexOverview) => !!index.userId;
+    const isUserIndex = (index: IndexOverviewWithHistory) => !!index.userId;
 
     const handleSignInClick = () => {
         router.push(PAGES_URLS.signIn);
@@ -158,7 +158,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     );
 
     // Mobile Card Component
-    const MobileIndexCard = ({index}: {index: IndexOverview}) => {
+    const MobileIndexCard = ({index}: {index: IndexOverviewWithHistory}) => {
         const isExpanded = expandedRows.has(index.id);
 
         return (
@@ -196,7 +196,9 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
 
                     <div className="flex items-center gap-2 ml-2">
                         <div className="text-right relative">
-                            <div className="text-sm font-medium">{formatPercentage(index.historyOverview.total)}</div>
+                            <div className="text-sm font-medium">
+                                {renderSafelyPercentage(index.historyOverview.total)}
+                            </div>
                             <div className="text-xs text-gray-500">Total</div>
                             {hiddenOption && <ProtectedOverlay />}
                         </div>
@@ -225,13 +227,13 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                         <div className="grid grid-cols-2 gap-4">
                             <div className="text-center">
                                 <div className="text-sm font-medium">
-                                    {formatPercentage(index.historyOverview.days7)}
+                                    {renderSafelyPercentage(index.historyOverview.days7)}
                                 </div>
                                 <div className="text-xs text-gray-500">7 days</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-sm font-medium">
-                                    {formatPercentage(index.historyOverview.days30)}
+                                    {renderSafelyPercentage(index.historyOverview.days30)}
                                 </div>
                                 <div className="text-xs text-gray-500">30 days</div>
                             </div>
@@ -435,11 +437,11 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                             {hiddenOption && <ProtectedOverlay />}
                                         </div>
                                     </TableCell>
-                                    <TableCell>{formatPercentage(index.historyOverview.days7)}</TableCell>
-                                    <TableCell>{formatPercentage(index.historyOverview.days30)}</TableCell>
+                                    <TableCell>{renderSafelyPercentage(index.historyOverview.days7)}</TableCell>
+                                    <TableCell>{renderSafelyPercentage(index.historyOverview.days30)}</TableCell>
                                     <TableCell>
                                         <div className="relative">
-                                            {formatPercentage(index.historyOverview.total)}
+                                            {renderSafelyPercentage(index.historyOverview.total)}
                                             {hiddenOption && <ProtectedOverlay />}
                                         </div>
                                     </TableCell>

@@ -5,9 +5,10 @@ import {dbGetIndicesOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {connection} from "next/server";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 import ContentLoader from "@/components/Suspense/ContentLoader";
-import fetchAssets from "@/app/actions/assets/fetchAssets";
 import {IndexesPageClient} from "@/app/indices/components/CLAUD_WEB/IndicesPageClient";
 import {auth} from "@/auth";
+import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
+import {actionGetIndicesWithHistoryOverview} from "@/app/indices/actions";
 
 export default async function IndicesPage() {
     return (
@@ -33,10 +34,13 @@ const IndicesPageComponent = async () => {
     const session = await auth();
     const currentUserId = session?.user?.id;
 
-    const systemIndicesOverview = await dbGetIndicesOverview();
-    const userIndicesOverview = currentUserId ? await dbGetIndicesOverview(currentUserId) : [];
+    const fetchedIndices = await Promise.all([
+        dbGetIndicesOverview(),
+        currentUserId ? dbGetIndicesOverview(currentUserId) : [],
+    ]);
 
-    const {data: assets} = await fetchAssets({});
+    const indices = [...fetchedIndices[0], ...fetchedIndices[1]];
+    const fetchedProps = await Promise.all([dbGetAssets(), actionGetIndicesWithHistoryOverview(indices)]);
 
-    return <IndexesPageClient indices={[...systemIndicesOverview, ...userIndicesOverview]} assets={assets} />;
+    return <IndexesPageClient assets={fetchedProps[0]} indices={fetchedProps[1]} />;
 };

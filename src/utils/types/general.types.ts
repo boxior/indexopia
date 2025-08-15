@@ -101,6 +101,8 @@ export type IndexOverview = Pick<
     "id" | "systemId" | "userId" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime"
 > & {assets: IndexOverviewAsset[]};
 
+export type IndexOverviewWithHistory = IndexOverview & {history: IndexHistory[]};
+
 export type IndexOverviewForCreate = Omit<IndexOverview, "id"> & {id?: Id};
 
 /**
