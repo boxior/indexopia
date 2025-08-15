@@ -4,7 +4,7 @@ import {IndexPageClient} from "@/app/indices/[id]/components/CLAUD_WEB/IndexPage
 import ContentLoader from "@/components/Suspense/ContentLoader";
 import * as React from "react";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
-import fetchAssets from "@/app/actions/assets/fetchAssets";
+import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 
 interface PageProps {
     params: Promise<{id: string}>;
@@ -38,7 +38,7 @@ const IndexPageComponent = async ({params}: PageProps) => {
         id,
     });
 
-    const {data: assets} = await fetchAssets({});
+    const assets = await dbGetAssets();
 
     return <IndexPageClient index={index} assets={assets} />;
 };

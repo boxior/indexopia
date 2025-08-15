@@ -27,7 +27,7 @@ export default async function fetchAssetHistory(
             res.json()
         );
         await writeJsonFile("history_" + params.id, history.data, "/db/raw-history");
-        const populatedHistory = populateMissingAssetHistory<Omit<AssetHistory, "assetId">>(history.data);
+        const populatedHistory = populateMissingAssetHistory<Omit<AssetHistory, "assetId">>(history.data ?? []);
         await writeJsonFile("history_" + params.id, history.data, "/db/populated-history");
 
         return {

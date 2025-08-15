@@ -14,6 +14,7 @@ import moment from "moment";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 import {pick, uniqBy} from "lodash";
 import {dbGetMultipleAssetHistoryByStartTime} from "@/lib/db/helpers/db.assetsHistory.helpers";
+import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 
 export default async function IndicesPage() {
     return (
@@ -45,7 +46,7 @@ const IndicesPageComponent = async () => {
     ]);
 
     const indices = [...fetchedIndices[0], ...fetchedIndices[1]];
-    const fetchedProps = await Promise.all([fetchAssets({}), getIndicesWithHistoryOverview(indices)]);
+    const fetchedProps = await Promise.all([dbGetAssets(), getIndicesWithHistoryOverview(indices)]);
 
     return <IndexesPageClient assets={fetchedProps[0]} indices={fetchedProps[1]} />;
 };
