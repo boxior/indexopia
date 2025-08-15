@@ -11,6 +11,7 @@ import Link from "next/link";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
 import {Button} from "@/components/ui/button";
 import {filterTopPerformance} from "@/app/indices/helpers";
+import {actionGetIndicesWithHistoryOverview} from "@/app/indices/actions";
 
 export default async function HomePage() {
     return <HomePageSuspended />;
@@ -20,6 +21,7 @@ const HomePageSuspended = async () => {
     const systemIndicesOverview = await dbGetIndicesOverview();
 
     const topIndices = filterTopPerformance(systemIndicesOverview, 3);
+    const indices = await actionGetIndicesWithHistoryOverview(topIndices);
 
     return (
         <SuspenseWrapper loadingMessage="Loading Indexopia..." variant="spinner" showLogo={true}>
@@ -29,7 +31,7 @@ const HomePageSuspended = async () => {
                     <HeroSection />
                     <section className="py-20 bg-white">
                         <div className="container mx-auto px-4">
-                            <IndicesTable indices={topIndices.slice(-3)} mode={EntityMode.VIEW} />
+                            <IndicesTable indices={indices} mode={EntityMode.VIEW} />
                             <div className="text-center mt-8">
                                 <Link href={PAGES_URLS.indices}>
                                     <Button size="lg" variant="outline">
