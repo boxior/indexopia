@@ -27,7 +27,7 @@ import {HISTORY_OVERVIEW_DAYS, PAGES_URLS} from "@/utils/constants/general.const
 import {useRouter} from "next/navigation";
 import {useSession} from "next-auth/react";
 import {LinkReferer} from "@/app/components/LinkReferer";
-import {formatPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
+import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 
 interface IndicesTableProps {
     indices: IndexOverviewWithHistory[];
@@ -196,7 +196,9 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
 
                     <div className="flex items-center gap-2 ml-2">
                         <div className="text-right relative">
-                            <div className="text-sm font-medium">{formatPercentage(index.historyOverview.total)}</div>
+                            <div className="text-sm font-medium">
+                                {renderSafelyPercentage(index.historyOverview.total)}
+                            </div>
                             <div className="text-xs text-gray-500">Total</div>
                             {hiddenOption && <ProtectedOverlay />}
                         </div>
@@ -225,13 +227,13 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                         <div className="grid grid-cols-2 gap-4">
                             <div className="text-center">
                                 <div className="text-sm font-medium">
-                                    {formatPercentage(index.historyOverview.days7)}
+                                    {renderSafelyPercentage(index.historyOverview.days7)}
                                 </div>
                                 <div className="text-xs text-gray-500">7 days</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-sm font-medium">
-                                    {formatPercentage(index.historyOverview.days30)}
+                                    {renderSafelyPercentage(index.historyOverview.days30)}
                                 </div>
                                 <div className="text-xs text-gray-500">30 days</div>
                             </div>
@@ -435,11 +437,11 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                             {hiddenOption && <ProtectedOverlay />}
                                         </div>
                                     </TableCell>
-                                    <TableCell>{formatPercentage(index.historyOverview.days7)}</TableCell>
-                                    <TableCell>{formatPercentage(index.historyOverview.days30)}</TableCell>
+                                    <TableCell>{renderSafelyPercentage(index.historyOverview.days7)}</TableCell>
+                                    <TableCell>{renderSafelyPercentage(index.historyOverview.days30)}</TableCell>
                                     <TableCell>
                                         <div className="relative">
-                                            {formatPercentage(index.historyOverview.total)}
+                                            {renderSafelyPercentage(index.historyOverview.total)}
                                             {hiddenOption && <ProtectedOverlay />}
                                         </div>
                                     </TableCell>

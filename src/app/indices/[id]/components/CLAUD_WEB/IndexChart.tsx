@@ -6,6 +6,9 @@ import {AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContain
 import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Index} from "@/utils/types/general.types";
 import {COLORS} from "@/utils/constants/general.constants";
 import moment from "moment";
+import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
+import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
+import {NumeralFormat} from "@numeral";
 
 interface IndexChartProps {
     index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
@@ -109,15 +112,14 @@ export function IndexChart({index}: IndexChartProps) {
                     <div className="space-y-1">
                         <div className="flex justify-between items-center">
                             <span className="text-xs sm:text-sm text-gray-500">Index Value:</span>
-                            <span className="font-medium text-sm sm:text-base">${Number(value).toFixed(2)}</span>
+                            <span className="font-medium text-sm sm:text-base">${renderSafelyNumber(value)}</span>
                         </div>
                         <div className="flex justify-between items-center">
                             <span className="text-xs sm:text-sm text-gray-500">Change:</span>
                             <span
                                 className={`font-medium text-sm sm:text-base ${change >= 0 ? "text-green-600" : "text-red-600"}`}
                             >
-                                {change >= 0 ? "+" : ""}
-                                {change.toFixed(2)}%
+                                {renderSafelyPercentage(change)}
                             </span>
                         </div>
                     </div>
@@ -150,12 +152,11 @@ export function IndexChart({index}: IndexChartProps) {
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                         <CardTitle className="text-lg sm:text-xl">Price Chart</CardTitle>
                         <div className="flex items-center gap-2 sm:gap-4">
-                            <div className="text-xl sm:text-2xl font-bold">${currentValue.toFixed(2)}</div>
+                            <div className="text-xl sm:text-2xl font-bold">${renderSafelyNumber(currentValue)}</div>
                             <div
                                 className={`text-sm font-medium ${performance >= 0 ? "text-green-600" : "text-red-600"}`}
                             >
-                                {performance >= 0 ? "+" : ""}
-                                {performance.toFixed(2)}% ({selectedRange})
+                                {renderSafelyPercentage(performance)} ({selectedRange})
                             </div>
                         </div>
                     </div>
@@ -227,7 +228,7 @@ export function IndexChart({index}: IndexChartProps) {
                                 fontSize={10}
                                 className="sm:text-xs"
                                 tick={{fontSize: 10}}
-                                tickFormatter={value => `$${Number(value).toFixed(2)}`}
+                                tickFormatter={value => `$${renderSafelyNumber(value, NumeralFormat.INTEGER)}`}
                                 width={60}
                             />
                             <Tooltip content={<CustomTooltip />} />

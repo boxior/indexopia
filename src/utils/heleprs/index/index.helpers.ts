@@ -21,3 +21,7 @@ export const getSystemIndexOverviewId = ({
 }) => {
     return equalPortions ? `equalPortions_${assetsCount}` : `${systemIndexSortBy}_${systemIndexBy}_${assetsCount}`;
 };
+
+export const sortIndexAssetsByPortion = (assets: IndexOverviewAsset[]) => {
+    return assets.toSorted((a, b) => b.portion - a.portion);
+};

@@ -11,7 +11,7 @@ import * as React from "react";
 import {LinkReferer} from "@/app/components/LinkReferer";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {NumeralFormat} from "@numeral";
-import {formatPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
+import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 import {ChartPreview} from "@/app/indices/components/CLAUD_WEB/ChartPreview";
 
@@ -140,7 +140,9 @@ export function AssetsTable({assets}: AssetsTableProps) {
 
                     <div className="flex items-center gap-2 ml-2">
                         <div className="text-right">
-                            <div className="text-sm font-medium">{formatPercentage(asset.historyOverview.total)}</div>
+                            <div className="text-sm font-medium">
+                                {renderSafelyPercentage(asset.historyOverview.total)}
+                            </div>
                             <div className="text-xs text-gray-500">Total</div>
                         </div>
 
@@ -168,13 +170,13 @@ export function AssetsTable({assets}: AssetsTableProps) {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="text-center">
                                 <div className="text-sm font-medium">
-                                    {formatPercentage(asset.historyOverview.days7)}
+                                    {renderSafelyPercentage(asset.historyOverview.days7)}
                                 </div>
                                 <div className="text-xs text-gray-500">7 days</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-sm font-medium">
-                                    {formatPercentage(asset.historyOverview.days30)}
+                                    {renderSafelyPercentage(asset.historyOverview.days30)}
                                 </div>
                                 <div className="text-xs text-gray-500">30 days</div>
                             </div>
@@ -357,9 +359,9 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                                 className="w-32 h-16 relative"
                                             />
                                         </TableCell>
-                                        <TableCell>{formatPercentage(asset.historyOverview.days7)}</TableCell>
-                                        <TableCell>{formatPercentage(asset.historyOverview.days30)}</TableCell>
-                                        <TableCell>{formatPercentage(asset.historyOverview.total)}</TableCell>
+                                        <TableCell>{renderSafelyPercentage(asset.historyOverview.days7)}</TableCell>
+                                        <TableCell>{renderSafelyPercentage(asset.historyOverview.days30)}</TableCell>
+                                        <TableCell>{renderSafelyPercentage(asset.historyOverview.total)}</TableCell>
                                         <TableCell>
                                             <span className="text-red-600">
                                                 -{Math.abs(asset.maxDrawDown.value).toFixed(2)}%

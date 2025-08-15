@@ -9,6 +9,8 @@ import {UseIndexActionsReturns} from "@/app/indices/[id]/hooks/useIndexActions.h
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {NumeralFormat} from "@numeral";
 import {useState} from "react";
+import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
+import {sortIndexAssetsByPortion} from "@/utils/heleprs/index/index.helpers";
 
 interface IndexOverviewProps {
     index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
@@ -23,17 +25,6 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
 
     const [isAssetsExpanded, setIsAssetsExpanded] = useState(false);
 
-    const formatPercentage = (value: number) => {
-        const sign = value >= 0 ? "+" : "";
-        const color = value >= 0 ? "text-green-600" : "text-red-600";
-        return (
-            <span className={color}>
-                {sign}
-                {renderSafelyNumber(value)}%
-            </span>
-        );
-    };
-
     const getDuration = () => {
         if (!index.startTime || !index.endTime) return "N/A";
         return getIndexDurationLabel(index.startTime, index.endTime);
@@ -44,35 +35,31 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
             icon: TrendingUp,
             label: "24h",
             fullLabel: "24h Performance",
-            value: formatPercentage(index.historyOverview.days1),
+            value: renderSafelyPercentage(index.historyOverview.days1),
         },
         {
             icon: TrendingUp,
             label: "7d",
             fullLabel: "7d Performance",
-            value: formatPercentage(index.historyOverview.days7),
+            value: renderSafelyPercentage(index.historyOverview.days7),
         },
         {
             icon: TrendingUp,
             label: "30d",
             fullLabel: "30d Performance",
-            value: formatPercentage(index.historyOverview.days30),
+            value: renderSafelyPercentage(index.historyOverview.days30),
         },
         {
             icon: BarChart3,
             label: "Total",
             fullLabel: "Total Return",
-            value: formatPercentage(index.historyOverview.total),
+            value: renderSafelyPercentage(index.historyOverview.total),
         },
         {
             icon: TrendingDown,
             label: "Max DD",
             fullLabel: "Max Drawdown",
-            value: (
-                <span className="text-red-600">
-                    -{renderSafelyNumber(index.maxDrawDown.value, NumeralFormat.PERCENT)}
-                </span>
-            ),
+            value: renderSafelyPercentage(-index.maxDrawDown.value),
         },
         {
             icon: Calendar,
@@ -81,6 +68,8 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
             value: getDuration(),
         },
     ];
+
+    const sortedAssetsByPortion = sortIndexAssetsByPortion(index.assets);
 
     return (
         <Card className="mb-6">
@@ -158,13 +147,17 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
 
                 {/* Assets Overview */}
                 <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t">
-                    <h3 className="text-sm font-medium text-gray-500 mb-2 sm:mb-3">Assets ({index.assets.length})</h3>
+                    <h3 className="text-sm font-medium text-gray-500 mb-2 sm:mb-3">
+                        Assets ({sortedAssetsByPortion.length})
+                    </h3>
 
                     {/* Mobile: Vertical Stack */}
                     <div className="sm:hidden space-y-2">
                         {(() => {
-                            const visibleAssets = isAssetsExpanded ? index.assets : index.assets.slice(0, 5);
-                            const hasMoreAssets = index.assets.length > 5;
+                            const visibleAssets = isAssetsExpanded
+                                ? sortedAssetsByPortion
+                                : sortedAssetsByPortion.slice(0, 5);
+                            const hasMoreAssets = sortedAssetsByPortion.length > 5;
 
                             return (
                                 <>
@@ -197,7 +190,7 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
                                                     </>
                                                 ) : (
                                                     <>
-                                                        Show {index.assets.length - 5} More
+                                                        Show {sortedAssetsByPortion.length - 5} More
                                                         <ChevronDown className="ml-1 h-3 w-3" />
                                                     </>
                                                 )}
@@ -211,7 +204,7 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
 
                     {/* Desktop: Horizontal Wrap */}
                     <div className="hidden sm:flex flex-wrap gap-2">
-                        {index.assets.map(asset => (
+                        {sortedAssetsByPortion.map(asset => (
                             <div key={asset.id} className="flex items-center space-x-2 bg-gray-50 rounded-lg px-3 py-2">
                                 <Badge variant="outline" className="text-xs">
                                     {asset.symbol}
