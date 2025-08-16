@@ -14,6 +14,7 @@ import {NumeralFormat} from "@numeral";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 import {ChartPreview} from "@/app/indices/components/CLAUD_WEB/ChartPreview";
+import {useTranslation} from "react-i18next";
 
 interface AssetsTableProps {
     assets: AssetWithHistoryOverviewPortionAndMaxDrawDown[];
@@ -32,6 +33,8 @@ type SortField =
 type SortOrder = "asc" | "desc";
 
 export function AssetsTable({assets}: AssetsTableProps) {
+    const {t} = useTranslation();
+
     const [sortField, setSortField] = useState<SortField>("portion");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -221,7 +224,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-lg">Assets Breakdown</CardTitle>
+                <CardTitle className="text-lg">{t("common.assetsBreakdown")}</CardTitle>
             </CardHeader>
             <CardContent>
                 {/* Desktop Table */}
@@ -236,7 +239,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("rank")}
                                         >
-                                            Rank
+                                            {t("common.rank")}
                                             {getSortIcon("rank")}
                                         </Button>
                                     </TableHead>
@@ -246,7 +249,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("name")}
                                         >
-                                            Asset
+                                            {t("common.asset")}
                                             {getSortIcon("name")}
                                         </Button>
                                     </TableHead>
@@ -256,7 +259,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("portion")}
                                         >
-                                            Allocation
+                                            {t("common.allocation")}
                                             {getSortIcon("portion")}
                                         </Button>
                                     </TableHead>
@@ -266,7 +269,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("priceUsd")}
                                         >
-                                            Price
+                                            {t("common.price")}
                                             {getSortIcon("priceUsd")}
                                         </Button>
                                     </TableHead>
@@ -277,7 +280,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("days7")}
                                         >
-                                            7d
+                                            {t("common.days7")}
                                             {getSortIcon("days7")}
                                         </Button>
                                     </TableHead>
@@ -287,7 +290,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("days30")}
                                         >
-                                            30d
+                                            {t("common.days30")}
                                             {getSortIcon("days30")}
                                         </Button>
                                     </TableHead>
@@ -297,7 +300,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("total")}
                                         >
-                                            Total Return
+                                            {t("common.total")}
                                             {getSortIcon("total")}
                                         </Button>
                                     </TableHead>
@@ -307,7 +310,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("maxDrawDown")}
                                         >
-                                            Max Drawdown
+                                            {t("common.maxDrawdown")}
                                             {getSortIcon("maxDrawDown")}
                                         </Button>
                                     </TableHead>
@@ -317,7 +320,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("marketCapUsd")}
                                         >
-                                            Market Cap
+                                            {t("common.marketCap")}
                                             {getSortIcon("marketCapUsd")}
                                         </Button>
                                     </TableHead>
