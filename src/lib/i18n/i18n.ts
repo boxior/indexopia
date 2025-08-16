@@ -28,6 +28,25 @@ const detectionOptions = {
 
     // Check all fallback languages
     checkWhitelist: true,
+
+    // localStorage specific options
+    lookupLocalStorage: "i18nextLng",
+
+    // Convert language codes (optional - helps with consistency)
+    convertDetectedLanguage: (lng: string) => {
+        // If detected language is not in supported languages, use fallback
+        if (lng && supportedLanguages[lng as keyof typeof supportedLanguages]) {
+            return lng;
+        }
+
+        // Handle language codes with regions (e.g., 'en-US' -> 'en')
+        const shortCode = lng?.split("-")[0];
+        if (shortCode && supportedLanguages[shortCode as keyof typeof supportedLanguages]) {
+            return shortCode;
+        }
+
+        return fallbackLanguage;
+    },
 };
 
 // Initialize i18next
@@ -43,8 +62,8 @@ const initI18n = () => {
                 // Fallback language
                 fallbackLng: fallbackLanguage,
 
-                // Default language
-                lng: defaultLanguage,
+                // Default language - remove this to let detection work properly
+                // lng: defaultLanguage,
 
                 // Language detection
                 detection: detectionOptions,

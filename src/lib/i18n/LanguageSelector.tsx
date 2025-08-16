@@ -9,9 +9,15 @@ export default function LanguageSelector() {
     const {i18n} = useTranslation();
     const [isOpen, setIsOpen] = useState(false);
 
-    const changeLanguage = (lng: string) => {
-        i18n.changeLanguage(lng);
-        setIsOpen(false);
+    const changeLanguage = async (lng: string) => {
+        try {
+            await i18n.changeLanguage(lng);
+            // Explicitly save to localStorage (though i18next should do this automatically)
+            localStorage.setItem("i18nextLng", lng);
+            setIsOpen(false);
+        } catch (error) {
+            console.error("Failed to change language:", error);
+        }
     };
 
     const currentLanguage =
