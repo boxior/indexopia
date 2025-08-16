@@ -46,3 +46,5 @@ export const COLORS = {
     negative: "#ef4444",
     positive: "#10b981",
 };
+
+export const MAX_PORTION = 100;
