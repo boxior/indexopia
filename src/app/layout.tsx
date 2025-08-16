@@ -4,6 +4,7 @@ import "./globals.css";
 import {SessionProvider} from "next-auth/react";
 import {auth} from "@/auth";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
+import I18nProvider from "@/lib/i18n/I18nProvider";
 
 const geistSans = Geist({
     variable: "--font-geist-sans",
@@ -44,5 +45,5 @@ const RootLayoutSuspended = async ({
 }>) => {
     const session = await auth();
 
-    return <SessionProvider session={session}>{children}</SessionProvider>;
+    return <SessionProvider session={session}>{<I18nProvider>{children}</I18nProvider>}</SessionProvider>;
 };

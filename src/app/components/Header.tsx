@@ -9,16 +9,42 @@ import {LogOut, Globe, Menu, X} from "lucide-react";
 import {useSession} from "next-auth/react";
 import {signOut} from "next-auth/react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
+import {useTranslation} from "react-i18next";
+import {supportedLanguages} from "@/lib/i18n/i18n";
 
 export default function Header() {
     const {data, status, update} = useSession();
     const {user} = data ?? {};
+    const {t, i18n} = useTranslation();
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const handleSignOut = async () => {
         await signOut({redirectTo: PAGES_URLS.home});
         await update();
+    };
+
+    const handleLanguageChange = (languageCode: string) => {
+        i18n.changeLanguage(languageCode);
+    };
+
+    // Get current language display name
+    const getCurrentLanguageName = () => {
+        const currentLang = i18n.language;
+        return (
+            supportedLanguages[currentLang as keyof typeof supportedLanguages] ||
+            supportedLanguages[currentLang.split("-")[0] as keyof typeof supportedLanguages] ||
+            supportedLanguages.en
+        );
+    };
+
+    // Get current language code for display (uppercase)
+    const getCurrentLanguageCode = () => {
+        const currentLang = i18n.language;
+        if (currentLang.startsWith("en")) return "EN";
+        if (currentLang.startsWith("ru")) return "RU";
+        if (currentLang.startsWith("uk")) return "UK";
+        return "EN";
     };
 
     return (
@@ -36,17 +62,17 @@ export default function Header() {
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex items-center space-x-8">
                         <Link href={PAGES_URLS.home} className="text-gray-700 hover:text-blue-600 transition-colors">
-                            Home
+                            {t("home")}
                         </Link>
                         <Link href={PAGES_URLS.indices} className="text-gray-700 hover:text-blue-600 transition-colors">
-                            Indices
+                            {t("indices")}
                         </Link>
                         {/* TODO: https://cryptofunds.atlassian.net/browse/SCRUM-28; https://cryptofunds.atlassian.net/browse/SCRUM-29*/}
                         {/*<Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors">*/}
-                        {/*    About*/}
+                        {/*    {t('about')}*/}
                         {/*</Link>*/}
                         {/*<Link href="/blog" className="text-gray-700 hover:text-blue-600 transition-colors">*/}
-                        {/*    Blog*/}
+                        {/*    {t('blog')}*/}
                         {/*</Link>*/}
                     </nav>
 
@@ -55,14 +81,29 @@ export default function Header() {
                         {/* Language Selector */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                    <Globe className="h-4 w-4 mr-2" />
-                                    EN
+                                <Button variant="ghost" size="sm" className="gap-2">
+                                    <Globe className="h-4 w-4" />
+                                    <span className="hidden sm:inline">{getCurrentLanguageName()}</span>
+                                    <span className="sm:hidden">{getCurrentLanguageCode()}</span>
                                 </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem>English</DropdownMenuItem>
-                                <DropdownMenuItem>Ukrainian</DropdownMenuItem>
+                            <DropdownMenuContent align="end">
+                                {Object.entries(supportedLanguages).map(([code, name]) => (
+                                    <DropdownMenuItem
+                                        key={code}
+                                        onClick={() => handleLanguageChange(code)}
+                                        className={`cursor-pointer ${
+                                            i18n.language === code || i18n.language.startsWith(code)
+                                                ? "bg-blue-50 text-blue-700"
+                                                : ""
+                                        }`}
+                                    >
+                                        <div className="flex items-center justify-between w-full">
+                                            <span>{name}</span>
+                                            <span className="text-xs text-gray-500 ml-2">{code.toUpperCase()}</span>
+                                        </div>
+                                    </DropdownMenuItem>
+                                ))}
                             </DropdownMenuContent>
                         </DropdownMenu>
 
@@ -80,7 +121,7 @@ export default function Header() {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <div className="flex flex-col space-y-1 p-2">
-                                        <p className="text-sm font-medium">{user.name || "User"}</p>
+                                        <p className="text-sm font-medium">{user.name || t("auth.user")}</p>
                                         <p className="text-xs text-gray-500">{user.email}</p>
                                     </div>
                                     <DropdownMenuItem
@@ -89,13 +130,13 @@ export default function Header() {
                                         disabled={status === "loading"}
                                     >
                                         <LogOut className="mr-2 h-4 w-4" />
-                                        Sign out
+                                        {t("auth.signOut")}
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         ) : (
                             <Link href={PAGES_URLS.signIn}>
-                                <Button>Sign In</Button>
+                                <Button>{t("auth.signIn")}</Button>
                             </Link>
                         )}
 
@@ -105,6 +146,7 @@ export default function Header() {
                             size="sm"
                             className="md:hidden"
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            aria-label={isMenuOpen ? t("common.closeMenu") : t("common.openMenu")}
                         >
                             {isMenuOpen ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
                         </Button>
@@ -118,23 +160,53 @@ export default function Header() {
                             <Link
                                 href={PAGES_URLS.home}
                                 className="text-gray-700 hover:text-blue-600 transition-colors p-2"
+                                onClick={() => setIsMenuOpen(false)}
                             >
-                                Home
+                                {t("home")}
                             </Link>
                             <Link
                                 href={PAGES_URLS.indices}
                                 className="text-gray-700 hover:text-blue-600 transition-colors p-2"
+                                onClick={() => setIsMenuOpen(false)}
                             >
-                                Indices
+                                {t("indices")}
                             </Link>
                             {/* TODO: https://cryptofunds.atlassian.net/browse/SCRUM-28; https://cryptofunds.atlassian.net/browse/SCRUM-29*/}
                             {/*<Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors p-2">*/}
-                            {/*    About*/}
+                            {/*    {t('about')}*/}
                             {/*</Link>*/}
                             {/*<Link href="/blog" className="text-gray-700 hover:text-blue-600 transition-colors p-2">*/}
-                            {/*    Blog*/}
+                            {/*    {t('blog')}*/}
                             {/*</Link>*/}
                         </nav>
+
+                        {/* Mobile Language Selector */}
+                        <div className="border-t pt-4 mt-4">
+                            <div className="px-2 mb-2">
+                                <span className="text-sm font-medium text-gray-700">{t("common.language")}</span>
+                            </div>
+                            <div className="space-y-1">
+                                {Object.entries(supportedLanguages).map(([code, name]) => (
+                                    <button
+                                        key={code}
+                                        onClick={() => {
+                                            handleLanguageChange(code);
+                                            setIsMenuOpen(false);
+                                        }}
+                                        className={`w-full text-left p-2 rounded transition-colors ${
+                                            i18n.language === code || i18n.language.startsWith(code)
+                                                ? "bg-blue-50 text-blue-700"
+                                                : "text-gray-700 hover:bg-gray-50"
+                                        }`}
+                                    >
+                                        <div className="flex items-center justify-between">
+                                            <span>{name}</span>
+                                            <span className="text-xs text-gray-500">{code.toUpperCase()}</span>
+                                        </div>
+                                    </button>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

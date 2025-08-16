@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import {Twitter, Github, Youtube} from "lucide-react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
+import {useTranslation} from "react-i18next";
 
 export default function Footer() {
+    const {t} = useTranslation();
+
     return (
         <footer className="bg-gray-900 text-white">
             <div className="container mx-auto px-4 py-12">
@@ -15,32 +20,19 @@ export default function Footer() {
                             </div>
                             <span className="text-xl font-bold">Indexopia</span>
                         </Link>
-                        <p className="text-gray-400 text-sm">
-                            Indexopia is a platform for creating and tracking crypto indices and crypto portfolios.
-                        </p>
+                        <p className="text-gray-400 text-sm">{t("footer.description")}</p>
                     </div>
 
                     {/* About Section */}
                     <div>
-                        <h3 className="font-semibold mb-4">About</h3>
+                        <h3 className="font-semibold mb-4">{t("footer.about")}</h3>
                         <ul className="space-y-2 text-sm">
-                            {/* TODO: https://cryptofunds.atlassian.net/browse/SCRUM-28; https://cryptofunds.atlassian.net/browse/SCRUM-29*/}
-                            {/*<li>*/}
-                            {/*    <Link href="/about" className="text-gray-400 hover:text-white transition-colors">*/}
-                            {/*        About Us*/}
-                            {/*    </Link>*/}
-                            {/*</li>*/}
-                            {/*<li>*/}
-                            {/*    <Link href="/disclaimer" className="text-gray-400 hover:text-white transition-colors">*/}
-                            {/*        Disclaimer*/}
-                            {/*    </Link>*/}
-                            {/*</li>*/}
                             <li>
                                 <Link
                                     href={PAGES_URLS.terms}
                                     className="text-gray-400 hover:text-white transition-colors"
                                 >
-                                    Terms of Service
+                                    {t("footer.termsOfService")}
                                 </Link>
                             </li>
                             <li>
@@ -48,7 +40,7 @@ export default function Footer() {
                                     href={PAGES_URLS.privacy}
                                     className="text-gray-400 hover:text-white transition-colors"
                                 >
-                                    Privacy Policy
+                                    {t("footer.privacyPolicy")}
                                 </Link>
                             </li>
                             <li>
@@ -56,7 +48,7 @@ export default function Footer() {
                                     href={PAGES_URLS.contact}
                                     className="text-gray-400 hover:text-white transition-colors"
                                 >
-                                    Contact
+                                    {t("footer.contact")}
                                 </Link>
                             </li>
                         </ul>
@@ -64,45 +56,23 @@ export default function Footer() {
 
                     {/* Explore Section */}
                     <div>
-                        <h3 className="font-semibold mb-4">Explore</h3>
+                        <h3 className="font-semibold mb-4">{t("footer.explore")}</h3>
                         <ul className="space-y-2 text-sm">
                             <li>
                                 <Link
                                     href={PAGES_URLS.indices}
                                     className="text-gray-400 hover:text-white transition-colors"
                                 >
-                                    Free Crypto Indices
+                                    {t("footer.freeIndices")}
                                 </Link>
                             </li>
-
-                            {/*<li>*/}
-                            {/*    <Link href="/premium" className="text-gray-400 hover:text-white transition-colors">*/}
-                            {/*        Premium Crypto Indices*/}
-                            {/*    </Link>*/}
-                            {/*</li>*/}
-                            {/*<li>*/}
-                            {/*    <Link href="/tracker" className="text-gray-400 hover:text-white transition-colors">*/}
-                            {/*        Crypto Portfolio Tracker*/}
-                            {/*    </Link>*/}
-                            {/*</li>*/}
-                            {/*TODO: https://cryptofunds.atlassian.net/browse/SCRUM-31*/}
-                            {/*<li>*/}
-                            {/*    <Link href="/faq" className="text-gray-400 hover:text-white transition-colors">*/}
-                            {/*        FAQ*/}
-                            {/*    </Link>*/}
-                            {/*</li>*/}
-                            {/*<li>*/}
-                            {/*    <Link href="/blog" className="text-gray-400 hover:text-white transition-colors">*/}
-                            {/*        Blog*/}
-                            {/*    </Link>*/}
-                            {/*</li>*/}
                         </ul>
                     </div>
 
-                    {/* Social Media */}
+                    {/* Social Media and Language Selector */}
                     <div>
-                        <h3 className="font-semibold mb-4">Join Our Community</h3>
-                        <div className="flex space-x-4">
+                        <h3 className="font-semibold mb-4">{t("footer.community")}</h3>
+                        <div className="flex space-x-4 mb-4">
                             <Link href="#" className="text-gray-400 hover:text-white transition-colors">
                                 <Twitter className="h-5 w-5" />
                             </Link>
@@ -117,7 +87,7 @@ export default function Footer() {
                 </div>
 
                 <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400 text-sm">
-                    <p>© 2025 Indexopia. All Rights Reserved.</p>
+                    <p>{t("footer.copyright")}</p>
                 </div>
             </div>
         </footer>
