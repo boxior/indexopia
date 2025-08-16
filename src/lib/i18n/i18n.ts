@@ -83,6 +83,7 @@ const initI18n = () => {
                                 asset: "Asset",
                                 allocation: "Allocation",
                                 price: "Price",
+                                priceChart: "Price Chart",
                                 total: "Total",
                                 maxDrawdown: "Max Drawdown",
                                 marketCap: "Market Cap",
@@ -112,6 +113,16 @@ const initI18n = () => {
                                 enterIndexName: "Enter index name",
                                 enterNewIndexName: "Enter new index name",
                                 chart: "Chart",
+                            },
+                            // Time ranges
+                            timeRanges: {
+                                "7d": "7 Days",
+                                "1m": "1 Month",
+                                "3m": "3 Months",
+                                "6m": "6 Months",
+                                ytd: "YTD",
+                                "1y": "1 Year",
+                                all: "All Time",
                             },
 
                             // Authentication
@@ -240,6 +251,7 @@ const initI18n = () => {
                                 asset: "Актив",
                                 allocation: "Распределение",
                                 price: "Цена",
+                                priceChart: "График цены",
                                 total: "Всего",
                                 maxDrawdown: "Макс. просадка",
                                 marketCap: "Рын. капитализация",
@@ -269,6 +281,16 @@ const initI18n = () => {
                                 enterIndexName: "Введите название индекса",
                                 enterNewIndexName: "Введите новое название индекса",
                                 chart: "График",
+                            },
+                            // Time ranges
+                            timeRanges: {
+                                "7d": "7 дней",
+                                "1m": "1 месяц",
+                                "3m": "3 месяца",
+                                "6m": "6 месяцев",
+                                ytd: "С начала года",
+                                "1y": "1 год",
+                                all: "Все время",
                             },
 
                             // Authentication
@@ -399,6 +421,7 @@ const initI18n = () => {
                                 asset: "Актив",
                                 allocation: "Розподіл",
                                 price: "Ціна",
+                                priceChart: "Графік ціни",
                                 total: "Загалом",
                                 maxDrawdown: "Макс. просідання",
                                 marketCap: "Ринк. капіталізація",
@@ -428,6 +451,16 @@ const initI18n = () => {
                                 enterIndexName: "Введіть назву індексу",
                                 enterNewIndexName: "Введіть нову назву індексу",
                                 chart: "Графік",
+                            },
+                            // Time ranges
+                            timeRanges: {
+                                "7d": "7 днів",
+                                "1m": "1 місяць",
+                                "3m": "3 місяці",
+                                "6m": "6 місяців",
+                                ytd: "З початку року",
+                                "1y": "1 рік",
+                                all: "Весь час",
                             },
 
                             // Authentication

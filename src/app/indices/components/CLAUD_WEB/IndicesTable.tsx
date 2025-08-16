@@ -245,7 +245,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                 <div className="text-sm font-medium text-red-600">
                                     -{Math.abs(index.maxDrawDown.value).toFixed(2)}%
                                 </div>
-                                <div className="text-xs text-gray-500">Max Drawdown</div>
+                                <div className="text-xs text-gray-500"> {t("maxDrawdown")}</div>
                                 {hiddenOption && <ProtectedOverlay />}
                             </div>
                             <div className="text-center">
@@ -376,7 +376,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                         className="h-auto p-0 font-medium"
                                         onClick={() => handleSort("maxDrawDown")}
                                     >
-                                        Max Drawdown
+                                        {t("maxDrawdown")}
                                         {getSortIcon("maxDrawDown")}
                                     </Button>
                                 </TableHead>

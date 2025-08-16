@@ -10,14 +10,8 @@ import Link from "next/link";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
 import {Button} from "@/components/ui/button";
 import {useTranslation} from "react-i18next";
-import {useEffect} from "react";
-import initI18n from "@/lib/i18n/i18n";
 
 export default function HomePage() {
-    useEffect(() => {
-        initI18n();
-    }, []);
-
     return <HomePageSuspended />;
 }
 

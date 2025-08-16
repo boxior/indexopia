@@ -11,6 +11,7 @@ import {NumeralFormat} from "@numeral";
 import {useState} from "react";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {sortIndexAssetsByPortion} from "@/utils/heleprs/index/index.helpers";
+import {useTranslation} from "react-i18next";
 
 interface IndexOverviewProps {
     index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
@@ -21,6 +22,8 @@ interface IndexOverviewProps {
 }
 
 export function IndexOverview({index, currentUserId, onEditAction, onDeleteAction, onCloneAction}: IndexOverviewProps) {
+    const {t} = useTranslation();
+
     const isUserIndex = !!index.userId && index.userId === currentUserId;
 
     const [isAssetsExpanded, setIsAssetsExpanded] = useState(false);

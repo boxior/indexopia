@@ -146,7 +146,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                             <div className="text-sm font-medium">
                                 {renderSafelyPercentage(asset.historyOverview.total)}
                             </div>
-                            <div className="text-xs text-gray-500">Total</div>
+                            <div className="text-xs text-gray-500"> {t("common.total")}</div>
                         </div>
 
                         <Button
@@ -165,7 +165,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                     <div className="mt-4 pt-4 border-t space-y-3">
                         {/* Chart Preview */}
                         <div className="mb-4">
-                            <div className="text-xs text-gray-500 mb-2">30d Chart</div>
+                            <div className="text-xs text-gray-500 mb-2"> {t("common.chart30d")}</div>
                             <ChartPreview data={asset.history.slice(-HISTORY_OVERVIEW_DAYS)} className="w-full h-32" />
                         </div>
 
@@ -175,13 +175,13 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                 <div className="text-sm font-medium">
                                     {renderSafelyPercentage(asset.historyOverview.days7)}
                                 </div>
-                                <div className="text-xs text-gray-500">7 days</div>
+                                <div className="text-xs text-gray-500"> {t("common.days7")}</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-sm font-medium">
                                     {renderSafelyPercentage(asset.historyOverview.days30)}
                                 </div>
-                                <div className="text-xs text-gray-500">30 days</div>
+                                <div className="text-xs text-gray-500"> {t("common.days30")}</div>
                             </div>
                         </div>
 
@@ -191,7 +191,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                 <div className="text-sm font-medium text-red-600">
                                     -{Math.abs(asset.maxDrawDown.value).toFixed(2)}%
                                 </div>
-                                <div className="text-xs text-gray-500">Max Drawdown</div>
+                                <div className="text-xs text-gray-500"> {t("common.maxDrawdown")}</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-sm font-medium">
@@ -199,7 +199,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                         .toString()
                                         .toUpperCase()}
                                 </div>
-                                <div className="text-xs text-gray-500">Market Cap</div>
+                                <div className="text-xs text-gray-500"> {t("common.marketCap")}</div>
                             </div>
                         </div>
 

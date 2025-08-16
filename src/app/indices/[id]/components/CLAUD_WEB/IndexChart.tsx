@@ -9,6 +9,7 @@ import moment from "moment";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {NumeralFormat} from "@numeral";
+import {useTranslation} from "react-i18next";
 
 interface IndexChartProps {
     index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
@@ -20,22 +21,24 @@ interface CustomTooltipProps extends TooltipProps<number, string> {
     label?: string;
 }
 
-const timeRanges = [
-    {label: "7D", days: 7},
-    {label: "1M", days: 30},
-    {label: "3M", days: 90},
-    {label: "6M", days: 180},
-    {label: "YTD", days: "ytd"},
-    {label: "1Y", days: 365},
-    {label: "All", days: null},
-];
-
 export function IndexChart({index}: IndexChartProps) {
+    const {t} = useTranslation();
+
+    const timeRanges = [
+        {label: t("timeRanges.7d"), value: "7D", days: 7},
+        {label: t("timeRanges.1m"), value: "1M", days: 30},
+        {label: t("timeRanges.3m"), value: "3M", days: 90},
+        {label: t("timeRanges.6m"), value: "6M", days: 180},
+        {label: t("timeRanges.ytd"), value: "YTD", days: "ytd"},
+        {label: t("timeRanges.1y"), value: "1Y", days: 365},
+        {label: t("timeRanges.all"), value: "All", days: null},
+    ];
+    console.log("timeRanges", timeRanges);
     const {history, id} = index;
     const [selectedRange, setSelectedRange] = useState("1M");
 
     const getFilteredData = () => {
-        const range = timeRanges.find(r => r.label === selectedRange);
+        const range = timeRanges.find(r => r.value === selectedRange);
         if (!range || !range.days) return history;
 
         if (range.days === "ytd") {
@@ -150,7 +153,7 @@ export function IndexChart({index}: IndexChartProps) {
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     {/* Title and Performance */}
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                        <CardTitle className="text-lg sm:text-xl">Price Chart</CardTitle>
+                        <CardTitle className="text-lg sm:text-xl">{t("common.priceChart")}</CardTitle>
                         <div className="flex items-center gap-2 sm:gap-4">
                             <div className="text-xl sm:text-2xl font-bold">${renderSafelyNumber(currentValue)}</div>
                             <div
