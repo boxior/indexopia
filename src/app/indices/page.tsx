@@ -13,7 +13,7 @@ import {actionGetIndicesWithHistoryOverview} from "@/app/indices/actions";
 export default async function IndicesPage() {
     return (
         <SuspenseWrapper
-            loadingMessage="Loading crypto indices..."
+            loadingMessage="common.loadingCryptoIndices"
             variant="dots"
             showLogo={false}
             fullScreen={false}
