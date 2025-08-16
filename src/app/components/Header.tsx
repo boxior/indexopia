@@ -33,14 +33,14 @@ export default function Header() {
         const currentLang = i18n.language;
         return (
             supportedLanguages[currentLang as keyof typeof supportedLanguages] ||
-            supportedLanguages[currentLang.split("-")[0] as keyof typeof supportedLanguages] ||
+            supportedLanguages[currentLang?.split("-")[0] as keyof typeof supportedLanguages] ||
             supportedLanguages.en
         );
     };
 
     // Get current language code for display (uppercase)
     const getCurrentLanguageCode = () => {
-        const currentLang = i18n.language;
+        const currentLang = i18n.language ?? "";
         if (currentLang.startsWith("en")) return "EN";
         if (currentLang.startsWith("ru")) return "RU";
         if (currentLang.startsWith("uk")) return "UK";
