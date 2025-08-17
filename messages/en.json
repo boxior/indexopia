@@ -1,6 +1,7 @@
 {
   "common": {
-    "hello": "Hello"
+    "hello": "Hello",
+    "loading": "Loading..."
   },
   "header": {
     "brand": "Indexopia",
@@ -102,5 +103,9 @@
     "subtitle": "Join thousands of investors who trust Indexopia for their crypto portfolio management. Start with our free tier and upgrade as you grow.",
     "getStartedFree": "Get Started Free",
     "exploreIndices": "Explore Indices"
+  },
+  "home": {
+    "loading": "Loading Indexopia...",
+    "viewAllIndices": "View All Indices"
   }
 }

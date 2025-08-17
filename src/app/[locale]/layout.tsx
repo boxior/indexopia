@@ -36,10 +36,11 @@ export default async function RootLayout(props: Readonly<PageProps>) {
     return (
         <html lang={locale}>
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                {/*Suspense show loading if change locale*/}
-                {/*<SuspenseWrapper>*/}
-                <RootLayoutSuspended {...props} />
-                {/*</SuspenseWrapper>*/}
+                <NextIntlClientProvider>
+                    <SuspenseWrapper>
+                        <RootLayoutSuspended {...props} />
+                    </SuspenseWrapper>
+                </NextIntlClientProvider>
             </body>
         </html>
     );
@@ -48,9 +49,5 @@ export default async function RootLayout(props: Readonly<PageProps>) {
 const RootLayoutSuspended = async ({children}: Readonly<PageProps>) => {
     const session = await auth();
 
-    return (
-        <SessionProvider session={session}>
-            <NextIntlClientProvider>{children}</NextIntlClientProvider>
-        </SessionProvider>
-    );
+    return <SessionProvider session={session}>{children}</SessionProvider>;
 };
