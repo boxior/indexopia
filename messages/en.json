@@ -215,6 +215,12 @@
         "maxDrawDown": "Max Drawdown",
         "duration": "Duration"
       }
+    },
+    "duration": {
+      "years": "{count, plural, one {# year} other {# years}}",
+      "months": "{count, plural, one {# month} other {# months}}",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "zero": "0 days"
     }
   }
 }

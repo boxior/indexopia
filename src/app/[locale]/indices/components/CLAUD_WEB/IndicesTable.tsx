@@ -56,6 +56,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
 
     // i18n
     const tTable = useTranslations("indices.table");
+    const tDuration = useTranslations("indices.duration");
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -255,7 +256,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                             <div className="text-center">
                                 <div className="text-sm font-medium text-gray-600">
                                     {!!index.startTime && !!index.endTime
-                                        ? getIndexDurationLabel(index.startTime, index.endTime)
+                                        ? getIndexDurationLabel(index.startTime, index.endTime, tDuration)
                                         : "-"}
                                 </div>
                                 <div className="text-xs text-gray-500">{tTable("labels.duration")}</div>
@@ -462,7 +463,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                     <TableCell>
                                         {!!index.startTime && !!index.endTime ? (
                                             <span className="text-sm text-gray-500">
-                                                {getIndexDurationLabel(index.startTime, index.endTime)}
+                                                {getIndexDurationLabel(index.startTime, index.endTime, tDuration)}
                                             </span>
                                         ) : (
                                             <span className="text-sm text-gray-500">-</span>

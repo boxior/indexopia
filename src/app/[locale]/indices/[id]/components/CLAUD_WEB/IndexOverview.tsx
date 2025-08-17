@@ -11,6 +11,7 @@ import {NumeralFormat} from "@numeral";
 import {useState} from "react";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {sortIndexAssetsByPortion} from "@/utils/heleprs/index/index.helpers";
+import {useTranslations} from "next-intl";
 
 interface IndexOverviewProps {
     index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
@@ -25,9 +26,11 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
 
     const [isAssetsExpanded, setIsAssetsExpanded] = useState(false);
 
+    const tDuration = useTranslations("indices.duration");
+
     const getDuration = () => {
         if (!index.startTime || !index.endTime) return "N/A";
-        return getIndexDurationLabel(index.startTime, index.endTime);
+        return getIndexDurationLabel(index.startTime, index.endTime, tDuration);
     };
 
     const performanceMetrics = [

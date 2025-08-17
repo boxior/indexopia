@@ -215,6 +215,12 @@
         "maxDrawDown": "Макс. просідання",
         "duration": "Тривалість"
       }
+    },
+    "duration": {
+      "years": "{count, plural, one {# рік} few {# роки} many {# років} other {# років}}",
+      "months": "{count, plural, one {# місяць} few {# місяці} many {# місяців} other {# місяців}}",
+      "days": "{count, plural, one {# день} few {# дні} many {# днів} other {# днів}}",
+      "zero": "0 днів"
     }
   }
 }

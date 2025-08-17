@@ -215,6 +215,12 @@
         "maxDrawDown": "Макс. просадка",
         "duration": "Длительность"
       }
+    },
+    "duration": {
+      "years": "{count, plural, one {# год} few {# года} many {# лет} other {# лет}}",
+      "months": "{count, plural, one {# месяц} few {# месяца} many {# месяцев} other {# месяцев}}",
+      "days": "{count, plural, one {# день} few {# дня} many {# дней} other {# дней}}",
+      "zero": "0 дней"
     }
   }
 }

@@ -1,34 +1,43 @@
 import {AssetHistory, IndexOverview, MomentFormat} from "@/utils/types/general.types";
-import momentTimeZone from "moment-timezone";
 import moment from "moment/moment";
 import {convertToUTC} from "@/utils/heleprs/convertToUTC.helper";
 import {TOP_PERFORMANCE_COUNT} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesFilters";
-import {COLORS} from "@/utils/constants/general.constants";
 
-export const getChartColorClassname = (value: number) => {
-    return value < 0 ? "text-red-500" : "text-green-500";
-};
+export type DurationUnit = "years" | "months" | "days" | "zero";
+export type DurationTranslator = (unit: DurationUnit, values?: {count?: number}) => string;
 
-export const getChartColor = (value: number) => {
-    return value < 0 ? COLORS.negative : "#22c55e";
-};
-
-export const getIndexStartFromLabel = (startTime: number) => {
-    return momentTimeZone.tz(startTime, "UTC").startOf("day").format(MomentFormat.DATE);
-};
-
-export const getIndexDurationLabel = (startTime: number, endTime: number) => {
+// Localized duration label. Optionally accepts a translator from next-intl:
+// const tDuration = useTranslations("indices.duration");
+// getIndexDurationLabel(start, end, (unit, v) => tDuration(unit, v));
+export const getIndexDurationLabel = (startTime: number, endTime: number, t?: DurationTranslator) => {
     // Calculate the duration difference in days
     const end = moment(endTime).utc().startOf("day");
     const start = moment(startTime).utc().startOf("day");
     const duration = moment.duration(end.diff(start)); // Create a moment duration
 
     // Break down the duration into years, months, and days
-    const years = duration.years() > 0 ? `${duration.years()} year${duration.years() > 1 ? "s" : ""} ` : "";
-    const months = duration.months() > 0 ? `${duration.months()} month${duration.months() > 1 ? "s" : ""} ` : "";
-    const days = duration.days() > 0 ? `${duration.days()} day${duration.days() > 1 ? "s" : ""}` : "";
+    const y = duration.years();
+    const m = duration.months();
+    const d = duration.days();
 
-    return `${years}${months}${days}`.trim() || "0 days";
+    const format = (unit: Exclude<DurationUnit, "zero">, count: number) => {
+        if (!t) {
+            // Fallback to English if translator is not provided
+            const plural = count === 1 ? "" : "s";
+            return `${count} ${unit.slice(0, -1)}${plural}`;
+        }
+        return t(unit, {count});
+    };
+
+    const parts: string[] = [];
+    if (y > 0) parts.push(format("years", y));
+    if (m > 0) parts.push(format("months", m));
+    if (d > 0) parts.push(format("days", d));
+
+    if (parts.length === 0) {
+        return t ? t("zero") : "0 days";
+    }
+    return parts.join(" ");
 };
 
 /**
