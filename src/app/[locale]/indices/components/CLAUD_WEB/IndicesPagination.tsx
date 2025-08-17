@@ -1,6 +1,7 @@
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
 import {Button} from "@/components/ui/button";
 import {ChevronLeft, ChevronRight, MoreHorizontal} from "lucide-react";
+import {useTranslations} from "next-intl";
 
 interface PaginationProps {
     currentPage: number;
@@ -20,6 +21,8 @@ export function IndicesPagination({
     const totalPages = Math.ceil(totalItems / itemsPerPage);
     const startItem = (currentPage - 1) * itemsPerPage + 1;
     const endItem = Math.min(currentPage * itemsPerPage, totalItems);
+
+    const t = useTranslations("indices.pagination");
 
     const handlePreviousPage = () => {
         if (currentPage > 1) {
@@ -57,13 +60,13 @@ export function IndicesPagination({
             {/* Results info and items per page - mobile stacked, desktop inline */}
             <div className="flex flex-col sm:flex-row items-center gap-2 sm:gap-4">
                 <p className="text-sm text-gray-700 text-center sm:text-left">
-                    <span className="hidden sm:inline">Showing </span>
-                    {startItem}-{endItem} of {totalItems}
-                    <span className="hidden sm:inline"> results</span>
+                    <span className="hidden sm:inline">{t("showing")} </span>
+                    {t("range", {start: startItem, end: endItem, total: totalItems})}
+                    <span className="hidden sm:inline"> {t("results")}</span>
                 </p>
                 <div className="flex items-center gap-2">
-                    <span className="text-sm text-gray-700 hidden sm:inline">Items per page:</span>
-                    <span className="text-sm text-gray-700 sm:hidden">Per page:</span>
+                    <span className="text-sm text-gray-700 hidden sm:inline">{t("itemsPerPageLabel")}</span>
+                    <span className="text-sm text-gray-700 sm:hidden">{t("itemsPerPageShort")}</span>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
@@ -96,7 +99,7 @@ export function IndicesPagination({
                     className="flex items-center gap-1"
                 >
                     <ChevronLeft className="h-4 w-4" />
-                    <span className="hidden sm:inline">Previous</span>
+                    <span className="hidden sm:inline">{t("previous")}</span>
                 </Button>
 
                 {/* Desktop pagination */}
@@ -169,9 +172,7 @@ export function IndicesPagination({
 
                 {/* Page info for mobile */}
                 <div className="flex sm:hidden items-center px-2">
-                    <span className="text-sm text-gray-600">
-                        {currentPage} / {totalPages}
-                    </span>
+                    <span className="text-sm text-gray-600">{t("pageInfo", {current: currentPage, totalPages})}</span>
                 </div>
 
                 {/* Next button */}
@@ -182,7 +183,7 @@ export function IndicesPagination({
                     disabled={currentPage === totalPages}
                     className="flex items-center gap-1"
                 >
-                    <span className="hidden sm:inline">Next</span>
+                    <span className="hidden sm:inline">{t("next")}</span>
                     <ChevronRight className="h-4 w-4" />
                 </Button>
             </div>

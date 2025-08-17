@@ -4,6 +4,7 @@ import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {Search, X, Plus} from "lucide-react";
+import {useTranslations} from "next-intl";
 
 interface IndicesFiltersProps {
     onSearchChange: (search: string) => void;
@@ -26,6 +27,9 @@ export function IndicesFilters({
     const [search, setSearch] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
     const [performanceFilter, setPerformanceFilter] = useState("all");
+
+    const tFilters = useTranslations("indices.filters");
+    const tActions = useTranslations("indices.actions");
 
     const handleSearchChange = (value: string) => {
         setSearch(value);
@@ -60,7 +64,7 @@ export function IndicesFilters({
                     <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                         <Input
-                            placeholder="Search indices..."
+                            placeholder={tFilters("searchPlaceholder")}
                             value={search}
                             onChange={e => handleSearchChange(e.target.value)}
                             className="pl-10"
@@ -69,7 +73,7 @@ export function IndicesFilters({
                     {onCreateIndex && (
                         <Button onClick={onCreateIndex} size="sm" className="flex-shrink-0 h-10 px-3">
                             <Plus className="h-4 w-4 mr-1" />
-                            <span className="hidden xs:inline">Create</span>
+                            <span className="hidden xs:inline">{tActions("create")}</span>
                         </Button>
                     )}
                 </div>
@@ -78,24 +82,30 @@ export function IndicesFilters({
                 <div className="flex gap-2 items-center">
                     <Select value={typeFilter} onValueChange={handleTypeChange}>
                         <SelectTrigger className="flex-1 min-w-0">
-                            <SelectValue placeholder="Type" />
+                            <SelectValue placeholder={tFilters("type.placeholder")} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Types</SelectItem>
-                            <SelectItem value="system">System</SelectItem>
-                            <SelectItem value="custom">Custom</SelectItem>
+                            <SelectItem value="all">{tFilters("type.all")}</SelectItem>
+                            <SelectItem value="system">{tFilters("type.system")}</SelectItem>
+                            <SelectItem value="custom">{tFilters("type.custom")}</SelectItem>
                         </SelectContent>
                     </Select>
 
                     <Select value={performanceFilter} onValueChange={handlePerformanceChange}>
                         <SelectTrigger className="flex-1 min-w-0">
-                            <SelectValue placeholder="Performance" />
+                            <SelectValue placeholder={tFilters("performance.placeholder")} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Performance</SelectItem>
-                            <SelectItem value="positive">Positive {POSITIVE_NEGATIVE_DAYS}d</SelectItem>
-                            <SelectItem value="negative">Negative {POSITIVE_NEGATIVE_DAYS}d</SelectItem>
-                            <SelectItem value="top-performers">Top {TOP_PERFORMANCE_COUNT} Performers</SelectItem>
+                            <SelectItem value="all">{tFilters("performance.all")}</SelectItem>
+                            <SelectItem value="positive">
+                                {tFilters("performance.positiveDays", {days: POSITIVE_NEGATIVE_DAYS})}
+                            </SelectItem>
+                            <SelectItem value="negative">
+                                {tFilters("performance.negativeDays", {days: POSITIVE_NEGATIVE_DAYS})}
+                            </SelectItem>
+                            <SelectItem value="top-performers">
+                                {tFilters("performance.topPerformersCount", {count: TOP_PERFORMANCE_COUNT})}
+                            </SelectItem>
                         </SelectContent>
                     </Select>
 
@@ -112,7 +122,7 @@ export function IndicesFilters({
                 <div className="relative flex-1">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
                     <Input
-                        placeholder="Search indices..."
+                        placeholder={tFilters("searchPlaceholder")}
                         value={search}
                         onChange={e => handleSearchChange(e.target.value)}
                         className="pl-10"
@@ -122,29 +132,35 @@ export function IndicesFilters({
                 <div className="flex gap-2 items-center">
                     <Select value={typeFilter} onValueChange={handleTypeChange}>
                         <SelectTrigger className="w-32">
-                            <SelectValue placeholder="Type" />
+                            <SelectValue placeholder={tFilters("type.placeholder")} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Types</SelectItem>
-                            <SelectItem value="system">System</SelectItem>
-                            <SelectItem value="custom">Custom</SelectItem>
+                            <SelectItem value="all">{tFilters("type.all")}</SelectItem>
+                            <SelectItem value="system">{tFilters("type.system")}</SelectItem>
+                            <SelectItem value="custom">{tFilters("type.custom")}</SelectItem>
                         </SelectContent>
                     </Select>
 
                     <Select value={performanceFilter} onValueChange={handlePerformanceChange}>
-                        <SelectTrigger className="w-40">
-                            <SelectValue placeholder="Performance" />
+                        <SelectTrigger className="w-44">
+                            <SelectValue placeholder={tFilters("performance.placeholder")} />
                         </SelectTrigger>
                         <SelectContent>
-                            <SelectItem value="all">All Performance</SelectItem>
-                            <SelectItem value="positive">Positive {POSITIVE_NEGATIVE_DAYS}d</SelectItem>
-                            <SelectItem value="negative">Negative {POSITIVE_NEGATIVE_DAYS}d</SelectItem>
-                            <SelectItem value="top-performers">Top {TOP_PERFORMANCE_COUNT} Performers</SelectItem>
+                            <SelectItem value="all">{tFilters("performance.all")}</SelectItem>
+                            <SelectItem value="positive">
+                                {tFilters("performance.positiveDays", {days: POSITIVE_NEGATIVE_DAYS})}
+                            </SelectItem>
+                            <SelectItem value="negative">
+                                {tFilters("performance.negativeDays", {days: POSITIVE_NEGATIVE_DAYS})}
+                            </SelectItem>
+                            <SelectItem value="top-performers">
+                                {tFilters("performance.topPerformersCount", {count: TOP_PERFORMANCE_COUNT})}
+                            </SelectItem>
                         </SelectContent>
                     </Select>
 
                     {hasActiveFilters && (
-                        <Button variant="outline" size="sm" onClick={handleClearFilters} className="px-3">
+                        <Button variant="outline" size="sm" onClick={handleClearFilters}>
                             <X className="h-4 w-4" />
                         </Button>
                     )}
@@ -152,7 +168,7 @@ export function IndicesFilters({
                     {onCreateIndex && (
                         <Button onClick={onCreateIndex} size="sm" className="ml-2">
                             <Plus className="h-4 w-4 mr-2" />
-                            Create Index
+                            {tActions("create")}
                         </Button>
                     )}
                 </div>

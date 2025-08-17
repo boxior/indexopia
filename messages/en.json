@@ -146,6 +146,32 @@
       "title": "No indices found",
       "adjustFilters": "Try adjusting your filters or search terms",
       "createFirst": "Create your first custom index to get started"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "results": "results",
+      "range": "{start}-{end} of {total}",
+      "itemsPerPageLabel": "Items per page:",
+      "itemsPerPageShort": "Per page:",
+      "previous": "Previous",
+      "next": "Next",
+      "pageInfo": "{current} / {totalPages}"
+    },
+    "filters": {
+      "searchPlaceholder": "Search indices...",
+      "type": {
+        "placeholder": "Type",
+        "all": "All Types",
+        "system": "System",
+        "custom": "Custom"
+      },
+      "performance": {
+        "placeholder": "Performance",
+        "all": "All Performance",
+        "positiveDays": "Positive {days}d",
+        "negativeDays": "Negative {days}d",
+        "topPerformersCount": "Top {count} Performers"
+      }
     }
   }
 }

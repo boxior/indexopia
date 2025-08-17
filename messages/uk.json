@@ -146,6 +146,32 @@
       "title": "Індекси не знайдено",
       "adjustFilters": "Спробуйте змінити фільтри або пошуковий запит",
       "createFirst": "Створіть свій перший користувацький індекс, щоб розпочати"
+    },
+    "pagination": {
+      "showing": "Показано",
+      "results": "результатів",
+      "range": "{start}-{end} з {total}",
+      "itemsPerPageLabel": "Елементів на сторінці:",
+      "itemsPerPageShort": "На стор.:",
+      "previous": "Назад",
+      "next": "Далі",
+      "pageInfo": "{current} / {totalPages}"
+    },
+    "filters": {
+      "searchPlaceholder": "Пошук індексів...",
+      "type": {
+        "placeholder": "Тип",
+        "all": "Усі типи",
+        "system": "Системні",
+        "custom": "Користувацькі"
+      },
+      "performance": {
+        "placeholder": "Дохідність",
+        "all": "Уся дохідність",
+        "positiveDays": "Позитивна за {days} дн.",
+        "negativeDays": "Негативна за {days} дн.",
+        "topPerformersCount": "Топ {count} лідерів"
+      }
     }
   }
 }
