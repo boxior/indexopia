@@ -172,6 +172,49 @@
         "negativeDays": "Negative {days}d",
         "topPerformersCount": "Top {count} Performers"
       }
+    },
+    "table": {
+      "headers": {
+        "name": "Name",
+        "assets": "Assets",
+        "chart": "{days}d Chart",
+        "days7": "7d",
+        "days30": "30d",
+        "total": "Total",
+        "maxDrawDown": "Max Drawdown",
+        "duration": "Duration",
+        "actions": "Actions"
+      },
+      "badges": {
+        "system": "System",
+        "custom": "Custom",
+        "public": "Public",
+        "private": "Private"
+      },
+      "tooltips": {
+        "expand": "Expand",
+        "collapse": "Collapse",
+        "showChart": "Show chart",
+        "hideChart": "Hide chart",
+        "copyLink": "Copy link",
+        "view": "View",
+        "edit": "Edit",
+        "delete": "Delete",
+        "clone": "Clone",
+        "show": "Show",
+        "hide": "Hide",
+        "sortBy": "Sort by {field}"
+      },
+      "copy": {
+        "success": "Link copied"
+      },
+      "labels": {
+        "total": "Total",
+        "days7Full": "7 days",
+        "days30Full": "30 days",
+        "maxDrawDown": "Max Drawdown",
+        "duration": "Duration"
+      }
     }
   }
 }

@@ -172,6 +172,49 @@
         "negativeDays": "Отрицательная за {days} дн.",
         "topPerformersCount": "Топ {count} лидеров"
       }
+    },
+    "table": {
+      "headers": {
+        "name": "Название",
+        "assets": "Активы",
+        "chart": "График {days}д",
+        "days7": "7д",
+        "days30": "30д",
+        "total": "Итого",
+        "maxDrawDown": "Макс. просадка",
+        "duration": "Длительность",
+        "actions": "Действия"
+      },
+      "badges": {
+        "system": "Системный",
+        "custom": "Пользовательский",
+        "public": "Публичный",
+        "private": "Приватный"
+      },
+      "tooltips": {
+        "expand": "Развернуть",
+        "collapse": "Свернуть",
+        "showChart": "Показать график",
+        "hideChart": "Скрыть график",
+        "copyLink": "Скопировать ссылку",
+        "view": "Просмотр",
+        "edit": "Редактировать",
+        "delete": "Удалить",
+        "clone": "Клонировать",
+        "show": "Показать",
+        "hide": "Скрыть",
+        "sortBy": "Сортировать по {field}"
+      },
+      "copy": {
+        "success": "Ссылка скопирована"
+      },
+      "labels": {
+        "total": "Итого",
+        "days7Full": "7 дней",
+        "days30Full": "30 дней",
+        "maxDrawDown": "Макс. просадка",
+        "duration": "Длительность"
+      }
     }
   }
 }

@@ -28,6 +28,7 @@ import {useRouter} from "next/navigation";
 import {useSession} from "next-auth/react";
 import {LinkReferer} from "@/app/components/LinkReferer";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
+import {useTranslations} from "next-intl";
 
 interface IndicesTableProps {
     indices: IndexOverviewWithHistory[];
@@ -52,6 +53,9 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
 
     const isViewMode = mode === EntityMode.VIEW;
     const hiddenOption = isViewMode && !currentUserId;
+
+    // i18n
+    const tTable = useTranslations("indices.table");
 
     // Pagination state
     const [currentPage, setCurrentPage] = useState(1);
@@ -199,7 +203,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                             <div className="text-sm font-medium">
                                 {renderSafelyPercentage(index.historyOverview.total)}
                             </div>
-                            <div className="text-xs text-gray-500">Total</div>
+                            <div className="text-xs text-gray-500">{tTable("labels.total")}</div>
                             {hiddenOption && <ProtectedOverlay />}
                         </div>
 
@@ -229,13 +233,13 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                 <div className="text-sm font-medium">
                                     {renderSafelyPercentage(index.historyOverview.days7)}
                                 </div>
-                                <div className="text-xs text-gray-500">7 days</div>
+                                <div className="text-xs text-gray-500">{tTable("labels.days7Full")}</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-sm font-medium">
                                     {renderSafelyPercentage(index.historyOverview.days30)}
                                 </div>
-                                <div className="text-xs text-gray-500">30 days</div>
+                                <div className="text-xs text-gray-500">{tTable("labels.days30Full")}</div>
                             </div>
                         </div>
 
@@ -245,7 +249,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                 <div className="text-sm font-medium text-red-600">
                                     -{Math.abs(index.maxDrawDown.value).toFixed(2)}%
                                 </div>
-                                <div className="text-xs text-gray-500">Max Drawdown</div>
+                                <div className="text-xs text-gray-500">{tTable("labels.maxDrawDown")}</div>
                                 {hiddenOption && <ProtectedOverlay />}
                             </div>
                             <div className="text-center">
@@ -254,7 +258,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                         ? getIndexDurationLabel(index.startTime, index.endTime)
                                         : "-"}
                                 </div>
-                                <div className="text-xs text-gray-500">Duration</div>
+                                <div className="text-xs text-gray-500">{tTable("labels.duration")}</div>
                             </div>
                         </div>
 
@@ -273,7 +277,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                         </Button>
                                     </TooltipTrigger>
                                     <TooltipContent>
-                                        <p>Clone index</p>
+                                        <p>{tTable("tooltips.clone")}</p>
                                     </TooltipContent>
                                 </Tooltip>
 
@@ -291,7 +295,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                                 </Button>
                                             </TooltipTrigger>
                                             <TooltipContent>
-                                                <p>Edit index</p>
+                                                <p>{tTable("tooltips.edit")}</p>
                                             </TooltipContent>
                                         </Tooltip>
 
@@ -307,7 +311,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                                 </Button>
                                             </TooltipTrigger>
                                             <TooltipContent>
-                                                <p>Delete index</p>
+                                                <p>{tTable("tooltips.delete")}</p>
                                             </TooltipContent>
                                         </Tooltip>
                                     </>
@@ -334,19 +338,19 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                         className="h-auto p-0 font-medium"
                                         onClick={() => handleSort("name")}
                                     >
-                                        Index Name
+                                        {tTable("headers.name")}
                                         {getSortIcon("name")}
                                     </Button>
                                 </TableHead>
-                                <TableHead>Assets</TableHead>
-                                <TableHead>{HISTORY_OVERVIEW_DAYS}d Chart</TableHead>
+                                <TableHead>{tTable("headers.assets")}</TableHead>
+                                <TableHead>{tTable("headers.chart", {days: HISTORY_OVERVIEW_DAYS})}</TableHead>
                                 <TableHead>
                                     <Button
                                         variant="ghost"
                                         className="h-auto p-0 font-medium"
                                         onClick={() => handleSort("days7")}
                                     >
-                                        7d
+                                        {tTable("headers.days7")}
                                         {getSortIcon("days7")}
                                     </Button>
                                 </TableHead>
@@ -356,7 +360,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                         className="h-auto p-0 font-medium"
                                         onClick={() => handleSort("days30")}
                                     >
-                                        30d
+                                        {tTable("headers.days30")}
                                         {getSortIcon("days30")}
                                     </Button>
                                 </TableHead>
@@ -366,7 +370,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                         className="h-auto p-0 font-medium"
                                         onClick={() => handleSort("total")}
                                     >
-                                        Total Return
+                                        {tTable("headers.total")}
                                         {getSortIcon("total")}
                                     </Button>
                                 </TableHead>
@@ -376,12 +380,14 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                         className="h-auto p-0 font-medium"
                                         onClick={() => handleSort("maxDrawDown")}
                                     >
-                                        Max Drawdown
+                                        {tTable("headers.maxDrawDown")}
                                         {getSortIcon("maxDrawDown")}
                                     </Button>
                                 </TableHead>
-                                <TableHead>Duration</TableHead>
-                                {!isViewMode && <TableHead className="text-right">Actions</TableHead>}
+                                <TableHead>{tTable("headers.duration")}</TableHead>
+                                {!isViewMode && (
+                                    <TableHead className="text-right">{tTable("headers.actions")}</TableHead>
+                                )}
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -477,7 +483,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                                         </Button>
                                                     </TooltipTrigger>
                                                     <TooltipContent>
-                                                        <p>Clone index</p>
+                                                        <p>{tTable("tooltips.clone")}</p>
                                                     </TooltipContent>
                                                 </Tooltip>
                                                 {isUserIndex(index) && index.userId === currentUserId && (
@@ -494,7 +500,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                                                 </Button>
                                                             </TooltipTrigger>
                                                             <TooltipContent>
-                                                                <p>Edit index</p>
+                                                                <p>{tTable("tooltips.edit")}</p>
                                                             </TooltipContent>
                                                         </Tooltip>
                                                         <Tooltip>
@@ -509,7 +515,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                                                 </Button>
                                                             </TooltipTrigger>
                                                             <TooltipContent>
-                                                                <p>Delete index</p>
+                                                                <p>{tTable("tooltips.delete")}</p>
                                                             </TooltipContent>
                                                         </Tooltip>
                                                     </>

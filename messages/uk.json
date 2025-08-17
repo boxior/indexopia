@@ -172,6 +172,49 @@
         "negativeDays": "Негативна за {days} дн.",
         "topPerformersCount": "Топ {count} лідерів"
       }
+    },
+    "table": {
+      "headers": {
+        "name": "Назва",
+        "assets": "Активи",
+        "chart": "Графік {days}д",
+        "days7": "7д",
+        "days30": "30д",
+        "total": "Разом",
+        "maxDrawDown": "Макс. просідання",
+        "duration": "Тривалість",
+        "actions": "Дії"
+      },
+      "badges": {
+        "system": "Системний",
+        "custom": "Користувацький",
+        "public": "Публічний",
+        "private": "Приватний"
+      },
+      "tooltips": {
+        "expand": "Розгорнути",
+        "collapse": "Згорнути",
+        "showChart": "Показати графік",
+        "hideChart": "Сховати графік",
+        "copyLink": "Скопіювати посилання",
+        "view": "Переглянути",
+        "edit": "Редагувати",
+        "delete": "Видалити",
+        "clone": "Клонувати",
+        "show": "Показати",
+        "hide": "Приховати",
+        "sortBy": "Сортувати за {field}"
+      },
+      "copy": {
+        "success": "Посилання скопійовано"
+      },
+      "labels": {
+        "total": "Разом",
+        "days7Full": "7 днів",
+        "days30Full": "30 днів",
+        "maxDrawDown": "Макс. просідання",
+        "duration": "Тривалість"
+      }
     }
   }
 }
