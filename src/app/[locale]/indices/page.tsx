@@ -9,11 +9,14 @@ import {IndexesPageClient} from "@/app/[locale]/indices/components/CLAUD_WEB/Ind
 import {auth} from "@/auth";
 import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {actionGetIndicesWithHistoryOverview} from "@/app/[locale]/indices/actions";
+import {getTranslations} from "next-intl/server";
 
 export default async function IndicesPage() {
+    const t = await getTranslations("indices");
+
     return (
         <SuspenseWrapper
-            loadingMessage="Loading crypto indices..."
+            loadingMessage={t("loading")}
             variant="dots"
             showLogo={false}
             fullScreen={false}

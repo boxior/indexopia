@@ -14,6 +14,7 @@ import {filterTopPerformance} from "@/app/[locale]/indices/helpers";
 import {useIndexActions} from "@/app/[locale]/indices/[id]/hooks/useIndexActions.hook";
 import {DeleteIndexConfirmModal} from "@/app/[locale]/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import * as React from "react";
+import {useTranslations} from "next-intl";
 
 export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWithHistory[]; assets: Asset[]}) => {
     const {
@@ -32,6 +33,8 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
         isDeleting,
         onDeleteCancel,
     } = useIndexActions();
+
+    const t = useTranslations("indices");
 
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
@@ -113,16 +116,14 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
                 <div className="container mx-auto px-4 py-8">
                     {/* Page Header */}
                     <div className="mb-6 md:mb-8">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Crypto Indices</h1>
-                        <p className="text-sm sm:text-base text-gray-600">
-                            Explore and manage your crypto investment indices
-                        </p>
+                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">{t("title")}</h1>
+                        <p className="text-sm sm:text-base text-gray-600">{t("subtitle")}</p>
                     </div>
                     <div className={"hidden md:block"}>
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">Total Indices</CardTitle>
+                                    <CardTitle className="text-sm font-medium">{t("cards.total.title")}</CardTitle>
                                     <BarChart className="h-4 w-4 text-muted-foreground" />
                                 </CardHeader>
                                 <CardContent>
@@ -130,46 +131,50 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
                                         {renderSafelyNumber(stats.totalIndices, NumeralFormat.INTEGER)}
                                     </div>
                                     <p className="text-xs text-muted-foreground">
-                                        {renderSafelyNumber(stats.systemIndices, NumeralFormat.INTEGER)} system,{" "}
-                                        {renderSafelyNumber(stats.customIndices, NumeralFormat.INTEGER)} custom
+                                        {t("cards.total.breakdown", {
+                                            system:
+                                                renderSafelyNumber(stats.systemIndices, NumeralFormat.INTEGER) ?? "",
+                                            custom:
+                                                renderSafelyNumber(stats.customIndices, NumeralFormat.INTEGER) ?? "",
+                                        })}
                                     </p>
                                 </CardContent>
                             </Card>
 
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">System Indices</CardTitle>
+                                    <CardTitle className="text-sm font-medium">{t("cards.system.title")}</CardTitle>
                                     {renderArrow(stats.systemAvgReturn)}
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">
                                         {renderSafelyNumber(stats.systemIndices, NumeralFormat.INTEGER)}
                                     </div>
-                                    <p className="text-xs text-muted-foreground">Professional strategies</p>
+                                    <p className="text-xs text-muted-foreground">{t("cards.system.subtitle")}</p>
                                 </CardContent>
                             </Card>
 
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">Custom Indices</CardTitle>
+                                    <CardTitle className="text-sm font-medium">{t("cards.custom.title")}</CardTitle>
                                     {renderArrow(stats.userAvrReturn)}
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">
                                         {renderSafelyNumber(stats.customIndices, NumeralFormat.INTEGER)}
                                     </div>
-                                    <p className="text-xs text-muted-foreground">Your personal strategies</p>
+                                    <p className="text-xs text-muted-foreground">{t("cards.custom.subtitle")}</p>
                                 </CardContent>
                             </Card>
 
                             <Card>
                                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                                    <CardTitle className="text-sm font-medium">Avg. Return</CardTitle>
+                                    <CardTitle className="text-sm font-medium">{t("cards.avgReturn.title")}</CardTitle>
                                     {renderArrow(stats.avgReturn)}
                                 </CardHeader>
                                 <CardContent>
                                     <div className="text-2xl font-bold">{renderSafelyNumber(stats.avgReturn)}%</div>
-                                    <p className="text-xs text-muted-foreground">Across all filtered indices</p>
+                                    <p className="text-xs text-muted-foreground">{t("cards.avgReturn.subtitle")}</p>
                                 </CardContent>
                             </Card>
                         </div>
@@ -183,14 +188,14 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
                                     <div className="flex items-center justify-between">
                                         <div className="md:block">
                                             <span className="text-xs md:hidden font-medium text-muted-foreground">
-                                                Total:{" "}
+                                                {t("mobile.total")}:{" "}
                                                 <span className="font-bold text-foreground">{stats.totalIndices}</span>
                                             </span>
                                             <div className="hidden md:block text-2xl font-bold">
                                                 {stats.totalIndices}
                                             </div>
                                             <p className="hidden md:block text-sm font-medium text-muted-foreground">
-                                                Total
+                                                {t("mobile.total")}
                                             </p>
                                         </div>
                                         <BarChart className="h-3 w-3 md:h-4 md:w-4 text-muted-foreground" />
@@ -202,7 +207,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
                                     <div className="flex items-center justify-between">
                                         <div className="md:block">
                                             <span className="text-xs md:hidden font-medium text-muted-foreground">
-                                                System:{" "}
+                                                {t("mobile.system")}:{" "}
                                                 <span className="font-bold text-foreground">
                                                     {renderSafelyNumber(stats.systemIndices, NumeralFormat.INTEGER)}
                                                 </span>
@@ -211,7 +216,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
                                                 {renderSafelyNumber(stats.systemIndices, NumeralFormat.INTEGER)}
                                             </div>
                                             <p className="hidden md:block text-sm font-medium text-muted-foreground">
-                                                System
+                                                {t("mobile.system")}
                                             </p>
                                         </div>
                                         <div className="flex-shrink-0">{renderArrow(stats.systemAvgReturn)}</div>
@@ -223,7 +228,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
                                     <div className="flex items-center justify-between">
                                         <div className="md:block">
                                             <span className="text-xs md:hidden font-medium text-muted-foreground">
-                                                Custom:{" "}
+                                                {t("mobile.custom")}:{" "}
                                                 <span className="font-bold text-foreground">
                                                     {renderSafelyNumber(stats.customIndices, NumeralFormat.INTEGER)}
                                                 </span>
@@ -232,7 +237,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
                                                 {renderSafelyNumber(stats.customIndices, NumeralFormat.INTEGER)}
                                             </div>
                                             <p className="hidden md:block text-sm font-medium text-muted-foreground">
-                                                Custom
+                                                {t("mobile.custom")}
                                             </p>
                                         </div>
                                         <div className="flex-shrink-0">{renderArrow(stats.userAvrReturn)}</div>
@@ -244,7 +249,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
                                     <div className="flex items-center justify-between">
                                         <div className="md:block">
                                             <span className="text-xs md:hidden font-medium text-muted-foreground">
-                                                Return:{" "}
+                                                {t("mobile.return")}:{" "}
                                                 <span className="font-bold text-foreground">
                                                     {renderSafelyNumber(stats.avgReturn, NumeralFormat.INTEGER)}%
                                                 </span>
@@ -253,7 +258,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
                                                 {renderSafelyNumber(stats.avgReturn, NumeralFormat.INTEGER)}%
                                             </div>
                                             <p className="hidden md:block text-sm font-medium text-muted-foreground">
-                                                Return
+                                                {t("mobile.return")}
                                             </p>
                                         </div>
                                         <div className="flex-shrink-0">{renderArrow(stats.avgReturn)}</div>
@@ -280,8 +285,8 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
                                 className="w-full sm:w-auto flex-shrink-0 h-8 px-3 text-xs sm:h-9 sm:px-4 sm:text-sm"
                             >
                                 <Plus className="h-3 w-3 sm:h-4 sm:w-4 mr-1 sm:mr-2" />
-                                <span className="hidden xs:inline">Create Custom Index</span>
-                                <span className="xs:hidden">Create Index</span>
+                                <span className="hidden xs:inline">{t("actions.createCustom")}</span>
+                                <span className="xs:hidden">{t("actions.create")}</span>
                             </Button>
                         </div>
                     </div>
@@ -289,7 +294,7 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
                     {/* Results Info */}
                     <div className="mb-4">
                         <p className="text-sm text-gray-600">
-                            Showing {filteredIndices.length} of {indices.length} indices
+                            {t("results.showing", {count: filteredIndices.length, total: indices.length})}
                         </p>
                     </div>
 
@@ -308,11 +313,11 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
                         <div className="text-center py-12 bg-white rounded-lg shadow">
                             <div className="text-gray-500">
                                 <BarChart className="h-12 w-12 mx-auto mb-4" />
-                                <h3 className="text-lg font-medium mb-2">No indices found</h3>
+                                <h3 className="text-lg font-medium mb-2">{t("empty.title")}</h3>
                                 <p className="text-sm">
                                     {searchTerm || typeFilter !== "all" || performanceFilter !== "all"
-                                        ? "Try adjusting your filters or search terms"
-                                        : "Create your first custom index to get started"}
+                                        ? t("empty.adjustFilters")
+                                        : t("empty.createFirst")}
                                 </p>
                             </div>
                         </div>

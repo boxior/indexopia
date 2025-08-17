@@ -1,6 +1,5 @@
 {
   "common": {
-    "hello": "Hello",
     "loading": "Loading..."
   },
   "header": {
@@ -107,5 +106,46 @@
   "home": {
     "loading": "Loading Indexopia...",
     "viewAllIndices": "View All Indices"
+  },
+  "indices": {
+    "loading": "Loading crypto indices...",
+    "title": "Crypto Indices",
+    "subtitle": "Explore and manage your crypto investment indices",
+    "cards": {
+      "total": {
+        "title": "Total Indices",
+        "breakdown": "{system} system, {custom} custom"
+      },
+      "system": {
+        "title": "System Indices",
+        "subtitle": "Professional strategies"
+      },
+      "custom": {
+        "title": "Custom Indices",
+        "subtitle": "Your personal strategies"
+      },
+      "avgReturn": {
+        "title": "Avg. Return",
+        "subtitle": "Across all filtered indices"
+      }
+    },
+    "mobile": {
+      "total": "Total",
+      "system": "System",
+      "custom": "Custom",
+      "return": "Return"
+    },
+    "actions": {
+      "createCustom": "Create Custom Index",
+      "create": "Create Index"
+    },
+    "results": {
+      "showing": "Showing {count} of {total} indices"
+    },
+    "empty": {
+      "title": "No indices found",
+      "adjustFilters": "Try adjusting your filters or search terms",
+      "createFirst": "Create your first custom index to get started"
+    }
   }
 }
