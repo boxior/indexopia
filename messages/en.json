@@ -1,5 +1,113 @@
 {
   "common": {
     "hello": "Hello"
+  },
+  "header": {
+    "brand": "Indexopia",
+    "navigation": {
+      "home": "Home",
+      "indices": "Indices",
+      "about": "About",
+      "blog": "Blog"
+    },
+    "language": {
+      "current": "EN",
+      "english": "English",
+      "ukrainian": "Ukrainian",
+      "russian": "Russian"
+    },
+    "auth": {
+      "signIn": "Sign In",
+      "signOut": "Sign out"
+    }
+  },
+  "footer": {
+    "brand": "Indexopia",
+    "tagline": "Professional crypto portfolio management made simple.",
+    "sections": {
+      "product": {
+        "title": "Product",
+        "indices": "Indices",
+        "analytics": "Analytics",
+        "portfolio": "Portfolio",
+        "pricing": "Pricing"
+      },
+      "company": {
+        "title": "Company",
+        "about": "About",
+        "blog": "Blog",
+        "careers": "Careers",
+        "contact": "Contact"
+      },
+      "resources": {
+        "title": "Resources",
+        "documentation": "Documentation",
+        "help": "Help Center",
+        "privacy": "Privacy Policy",
+        "terms": "Terms of Service"
+      }
+    },
+    "copyright": "© 2024 Indexopia. All rights reserved."
+  },
+  "hero": {
+    "title": {
+      "the": "The",
+      "ultimate": "Ultimate",
+      "cryptoIndexPlatform": "Crypto Index Platform"
+    },
+    "subtitle": "Track your crypto like a pro with real-time data, professional portfolio management, and access to thousands of curated crypto indices.",
+    "cta": {
+      "exploreIndices": "Explore Indices",
+      "signUpFree": "Sign Up Free"
+    },
+    "features": {
+      "realTime": {
+        "title": "Real-time Data",
+        "description": "Get instant access to live crypto prices and market data"
+      },
+      "professionalTools": {
+        "title": "Professional Tools",
+        "description": "Advanced portfolio tracking and P&L analysis"
+      },
+      "thousands": {
+        "title": "Thousands of Portfolios",
+        "description": "Access curated indices from crypto experts"
+      }
+    }
+  },
+  "benefits": {
+    "title": "Why Choose Indexopia?",
+    "subtitle": "Everything you need to build and manage a successful crypto portfolio",
+    "items": {
+      "analytics": {
+        "title": "Professional Analytics",
+        "description": "Advanced charts, metrics, and performance analysis tools used by professional traders."
+      },
+      "risk": {
+        "title": "Risk Management",
+        "description": "Built-in risk assessment tools and portfolio optimization to protect your investments."
+      },
+      "global": {
+        "title": "Global Markets",
+        "description": "Access to worldwide crypto markets with real-time data from major exchanges."
+      },
+      "community": {
+        "title": "Community Driven",
+        "description": "Learn from experienced traders and share strategies with our growing community."
+      },
+      "execution": {
+        "title": "Fast Execution",
+        "description": "Lightning-fast data processing and real-time portfolio updates."
+      },
+      "strategies": {
+        "title": "Proven Strategies",
+        "description": "Access to time-tested investment strategies with documented performance."
+      }
+    }
+  },
+  "cta": {
+    "title": "Ready to Start Your Journey?",
+    "subtitle": "Join thousands of investors who trust Indexopia for their crypto portfolio management.",
+    "button": "Get Started Today"
   }
 }

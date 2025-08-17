@@ -36,9 +36,10 @@ export default async function RootLayout(props: Readonly<PageProps>) {
     return (
         <html lang={locale}>
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-                <SuspenseWrapper>
-                    <RootLayoutSuspended {...props} />
-                </SuspenseWrapper>
+                {/*Suspense show loading if change locale*/}
+                {/*<SuspenseWrapper>*/}
+                <RootLayoutSuspended {...props} />
+                {/*</SuspenseWrapper>*/}
             </body>
         </html>
     );
@@ -49,7 +50,7 @@ const RootLayoutSuspended = async ({children}: Readonly<PageProps>) => {
 
     return (
         <SessionProvider session={session}>
-            {<NextIntlClientProvider>{children}</NextIntlClientProvider>}
+            <NextIntlClientProvider>{children}</NextIntlClientProvider>
         </SessionProvider>
     );
 };

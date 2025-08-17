@@ -1,7 +1,7 @@
 "use client";
 
-import {useState} from "react";
-import Link from "next/link";
+import {useState, useTransition} from "react";
+import {useTranslations, useLocale} from "next-intl";
 import {Button} from "@/components/ui/button";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
@@ -9,16 +9,50 @@ import {LogOut, Globe, Menu, X} from "lucide-react";
 import {useSession} from "next-auth/react";
 import {signOut} from "next-auth/react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
+import {Link, usePathname, useRouter} from "@/i18n/navigation";
+import {useParams} from "next/navigation";
 
 export default function Header() {
+    const t = useTranslations("header");
     const {data, status, update} = useSession();
     const {user} = data ?? {};
+    const locale = useLocale();
+
+    const router = useRouter();
+    const [isPending, startTransition] = useTransition();
+    const pathname = usePathname();
+    const params = useParams();
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const handleSignOut = async () => {
         await signOut({redirectTo: PAGES_URLS.home});
         await update();
+    };
+
+    const handleLanguageChange = (nextLocale: string) => {
+        startTransition(() => {
+            router.replace(
+                // @ts-expect-error -- TypeScript will validate that only known `params`
+                // are used in combination with a given `pathname`. Since the two will
+                // always match for the current route, we can skip runtime checks.
+                {pathname, params},
+                {locale: nextLocale}
+            );
+        });
+    };
+
+    const getCurrentLanguageDisplay = () => {
+        switch (locale) {
+            case "en":
+                return t("language.current");
+            case "uk":
+                return "UK";
+            case "ru":
+                return "RU";
+            default:
+                return "EN";
+        }
     };
 
     return (
@@ -30,23 +64,23 @@ export default function Header() {
                         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
                             <span className="text-white font-bold text-sm">IX</span>
                         </div>
-                        <span className="text-xl font-bold text-gray-900">Indexopia</span>
+                        <span className="text-xl font-bold text-gray-900">{t("brand")}</span>
                     </Link>
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex items-center space-x-8">
                         <Link href={PAGES_URLS.home} className="text-gray-700 hover:text-blue-600 transition-colors">
-                            Home
+                            {t("navigation.home")}
                         </Link>
                         <Link href={PAGES_URLS.indices} className="text-gray-700 hover:text-blue-600 transition-colors">
-                            Indices
+                            {t("navigation.indices")}
                         </Link>
                         {/* TODO: https://cryptofunds.atlassian.net/browse/SCRUM-28; https://cryptofunds.atlassian.net/browse/SCRUM-29*/}
                         {/*<Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors">*/}
-                        {/*    About*/}
+                        {/*    {t("navigation.about")}*/}
                         {/*</Link>*/}
                         {/*<Link href="/blog" className="text-gray-700 hover:text-blue-600 transition-colors">*/}
-                        {/*    Blog*/}
+                        {/*    {t("navigation.blog")}*/}
                         {/*</Link>*/}
                     </nav>
 
@@ -57,12 +91,19 @@ export default function Header() {
                             <DropdownMenuTrigger asChild>
                                 <Button variant="ghost" size="sm">
                                     <Globe className="h-4 w-4 mr-2" />
-                                    EN
+                                    {getCurrentLanguageDisplay()}
                                 </Button>
                             </DropdownMenuTrigger>
                             <DropdownMenuContent>
-                                <DropdownMenuItem>English</DropdownMenuItem>
-                                <DropdownMenuItem>Ukrainian</DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleLanguageChange("en")}>
+                                    {t("language.english")}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleLanguageChange("uk")}>
+                                    {t("language.ukrainian")}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleLanguageChange("ru")}>
+                                    {t("language.russian")}
+                                </DropdownMenuItem>
                             </DropdownMenuContent>
                         </DropdownMenu>
 
@@ -89,13 +130,13 @@ export default function Header() {
                                         disabled={status === "loading"}
                                     >
                                         <LogOut className="mr-2 h-4 w-4" />
-                                        Sign out
+                                        {t("auth.signOut")}
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         ) : (
                             <Link href={PAGES_URLS.signIn}>
-                                <Button>Sign In</Button>
+                                <Button>{t("auth.signIn")}</Button>
                             </Link>
                         )}
 
@@ -119,20 +160,20 @@ export default function Header() {
                                 href={PAGES_URLS.home}
                                 className="text-gray-700 hover:text-blue-600 transition-colors p-2"
                             >
-                                Home
+                                {t("navigation.home")}
                             </Link>
                             <Link
                                 href={PAGES_URLS.indices}
                                 className="text-gray-700 hover:text-blue-600 transition-colors p-2"
                             >
-                                Indices
+                                {t("navigation.indices")}
                             </Link>
                             {/* TODO: https://cryptofunds.atlassian.net/browse/SCRUM-28; https://cryptofunds.atlassian.net/browse/SCRUM-29*/}
                             {/*<Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors p-2">*/}
-                            {/*    About*/}
+                            {/*    {t("navigation.about")}*/}
                             {/*</Link>*/}
                             {/*<Link href="/blog" className="text-gray-700 hover:text-blue-600 transition-colors p-2">*/}
-                            {/*    Blog*/}
+                            {/*    {t("navigation.blog")}*/}
                             {/*</Link>*/}
                         </nav>
                     </div>
