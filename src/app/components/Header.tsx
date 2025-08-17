@@ -1,58 +1,27 @@
 "use client";
 
-import {useState, useTransition} from "react";
-import {useTranslations, useLocale} from "next-intl";
+import {useState} from "react";
+import {useTranslations} from "next-intl";
 import {Button} from "@/components/ui/button";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
-import {LogOut, Globe, Menu, X} from "lucide-react";
+import {LogOut, Menu, X} from "lucide-react";
 import {useSession} from "next-auth/react";
 import {signOut} from "next-auth/react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
-import {Link, usePathname, useRouter} from "@/i18n/navigation";
-import {useParams} from "next/navigation";
+import {Link} from "@/i18n/navigation";
+import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 
 export default function Header() {
     const t = useTranslations("header");
     const {data, status, update} = useSession();
     const {user} = data ?? {};
-    const locale = useLocale();
-
-    const router = useRouter();
-    const [isPending, startTransition] = useTransition();
-    const pathname = usePathname();
-    const params = useParams();
 
     const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const handleSignOut = async () => {
         await signOut({redirectTo: PAGES_URLS.home});
         await update();
-    };
-
-    const handleLanguageChange = (nextLocale: string) => {
-        startTransition(() => {
-            router.replace(
-                // @ts-expect-error -- TypeScript will validate that only known `params`
-                // are used in combination with a given `pathname`. Since the two will
-                // always match for the current route, we can skip runtime checks.
-                {pathname, params},
-                {locale: nextLocale}
-            );
-        });
-    };
-
-    const getCurrentLanguageDisplay = () => {
-        switch (locale) {
-            case "en":
-                return t("language.current");
-            case "uk":
-                return "UK";
-            case "ru":
-                return "RU";
-            default:
-                return "EN";
-        }
     };
 
     return (
@@ -87,25 +56,7 @@ export default function Header() {
                     {/* Right side - Language, Auth */}
                     <div className="flex items-center space-x-4">
                         {/* Language Selector */}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                    <Globe className="h-4 w-4 mr-2" />
-                                    {getCurrentLanguageDisplay()}
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem onClick={() => handleLanguageChange("en")}>
-                                    {t("language.english")}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleLanguageChange("uk")}>
-                                    {t("language.ukrainian")}
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => handleLanguageChange("ru")}>
-                                    {t("language.russian")}
-                                </DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <LanguageSwitcher />
 
                         {/* Authentication */}
                         {user ? (
