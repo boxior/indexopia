@@ -23,31 +23,23 @@
   },
   "footer": {
     "brand": "Indexopia",
-    "tagline": "Professional crypto portfolio management made simple.",
+    "tagline": "Indexopia is a platform for creating and tracking crypto indices and crypto portfolios.",
     "sections": {
-      "product": {
-        "title": "Product",
-        "indices": "Indices",
-        "analytics": "Analytics",
-        "portfolio": "Portfolio",
-        "pricing": "Pricing"
-      },
-      "company": {
-        "title": "Company",
-        "about": "About",
-        "blog": "Blog",
-        "careers": "Careers",
+      "about": {
+        "title": "About",
+        "termsOfService": "Terms of Service",
+        "privacyPolicy": "Privacy Policy",
         "contact": "Contact"
       },
-      "resources": {
-        "title": "Resources",
-        "documentation": "Documentation",
-        "help": "Help Center",
-        "privacy": "Privacy Policy",
-        "terms": "Terms of Service"
+      "explore": {
+        "title": "Explore",
+        "freeCryptoIndices": "Free Crypto Indices"
+      },
+      "community": {
+        "title": "Join Our Community"
       }
     },
-    "copyright": "© 2024 Indexopia. All rights reserved."
+    "copyright": "© 2025 Indexopia. All Rights Reserved."
   },
   "hero": {
     "title": {
@@ -106,8 +98,9 @@
     }
   },
   "cta": {
-    "title": "Ready to Start Your Journey?",
-    "subtitle": "Join thousands of investors who trust Indexopia for their crypto portfolio management.",
-    "button": "Get Started Today"
+    "title": "Ready to Start Your Crypto Journey?",
+    "subtitle": "Join thousands of investors who trust Indexopia for their crypto portfolio management. Start with our free tier and upgrade as you grow.",
+    "getStartedFree": "Get Started Free",
+    "exploreIndices": "Explore Indices"
   }
 }

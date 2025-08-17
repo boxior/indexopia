@@ -1,8 +1,13 @@
-import Link from "next/link";
+"use client";
+
+import {useTranslations} from "next-intl";
+import {Link} from "@/i18n/navigation";
 import {Twitter, Github, Youtube} from "lucide-react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default function Footer() {
+    const t = useTranslations("footer");
+
     return (
         <footer className="bg-gray-900 text-white">
             <div className="container mx-auto px-4 py-12">
@@ -13,16 +18,14 @@ export default function Footer() {
                             <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
                                 <span className="text-white font-bold text-sm">IX</span>
                             </div>
-                            <span className="text-xl font-bold">Indexopia</span>
+                            <span className="text-xl font-bold">{t("brand")}</span>
                         </Link>
-                        <p className="text-gray-400 text-sm">
-                            Indexopia is a platform for creating and tracking crypto indices and crypto portfolios.
-                        </p>
+                        <p className="text-gray-400 text-sm">{t("tagline")}</p>
                     </div>
 
                     {/* About Section */}
                     <div>
-                        <h3 className="font-semibold mb-4">About</h3>
+                        <h3 className="font-semibold mb-4">{t("sections.about.title")}</h3>
                         <ul className="space-y-2 text-sm">
                             {/* TODO: https://cryptofunds.atlassian.net/browse/SCRUM-28; https://cryptofunds.atlassian.net/browse/SCRUM-29*/}
                             {/*<li>*/}
@@ -40,7 +43,7 @@ export default function Footer() {
                                     href={PAGES_URLS.terms}
                                     className="text-gray-400 hover:text-white transition-colors"
                                 >
-                                    Terms of Service
+                                    {t("sections.about.termsOfService")}
                                 </Link>
                             </li>
                             <li>
@@ -48,7 +51,7 @@ export default function Footer() {
                                     href={PAGES_URLS.privacy}
                                     className="text-gray-400 hover:text-white transition-colors"
                                 >
-                                    Privacy Policy
+                                    {t("sections.about.privacyPolicy")}
                                 </Link>
                             </li>
                             <li>
@@ -56,7 +59,7 @@ export default function Footer() {
                                     href={PAGES_URLS.contact}
                                     className="text-gray-400 hover:text-white transition-colors"
                                 >
-                                    Contact
+                                    {t("sections.about.contact")}
                                 </Link>
                             </li>
                         </ul>
@@ -64,14 +67,14 @@ export default function Footer() {
 
                     {/* Explore Section */}
                     <div>
-                        <h3 className="font-semibold mb-4">Explore</h3>
+                        <h3 className="font-semibold mb-4">{t("sections.explore.title")}</h3>
                         <ul className="space-y-2 text-sm">
                             <li>
                                 <Link
                                     href={PAGES_URLS.indices}
                                     className="text-gray-400 hover:text-white transition-colors"
                                 >
-                                    Free Crypto Indices
+                                    {t("sections.explore.freeCryptoIndices")}
                                 </Link>
                             </li>
 
@@ -101,7 +104,7 @@ export default function Footer() {
 
                     {/* Social Media */}
                     <div>
-                        <h3 className="font-semibold mb-4">Join Our Community</h3>
+                        <h3 className="font-semibold mb-4">{t("sections.community.title")}</h3>
                         <div className="flex space-x-4">
                             <Link href="#" className="text-gray-400 hover:text-white transition-colors">
                                 <Twitter className="h-5 w-5" />
@@ -117,7 +120,7 @@ export default function Footer() {
                 </div>
 
                 <div className="border-t border-gray-800 mt-12 pt-8 text-center text-gray-400 text-sm">
-                    <p>© 2025 Indexopia. All Rights Reserved.</p>
+                    <p>{t("copyright")}</p>
                 </div>
             </div>
         </footer>
