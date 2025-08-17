@@ -116,8 +116,9 @@ export enum MomentFormat {
     TIME = "HH:mm",
 }
 
-export type ServerPageProps<ID extends string = string> = {
-    params: Promise<{id: ID}>;
+export type PageProps = {
+    children: React.ReactNode;
+    params: Promise<{locale: string}>;
     searchParams: Promise<{[key: string]: string | string[] | undefined}>;
 };
 
