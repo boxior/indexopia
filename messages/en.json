@@ -1,6 +1,14 @@
 {
   "common": {
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "creating": "Creating",
+    "updating": "Updating",
+    "cloning": "Cloning",
+    "create": "Create",
+    "update": "Update",
+    "clone": "Clone",
+    "noChangedDetected": "No changes detected"
   },
   "header": {
     "brand": "Indexopia",
@@ -222,5 +230,56 @@
       "days": "{count, plural, one {# day} other {# days}}",
       "zero": "0 days"
     }
+  },
+  "indexModal": {
+    "modes": {
+      "create": {
+        "title": "Create Custom Index",
+        "action": "Create Index",
+        "namePlaceholder": "Enter index name"
+      },
+      "edit": {
+        "title": "Edit Index",
+        "action": "Update Index",
+        "namePlaceholder": "Enter index name"
+      },
+      "clone": {
+        "title": "Clone Index",
+        "action": "Clone Index",
+        "namePlaceholder": "Enter new index name",
+        "description": "Create a custom copy of this index with your own asset allocation and portfolio composition."
+      },
+      "default": {
+        "title": "Index",
+        "action": "Save",
+        "namePlaceholder": "Enter index name"
+      }
+    },
+    "fields": {
+      "name": {
+        "label": "Index Name"
+      },
+      "assetsAllocation": {
+        "label": "Assets & Allocation",
+        "selectPlaceholder": "Select asset to add"
+      }
+    },
+    "validation": {
+      "name": {
+        "required": "Index name is required",
+        "min": "Index name must be at least {count} characters",
+        "max": "Index name must be less than {count} characters"
+      },
+      "assets": {
+        "atLeastOne": "At least one asset is required",
+        "portion": {
+          "min": "Portion must be at least {count}%",
+          "max": "Portion cannot exceed {count}%",
+          "required": "Portion is required"
+        },
+        "totalAllocation": "Total allocation must equal {count}%"
+      }
+    },
+    "totalAllocation": "Total allocation"
   }
 }

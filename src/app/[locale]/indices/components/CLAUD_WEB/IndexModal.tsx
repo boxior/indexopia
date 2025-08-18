@@ -11,6 +11,8 @@ import {Tooltip, TooltipContent, TooltipTrigger, TooltipProvider} from "@/compon
 import {Loader2, X} from "lucide-react";
 import {Asset, Id, IndexOverviewAsset, IndexOverviewForCreate} from "@/utils/types/general.types";
 import {UseIndexActionsReturns} from "@/app/[locale]/indices/[id]/hooks/useIndexActions.hook";
+import {useTranslations} from "next-intl";
+import {MAX_PORTION} from "@/utils/constants/general.constants";
 
 export enum IndexMode {
     CREATE = "create",
@@ -35,32 +37,7 @@ interface FormValues {
     assets: IndexOverviewAsset[];
     selectedAssetId: string;
 }
-const validationSchema = Yup.object().shape({
-    name: Yup.string()
-        .trim()
-        .required("Index name is required")
-        .min(2, "Index name must be at least 2 characters")
-        .max(100, "Index name must be less than 100 characters"),
-    assets: Yup.array()
-        .of(
-            Yup.object().shape({
-                id: Yup.string().required(),
-                symbol: Yup.string().required(),
-                name: Yup.string().required(),
-                rank: Yup.number().required(),
-                portion: Yup.number()
-                    .min(0, "Portion must be at least 0%")
-                    .max(100, "Portion cannot exceed 100%")
-                    .required("Portion is required"),
-            })
-        )
-        .min(1, "At least one asset is required")
-        .test("total-allocation", "Total allocation must equal 100%", function (assets) {
-            if (!assets || assets.length === 0) return true;
-            const total = assets.reduce((sum, asset) => sum + (asset.portion || 0), 0);
-            return Math.abs(total - 100) < 0.01; // Allow for small floating point differences
-        }),
-});
+
 export function IndexModal({
     isOpen,
     onCancelAction,
@@ -69,35 +46,75 @@ export function IndexModal({
     indexOverview,
     mode = IndexMode.CREATE,
 }: CreateUpdateIndexModalProps) {
+    const tCommon = useTranslations("common");
+
+    const tIndexModal = useTranslations("indexModal");
+
+    const tIndexModalModes = useTranslations("indexModal.modes");
+    const tIndexModalFields = useTranslations("indexModal.fields");
+    const tIndexModalValidation = useTranslations("indexModal.validation");
+
+    const validationSchema = Yup.object().shape({
+        name: Yup.string()
+            .trim()
+            .required(tIndexModalValidation("name.required"))
+            .min(2, tIndexModalValidation("name.min", {count: 2}))
+            .max(100, tIndexModalValidation("name.max", {count: 100})),
+        assets: Yup.array()
+            .of(
+                Yup.object().shape({
+                    id: Yup.string().required(),
+                    symbol: Yup.string().required(),
+                    name: Yup.string().required(),
+                    rank: Yup.number().required(),
+                    portion: Yup.number()
+                        .min(0, tIndexModalValidation("assets.portion.min", {count: 0}))
+                        .max(MAX_PORTION, tIndexModalValidation("assets.portion.max", {count: MAX_PORTION}))
+                        .required(tIndexModalValidation("assets.portion.required")),
+                })
+            )
+            .min(1, tIndexModalValidation("assets.atLeastOne"))
+            .test(
+                "total-allocation",
+                tIndexModalValidation("assets.portion.min", {count: MAX_PORTION}),
+                function (assets) {
+                    if (!assets || assets.length === 0) return true;
+                    const total = assets.reduce((sum, asset) => sum + (asset.portion || 0), 0);
+                    return Math.abs(total - MAX_PORTION) < 0.01; // Allow for small floating point differences
+                }
+            ),
+    });
+
     // Get context-aware labels based on mode
     const getLabels = () => {
         switch (mode) {
             case IndexMode.CREATE:
                 return {
-                    title: "Create Custom Index",
-                    action: "Create Index",
-                    namePlaceholder: "Enter index name",
+                    title: tIndexModalModes("create.title"),
+                    action: tIndexModalModes("create.action"),
+                    namePlaceholder: tIndexModalModes("create.namePlaceholder"),
                 };
             case IndexMode.EDIT:
                 return {
-                    title: "Edit Index",
-                    action: "Update Index",
-                    namePlaceholder: "Enter index name",
+                    title: tIndexModalModes("edit.title"),
+                    action: tIndexModalModes("edit.action"),
+                    namePlaceholder: tIndexModalModes("edit.namePlaceholder"),
                 };
             case IndexMode.CLONE:
                 return {
-                    title: "Clone Index",
-                    action: "Clone Index",
-                    namePlaceholder: "Enter new index name",
+                    title: tIndexModalModes("clone.title"),
+                    action: tIndexModalModes("clone.action"),
+                    namePlaceholder: tIndexModalModes("clone.namePlaceholder"),
                 };
             default:
                 return {
-                    title: "Index",
-                    action: "Save",
-                    namePlaceholder: "Enter index name",
+                    title: tIndexModalModes("default.title"),
+                    action: tIndexModalModes("default.action"),
+                    namePlaceholder: tIndexModalModes("default.namePlaceholder"),
                 };
         }
     };
+
     const labels = getLabels();
     const getInitialValues = (): FormValues => {
         if (indexOverview && (mode === IndexMode.EDIT || mode === IndexMode.CLONE)) {
@@ -194,15 +211,14 @@ export function IndexModal({
                                     <DialogTitle>{labels.title}</DialogTitle>
                                     {mode === IndexMode.CLONE && (
                                         <p className="text-sm text-gray-600 mt-2">
-                                            Create a custom copy of this index with your own asset allocation and
-                                            portfolio composition.
+                                            {tIndexModalModes("clone.description")}
                                         </p>
                                     )}
                                 </DialogHeader>
                                 <div className="space-y-6">
                                     {/* Name Input */}
                                     <div className="space-y-2">
-                                        <Label htmlFor="name">Index Name*</Label>
+                                        <Label htmlFor="name">{tIndexModalFields("name.label")}*</Label>
                                         <Field name="name">
                                             {({field, meta}: any) => (
                                                 <>
@@ -222,7 +238,7 @@ export function IndexModal({
                                     </div>
                                     {/* Assets & Allocation */}
                                     <div className="space-y-4">
-                                        <Label>Assets & Allocation*</Label>
+                                        <Label>{tIndexModalFields("assetsAllocation.label")}*</Label>
                                         {/* Asset Selector */}
                                         <div className="flex gap-2">
                                             <Field name="selectedAssetId">
@@ -256,7 +272,11 @@ export function IndexModal({
                                                         disabled={formik.isSubmitting}
                                                     >
                                                         <SelectTrigger className="flex-1">
-                                                            <SelectValue placeholder="Select asset to add" />
+                                                            <SelectValue
+                                                                placeholder={tIndexModalFields(
+                                                                    "assetsAllocation.selectPlaceholder"
+                                                                )}
+                                                            />
                                                         </SelectTrigger>
                                                         <SelectContent>
                                                             {availableAssets
@@ -350,7 +370,7 @@ export function IndexModal({
                                         {/* Total Allocation Display */}
                                         {formik.values.assets.length > 0 && (
                                             <div className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
-                                                <span className="font-medium">Total Allocation:</span>
+                                                <span className="font-medium">{tIndexModal("totalAllocation")}:</span>
                                                 <span
                                                     className={`font-medium ${
                                                         Math.abs(totalPortion - 100) < 0.01
@@ -378,7 +398,7 @@ export function IndexModal({
                                         disabled={formik.isSubmitting}
                                         className="w-full sm:w-auto"
                                     >
-                                        Cancel
+                                        {tCommon("cancel")}
                                     </Button>
                                     <TooltipProvider>
                                         <Tooltip>
@@ -394,17 +414,17 @@ export function IndexModal({
                                                                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
                                                                 <span className="hidden xs:inline">
                                                                     {mode === IndexMode.CREATE
-                                                                        ? "Creating..."
+                                                                        ? `${tCommon("creating")}...`
                                                                         : mode === IndexMode.EDIT
-                                                                          ? "Updating..."
-                                                                          : "Cloning..."}
+                                                                          ? `${tCommon("updating")}...`
+                                                                          : `${tCommon("cloning")}...`}
                                                                 </span>
                                                                 <span className="xs:hidden">
                                                                     {mode === IndexMode.CREATE
-                                                                        ? "Creating"
+                                                                        ? tCommon("creating")
                                                                         : mode === IndexMode.EDIT
-                                                                          ? "Updating"
-                                                                          : "Cloning"}
+                                                                          ? tCommon("updating")
+                                                                          : tCommon("cloning")}
                                                                 </span>
                                                             </>
                                                         ) : (
@@ -414,10 +434,10 @@ export function IndexModal({
                                                                 </span>
                                                                 <span className="xs:hidden">
                                                                     {mode === IndexMode.CREATE
-                                                                        ? "Create"
+                                                                        ? tCommon("create")
                                                                         : mode === IndexMode.EDIT
-                                                                          ? "Update"
-                                                                          : "Clone"}
+                                                                          ? tCommon("update")
+                                                                          : tCommon("clone")}
                                                                 </span>
                                                             </>
                                                         )}
@@ -426,7 +446,7 @@ export function IndexModal({
                                             </TooltipTrigger>
                                             {mode === IndexMode.EDIT && !formHasChanges && !formik.isSubmitting && (
                                                 <TooltipContent>
-                                                    <p>No changes detected</p>
+                                                    <p>{tCommon("noChangedDetected")}</p>
                                                 </TooltipContent>
                                             )}
                                         </Tooltip>
