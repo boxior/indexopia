@@ -27,47 +27,49 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
     const [isAssetsExpanded, setIsAssetsExpanded] = useState(false);
 
     const tDuration = useTranslations("indices.duration");
+    const tIndex = useTranslations("index");
+    const tCommon = useTranslations("common");
 
     const getDuration = () => {
-        if (!index.startTime || !index.endTime) return "N/A";
+        if (!index.startTime || !index.endTime) return tCommon("noDataAvailable");
         return getIndexDurationLabel(index.startTime, index.endTime, tDuration);
     };
 
     const performanceMetrics = [
         {
             icon: TrendingUp,
-            label: "24h",
-            fullLabel: "24h Performance",
+            label: tIndex("overview.performance.24h.short"),
+            fullLabel: tIndex("overview.performance.24h.full"),
             value: renderSafelyPercentage(index.historyOverview.days1),
         },
         {
             icon: TrendingUp,
-            label: "7d",
-            fullLabel: "7d Performance",
+            label: tIndex("overview.performance.7d.short"),
+            fullLabel: tIndex("overview.performance.7d.full"),
             value: renderSafelyPercentage(index.historyOverview.days7),
         },
         {
             icon: TrendingUp,
-            label: "30d",
-            fullLabel: "30d Performance",
+            label: tIndex("overview.performance.30d.short"),
+            fullLabel: tIndex("overview.performance.30d.full"),
             value: renderSafelyPercentage(index.historyOverview.days30),
         },
         {
             icon: BarChart3,
-            label: "Total",
-            fullLabel: "Total Return",
+            label: tIndex("overview.performance.total.short"),
+            fullLabel: tIndex("overview.performance.total.full"),
             value: renderSafelyPercentage(index.historyOverview.total),
         },
         {
             icon: TrendingDown,
-            label: "Max DD",
-            fullLabel: "Max Drawdown",
+            label: tIndex("overview.performance.maxDrawdown.short"),
+            fullLabel: tIndex("overview.performance.maxDrawdown.full"),
             value: renderSafelyPercentage(-index.maxDrawDown.value),
         },
         {
             icon: Calendar,
-            label: "Duration",
-            fullLabel: "Duration",
+            label: tIndex("overview.performance.duration.short"),
+            fullLabel: tIndex("overview.performance.duration.full"),
             value: getDuration(),
         },
     ];
@@ -82,7 +84,9 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
                     <div className="flex flex-col sm:flex-row sm:items-center gap-3">
                         <CardTitle className="text-xl sm:text-2xl leading-tight break-words">{index.name}</CardTitle>
                         <Badge variant={isUserIndex ? "default" : "secondary"} className="w-fit">
-                            {isUserIndex ? "Custom Index" : "System Index"}
+                            {isUserIndex
+                                ? tIndex("overview.badges.customIndex")
+                                : tIndex("overview.badges.systemIndex")}
                         </Badge>
                     </div>
 
@@ -92,17 +96,17 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
                         <div className="hidden sm:flex items-center gap-2">
                             <Button variant="outline" size="sm" onClick={() => onCloneAction?.(index)}>
                                 <Copy className="h-4 w-4 mr-2" />
-                                Clone
+                                {tIndex("overview.actions.clone")}
                             </Button>
                             {isUserIndex && (
                                 <>
                                     <Button variant="outline" size="sm" onClick={() => onEditAction?.(index)}>
                                         <Edit className="h-4 w-4 mr-2" />
-                                        Edit
+                                        {tIndex("overview.actions.edit")}
                                     </Button>
                                     <Button variant="outline" size="sm" onClick={() => onDeleteAction?.(index)}>
                                         <Trash2 className="h-4 w-4 mr-2" />
-                                        Delete
+                                        {tIndex("overview.actions.delete")}
                                     </Button>
                                 </>
                             )}
@@ -113,17 +117,17 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
                             <div className="flex flex-1 flex-wrap items-center justify-end gap-2">
                                 <Button variant="outline" size="sm" onClick={() => onCloneAction?.(index)}>
                                     <Copy className="h-4 w-4 mr-2" />
-                                    Clone
+                                    {tIndex("overview.actions.clone")}
                                 </Button>
                                 {isUserIndex && (
                                     <>
                                         <Button variant="outline" size="sm" onClick={() => onEditAction?.(index)}>
                                             <Edit className="h-4 w-4 mr-2" />
-                                            Edit
+                                            {tIndex("overview.actions.edit")}
                                         </Button>
                                         <Button variant="outline" size="sm" onClick={() => onDeleteAction?.(index)}>
                                             <Trash2 className="h-4 w-4 mr-2" />
-                                            Delete
+                                            {tIndex("overview.actions.delete")}
                                         </Button>
                                     </>
                                 )}
@@ -151,7 +155,7 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
                 {/* Assets Overview */}
                 <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t">
                     <h3 className="text-sm font-medium text-gray-500 mb-2 sm:mb-3">
-                        Assets ({sortedAssetsByPortion.length})
+                        {tIndex("overview.assets.title", {count: sortedAssetsByPortion.length})}
                     </h3>
 
                     {/* Mobile: Vertical Stack */}
@@ -188,12 +192,14 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
                                             >
                                                 {isAssetsExpanded ? (
                                                     <>
-                                                        Show Less
+                                                        {tIndex("overview.assets.showLess")}
                                                         <ChevronUp className="ml-1 h-3 w-3" />
                                                     </>
                                                 ) : (
                                                     <>
-                                                        Show {sortedAssetsByPortion.length - 5} More
+                                                        {tIndex("overview.assets.showMore", {
+                                                            count: sortedAssetsByPortion.length - 5,
+                                                        })}
                                                         <ChevronDown className="ml-1 h-3 w-3" />
                                                     </>
                                                 )}

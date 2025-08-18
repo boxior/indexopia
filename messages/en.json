@@ -242,6 +242,66 @@
     },
     "navigation": {
       "backToIndices": "Back to Indices"
+    },
+    "overview": {
+      "badges": {
+        "customIndex": "Custom Index",
+        "systemIndex": "System Index"
+      },
+      "actions": {
+        "clone": "Clone",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "performance": {
+        "24h": {
+          "short": "24h",
+          "full": "24h Performance"
+        },
+        "7d": {
+          "short": "7d",
+          "full": "7d Performance"
+        },
+        "30d": {
+          "short": "30d",
+          "full": "30d Performance"
+        },
+        "total": {
+          "short": "Total",
+          "full": "Total Return"
+        },
+        "maxDrawdown": {
+          "short": "Max DD",
+          "full": "Max Drawdown"
+        },
+        "duration": {
+          "short": "Duration",
+          "full": "Duration"
+        }
+      },
+      "assets": {
+        "title": "Assets ({count})",
+        "showLess": "Show Less",
+        "showMore": "Show {count} More"
+      }
+    },
+    "chart": {
+      "title": "Performance Chart",
+      "priceChart": "Price Chart",
+      "timeRanges": {
+        "7d": "7D",
+        "1m": "1M",
+        "3m": "3M",
+        "6m": "6M",
+        "ytd": "YTD",
+        "1y": "1Y",
+        "all": "All"
+      },
+      "tooltip": {
+        "indexValue": "Index Value",
+        "change": "Change"
+      },
+      "noDataDescription": "No historical data available for the selected time range."
     }
   },
   "indexModal": {
