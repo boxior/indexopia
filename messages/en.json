@@ -10,7 +10,8 @@
     "clone": "Clone",
     "delete": "Delete",
     "deleting": "Deleting...",
-    "noChangedDetected": "No changes detected"
+    "noChangedDetected": "No changes detected",
+    "noDataAvailable": "No data available"
   },
   "header": {
     "brand": "Indexopia",
