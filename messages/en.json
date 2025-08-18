@@ -302,6 +302,30 @@
         "change": "Change"
       },
       "noDataDescription": "No historical data available for the selected time range."
+    },
+    "assetsTable": {
+      "title": "Assets Breakdown",
+      "headers": {
+        "rank": "Rank",
+        "asset": "Asset",
+        "allocation": "Allocation",
+        "price": "Price",
+        "chart30d": "30d Chart",
+        "days7": "7d",
+        "days30": "30d",
+        "totalReturn": "Total Return",
+        "maxDrawdown": "Max Drawdown",
+        "marketCap": "Market Cap"
+      },
+      "mobile": {
+        "total": "Total",
+        "chart30d": "30d Chart",
+        "days7": "7 days",
+        "days30": "30 days",
+        "maxDrawdown": "Max Drawdown",
+        "marketCap": "Market Cap",
+        "viewOnExplorer": "View on Explorer"
+      }
     }
   },
   "indexModal": {

@@ -14,6 +14,7 @@ import {NumeralFormat} from "@numeral";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 import {ChartPreview} from "@/app/[locale]/indices/components/CLAUD_WEB/ChartPreview";
+import {useTranslations} from "next-intl";
 
 interface AssetsTableProps {
     assets: AssetWithHistoryOverviewPortionAndMaxDrawDown[];
@@ -35,6 +36,8 @@ export function AssetsTable({assets}: AssetsTableProps) {
     const [sortField, setSortField] = useState<SortField>("portion");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
+
+    const tIndex = useTranslations("index");
 
     const handleSort = (field: SortField) => {
         if (sortField === field) {
@@ -143,7 +146,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                             <div className="text-sm font-medium">
                                 {renderSafelyPercentage(asset.historyOverview.total)}
                             </div>
-                            <div className="text-xs text-gray-500">Total</div>
+                            <div className="text-xs text-gray-500">{tIndex("assetsTable.mobile.total")}</div>
                         </div>
 
                         <Button
@@ -162,7 +165,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                     <div className="mt-4 pt-4 border-t space-y-3">
                         {/* Chart Preview */}
                         <div className="mb-4">
-                            <div className="text-xs text-gray-500 mb-2">30d Chart</div>
+                            <div className="text-xs text-gray-500 mb-2">{tIndex("assetsTable.mobile.chart30d")}</div>
                             <ChartPreview data={asset.history.slice(-HISTORY_OVERVIEW_DAYS)} className="w-full h-32" />
                         </div>
 
@@ -172,13 +175,13 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                 <div className="text-sm font-medium">
                                     {renderSafelyPercentage(asset.historyOverview.days7)}
                                 </div>
-                                <div className="text-xs text-gray-500">7 days</div>
+                                <div className="text-xs text-gray-500">{tIndex("assetsTable.mobile.days7")}</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-sm font-medium">
                                     {renderSafelyPercentage(asset.historyOverview.days30)}
                                 </div>
-                                <div className="text-xs text-gray-500">30 days</div>
+                                <div className="text-xs text-gray-500">{tIndex("assetsTable.mobile.days30")}</div>
                             </div>
                         </div>
 
@@ -188,7 +191,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                 <div className="text-sm font-medium text-red-600">
                                     -{Math.abs(asset.maxDrawDown.value).toFixed(2)}%
                                 </div>
-                                <div className="text-xs text-gray-500">Max Drawdown</div>
+                                <div className="text-xs text-gray-500">{tIndex("assetsTable.mobile.maxDrawdown")}</div>
                             </div>
                             <div className="text-center">
                                 <div className="text-sm font-medium">
@@ -196,7 +199,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                         .toString()
                                         .toUpperCase()}
                                 </div>
-                                <div className="text-xs text-gray-500">Market Cap</div>
+                                <div className="text-xs text-gray-500">{tIndex("assetsTable.mobile.marketCap")}</div>
                             </div>
                         </div>
 
@@ -206,7 +209,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                 <LinkReferer
                                     href={asset.explorer}
                                     view="secondary"
-                                    children="View on Explorer"
+                                    children={tIndex("assetsTable.mobile.viewOnExplorer")}
                                     target="_blank"
                                     className="text-sm"
                                 />
@@ -221,7 +224,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
     return (
         <Card>
             <CardHeader>
-                <CardTitle className="text-lg">Assets Breakdown</CardTitle>
+                <CardTitle className="text-lg">{tIndex("assetsTable.title")}</CardTitle>
             </CardHeader>
             <CardContent>
                 {/* Desktop Table */}
@@ -236,7 +239,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("rank")}
                                         >
-                                            Rank
+                                            {tIndex("assetsTable.headers.rank")}
                                             {getSortIcon("rank")}
                                         </Button>
                                     </TableHead>
@@ -246,7 +249,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("name")}
                                         >
-                                            Asset
+                                            {tIndex("assetsTable.headers.asset")}
                                             {getSortIcon("name")}
                                         </Button>
                                     </TableHead>
@@ -256,7 +259,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("portion")}
                                         >
-                                            Allocation
+                                            {tIndex("assetsTable.headers.allocation")}
                                             {getSortIcon("portion")}
                                         </Button>
                                     </TableHead>
@@ -266,18 +269,18 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("priceUsd")}
                                         >
-                                            Price
+                                            {tIndex("assetsTable.headers.price")}
                                             {getSortIcon("priceUsd")}
                                         </Button>
                                     </TableHead>
-                                    <TableHead>30d Chart</TableHead>
+                                    <TableHead>{tIndex("assetsTable.headers.chart30d")}</TableHead>
                                     <TableHead>
                                         <Button
                                             variant="ghost"
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("days7")}
                                         >
-                                            7d
+                                            {tIndex("assetsTable.headers.days7")}
                                             {getSortIcon("days7")}
                                         </Button>
                                     </TableHead>
@@ -287,7 +290,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("days30")}
                                         >
-                                            30d
+                                            {tIndex("assetsTable.headers.days30")}
                                             {getSortIcon("days30")}
                                         </Button>
                                     </TableHead>
@@ -297,7 +300,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("total")}
                                         >
-                                            Total Return
+                                            {tIndex("assetsTable.headers.totalReturn")}
                                             {getSortIcon("total")}
                                         </Button>
                                     </TableHead>
@@ -307,7 +310,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("maxDrawDown")}
                                         >
-                                            Max Drawdown
+                                            {tIndex("assetsTable.headers.maxDrawdown")}
                                             {getSortIcon("maxDrawDown")}
                                         </Button>
                                     </TableHead>
@@ -317,7 +320,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                             className="h-auto p-0 font-medium"
                                             onClick={() => handleSort("marketCapUsd")}
                                         >
-                                            Market Cap
+                                            {tIndex("assetsTable.headers.marketCap")}
                                             {getSortIcon("marketCapUsd")}
                                         </Button>
                                     </TableHead>
