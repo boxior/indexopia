@@ -235,7 +235,14 @@
     }
   },
   "index": {
-    "loading": "Loading index details..."
+    "loading": "Loading index details...",
+    "notFound": {
+      "title": "Index not found",
+      "description": "The index you're looking for doesn't exist."
+    },
+    "navigation": {
+      "backToIndices": "Back to Indices"
+    }
   },
   "indexModal": {
     "modes": {
