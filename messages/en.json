@@ -234,6 +234,9 @@
       "zero": "0 days"
     }
   },
+  "index": {
+    "loading": "Loading index details..."
+  },
   "indexModal": {
     "modes": {
       "create": {

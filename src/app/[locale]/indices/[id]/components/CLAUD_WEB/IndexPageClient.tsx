@@ -26,7 +26,7 @@ export function IndexPageClient({
     const session = useSession();
     const currentUserId = session.data?.user?.id;
 
-    const t = useTranslations("common");
+    const tIndex = useTranslations("index");
 
     const {
         onSave,
@@ -82,7 +82,6 @@ export function IndexPageClient({
                     <Button variant="outline" onClick={() => router.push(PAGES_URLS.indices)} className="mb-4">
                         <ArrowLeft className="h-4 w-4 mr-2" />
                         Back to Indices
-                        {t("hello")}
                     </Button>
                 </div>
 

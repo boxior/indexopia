@@ -12,12 +12,11 @@ interface PageProps {
 }
 
 export default async function Page(pageProps: PageProps) {
-    const t = await getTranslations("common");
+    const t = await getTranslations("index");
 
     return (
         <SuspenseWrapper
-            loadingMessage={t("hello")}
-            // loadingMessage="Loading index details..."
+            loadingMessage={t("loading")}
             variant="pulse"
             showLogo={false}
             fullScreen={false}
