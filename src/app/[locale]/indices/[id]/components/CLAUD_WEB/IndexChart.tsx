@@ -9,6 +9,7 @@ import moment from "moment";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {NumeralFormat} from "@numeral";
+import {useLocale} from "next-intl";
 
 interface IndexChartProps {
     index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
@@ -31,6 +32,8 @@ const timeRanges = [
 ];
 
 export function IndexChart({index}: IndexChartProps) {
+    const locale = useLocale();
+
     const {history, id} = index;
     const [selectedRange, setSelectedRange] = useState("1M");
 
@@ -75,7 +78,7 @@ export function IndexChart({index}: IndexChartProps) {
         const date = moment.utc(timestamp).toDate();
         const isYTDRange = selectedRange === "YTD";
 
-        return date.toLocaleDateString("en-US", {
+        return date.toLocaleDateString(locale, {
             month: "short",
             day: "numeric",
             year: selectedRange === "All" || selectedRange === "1Y" || isYTDRange ? "numeric" : undefined,
@@ -84,7 +87,7 @@ export function IndexChart({index}: IndexChartProps) {
 
     const formatTooltipDate = (timestamp: number) => {
         const date = moment.utc(timestamp).toDate();
-        return date.toLocaleDateString("en-US", {
+        return date.toLocaleDateString(locale, {
             weekday: "long",
             year: "numeric",
             month: "long",

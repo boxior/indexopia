@@ -1,6 +1,9 @@
 import React from "react";
 import {AreaChart, Area, ResponsiveContainer, Tooltip, YAxis} from "recharts";
 import {COLORS, Z_INDEXES} from "@/utils/constants/general.constants";
+import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
+import {NumeralFormat} from "@numeral";
+import {useLocale} from "next-intl";
 
 export type IndexHistory = {
     priceUsd: string;
@@ -14,6 +17,7 @@ interface IndexChartPreviewProps {
 }
 
 export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
+    const locale = useLocale();
     // Transform and prepare data for the chart
     const chartData = React.useMemo(() => {
         if (!data || data.length === 0) return [];
@@ -23,7 +27,7 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
                 time: item.time,
                 price: parseFloat(item.priceUsd),
                 date: item.date,
-                formattedDate: new Date(item.date).toLocaleDateString("en-US", {
+                formattedDate: new Date(item.date).toLocaleDateString(locale, {
                     year: "numeric",
                     month: "short",
                     day: "numeric",
@@ -61,7 +65,9 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
 
             return (
                 <div className="bg-white border border-gray-200 rounded-lg shadow-lg p-3 text-sm pointer-events-none">
-                    <p className="font-medium text-gray-900">${data.price.toFixed(4)}</p>
+                    <p className="font-medium text-gray-900">
+                        {renderSafelyNumber(data.price, NumeralFormat.CURRENCY_$)}
+                    </p>
                     <p className="text-gray-600 text-xs">{data.formattedDate}</p>
                 </div>
             );
