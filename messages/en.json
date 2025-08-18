@@ -8,6 +8,8 @@
     "create": "Create",
     "update": "Update",
     "clone": "Clone",
+    "delete": "Delete",
+    "deleting": "Deleting...",
     "noChangedDetected": "No changes detected"
   },
   "header": {
@@ -281,5 +283,9 @@
       }
     },
     "totalAllocation": "Total allocation"
+  },
+  "deleteIndexModal": {
+    "title": "Delete Index",
+    "description": "Are you sure you want to delete the index \"{indexName}\"? This action cannot be undone."
   }
 }

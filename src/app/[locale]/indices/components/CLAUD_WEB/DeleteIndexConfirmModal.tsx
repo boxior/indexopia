@@ -11,6 +11,7 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import {useTranslations} from "next-intl";
 
 interface DeleteConfirmModalProps {
     isOpen: boolean;
@@ -27,23 +28,24 @@ export function DeleteIndexConfirmModal({
     indexName,
     isDeleting,
 }: DeleteConfirmModalProps) {
+    const tCommon = useTranslations("common");
+    const tDeleteModal = useTranslations("deleteIndexModal");
+
     return (
         <AlertDialog open={isOpen} onOpenChange={onCancelAction}>
             <AlertDialogContent>
                 <AlertDialogHeader>
-                    <AlertDialogTitle>Delete Index</AlertDialogTitle>
-                    <AlertDialogDescription>
-                        Are you sure you want to delete the index "{indexName}"? This action cannot be undone.
-                    </AlertDialogDescription>
+                    <AlertDialogTitle>{tDeleteModal("title")}</AlertDialogTitle>
+                    <AlertDialogDescription>{tDeleteModal("description", {indexName})}</AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
-                    <AlertDialogCancel onClick={onCancelAction}>Cancel</AlertDialogCancel>
+                    <AlertDialogCancel onClick={onCancelAction}>{tCommon("cancel")}</AlertDialogCancel>
                     <AlertDialogAction
                         onClick={onConfirmAction}
                         disabled={isDeleting}
                         className="bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        {isDeleting ? "Deleting..." : "Delete"}
+                        {isDeleting ? tCommon("deleting") : tCommon("delete")}
                     </AlertDialogAction>
                 </AlertDialogFooter>
             </AlertDialogContent>
