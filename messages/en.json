@@ -1,5 +1,6 @@
 {
   "common": {
+    "user": "User",
     "loading": "Loading...",
     "cancel": "Cancel",
     "creating": "Creating",

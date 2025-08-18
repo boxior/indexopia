@@ -14,6 +14,8 @@ import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 
 export default function Header() {
     const t = useTranslations("header");
+    const tCommon = useTranslations("common");
+
     const {data, status, update} = useSession();
     const {user} = data ?? {};
 
@@ -72,7 +74,7 @@ export default function Header() {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <div className="flex flex-col space-y-1 p-2">
-                                        <p className="text-sm font-medium">{user.name || "User"}</p>
+                                        <p className="text-sm font-medium">{user.name || tCommon("user")}</p>
                                         <p className="text-xs text-gray-500">{user.email}</p>
                                     </div>
                                     <DropdownMenuItem
