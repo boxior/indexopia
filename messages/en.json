@@ -53,6 +53,44 @@
     },
     "copyright": "© 2025 Indexopia. All Rights Reserved."
   },
+  "signIn": {
+    "title": "Sign in to Indexopia",
+    "description": "Enter your email to receive a secure sign-in link",
+    "backToHome": "Back to Home",
+    "form": {
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "name@example.com",
+      "sendButton": "Send Sign-in Link",
+      "sending": "Sending..."
+    },
+    "errors": {
+      "sendEmailFailed": "Failed to send sign-in email. Please try again.",
+      "unexpectedError": "An unexpected error occurred. Please try again."
+    },
+    "emailSent": {
+      "title": "Check Your Email",
+      "description": "We've sent a sign-in link to",
+      "instructions": "Click the link in your email to sign in to your account. The link will expire in 24 hours.",
+      "troubleshooting": {
+        "title": "Didn't receive the email?",
+        "checkSpam": "Check your spam folder",
+        "checkEmail": "Make sure {email} is correct",
+        "tryAgain": "Try signing in again"
+      },
+      "tryDifferentEmail": "Try Different Email"
+    },
+    "legal": {
+      "agreement": "By signing in, you agree to our",
+      "and": "and"
+    },
+    "benefits": {
+      "title": "Why Sign In?",
+      "fullData": "Access full profit data and analytics",
+      "createPortfolios": "Create and track your own portfolios",
+      "personalizedInsights": "Get personalized investment insights",
+      "premiumIndices": "Access premium crypto indices"
+    }
+  },
   "hero": {
     "title": {
       "the": "The",

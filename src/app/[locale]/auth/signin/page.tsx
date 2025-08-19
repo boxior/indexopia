@@ -3,6 +3,7 @@
 import {useState} from "react";
 import {signIn} from "next-auth/react";
 import Link from "next/link";
+import {useTranslations} from "next-intl";
 import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
@@ -12,11 +13,13 @@ import {Loader2, Mail, ArrowLeft, CheckCircle} from "lucide-react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default function SignInPage() {
-    const [email, setEmail] = useState("");
+    const t = useTranslations("signIn");
+    const tCommon = useTranslations("common");
+    const tFooter = useTranslations("footer.sections.about");
 
+    const [email, setEmail] = useState("");
     const [isLoading, setIsLoading] = useState(false);
     const [isEmailSent, setIsEmailSent] = useState(false);
-
     const [error, setError] = useState("");
 
     const handleSubmit = async (e: React.FormEvent) => {
@@ -25,15 +28,15 @@ export default function SignInPage() {
         setError("");
 
         try {
-            const result = await signIn("resend", {/*redirectTo: PAGES_URLS.indices*/ redirect: false, email});
+            const result = await signIn("resend", {redirect: false, email});
 
             if (result?.error) {
-                setError("Failed to send sign-in email. Please try again.");
+                setError(t("errors.sendEmailFailed"));
             } else {
                 setIsEmailSent(true);
             }
         } catch (err) {
-            setError("An unexpected error occurred. Please try again.");
+            setError(t("errors.unexpectedError"));
         } finally {
             setIsLoading(false);
         }
@@ -51,25 +54,22 @@ export default function SignInPage() {
                         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
                             <CheckCircle className="h-8 w-8 text-green-600" />
                         </div>
-                        <CardTitle className="text-2xl font-bold text-gray-900">Check Your Email</CardTitle>
+                        <CardTitle className="text-2xl font-bold text-gray-900">{t("emailSent.title")}</CardTitle>
                         <CardDescription className="text-gray-600">
-                            We've sent a sign-in link to <strong>{email}</strong>
+                            {t("emailSent.description")} <strong>{email}</strong>
                         </CardDescription>
                     </CardHeader>
                     <CardContent className="space-y-4">
                         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-                            <p className="text-sm text-blue-800">
-                                Click the link in your email to sign in to your account. The link will expire in 24
-                                hours.
-                            </p>
+                            <p className="text-sm text-blue-800">{t("emailSent.instructions")}</p>
                         </div>
 
                         <div className="space-y-2">
-                            <p className="text-sm text-gray-600">Didn't receive the email?</p>
+                            <p className="text-sm text-gray-600">{t("emailSent.troubleshooting.title")}</p>
                             <ul className="text-sm text-gray-500 space-y-1">
-                                <li>• Check your spam folder</li>
-                                <li>• Make sure {email} is correct</li>
-                                <li>• Try signing in again</li>
+                                <li>• {t("emailSent.troubleshooting.checkSpam")}</li>
+                                <li>• {t("emailSent.troubleshooting.checkEmail", {email})}</li>
+                                <li>• {t("emailSent.troubleshooting.tryAgain")}</li>
                             </ul>
                         </div>
 
@@ -81,12 +81,12 @@ export default function SignInPage() {
                             variant="outline"
                             className="w-full"
                         >
-                            Try Different Email
+                            {t("emailSent.tryDifferentEmail")}
                         </Button>
 
                         <div className="text-center">
                             <Link href={PAGES_URLS.home} className="text-sm text-blue-600 hover:text-blue-800">
-                                Back to Home
+                                {t("backToHome")}
                             </Link>
                         </div>
                     </CardContent>
@@ -105,7 +105,7 @@ export default function SignInPage() {
                         className="inline-flex items-center text-sm text-gray-600 hover:text-gray-900 transition-colors"
                     >
                         <ArrowLeft className="h-4 w-4 mr-2" />
-                        Back to Home
+                        {t("backToHome")}
                     </Link>
                 </div>
 
@@ -118,10 +118,8 @@ export default function SignInPage() {
                             </div>
                         </div>
 
-                        <CardTitle className="text-2xl font-bold text-gray-900">Sign in to Indexopia</CardTitle>
-                        <CardDescription className="text-gray-600">
-                            Enter your email to receive a secure sign-in link
-                        </CardDescription>
+                        <CardTitle className="text-2xl font-bold text-gray-900">{t("title")}</CardTitle>
+                        <CardDescription className="text-gray-600">{t("description")}</CardDescription>
                     </CardHeader>
 
                     <CardContent>
@@ -134,12 +132,12 @@ export default function SignInPage() {
 
                             <div className="space-y-2">
                                 <Label htmlFor="email" className="text-sm font-medium text-gray-700">
-                                    Email Address
+                                    {t("form.emailLabel")}
                                 </Label>
                                 <Input
                                     id="email"
                                     type="email"
-                                    placeholder="name@example.com"
+                                    placeholder={t("form.emailPlaceholder")}
                                     value={email}
                                     onChange={e => setEmail(e.target.value)}
                                     required
@@ -156,12 +154,12 @@ export default function SignInPage() {
                                 {isLoading ? (
                                     <>
                                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                                        Sending...
+                                        {t("form.sending")}
                                     </>
                                 ) : (
                                     <>
                                         <Mail className="mr-2 h-4 w-4" />
-                                        Send Sign-in Link
+                                        {t("form.sendButton")}
                                     </>
                                 )}
                             </Button>
@@ -169,13 +167,13 @@ export default function SignInPage() {
 
                         <div className="mt-6 text-center">
                             <p className="text-sm text-gray-600">
-                                By signing in, you agree to our{" "}
+                                {t("legal.agreement")}{" "}
                                 <Link href={PAGES_URLS.terms} className="text-blue-600 hover:text-blue-800">
-                                    Terms of Service
+                                    {tFooter("termsOfService")}
                                 </Link>{" "}
-                                and{" "}
+                                {t("legal.and")}{" "}
                                 <Link href={PAGES_URLS.privacy} className="text-blue-600 hover:text-blue-800">
-                                    Privacy Policy
+                                    {tFooter("privacyPolicy")}
                                 </Link>
                             </p>
                         </div>
@@ -185,23 +183,23 @@ export default function SignInPage() {
                 {/* Additional Info */}
                 <div className="mt-8 text-center">
                     <div className="bg-white rounded-lg p-6 shadow-sm">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2">Why Sign In?</h3>
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2">{t("benefits.title")}</h3>
                         <ul className="text-sm text-gray-600 space-y-2">
                             <li className="flex items-center">
                                 <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                                Access full profit data and analytics
+                                {t("benefits.fullData")}
                             </li>
                             <li className="flex items-center">
                                 <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                                Create and track your own portfolios
+                                {t("benefits.createPortfolios")}
                             </li>
                             <li className="flex items-center">
                                 <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                                Get personalized investment insights
+                                {t("benefits.personalizedInsights")}
                             </li>
                             <li className="flex items-center">
                                 <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                                Access premium crypto indices
+                                {t("benefits.premiumIndices")}
                             </li>
                         </ul>
                     </div>
