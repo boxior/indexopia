@@ -91,6 +91,42 @@
       "premiumIndices": "Access premium crypto indices"
     }
   },
+  "error": {
+    "types": {
+      "verification": {
+        "title": "Link Expired",
+        "description": "The sign-in link has expired or has already been used.",
+        "suggestion": "Please request a new sign-in link."
+      },
+      "configuration": {
+        "title": "Server Error",
+        "description": "There is a problem with the server configuration.",
+        "suggestion": "Please contact support if this problem persists."
+      },
+      "accessDenied": {
+        "title": "Access Denied",
+        "description": "You do not have permission to access this resource.",
+        "suggestion": "Please check your email and try again."
+      },
+      "emailSignin": {
+        "title": "Email Error",
+        "description": "The email could not be sent.",
+        "suggestion": "Please check your email address and try again."
+      },
+      "default": {
+        "title": "Authentication Error",
+        "description": "An unexpected error occurred during sign-in.",
+        "suggestion": "Please try again or contact support if the problem persists."
+      }
+    },
+    "actions": {
+      "tryAgain": "Try signing in again",
+      "backToHomepage": "Back to homepage"
+    },
+    "support": {
+      "needHelp": "Need help?"
+    }
+  },
   "hero": {
     "title": {
       "the": "The",
