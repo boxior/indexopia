@@ -91,6 +91,12 @@
       "premiumIndices": "Access premium crypto indices"
     }
   },
+  "verifyRequest": {
+    "title": "Check Your Email",
+    "description": "A sign-in link has been sent to your email address",
+    "instructions": "Click the link in your email to sign in to your account.",
+    "backToHome": "Back to Home"
+  },
   "error": {
     "types": {
       "verification": {
