@@ -1,5 +1,3 @@
-"use server";
-
 import * as React from "react";
 import {dbGetIndicesOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {connection} from "next/server";

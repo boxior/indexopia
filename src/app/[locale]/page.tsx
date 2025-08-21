@@ -15,7 +15,13 @@ import {actionGetIndicesWithHistoryOverview} from "@/app/[locale]/indices/action
 import {getTranslations} from "next-intl/server";
 
 export default async function HomePage() {
-    return <HomePageSuspended />;
+    const t = await getTranslations("home");
+
+    return (
+        <SuspenseWrapper loadingMessage={t("loading")} variant="spinner" showLogo={true}>
+            <HomePageSuspended />
+        </SuspenseWrapper>
+    );
 }
 
 const HomePageSuspended = async () => {
@@ -26,28 +32,26 @@ const HomePageSuspended = async () => {
     const t = await getTranslations("home");
 
     return (
-        <SuspenseWrapper loadingMessage={t("loading")} variant="spinner" showLogo={true}>
-            <div className="min-h-screen flex flex-col">
-                <Header />
-                <main className="flex-1">
-                    <HeroSection />
-                    <section className="py-20 bg-white">
-                        <div className="container mx-auto px-4">
-                            <IndicesTable indices={indices} mode={EntityMode.VIEW} />
-                            <div className="text-center mt-8">
-                                <Link href={PAGES_URLS.indices}>
-                                    <Button size="lg" variant="outline">
-                                        {t("viewAllIndices")}
-                                    </Button>
-                                </Link>
-                            </div>
+        <div className="min-h-screen flex flex-col">
+            <Header />
+            <main className="flex-1">
+                <HeroSection />
+                <section className="py-20 bg-white">
+                    <div className="container mx-auto px-4">
+                        <IndicesTable indices={indices} mode={EntityMode.VIEW} />
+                        <div className="text-center mt-8">
+                            <Link href={PAGES_URLS.indices}>
+                                <Button size="lg" variant="outline">
+                                    {t("viewAllIndices")}
+                                </Button>
+                            </Link>
                         </div>
-                    </section>
-                    <BenefitsSection />
-                    <CTASection />
-                </main>
-                <Footer />
-            </div>
-        </SuspenseWrapper>
+                    </div>
+                </section>
+                <BenefitsSection />
+                <CTASection />
+            </main>
+            <Footer />
+        </div>
     );
 };

@@ -119,7 +119,6 @@ export enum MomentFormat {
 export type PageProps = {
     children: React.ReactNode;
     params: Promise<{locale: string}>;
-    searchParams: Promise<{[key: string]: string | string[] | undefined}>;
 };
 
 export type Id = string | number;
