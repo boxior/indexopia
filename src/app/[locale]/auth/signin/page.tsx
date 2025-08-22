@@ -14,7 +14,6 @@ import {PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default function SignInPage() {
     const t = useTranslations("signIn");
-    const tCommon = useTranslations("common");
     const tFooter = useTranslations("footer.sections.about");
 
     const [email, setEmail] = useState("");
@@ -48,7 +47,7 @@ export default function SignInPage() {
 
     if (isEmailSent) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+            <div className="bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
                 <Card className="w-full max-w-md">
                     <CardHeader className="text-center">
                         <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
@@ -96,7 +95,7 @@ export default function SignInPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
+        <div className="flex-1 bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center p-4">
             <div className="w-full max-w-md">
                 {/* Back to Home Link */}
                 <div className="mb-8">
@@ -143,6 +142,7 @@ export default function SignInPage() {
                                     required
                                     className="w-full"
                                     disabled={isLoading}
+                                    autoFocus
                                 />
                             </div>
 
