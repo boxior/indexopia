@@ -26,9 +26,9 @@ const AuthLayoutComponent = async ({
     children: React.ReactNode;
 }>) => {
     return (
-        <div className={"min-h-screen flex flex-col"}>
+        <div className={"min-h-screen flex flex-col justify-between"}>
             <BasicHeader />
-            {children}
+            <div className={"flex flex-1"}>{children}</div>
             <Footer />
         </div>
     );
