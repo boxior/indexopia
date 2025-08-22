@@ -68,7 +68,7 @@ export default function ErrorPage() {
                     </Alert>
 
                     <div className="flex flex-col gap-3">
-                        <Link href={PAGES_URLS.signIn}>
+                        <Link href={PAGES_URLS.authSignIn}>
                             <Button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700">
                                 <RefreshCw className="mr-2 h-4 w-4" />
                                 {t("actions.tryAgain")}

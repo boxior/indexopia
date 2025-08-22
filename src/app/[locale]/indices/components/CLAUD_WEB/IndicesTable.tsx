@@ -148,7 +148,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     const isUserIndex = (index: IndexOverviewWithHistory) => !!index.userId;
 
     const handleSignInClick = () => {
-        router.push(PAGES_URLS.signIn);
+        router.push(PAGES_URLS.authSignIn);
     };
 
     // Overlay component for protected cells

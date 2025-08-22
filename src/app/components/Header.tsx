@@ -88,7 +88,7 @@ export default function Header() {
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         ) : (
-                            <Link href={PAGES_URLS.signIn}>
+                            <Link href={PAGES_URLS.authSignIn}>
                                 <Button>{t("auth.signIn")}</Button>
                             </Link>
                         )}

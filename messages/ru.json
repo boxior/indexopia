@@ -463,5 +463,14 @@
   "deleteIndexModal": {
     "title": "Удалить индекс",
     "description": "Вы уверены, что хотите удалить индекс \"{indexName}\"? Это действие нельзя отменить."
+  },
+  "email": {
+    "signin": {
+      "subject": "Войти в Indexopia",
+      "welcome": "Добро пожаловать в Indexopia!",
+      "clickLink": "Нажмите на ссылку ниже, чтобы войти:",
+      "signInButton": "Войти в Indexopia",
+      "ignoreEmail": "Если вы не запрашивали это, вы можете спокойно проигнорировать это письмо."
+    }
   }
 }

@@ -18,7 +18,7 @@ export default function CTASection() {
                         <p className="text-xl text-white/90 mb-8 max-w-2xl mx-auto">{t("subtitle")}</p>
 
                         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                            <Link href={PAGES_URLS.signIn}>
+                            <Link href={PAGES_URLS.authSignIn}>
                                 <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100">
                                     {t("getStartedFree")}
                                 </Button>

@@ -463,5 +463,14 @@
   "deleteIndexModal": {
     "title": "Delete Index",
     "description": "Are you sure you want to delete the index \"{indexName}\"? This action cannot be undone."
+  },
+  "email": {
+    "signin": {
+      "subject": "Sign in to Indexopia",
+      "welcome": "Welcome to Indexopia!",
+      "clickLink": "Click the link below to sign in:",
+      "signInButton": "Sign in to Indexopia",
+      "ignoreEmail": "If you didn't request this, you can safely ignore this email."
+    }
   }
 }

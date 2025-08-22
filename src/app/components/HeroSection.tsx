@@ -31,7 +31,7 @@ export default function HeroSection() {
                                 {t("cta.exploreIndices")}
                             </Button>
                         </Link>
-                        <Link href={PAGES_URLS.signIn}>
+                        <Link href={PAGES_URLS.authSignIn}>
                             <Button size="lg" variant="outline">
                                 {t("cta.signUpFree")}
                             </Button>

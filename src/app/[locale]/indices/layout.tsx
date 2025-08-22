@@ -32,7 +32,7 @@ const IndicesLayoutComponent = async ({
     const session = await auth();
 
     if (!session) {
-        return redirect(PAGES_URLS.signIn);
+        return redirect(PAGES_URLS.authSignIn);
     }
 
     return (
