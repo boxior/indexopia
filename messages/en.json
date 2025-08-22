@@ -466,11 +466,26 @@
   },
   "email": {
     "signin": {
-      "subject": "Sign in to Indexopia",
-      "welcome": "Welcome to Indexopia!",
-      "clickLink": "Click the link below to sign in:",
-      "signInButton": "Sign in to Indexopia",
-      "ignoreEmail": "If you didn't request this, you can safely ignore this email."
+      "subject": "Secure Access to Your Crypto Portfolio",
+      "welcome": "Welcome Back!",
+      "tagline": "Professional Crypto Index Management",
+      "signInTitle": "Secure Sign-in Request",
+      "signInContext": "We received a sign-in request for your account. This secure, passwordless authentication ensures your crypto data stays protected.",
+      "clickLink": "Click the button below to access your dashboard and continue managing your crypto indices.",
+      "signInDetails": "Sign-in Details:",
+      "requestedAt": "Requested at",
+      "emailAddress": "Email address",
+      "purpose": "Purpose",
+      "purposeText": "Dashboard access & portfolio management",
+      "featuresTitle": "What's waiting for you:",
+      "feature1": "Real-time crypto index performance tracking",
+      "feature2": "Professional analytics and risk metrics",
+      "feature3": "Custom portfolio creation and management",
+      "signInButton": "Access My Dashboard",
+      "securityTitle": "Security First",
+      "securityNote": "This link will expire in 24 hours for your security. If you didn't request this, please ignore this email.",
+      "ignoreEmail": "If you didn't request this sign-in, you can safely ignore this email - no action is required.",
+      "footer": "© 2025 Indexopia. Professional crypto portfolio management."
     }
   }
 }
