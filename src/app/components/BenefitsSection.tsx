@@ -1,37 +1,42 @@
+"use client";
+
+import {useTranslations} from "next-intl";
 import {Card, CardContent} from "@/components/ui/card";
 import {BarChart3, Shield, Globe, Users, Zap, TrendingUp} from "lucide-react";
 
 export default function BenefitsSection() {
+    const t = useTranslations("benefits");
+
     const benefits = [
         {
             icon: <BarChart3 className="h-8 w-8 text-blue-600" />,
-            title: "Professional Analytics",
-            description: "Advanced charts, metrics, and performance analysis tools used by professional traders.",
+            title: t("items.analytics.title"),
+            description: t("items.analytics.description"),
         },
         {
             icon: <Shield className="h-8 w-8 text-green-600" />,
-            title: "Risk Management",
-            description: "Built-in risk assessment tools and portfolio optimization to protect your investments.",
+            title: t("items.risk.title"),
+            description: t("items.risk.description"),
         },
         {
             icon: <Globe className="h-8 w-8 text-purple-600" />,
-            title: "Global Markets",
-            description: "Access to worldwide crypto markets with real-time data from major exchanges.",
+            title: t("items.global.title"),
+            description: t("items.global.description"),
         },
         {
             icon: <Users className="h-8 w-8 text-orange-600" />,
-            title: "Community Driven",
-            description: "Learn from experienced traders and share strategies with our growing community.",
+            title: t("items.community.title"),
+            description: t("items.community.description"),
         },
         {
             icon: <Zap className="h-8 w-8 text-yellow-600" />,
-            title: "Fast Execution",
-            description: "Lightning-fast data processing and real-time portfolio updates.",
+            title: t("items.execution.title"),
+            description: t("items.execution.description"),
         },
         {
             icon: <TrendingUp className="h-8 w-8 text-red-600" />,
-            title: "Proven Strategies",
-            description: "Access to time-tested investment strategies with documented performance.",
+            title: t("items.strategies.title"),
+            description: t("items.strategies.description"),
         },
     ];
 
@@ -39,10 +44,8 @@ export default function BenefitsSection() {
         <section className="py-20 bg-gray-50">
             <div className="container mx-auto px-4">
                 <div className="text-center mb-12">
-                    <h2 className="text-3xl font-bold text-gray-900 mb-4">Why Choose Indexopia?</h2>
-                    <p className="text-gray-600 max-w-2xl mx-auto">
-                        Everything you need to build and manage a successful crypto portfolio
-                    </p>
+                    <h2 className="text-3xl font-bold text-gray-900 mb-4">{t("title")}</h2>
+                    <p className="text-gray-600 max-w-2xl mx-auto">{t("subtitle")}</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">

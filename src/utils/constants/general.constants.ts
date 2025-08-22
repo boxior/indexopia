@@ -1,5 +1,13 @@
 import {Id} from "@/utils/types/general.types";
 
+export const SUPPORTED_LOCALES = ["en", "uk", "ru"];
+
+export const DEFAULT_LOCALE = "en";
+
+export const BRAND_NAME = "Indexopia";
+
+export const DOMAIN_NAME = "indexopia";
+
 export const MAX_ASSETS_COUNT = 50;
 
 export const DEV_AUTH_NAME = "dev-auth";
@@ -9,7 +17,7 @@ export const DEV_AUTH_PATH = `/${DEV_AUTH_NAME}`;
 export const PAGES_URLS = {
     home: "/",
     // auth
-    signIn: "/auth/signin",
+    authSignIn: "/auth/signin",
     authError: "/auth/error",
     authVerifyRequest: "/auth/verify-request",
     // indices
@@ -46,3 +54,5 @@ export const COLORS = {
     negative: "#ef4444",
     positive: "#10b981",
 };
+
+export const MAX_PORTION = 100;

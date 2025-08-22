@@ -1,6 +1,6 @@
-// components/ui/suspense-wrapper.tsx
 import {Suspense} from "react";
 import PageLoader from "@/components/Suspense/PageLoader";
+import {useTranslations} from "next-intl";
 
 interface SuspenseWrapperProps {
     children: React.ReactNode;
@@ -14,13 +14,20 @@ interface SuspenseWrapperProps {
 export default function SuspenseWrapper({
     children,
     fallback,
-    loadingMessage = "Loading...",
+    loadingMessage,
     variant = "spinner",
     showLogo = true,
     fullScreen = true,
 }: SuspenseWrapperProps) {
+    const t = useTranslations("common");
+
     const defaultFallback = (
-        <PageLoader variant={variant} message={loadingMessage} showLogo={showLogo} fullScreen={fullScreen} />
+        <PageLoader
+            variant={variant}
+            message={loadingMessage ?? t("loading")}
+            showLogo={showLogo}
+            fullScreen={fullScreen}
+        />
     );
 
     return <Suspense fallback={fallback || defaultFallback}>{children}</Suspense>;

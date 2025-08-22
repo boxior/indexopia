@@ -1,16 +1,21 @@
 "use client";
 
 import {useState} from "react";
-import Link from "next/link";
+import {useTranslations} from "next-intl";
 import {Button} from "@/components/ui/button";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
 import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
-import {LogOut, Globe, Menu, X} from "lucide-react";
+import {LogOut, Menu, X} from "lucide-react";
 import {useSession} from "next-auth/react";
 import {signOut} from "next-auth/react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
+import {Link} from "@/i18n/navigation";
+import LanguageSwitcher from "@/app/components/LanguageSwitcher";
 
 export default function Header() {
+    const t = useTranslations("header");
+    const tCommon = useTranslations("common");
+
     const {data, status, update} = useSession();
     const {user} = data ?? {};
 
@@ -30,41 +35,30 @@ export default function Header() {
                         <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-600 to-purple-600 flex items-center justify-center">
                             <span className="text-white font-bold text-sm">IX</span>
                         </div>
-                        <span className="text-xl font-bold text-gray-900">Indexopia</span>
+                        <span className="text-xl font-bold text-gray-900">{t("brand")}</span>
                     </Link>
 
                     {/* Desktop Navigation */}
                     <nav className="hidden md:flex items-center space-x-8">
                         <Link href={PAGES_URLS.home} className="text-gray-700 hover:text-blue-600 transition-colors">
-                            Home
+                            {t("navigation.home")}
                         </Link>
                         <Link href={PAGES_URLS.indices} className="text-gray-700 hover:text-blue-600 transition-colors">
-                            Indices
+                            {t("navigation.indices")}
                         </Link>
                         {/* TODO: https://cryptofunds.atlassian.net/browse/SCRUM-28; https://cryptofunds.atlassian.net/browse/SCRUM-29*/}
                         {/*<Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors">*/}
-                        {/*    About*/}
+                        {/*    {t("navigation.about")}*/}
                         {/*</Link>*/}
                         {/*<Link href="/blog" className="text-gray-700 hover:text-blue-600 transition-colors">*/}
-                        {/*    Blog*/}
+                        {/*    {t("navigation.blog")}*/}
                         {/*</Link>*/}
                     </nav>
 
                     {/* Right side - Language, Auth */}
                     <div className="flex items-center space-x-4">
                         {/* Language Selector */}
-                        <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="sm">
-                                    <Globe className="h-4 w-4 mr-2" />
-                                    EN
-                                </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent>
-                                <DropdownMenuItem>English</DropdownMenuItem>
-                                <DropdownMenuItem>Ukrainian</DropdownMenuItem>
-                            </DropdownMenuContent>
-                        </DropdownMenu>
+                        <LanguageSwitcher />
 
                         {/* Authentication */}
                         {user ? (
@@ -80,7 +74,7 @@ export default function Header() {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                     <div className="flex flex-col space-y-1 p-2">
-                                        <p className="text-sm font-medium">{user.name || "User"}</p>
+                                        <p className="text-sm font-medium">{user.name || tCommon("user")}</p>
                                         <p className="text-xs text-gray-500">{user.email}</p>
                                     </div>
                                     <DropdownMenuItem
@@ -89,13 +83,13 @@ export default function Header() {
                                         disabled={status === "loading"}
                                     >
                                         <LogOut className="mr-2 h-4 w-4" />
-                                        Sign out
+                                        {t("auth.signOut")}
                                     </DropdownMenuItem>
                                 </DropdownMenuContent>
                             </DropdownMenu>
                         ) : (
-                            <Link href={PAGES_URLS.signIn}>
-                                <Button>Sign In</Button>
+                            <Link href={PAGES_URLS.authSignIn}>
+                                <Button>{t("auth.signIn")}</Button>
                             </Link>
                         )}
 
@@ -119,20 +113,20 @@ export default function Header() {
                                 href={PAGES_URLS.home}
                                 className="text-gray-700 hover:text-blue-600 transition-colors p-2"
                             >
-                                Home
+                                {t("navigation.home")}
                             </Link>
                             <Link
                                 href={PAGES_URLS.indices}
                                 className="text-gray-700 hover:text-blue-600 transition-colors p-2"
                             >
-                                Indices
+                                {t("navigation.indices")}
                             </Link>
                             {/* TODO: https://cryptofunds.atlassian.net/browse/SCRUM-28; https://cryptofunds.atlassian.net/browse/SCRUM-29*/}
                             {/*<Link href="/about" className="text-gray-700 hover:text-blue-600 transition-colors p-2">*/}
-                            {/*    About*/}
+                            {/*    {t("navigation.about")}*/}
                             {/*</Link>*/}
                             {/*<Link href="/blog" className="text-gray-700 hover:text-blue-600 transition-colors p-2">*/}
-                            {/*    Blog*/}
+                            {/*    {t("navigation.blog")}*/}
                             {/*</Link>*/}
                         </nav>
                     </div>
