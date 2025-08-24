@@ -6,6 +6,7 @@ import {setQueryParams} from "@/utils/heleprs/setQueryParams.helper";
 import {secondsUntilNextMidnightUTC} from "@/utils/heleprs/axios/axios.helpers";
 import {populateMissingAssetHistory} from "@/app/[locale]/indices/helpers";
 import {YEAR_IN_MS} from "@/utils/constants/general.constants";
+import {normalizeAssetHistoryToStartOfTheDay} from "@/lib/db/helpers/db.helpers";
 
 export type FetchAssetHistoryParams = {
     interval: string; // point-in-time interval, e.g. m1, m5, m15, m30, h1, h2, h6, h12, d1
@@ -57,7 +58,7 @@ async function fetchSingleRange(
         next: {revalidate: secondsUntilNextMidnightUTC()},
     }).then(res => res.json());
 
-    return history.data ?? [];
+    return normalizeAssetHistoryToStartOfTheDay(history.data ?? []);
 }
 
 // We have a limitation from 3rd party API that we can only fetch up to 1 years of data at a time.
@@ -77,8 +78,10 @@ export default async function fetchAssetHistory(
                 next: {revalidate: secondsUntilNextMidnightUTC()},
             }).then(res => res.json());
 
-            await writeJsonFile("history_" + params.id, history.data, "/db/raw-history");
-            const populatedHistory = populateMissingAssetHistory<Omit<AssetHistory, "assetId">>(history.data ?? []);
+            const historyData = normalizeAssetHistoryToStartOfTheDay(history.data ?? []);
+
+            await writeJsonFile("history_" + params.id, historyData, "/db/raw-history");
+            const populatedHistory = populateMissingAssetHistory<Omit<AssetHistory, "assetId">>(historyData);
             await writeJsonFile("history_" + params.id, populatedHistory, "/db/populated-history");
 
             return {data: populatedHistory};

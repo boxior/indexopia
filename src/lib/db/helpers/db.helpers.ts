@@ -390,6 +390,7 @@ export const normalizeDbBoolean = <Input extends Record<string, unknown>, Output
     return clonedEntity as unknown as Output;
 };
 
+// alternative. Currently we use populateMissingAssetHistory
 const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
     // Early return if the history is empty or has only one entry
     if (history.length <= 1) {
@@ -471,4 +472,16 @@ export const normalizeAssetsHistory = async (): Promise<NormalizedAssetHistory> 
     }
 
     return normalizedAssetHistory;
+};
+
+export const normalizeAssetHistoryToStartOfTheDay = (history: AssetHistory[] | undefined = []) => {
+    return history.map(item => {
+        const normalizedItem = momentTimeZone.tz(item.time, "UTC").startOf("day");
+
+        return {
+            ...item,
+            time: normalizedItem.valueOf(),
+            date: normalizedItem.toISOString(),
+        };
+    });
 };
