@@ -56,3 +56,5 @@ export const COLORS = {
 };
 
 export const MAX_PORTION = 100;
+
+export const YEAR_IN_MS = 365.25 * 24 * 60 * 60 * 1000; // Account for leap years

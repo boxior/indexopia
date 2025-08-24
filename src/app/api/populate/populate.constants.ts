@@ -1,8 +1,6 @@
 import {SaveSystemIndexProps, SystemIndexBy, SystemIndexSortBy} from "@/utils/types/general.types";
 import {capitalize} from "lodash";
-import {MAX} from "uuid";
 import {MAX_ASSETS_COUNT} from "@/utils/constants/general.constants";
-import {getSystemIndexOverviewId} from "@/utils/heleprs/index/index.helpers";
 
 const UP_TO_NUMBERS = [5, 25, 50];
 const SORT_BY = Object.values(SystemIndexSortBy);

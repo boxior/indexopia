@@ -38,17 +38,10 @@ export const getAssetHistoryOverview = async (
     const historyList = history ?? [];
 
     const lastDayItem = historyList[historyList.length - 1];
-    const lastDay = lastDayItem?.time;
 
-    const oneDayAgo = historyList.find(
-        item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-1, "day").valueOf()
-    );
-    const sevenDaysAgo = historyList.find(
-        item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-7, "day").valueOf()
-    );
-    const thirtyDaysAgo = historyList.find(
-        item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-30, "day").valueOf()
-    );
+    const oneDayAgo = historyList.slice(-2)[0];
+    const sevenDaysAgo = historyList.slice(-8)[0];
+    const thirtyDaysAgo = historyList.slice(-31)[0];
 
     const days1Profit = Number(lastDayItem?.priceUsd) - Number(oneDayAgo?.priceUsd);
     const days1ProfitPercent = (days1Profit / Number(oneDayAgo?.priceUsd)) * 100;
