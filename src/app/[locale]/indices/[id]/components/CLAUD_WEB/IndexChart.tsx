@@ -52,10 +52,7 @@ export function IndexChart({index}: IndexChartProps) {
             return history.filter(item => item.time >= startOfYearTimestamp);
         }
 
-        const cutoffDate = moment.utc().subtract(range.days as number, "days");
-        const cutoffTimestamp = cutoffDate.valueOf();
-
-        return history.filter(item => item.time >= cutoffTimestamp);
+        return history.slice((-range?.days as number) - 1);
     };
 
     const filteredData = getFilteredData();

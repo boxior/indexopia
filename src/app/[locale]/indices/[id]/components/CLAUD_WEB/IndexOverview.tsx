@@ -35,21 +35,29 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
         return getIndexDurationLabel(index.startTime, index.endTime, tDuration);
     };
 
+    const getTrendingIcon = (v: number) => {
+        if (v > 0) {
+            return TrendingUp;
+        }
+
+        return TrendingDown;
+    };
+
     const performanceMetrics = [
         {
-            icon: TrendingUp,
+            icon: getTrendingIcon(index.historyOverview.days1),
             label: tIndex("overview.performance.24h.short"),
             fullLabel: tIndex("overview.performance.24h.full"),
             value: renderSafelyPercentage(index.historyOverview.days1),
         },
         {
-            icon: TrendingUp,
+            icon: getTrendingIcon(index.historyOverview.days7),
             label: tIndex("overview.performance.7d.short"),
             fullLabel: tIndex("overview.performance.7d.full"),
             value: renderSafelyPercentage(index.historyOverview.days7),
         },
         {
-            icon: TrendingUp,
+            icon: getTrendingIcon(index.historyOverview.days30),
             label: tIndex("overview.performance.30d.short"),
             fullLabel: tIndex("overview.performance.30d.full"),
             value: renderSafelyPercentage(index.historyOverview.days30),
@@ -61,7 +69,7 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
             value: renderSafelyPercentage(index.historyOverview.total),
         },
         {
-            icon: TrendingDown,
+            icon: getTrendingIcon(-index.maxDrawDown.value),
             label: tIndex("overview.performance.maxDrawdown.short"),
             fullLabel: tIndex("overview.performance.maxDrawdown.full"),
             value: renderSafelyPercentage(-index.maxDrawDown.value),
