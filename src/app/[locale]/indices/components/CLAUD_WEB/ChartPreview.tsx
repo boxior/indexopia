@@ -56,7 +56,7 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
             Math.max(0, minPrice - finalPadding), // Don't go below 0 for prices
             maxPrice + finalPadding,
         ];
-    }, [chartData]);
+    }, [JSON.stringify(chartData)]);
 
     // Custom tooltip component with smart positioning
     const CustomTooltip = ({active, payload, coordinate}: any) => {
@@ -109,7 +109,10 @@ export function ChartPreview({data, className = ""}: IndexChartPreviewProps) {
     if (chartData.length === 1) {
         return (
             <div className={`h-12 w-20 flex items-center justify-center ${className}`}>
-                <div className="w-2 h-2 rounded-full bg-gray-400" title={`$${chartData[0].price.toFixed(4)}`} />
+                <div
+                    className="w-2 h-2 rounded-full bg-gray-400"
+                    title={`${renderSafelyNumber(chartData[0].price, NumeralFormat.CURRENCY_$)}`}
+                />
             </div>
         );
     }

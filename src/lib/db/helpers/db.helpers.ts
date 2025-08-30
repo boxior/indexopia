@@ -4,6 +4,7 @@ import {
     Asset,
     AssetHistory,
     AssetWithHistoryAndOverview,
+    AssetWithHistoryOverviewAndPortion,
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
     HistoryOverview,
     Id,
@@ -80,7 +81,7 @@ export const getIndexHistoryOverview = async <A extends {id: string; portion?: n
 }: {
     id?: Id;
     name?: string;
-    assets: AssetWithHistoryAndOverview<A>[];
+    assets: AssetWithHistoryOverviewAndPortion<A>[];
 }): Promise<HistoryOverview> => {
     // Read all assets
     if (assets.length === 0) {
@@ -227,6 +228,8 @@ export const getIndexHistory = <A extends {id?: Id; portion?: number}>(index: {
     );
 };
 
+// TODO: Check the merging logic. It seams like history is incorrect after merging. As it correct only for single coin in index.
+// Look at portion handlers
 function mergeAssetHistories<A = Asset>(
     histories: AssetHistory[][],
     portions: number[],
@@ -243,7 +246,7 @@ function mergeAssetHistories<A = Asset>(
     // Ensure all portions sum to 100%
     const portionSum = portions.reduce((sum, portion) => sum + portion, 0);
     if (Math.abs(portionSum - 100) > 1e-8) {
-        console.error("Portions must sum up to 100%", index.id, index.name);
+        console.error("Portions must sum up to 100%", portionSum, index.id, index.name);
 
         return [];
     }
@@ -252,18 +255,15 @@ function mergeAssetHistories<A = Asset>(
 
     // Ensure all histories have the same length
     if (!histories.every(history => history.length === arrayLength)) {
-        writeJsonFile("histories[][]", histories, "/db/debug");
+        void writeJsonFile("histories[][]", histories, "/db/debug");
         console.error("All histories must have the same length");
         return [];
-
-        // throw new Error("All histories must have the same length");
     }
 
     const merged: IndexHistory[] = [];
 
     for (let i = 0; i < arrayLength; i++) {
         const currentElements = histories.map(historyArray => historyArray[i]);
-
         // Since we assume time and date are the same across arrays, pick them from the first array
         const {time, date} = currentElements[0];
 
@@ -274,7 +274,22 @@ function mergeAssetHistories<A = Asset>(
                 return sum + parseFloat(assetHistory.priceUsd) * weight;
             }, 0)
             .toFixed(20); // Ensure fixed precision
+        // console.log("deforWeightedAveragePrice", deforWeightedAveragePrice);
+        // const weightedAveragePrice = currentElements
+        //     .reduce((sum, assetHistory, portionIndex) => {
+        //         const weight = new Decimal(portions[portionIndex]).div(100);
+        //         const price = new Decimal(assetHistory.priceUsd);
+        //         return sum.plus(price.mul(weight));
+        //     }, new Decimal(0))
+        //     .toString();
 
+        if (date === "2025-08-28T00:00:00.000Z") {
+            console.log("date", date);
+            console.log("portions", portions);
+            console.log("currentElements", currentElements);
+            console.log("weightedAveragePrice", weightedAveragePrice);
+            console.log("index", index);
+        }
         merged.push({
             time,
             date,

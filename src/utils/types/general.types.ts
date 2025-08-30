@@ -50,6 +50,12 @@ export type AssetWithHistory = Asset & {history: AssetHistory[]};
 
 export type AssetWithHistoryAndOverview<A = Asset> = A & {history: AssetHistory[]; historyOverview: HistoryOverview};
 
+export type AssetWithHistoryOverviewAndPortion<A = Asset> = A & {
+    history: AssetHistory[];
+    historyOverview: HistoryOverview;
+    portion: number;
+};
+
 export type AssetWithHistoryOverviewPortionAndMaxDrawDown = Asset & {
     history: AssetHistory[];
     historyOverview: HistoryOverview;

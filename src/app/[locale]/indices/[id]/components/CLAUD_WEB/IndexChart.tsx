@@ -71,7 +71,7 @@ export function IndexChart({index}: IndexChartProps) {
         const domainMax = maxValue + padding;
 
         return [domainMin, domainMax];
-    }, [filteredData]);
+    }, [JSON.stringify(filteredData)]);
 
     const formatDate = (timestamp: number | string) => {
         const date = moment.utc(timestamp).toDate();
