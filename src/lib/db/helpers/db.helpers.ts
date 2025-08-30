@@ -287,7 +287,6 @@ function mergeAssetHistories<A = Asset>(
                 ((parseFloat(assetHistory.priceUsd) - parseFloat(prevElements[elIndex]?.priceUsd)) /
                     parseFloat(prevElements[elIndex]?.priceUsd)) *
                 100;
-            console.log("elementPerformance", elementPerformance);
 
             const performance = elementPerformance / 100;
 
