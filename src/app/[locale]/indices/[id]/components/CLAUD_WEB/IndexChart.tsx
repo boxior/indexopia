@@ -132,7 +132,7 @@ export function IndexChart({index}: IndexChartProps) {
         }
         return null;
     };
-
+    console.log("filteredData", filteredData);
     const chartData = filteredData.map(item => ({
         timestamp: item.time,
         value: item.priceUsd,

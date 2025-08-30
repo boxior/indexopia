@@ -233,7 +233,8 @@ export const getIndexHistory = <A extends {id?: Id; portion?: number}>(index: {
 function mergeAssetHistories<A = Asset>(
     histories: AssetHistory[][],
     portions: number[],
-    index: {id?: Id; name: string; assets: AssetWithHistoryAndOverview<A>[]}
+    index: {id?: Id; name: string; assets: AssetWithHistoryAndOverview<A>[]},
+    startingBalance: number | undefined = 1000
 ): IndexHistory[] {
     if (histories.length === 0 || histories[0].length === 0) {
         return [];
@@ -267,33 +268,46 @@ function mergeAssetHistories<A = Asset>(
         // Since we assume time and date are the same across arrays, pick them from the first array
         const {time, date} = currentElements[0];
 
+        if (i === 0) {
+            merged.push({
+                time,
+                date,
+                priceUsd: startingBalance.toFixed(20),
+            });
+            continue;
+        }
+
+        const prevElements = histories.map(historyArray => historyArray[i - 1]);
+        const prevPrice = parseFloat(merged[i - 1]?.priceUsd) || 0;
         // Compute the weighted average price based on portions
-        const weightedAveragePrice = currentElements
-            .reduce((sum, assetHistory, index) => {
-                const weight = portions[index] / 100; // Convert portion to a multiplier
-                return sum + parseFloat(assetHistory.priceUsd) * weight;
-            }, 0)
-            .toFixed(20); // Ensure fixed precision
-        // console.log("deforWeightedAveragePrice", deforWeightedAveragePrice);
-        // const weightedAveragePrice = currentElements
-        //     .reduce((sum, assetHistory, portionIndex) => {
-        //         const weight = new Decimal(portions[portionIndex]).div(100);
-        //         const price = new Decimal(assetHistory.priceUsd);
-        //         return sum.plus(price.mul(weight));
-        //     }, new Decimal(0))
-        //     .toString();
+        const weightedAveragePrice = currentElements.reduce((sum, assetHistory, elIndex) => {
+            const weight = portions[elIndex] / 100; // Convert portion to a multiplier
+
+            const elementPerformance =
+                ((parseFloat(assetHistory.priceUsd) - parseFloat(prevElements[elIndex]?.priceUsd)) /
+                    parseFloat(prevElements[elIndex]?.priceUsd)) *
+                100;
+            console.log("elementPerformance", elementPerformance);
+
+            const performance = elementPerformance / 100;
+
+            // return prevPrice + prevPrice * performance;
+            return sum + prevPrice * performance * weight;
+        }, 0);
+        // .toFixed(20); // Ensure fixed precision
 
         if (date === "2025-08-28T00:00:00.000Z") {
             console.log("date", date);
             console.log("portions", portions);
             console.log("currentElements", currentElements);
+            console.log("prevPrice", prevPrice);
             console.log("weightedAveragePrice", weightedAveragePrice);
             console.log("index", index);
         }
         merged.push({
             time,
             date,
-            priceUsd: weightedAveragePrice,
+            priceUsd: (prevPrice + weightedAveragePrice).toFixed(20),
         });
     }
 
