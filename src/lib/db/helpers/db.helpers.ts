@@ -44,17 +44,17 @@ export const getAssetHistoryOverview = async (
     const sevenDaysAgo = historyList.slice(-8)[0];
     const thirtyDaysAgo = historyList.slice(-31)[0];
 
-    const days1Profit = Number(lastDayItem?.priceUsd) - Number(oneDayAgo?.priceUsd);
-    const days1ProfitPercent = (days1Profit / Number(oneDayAgo?.priceUsd)) * 100;
+    const days1Profit = parseFloat(lastDayItem?.priceUsd) - parseFloat(oneDayAgo?.priceUsd);
+    const days1ProfitPercent = (days1Profit / parseFloat(oneDayAgo?.priceUsd)) * 100;
 
-    const days7Profit = Number(lastDayItem?.priceUsd) - Number(sevenDaysAgo?.priceUsd);
-    const days7ProfitPercent = (days7Profit / Number(sevenDaysAgo?.priceUsd)) * 100;
+    const days7Profit = parseFloat(lastDayItem?.priceUsd) - parseFloat(sevenDaysAgo?.priceUsd);
+    const days7ProfitPercent = (days7Profit / parseFloat(sevenDaysAgo?.priceUsd)) * 100;
 
-    const days30Profit = Number(lastDayItem?.priceUsd) - Number(thirtyDaysAgo?.priceUsd);
-    const days30ProfitPercent = (days30Profit / Number(thirtyDaysAgo?.priceUsd)) * 100;
+    const days30Profit = parseFloat(lastDayItem?.priceUsd) - parseFloat(thirtyDaysAgo?.priceUsd);
+    const days30ProfitPercent = (days30Profit / parseFloat(thirtyDaysAgo?.priceUsd)) * 100;
 
-    const totalProfit = Number(lastDayItem?.priceUsd) - Number(historyList[0]?.priceUsd);
-    const totalProfitPercent = (totalProfit / Number(historyList[0]?.priceUsd)) * 100;
+    const totalProfit = parseFloat(lastDayItem?.priceUsd) - parseFloat(historyList[0]?.priceUsd);
+    const totalProfitPercent = (totalProfit / parseFloat(historyList[0]?.priceUsd)) * 100;
 
     return {
         days1: days1ProfitPercent,
@@ -74,7 +74,7 @@ export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
     return (assets ?? []).filter(asset => ids.includes(asset.id));
 };
 
-export const getIndexHistoryOverview = async <A extends {id: string; portion?: number} = Asset>({
+export const getIndexHistoryOverview = <A extends {id: string; portion?: number} = Asset>({
     id,
     name,
     assets,
@@ -82,7 +82,7 @@ export const getIndexHistoryOverview = async <A extends {id: string; portion?: n
     id?: Id;
     name?: string;
     assets: AssetWithHistoryOverviewAndPortion<A>[];
-}): Promise<HistoryOverview> => {
+}): HistoryOverview => {
     // Read all assets
     if (assets.length === 0) {
         return {days1: 0, days7: 0, days30: 0, total: 0};
@@ -263,6 +263,23 @@ function mergeAssetHistories<A = Asset>(
 
     const merged: IndexHistory[] = [];
 
+    const initialElements = histories.reduce((acc, el) => {
+        return [...acc, el[0]];
+    }, [] as AssetHistory[]);
+
+    const getElementsPerformance = (elements: AssetHistory[]) => {
+        return elements.reduce((acc, el, i) => {
+            const initialElement = initialElements[i];
+
+            // in percent
+            const performance =
+                ((parseFloat(el.priceUsd) - parseFloat(initialElement.priceUsd)) /
+                    parseFloat(initialElement.priceUsd)) *
+                100;
+            return [...acc, performance];
+        }, [] as number[]);
+    };
+
     for (let i = 0; i < arrayLength; i++) {
         const currentElements = histories.map(historyArray => historyArray[i]);
         // Since we assume time and date are the same across arrays, pick them from the first array
@@ -277,36 +294,21 @@ function mergeAssetHistories<A = Asset>(
             continue;
         }
 
-        const prevElements = histories.map(historyArray => historyArray[i - 1]);
-        const prevPrice = parseFloat(merged[i - 1]?.priceUsd) || 0;
+        const initialPrice = parseFloat(merged[0]?.priceUsd) || startingBalance;
         // Compute the weighted average price based on portions
         const weightedAveragePrice = currentElements.reduce((sum, assetHistory, elIndex) => {
             const weight = portions[elIndex] / 100; // Convert portion to a multiplier
 
-            const elementPerformance =
-                ((parseFloat(assetHistory.priceUsd) - parseFloat(prevElements[elIndex]?.priceUsd)) /
-                    parseFloat(prevElements[elIndex]?.priceUsd)) *
-                100;
-
+            const elementPerformance = getElementsPerformance(currentElements)[elIndex];
             const performance = elementPerformance / 100;
 
-            // return prevPrice + prevPrice * performance;
-            return sum + prevPrice * performance * weight;
+            return sum + initialPrice * performance * weight;
         }, 0);
-        // .toFixed(20); // Ensure fixed precision
 
-        if (date === "2025-08-28T00:00:00.000Z") {
-            console.log("date", date);
-            console.log("portions", portions);
-            console.log("currentElements", currentElements);
-            console.log("prevPrice", prevPrice);
-            console.log("weightedAveragePrice", weightedAveragePrice);
-            console.log("index", index);
-        }
         merged.push({
             time,
             date,
-            priceUsd: (prevPrice + weightedAveragePrice).toFixed(20),
+            priceUsd: (initialPrice + weightedAveragePrice).toFixed(20),
         });
     }
 
@@ -335,11 +337,10 @@ export const getIndex = async ({
     } = await getAssetsWithHistories({
         assets,
         ...pick(indexOverview, ["startTime"]),
+        endTime: 1487030400000, // 29: 1486857600000, // 30: 1486944000000 | 31: 1487030400000
     });
 
-    assets = assetsWithHistories;
-
-    assets = assets.map(asset => ({
+    assets = assetsWithHistories.map(asset => ({
         ...asset,
         portion: indexOverview.assets.find(a => a.id === asset.id)?.portion ?? 0,
         maxDrawDown: getMaxDrawDownWithTimeRange(asset.history),
@@ -352,7 +353,7 @@ export const getIndex = async ({
     };
 
     const indexHistory = getIndexHistory(index);
-    const indexHistoryOverview = await getIndexHistoryOverview(index);
+    const indexHistoryOverview = getIndexHistoryOverview(index);
     const indexMaxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
     return {

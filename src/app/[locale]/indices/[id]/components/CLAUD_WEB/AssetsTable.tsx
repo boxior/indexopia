@@ -64,7 +64,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
     };
 
     const sortedAssets = useMemo(() => {
-        return [...assets].sort((a, b) => {
+        return assets.toSorted((a, b) => {
             let aValue: any, bValue: any;
 
             switch (sortField) {

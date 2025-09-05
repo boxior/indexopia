@@ -140,8 +140,8 @@ export function IndexChart({index}: IndexChartProps) {
     }));
 
     // Calculate performance for the selected period
-    const currentValue = Number(filteredData[filteredData.length - 1]?.priceUsd) || 0;
-    const initialValue = Number(filteredData[0]?.priceUsd) || 0;
+    const currentValue = parseFloat(filteredData[filteredData.length - 1]?.priceUsd) || 0;
+    const initialValue = parseFloat(filteredData[0]?.priceUsd) || 0;
     const performance = initialValue > 0 ? ((currentValue - initialValue) / initialValue) * 100 : 0;
 
     // Determine gradient colors based on performance
