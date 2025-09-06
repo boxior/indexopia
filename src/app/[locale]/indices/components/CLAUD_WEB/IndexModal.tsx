@@ -275,6 +275,7 @@ export function IndexModal({
                                                         placeholder={labels.startingBalancePlaceholder}
                                                         disabled={formik.isSubmitting}
                                                         className={meta.touched && meta.error ? "border-red-500" : ""}
+                                                        autoComplete="off"
                                                     />
                                                     {meta.touched && meta.error && (
                                                         <p className="text-sm text-red-500">{meta.error}</p>

@@ -132,7 +132,7 @@ export function IndexChart({index}: IndexChartProps) {
         }
         return null;
     };
-    console.log("filteredData", filteredData);
+
     const chartData = filteredData.map(item => ({
         timestamp: item.time,
         value: item.priceUsd,
@@ -156,14 +156,6 @@ export function IndexChart({index}: IndexChartProps) {
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     {/* Title and Performance */}
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
-                        <CardTitle className="text-lg sm:text-xl">{tIndex("chart.startingBalance")}</CardTitle>
-                        <div className="flex items-center gap-2 sm:gap-4">
-                            <div className="text-xl sm:text-2xl font-bold">
-                                ${renderSafelyNumber(index.startingBalance)}
-                            </div>
-                        </div>
-                    </div>
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                         <CardTitle className="text-lg sm:text-xl">{tIndex("chart.priceChart")}</CardTitle>
                         <div className="flex items-center gap-2 sm:gap-4">
                             <div className="text-xl sm:text-2xl font-bold">${renderSafelyNumber(currentValue)}</div>
@@ -172,6 +164,15 @@ export function IndexChart({index}: IndexChartProps) {
                             >
                                 {renderSafelyPercentage(performance)} ({currentRange?.label ?? selectedRange})
                             </div>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-full shadow-sm">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                            <span className="text-xs font-medium text-blue-800 uppercase tracking-wide">
+                                Starting Balance
+                            </span>
+                            <span className="text-sm font-bold text-blue-900">
+                                ${renderSafelyNumber(index.startingBalance)}
+                            </span>
                         </div>
                     </div>
 
