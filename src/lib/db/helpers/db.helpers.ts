@@ -249,7 +249,7 @@ export const getIndexHistory = <A extends {id?: Id; portion?: number}>(index: {
 }): IndexHistory[] => {
     const portions = index.assets.map(asset => asset.portion ?? 0);
 
-    return mergeAssetHistoriesFromPrev(
+    return mergeAssetHistoriesFromInitial<A>(
         index.assets.map(a => a.history),
         portions,
         index
