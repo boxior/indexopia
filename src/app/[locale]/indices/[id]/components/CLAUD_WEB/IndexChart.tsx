@@ -156,6 +156,14 @@ export function IndexChart({index}: IndexChartProps) {
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                     {/* Title and Performance */}
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
+                        <CardTitle className="text-lg sm:text-xl">{tIndex("chart.startingBalance")}</CardTitle>
+                        <div className="flex items-center gap-2 sm:gap-4">
+                            <div className="text-xl sm:text-2xl font-bold">
+                                ${renderSafelyNumber(index.startingBalance)}
+                            </div>
+                        </div>
+                    </div>
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
                         <CardTitle className="text-lg sm:text-xl">{tIndex("chart.priceChart")}</CardTitle>
                         <div className="flex items-center gap-2 sm:gap-4">
                             <div className="text-xl sm:text-2xl font-bold">${renderSafelyNumber(currentValue)}</div>

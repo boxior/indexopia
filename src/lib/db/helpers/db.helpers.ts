@@ -246,13 +246,15 @@ export const getIndexHistory = <A extends {id?: Id; portion?: number}>(index: {
     id?: Id;
     name: string;
     assets: AssetWithHistoryAndOverview<A>[];
+    startingBalance: number;
 }): IndexHistory[] => {
     const portions = index.assets.map(asset => asset.portion ?? 0);
 
     return mergeAssetHistoriesFromInitial<A>(
         index.assets.map(a => a.history),
         portions,
-        index
+        index,
+        index.startingBalance
     );
 };
 
@@ -261,7 +263,7 @@ function mergeAssetHistoriesFromInitial<A = Asset>(
     histories: AssetHistory[][],
     portions: number[],
     index: {id?: Id; name: string; assets: AssetWithHistoryAndOverview<A>[]},
-    startingBalance: number | undefined = 1000
+    startingBalance: number
 ): IndexHistory[] {
     if (histories.length === 0 || histories[0].length === 0) {
         return [];

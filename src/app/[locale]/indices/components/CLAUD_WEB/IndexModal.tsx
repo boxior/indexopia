@@ -12,7 +12,7 @@ import {Loader2, X} from "lucide-react";
 import {Asset, Id, IndexOverviewAsset, IndexOverviewForCreate} from "@/utils/types/general.types";
 import {UseIndexActionsReturns} from "@/app/[locale]/indices/[id]/hooks/useIndexActions.hook";
 import {useTranslations} from "next-intl";
-import {MAX_PORTION} from "@/utils/constants/general.constants";
+import {DEFAULT_INDEX_STARTING_BALANCE, INDEX_VALIDATION, MAX_PORTION} from "@/utils/constants/general.constants";
 
 export enum IndexMode {
     CREATE = "create",
@@ -30,10 +30,12 @@ interface CreateUpdateIndexModalProps {
 export interface ModalIndexData {
     id?: Id;
     name: string;
+    startingBalance: number;
     assets: IndexOverviewAsset[];
 }
 interface FormValues {
     name: string;
+    startingBalance: number;
     assets: IndexOverviewAsset[];
     selectedAssetId: string;
 }
@@ -58,8 +60,18 @@ export function IndexModal({
         name: Yup.string()
             .trim()
             .required(tIndexModalValidation("name.required"))
-            .min(2, tIndexModalValidation("name.min", {count: 2}))
-            .max(100, tIndexModalValidation("name.max", {count: 100})),
+            .min(INDEX_VALIDATION.name.min, tIndexModalValidation("name.min", {count: INDEX_VALIDATION.name.min}))
+            .max(INDEX_VALIDATION.name.max, tIndexModalValidation("name.max", {count: INDEX_VALIDATION.name.max})),
+        startingBalance: Yup.number()
+            .required(tIndexModalValidation("startingBalance.required"))
+            .min(
+                INDEX_VALIDATION.startingBalance.min,
+                tIndexModalValidation("startingBalance.min", {count: INDEX_VALIDATION.startingBalance.min})
+            )
+            .max(
+                INDEX_VALIDATION.startingBalance.max,
+                tIndexModalValidation("startingBalance.max", {count: INDEX_VALIDATION.startingBalance.max})
+            ),
         assets: Yup.array()
             .of(
                 Yup.object().shape({
@@ -93,24 +105,28 @@ export function IndexModal({
                     title: tIndexModalModes("create.title"),
                     action: tIndexModalModes("create.action"),
                     namePlaceholder: tIndexModalModes("create.namePlaceholder"),
+                    startingBalancePlaceholder: tIndexModalModes("create.startingBalancePlaceholder"),
                 };
             case IndexMode.EDIT:
                 return {
                     title: tIndexModalModes("edit.title"),
                     action: tIndexModalModes("edit.action"),
                     namePlaceholder: tIndexModalModes("edit.namePlaceholder"),
+                    startingBalancePlaceholder: tIndexModalModes("edit.startingBalancePlaceholder"),
                 };
             case IndexMode.CLONE:
                 return {
                     title: tIndexModalModes("clone.title"),
                     action: tIndexModalModes("clone.action"),
                     namePlaceholder: tIndexModalModes("clone.namePlaceholder"),
+                    startingBalancePlaceholder: tIndexModalModes("clone.startingBalancePlaceholder"),
                 };
             default:
                 return {
                     title: tIndexModalModes("default.title"),
                     action: tIndexModalModes("default.action"),
                     namePlaceholder: tIndexModalModes("default.namePlaceholder"),
+                    startingBalancePlaceholder: tIndexModalModes("default.startingBalancePlaceholder"),
                 };
         }
     };
@@ -120,12 +136,14 @@ export function IndexModal({
         if (indexOverview && (mode === IndexMode.EDIT || mode === IndexMode.CLONE)) {
             return {
                 name: indexOverview.name,
+                startingBalance: indexOverview.startingBalance,
                 assets: indexOverview.assets,
                 selectedAssetId: "",
             };
         }
         return {
             name: "",
+            startingBalance: DEFAULT_INDEX_STARTING_BALANCE,
             assets: [],
             selectedAssetId: "",
         };
@@ -139,6 +157,11 @@ export function IndexModal({
 
         // Check if name has changed
         if (currentValues.name.trim() !== indexOverview.name.trim()) {
+            return true;
+        }
+
+        // Check if startingBalance has changed
+        if (currentValues.startingBalance !== indexOverview.startingBalance) {
             return true;
         }
 
@@ -174,6 +197,7 @@ export function IndexModal({
     const getTotalPortion = (assets: IndexOverviewAsset[]) => {
         return assets.reduce((sum, asset) => sum + (asset.portion || 0), 0);
     };
+
     const handleSubmit = async (
         values: FormValues,
         {setSubmitting}: {setSubmitting: (isSubmitting: boolean) => void}
@@ -182,6 +206,7 @@ export function IndexModal({
             await onSaveAction({
                 id: indexOverview?.id,
                 name: values.name,
+                startingBalance: values.startingBalance,
                 assets: values.assets,
             });
             onCancelAction();
@@ -226,6 +251,28 @@ export function IndexModal({
                                                         {...field}
                                                         id="name"
                                                         placeholder={labels.namePlaceholder}
+                                                        disabled={formik.isSubmitting}
+                                                        className={meta.touched && meta.error ? "border-red-500" : ""}
+                                                    />
+                                                    {meta.touched && meta.error && (
+                                                        <p className="text-sm text-red-500">{meta.error}</p>
+                                                    )}
+                                                </>
+                                            )}
+                                        </Field>
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label htmlFor="startingBalance">
+                                            {tIndexModalFields("startingBalance.label")}*
+                                        </Label>
+                                        <Field name="startingBalance">
+                                            {({field, meta}: any) => (
+                                                <>
+                                                    <Input
+                                                        {...field}
+                                                        id="startingBalance"
+                                                        type={"number"}
+                                                        placeholder={labels.startingBalancePlaceholder}
                                                         disabled={formik.isSubmitting}
                                                         className={meta.touched && meta.error ? "border-red-500" : ""}
                                                     />
