@@ -42,6 +42,5 @@ const IndexPageComponent = async ({params}: PageProps) => {
     });
 
     const assets = await dbGetAssets();
-
     return <IndexPageClient index={index} assets={assets} />;
 };

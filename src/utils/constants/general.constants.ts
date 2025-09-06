@@ -56,3 +56,18 @@ export const COLORS = {
 };
 
 export const MAX_PORTION = 100;
+
+export const YEAR_IN_MS = 365.25 * 24 * 60 * 60 * 1000; // Account for leap years
+
+export const INDEX_VALIDATION = {
+    name: {
+        min: 2,
+        max: 100, // characters
+    },
+    startingBalance: {
+        min: 100,
+        max: 100_000_000, // USD
+    },
+};
+
+export const DEFAULT_INDEX_STARTING_BALANCE = 10_000;

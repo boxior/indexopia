@@ -30,11 +30,12 @@ export const actionUpdateIndexOverview = async (indexOverview: IndexOverview) =>
 
     const index = {
         name: indexOverview.name,
+        startingBalance: indexOverview.startingBalance,
         assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
     };
 
     const history = getIndexHistory(index);
-    const historyOverview = await getIndexHistoryOverview(index);
+    const historyOverview = getIndexHistoryOverview(history);
     const maxDrawDown = getMaxDrawDownWithTimeRange(history);
 
     return await dbPutIndexOverview({...indexOverview, historyOverview, maxDrawDown, startTime, endTime});
@@ -42,9 +43,10 @@ export const actionUpdateIndexOverview = async (indexOverview: IndexOverview) =>
 
 export const actionCreateIndexOverview = async ({
     name,
+    startingBalance,
     assets: propAssets,
     userId,
-}: Pick<IndexOverview, "name" | "assets" | "userId">) => {
+}: Pick<IndexOverview, "name" | "assets" | "userId" | "startingBalance">) => {
     let assets = [];
 
     const {
@@ -65,14 +67,24 @@ export const actionCreateIndexOverview = async ({
 
     const index = {
         name,
+        startingBalance,
         assets: assets as AssetWithHistoryOverviewPortionAndMaxDrawDown[],
     };
 
     const history = getIndexHistory(index);
-    const historyOverview = await getIndexHistoryOverview(index);
+    const historyOverview = getIndexHistoryOverview(history);
     const maxDrawDown = getMaxDrawDownWithTimeRange(history);
 
-    return await dbPostIndexOverview({name, assets, historyOverview, maxDrawDown, startTime, endTime, userId});
+    return await dbPostIndexOverview({
+        name,
+        assets,
+        historyOverview,
+        maxDrawDown,
+        startTime,
+        endTime,
+        userId,
+        startingBalance,
+    });
 };
 
 export const actionDeleteIndexOverview = async (id: Id) => {

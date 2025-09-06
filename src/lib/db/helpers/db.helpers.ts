@@ -4,6 +4,7 @@ import {
     Asset,
     AssetHistory,
     AssetWithHistoryAndOverview,
+    AssetWithHistoryOverviewAndPortion,
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
     HistoryOverview,
     Id,
@@ -38,29 +39,22 @@ export const getAssetHistoryOverview = async (
     const historyList = history ?? [];
 
     const lastDayItem = historyList[historyList.length - 1];
-    const lastDay = lastDayItem?.time;
 
-    const oneDayAgo = historyList.find(
-        item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-1, "day").valueOf()
-    );
-    const sevenDaysAgo = historyList.find(
-        item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-7, "day").valueOf()
-    );
-    const thirtyDaysAgo = historyList.find(
-        item => item.time === momentTimeZone.tz(lastDay, "UTC").startOf("day").add(-30, "day").valueOf()
-    );
+    const oneDayAgo = historyList.slice(-2)[0];
+    const sevenDaysAgo = historyList.slice(-8)[0];
+    const thirtyDaysAgo = historyList.slice(-31)[0];
 
-    const days1Profit = Number(lastDayItem?.priceUsd) - Number(oneDayAgo?.priceUsd);
-    const days1ProfitPercent = (days1Profit / Number(oneDayAgo?.priceUsd)) * 100;
+    const days1Profit = parseFloat(lastDayItem?.priceUsd) - parseFloat(oneDayAgo?.priceUsd);
+    const days1ProfitPercent = (days1Profit / parseFloat(oneDayAgo?.priceUsd)) * 100;
 
-    const days7Profit = Number(lastDayItem?.priceUsd) - Number(sevenDaysAgo?.priceUsd);
-    const days7ProfitPercent = (days7Profit / Number(sevenDaysAgo?.priceUsd)) * 100;
+    const days7Profit = parseFloat(lastDayItem?.priceUsd) - parseFloat(sevenDaysAgo?.priceUsd);
+    const days7ProfitPercent = (days7Profit / parseFloat(sevenDaysAgo?.priceUsd)) * 100;
 
-    const days30Profit = Number(lastDayItem?.priceUsd) - Number(thirtyDaysAgo?.priceUsd);
-    const days30ProfitPercent = (days30Profit / Number(thirtyDaysAgo?.priceUsd)) * 100;
+    const days30Profit = parseFloat(lastDayItem?.priceUsd) - parseFloat(thirtyDaysAgo?.priceUsd);
+    const days30ProfitPercent = (days30Profit / parseFloat(thirtyDaysAgo?.priceUsd)) * 100;
 
-    const totalProfit = Number(lastDayItem?.priceUsd) - Number(historyList[0]?.priceUsd);
-    const totalProfitPercent = (totalProfit / Number(historyList[0]?.priceUsd)) * 100;
+    const totalProfit = parseFloat(lastDayItem?.priceUsd) - parseFloat(historyList[0]?.priceUsd);
+    const totalProfitPercent = (totalProfit / parseFloat(historyList[0]?.priceUsd)) * 100;
 
     return {
         days1: days1ProfitPercent,
@@ -80,15 +74,16 @@ export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
     return (assets ?? []).filter(asset => ids.includes(asset.id));
 };
 
-export const getIndexHistoryOverview = async <A extends {id: string; portion?: number} = Asset>({
+// previous logic. It was inconsistency with the Index overview by assets overview.
+export const getIndexHistoryOverviewByAssetsOverview = <A extends {id: string; portion?: number} = Asset>({
     id,
     name,
     assets,
 }: {
     id?: Id;
     name?: string;
-    assets: AssetWithHistoryAndOverview<A>[];
-}): Promise<HistoryOverview> => {
+    assets: AssetWithHistoryOverviewAndPortion<A>[];
+}): HistoryOverview => {
     // Read all assets
     if (assets.length === 0) {
         return {days1: 0, days7: 0, days30: 0, total: 0};
@@ -133,6 +128,33 @@ export const getIndexHistoryOverview = async <A extends {id: string; portion?: n
         days7: weightedDays7,
         days30: weightedDays30,
         total: weightedTotal,
+    };
+};
+
+export const getIndexHistoryOverview = (historyList: IndexHistory[]): HistoryOverview => {
+    const lastDayItem = historyList[historyList.length - 1];
+
+    const oneDayAgo = historyList.slice(-2)[0];
+    const sevenDaysAgo = historyList.slice(-8)[0];
+    const thirtyDaysAgo = historyList.slice(-31)[0];
+
+    const days1Profit = parseFloat(lastDayItem?.priceUsd) - parseFloat(oneDayAgo?.priceUsd);
+    const days1ProfitPercent = (days1Profit / parseFloat(oneDayAgo?.priceUsd)) * 100;
+
+    const days7Profit = parseFloat(lastDayItem?.priceUsd) - parseFloat(sevenDaysAgo?.priceUsd);
+    const days7ProfitPercent = (days7Profit / parseFloat(sevenDaysAgo?.priceUsd)) * 100;
+
+    const days30Profit = parseFloat(lastDayItem?.priceUsd) - parseFloat(thirtyDaysAgo?.priceUsd);
+    const days30ProfitPercent = (days30Profit / parseFloat(thirtyDaysAgo?.priceUsd)) * 100;
+
+    const totalProfit = parseFloat(lastDayItem?.priceUsd) - parseFloat(historyList[0]?.priceUsd);
+    const totalProfitPercent = (totalProfit / parseFloat(historyList[0]?.priceUsd)) * 100;
+
+    return {
+        days1: days1ProfitPercent,
+        days7: days7ProfitPercent,
+        days30: days30ProfitPercent,
+        total: totalProfitPercent,
     };
 };
 
@@ -224,20 +246,24 @@ export const getIndexHistory = <A extends {id?: Id; portion?: number}>(index: {
     id?: Id;
     name: string;
     assets: AssetWithHistoryAndOverview<A>[];
+    startingBalance: number;
 }): IndexHistory[] => {
     const portions = index.assets.map(asset => asset.portion ?? 0);
 
-    return mergeAssetHistories(
+    return mergeAssetHistoriesFromInitial<A>(
         index.assets.map(a => a.history),
         portions,
-        index
+        index,
+        index.startingBalance
     );
 };
 
-function mergeAssetHistories<A = Asset>(
+// another logic, it's probably wrong.
+function mergeAssetHistoriesFromInitial<A = Asset>(
     histories: AssetHistory[][],
     portions: number[],
-    index: {id?: Id; name: string; assets: AssetWithHistoryAndOverview<A>[]}
+    index: {id?: Id; name: string; assets: AssetWithHistoryAndOverview<A>[]},
+    startingBalance: number
 ): IndexHistory[] {
     if (histories.length === 0 || histories[0].length === 0) {
         return [];
@@ -250,7 +276,7 @@ function mergeAssetHistories<A = Asset>(
     // Ensure all portions sum to 100%
     const portionSum = portions.reduce((sum, portion) => sum + portion, 0);
     if (Math.abs(portionSum - 100) > 1e-8) {
-        console.error("Portions must sum up to 100%", index.id, index.name);
+        console.error("Portions must sum up to 100%", portionSum, index.id, index.name);
 
         return [];
     }
@@ -259,33 +285,139 @@ function mergeAssetHistories<A = Asset>(
 
     // Ensure all histories have the same length
     if (!histories.every(history => history.length === arrayLength)) {
-        writeJsonFile("histories[][]", histories, "/db/debug");
+        void writeJsonFile("histories[][]", histories, "/db/debug");
         console.error("All histories must have the same length");
         return [];
-
-        // throw new Error("All histories must have the same length");
     }
 
     const merged: IndexHistory[] = [];
 
+    const initialElements = histories.reduce((acc, el) => {
+        return [...acc, el[0]];
+    }, [] as AssetHistory[]);
+
+    const getElementsPerformance = (elements: AssetHistory[]) => {
+        return elements.reduce((acc, el, i) => {
+            const initialElement = initialElements[i];
+
+            // in percent
+            const performance =
+                ((parseFloat(el.priceUsd) - parseFloat(initialElement.priceUsd)) /
+                    parseFloat(initialElement.priceUsd)) *
+                100;
+            return [...acc, performance];
+        }, [] as number[]);
+    };
+
     for (let i = 0; i < arrayLength; i++) {
         const currentElements = histories.map(historyArray => historyArray[i]);
-
         // Since we assume time and date are the same across arrays, pick them from the first array
         const {time, date} = currentElements[0];
 
+        if (i === 0) {
+            merged.push({
+                time,
+                date,
+                priceUsd: startingBalance.toFixed(20),
+            });
+            continue;
+        }
+
+        const initialPrice = parseFloat(merged[0]?.priceUsd) || startingBalance;
         // Compute the weighted average price based on portions
-        const weightedAveragePrice = currentElements
-            .reduce((sum, assetHistory, index) => {
-                const weight = portions[index] / 100; // Convert portion to a multiplier
-                return sum + parseFloat(assetHistory.priceUsd) * weight;
-            }, 0)
-            .toFixed(20); // Ensure fixed precision
+        const weightedAveragePrice = currentElements.reduce((sum, assetHistory, elIndex) => {
+            const weight = portions[elIndex] / 100; // Convert portion to a multiplier
+
+            const elementPerformance = getElementsPerformance(currentElements)[elIndex];
+            const performance = elementPerformance / 100;
+
+            return sum + initialPrice * performance * weight;
+        }, 0);
 
         merged.push({
             time,
             date,
-            priceUsd: weightedAveragePrice,
+            priceUsd: (initialPrice + weightedAveragePrice).toFixed(20),
+        });
+    }
+
+    return merged;
+}
+
+function mergeAssetHistoriesFromPrev<A = Asset>(
+    histories: AssetHistory[][],
+    portions: number[],
+    index: {id?: Id; name: string; assets: AssetWithHistoryAndOverview<A>[]},
+    startingBalance: number | undefined = 1000
+): IndexHistory[] {
+    if (histories.length === 0 || histories[0].length === 0) {
+        return [];
+    }
+
+    if (histories.length !== portions.length) {
+        throw new Error("The number of histories must match the number of portions");
+    }
+
+    // Ensure all portions sum to 100%
+    const portionSum = portions.reduce((sum, portion) => sum + portion, 0);
+    if (Math.abs(portionSum - 100) > 1e-8) {
+        console.error("Portions must sum up to 100%", portionSum, index.id, index.name);
+
+        return [];
+    }
+
+    const arrayLength = histories[0].length;
+
+    // Ensure all histories have the same length
+    if (!histories.every(history => history.length === arrayLength)) {
+        void writeJsonFile("histories[][]", histories, "/db/debug");
+        console.error("All histories must have the same length");
+        return [];
+    }
+
+    const merged: IndexHistory[] = [];
+
+    const getElementsPerformance = (prevElements: AssetHistory[], elements: AssetHistory[]) => {
+        return elements.reduce((acc, el, i) => {
+            const prevElement = prevElements[i];
+
+            // in percent
+            const performance =
+                ((parseFloat(el.priceUsd) - parseFloat(prevElement.priceUsd)) / parseFloat(prevElement.priceUsd)) * 100;
+            return [...acc, performance];
+        }, [] as number[]);
+    };
+
+    for (let i = 0; i < arrayLength; i++) {
+        const prevElements = histories.map(historyArray => historyArray[i - 1]);
+        const currentElements = histories.map(historyArray => historyArray[i]);
+        // Since we assume time and date are the same across arrays, pick them from the first array
+        const {time, date} = currentElements[0];
+
+        if (i === 0) {
+            merged.push({
+                time,
+                date,
+                priceUsd: startingBalance.toFixed(20),
+            });
+            continue;
+        }
+
+        const prevPrice = parseFloat(merged[i - 1]?.priceUsd) || startingBalance;
+        // Compute the weighted average price based on portions
+        const weightedAveragePrice = currentElements.reduce((sum, assetHistory, elIndex) => {
+            const weight = portions[elIndex] / 100; // Convert portion to a multiplier
+
+            const elementPerformance = getElementsPerformance(prevElements, currentElements)[elIndex];
+            const performance = elementPerformance / 100;
+
+            return sum + prevPrice * performance * weight;
+        }, 0);
+
+        merged.push({
+            time,
+            date,
+            priceUsd: (prevPrice + weightedAveragePrice).toFixed(20),
         });
     }
 
@@ -316,9 +448,7 @@ export const getIndex = async ({
         ...pick(indexOverview, ["startTime"]),
     });
 
-    assets = assetsWithHistories;
-
-    assets = assets.map(asset => ({
+    assets = assetsWithHistories.map(asset => ({
         ...asset,
         portion: indexOverview.assets.find(a => a.id === asset.id)?.portion ?? 0,
         maxDrawDown: getMaxDrawDownWithTimeRange(asset.history),
@@ -331,7 +461,7 @@ export const getIndex = async ({
     };
 
     const indexHistory = getIndexHistory(index);
-    const indexHistoryOverview = await getIndexHistoryOverview(index);
+    const indexHistoryOverview = getIndexHistoryOverview(indexHistory);
     const indexMaxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
     return {
@@ -397,6 +527,7 @@ export const normalizeDbBoolean = <Input extends Record<string, unknown>, Output
     return clonedEntity as unknown as Output;
 };
 
+// alternative. Currently we use populateMissingAssetHistory
 const fulfillAssetHistory = (history: AssetHistory[]): AssetHistory[] => {
     // Early return if the history is empty or has only one entry
     if (history.length <= 1) {
@@ -478,4 +609,16 @@ export const normalizeAssetsHistory = async (): Promise<NormalizedAssetHistory> 
     }
 
     return normalizedAssetHistory;
+};
+
+export const normalizeAssetHistoryToStartOfTheDay = (history: AssetHistory[] | undefined = []) => {
+    return history.map(item => {
+        const normalizedItem = momentTimeZone.tz(item.time, "UTC").startOf("day");
+
+        return {
+            ...item,
+            time: normalizedItem.valueOf(),
+            date: normalizedItem.toISOString(),
+        };
+    });
 };

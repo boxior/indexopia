@@ -64,7 +64,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
     };
 
     const sortedAssets = useMemo(() => {
-        return [...assets].sort((a, b) => {
+        return assets.toSorted((a, b) => {
             let aValue: any, bValue: any;
 
             switch (sortField) {
@@ -116,7 +116,6 @@ export function AssetsTable({assets}: AssetsTableProps) {
             }
         });
     }, [assets, sortField, sortOrder]);
-
     // Mobile Card Component
     const MobileAssetCard = ({asset}: {asset: AssetWithHistoryOverviewPortionAndMaxDrawDown}) => {
         const isExpanded = expandedRows.has(asset.id);
@@ -166,7 +165,10 @@ export function AssetsTable({assets}: AssetsTableProps) {
                         {/* Chart Preview */}
                         <div className="mb-4">
                             <div className="text-xs text-gray-500 mb-2">{tIndex("assetsTable.mobile.chart30d")}</div>
-                            <ChartPreview data={asset.history.slice(-HISTORY_OVERVIEW_DAYS)} className="w-full h-32" />
+                            <ChartPreview
+                                data={asset.history.slice(-HISTORY_OVERVIEW_DAYS - 1)}
+                                className="w-full h-32"
+                            />
                         </div>
 
                         {/* Performance metrics */}
@@ -358,7 +360,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                         </TableCell>
                                         <TableCell>
                                             <ChartPreview
-                                                data={asset.history.slice(-HISTORY_OVERVIEW_DAYS)}
+                                                data={asset.history.slice(-HISTORY_OVERVIEW_DAYS - 1)}
                                                 className="w-32 h-16 relative"
                                             />
                                         </TableCell>
@@ -367,7 +369,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                         <TableCell>{renderSafelyPercentage(asset.historyOverview.total)}</TableCell>
                                         <TableCell>
                                             <span className="text-red-600">
-                                                -{Math.abs(asset.maxDrawDown.value).toFixed(2)}%
+                                                {renderSafelyPercentage(-asset.maxDrawDown.value)}
                                             </span>
                                         </TableCell>
                                         <TableCell>

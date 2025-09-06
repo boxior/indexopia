@@ -11,7 +11,6 @@ import {MAX_ASSETS_COUNT} from "@/utils/constants/general.constants";
 import {chunk} from "lodash";
 import {SYSTEM_INDICES_PROPS} from "@/app/api/populate/populate.constants";
 import {handlePrepareToSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
-import {auth} from "@/auth";
 
 const TABLE_NAME_INDICES_OVERVIEW = ENV_VARIABLES.MYSQL_TABLE_NAME_INDICES_OVERVIEW; // Ensure your database table exists
 
@@ -24,6 +23,7 @@ const dbPostUserIndexOverview = async (data: Omit<IndexOverview, "id">): Promise
             INSERT INTO ${TABLE_NAME_INDICES_OVERVIEW}
             (
                 name,
+                startingBalance,
                 historyOverview,
                 maxDrawDown,
                 assets,
@@ -35,6 +35,7 @@ const dbPostUserIndexOverview = async (data: Omit<IndexOverview, "id">): Promise
 
         const values = [
             data.name,
+            data.startingBalance,
             JSON.stringify(data.historyOverview || {}),
             JSON.stringify(data.maxDrawDown || {}),
             JSON.stringify(data.assets || []), // Serialize assets array as JSON
@@ -69,17 +70,19 @@ const dbPostSystemIndexOverview = async (data: Omit<IndexOverview, "id">): Promi
             INSERT INTO ${TABLE_NAME_INDICES_OVERVIEW}
             (
                 name,
+                startingBalance,
                 historyOverview,
                 maxDrawDown,
                 assets,
                 startTime,
                 endTime,
                 systemId
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const values = [
             data.name,
+            data.startingBalance,
             JSON.stringify(data.historyOverview || {}),
             JSON.stringify(data.maxDrawDown || {}),
             JSON.stringify(data.assets || []), // Serialize assets array as JSON
@@ -130,6 +133,7 @@ export const dbGetIndicesOverview = async (userId?: string): Promise<IndexOvervi
             SELECT 
                 id,
                 name,
+                startingBalance,
                 historyOverview,
                 maxDrawDown,
                 assets,
@@ -153,6 +157,7 @@ export const dbGetIndicesOverview = async (userId?: string): Promise<IndexOvervi
         const indexOverviews = rows as Array<{
             id: number;
             name: string;
+            startingBalance: string;
             historyOverview: IndexOverview["historyOverview"]; // JSON stored as string in the DB
             maxDrawDown: IndexOverview["maxDrawDown"]; // JSON stored as string in the DB
             assets: IndexOverview["assets"]; // JSON stored as string in the DB
@@ -166,6 +171,7 @@ export const dbGetIndicesOverview = async (userId?: string): Promise<IndexOvervi
         const result: IndexOverview[] = indexOverviews.map(item => ({
             id: item.id,
             name: item.name,
+            startingBalance: parseFloat(item.startingBalance),
             historyOverview: item.historyOverview, // Parse JSON
             maxDrawDown: item.maxDrawDown, // Parse JSON
             assets: item.assets, // Parse JSON array of assets
@@ -190,6 +196,7 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
             UPDATE ${TABLE_NAME_INDICES_OVERVIEW}
             SET
                 name = ?,
+                startingBalance = ?,
                 historyOverview = ?,
                 maxDrawDown = ?,
                 assets = ?,
@@ -202,6 +209,7 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
 
         const values = [
             data.name || null,
+            data.startingBalance || null,
             JSON.stringify(data.historyOverview || {}),
             JSON.stringify(data.maxDrawDown || {}),
             JSON.stringify(data.assets || []), // Serialize assets array as JSON
@@ -294,6 +302,7 @@ export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | nu
         const indexOverviews = rows as Array<{
             id: number;
             name: string;
+            startingBalance: string;
             historyOverview: IndexOverview["historyOverview"]; // JSON stored as string in the DB
             maxDrawDown: IndexOverview["maxDrawDown"]; // JSON stored as string in the DB
             assets: IndexOverview["assets"]; // JSON stored as string in the DB
@@ -313,6 +322,7 @@ export const dbGetIndexOverviewById = async (id: Id): Promise<IndexOverview | nu
         const result: IndexOverview = {
             id: item.id,
             name: item.name,
+            startingBalance: parseFloat(item.startingBalance),
             historyOverview: item.historyOverview, // Parse JSON
             maxDrawDown: item.maxDrawDown, // Parse JSON
             assets: item.assets, // Parse JSON array of assets
@@ -350,6 +360,7 @@ export const dbGetIndexOverviewBySystemId = async (systemId: Id): Promise<IndexO
         const indexOverviews = rows as Array<{
             id: number;
             name: string;
+            startingBalance: string;
             historyOverview: IndexOverview["historyOverview"]; // JSON stored as string in the DB
             maxDrawDown: IndexOverview["maxDrawDown"]; // JSON stored as string in the DB
             assets: IndexOverview["assets"]; // JSON stored as string in the DB
@@ -368,6 +379,7 @@ export const dbGetIndexOverviewBySystemId = async (systemId: Id): Promise<IndexO
         const result: IndexOverview = {
             id: item.id,
             name: item.name,
+            startingBalance: parseFloat(item.startingBalance),
             historyOverview: item.historyOverview, // Parse JSON
             maxDrawDown: item.maxDrawDown, // Parse JSON
             assets: item.assets, // Parse JSON array of assets

@@ -83,3 +83,17 @@ CREATE TABLE index_overview (
 ```sql
 ALTER TABLE "Session" REPLICA IDENTITY FULL;
 ```
+### Get not at time 00:00:00.000Z records:
+```sql
+SELECT ah.* FROM yulya777_indexopia.assets_history AS ah
+WHERE date NOT LIKE '%T00:00:00.000Z';
+ORDER BY ah.time
+```
+### Normalize not at time 00:00:00.000Z records:
+```sql
+    UPDATE yulya777_indexopia.assets_history
+SET 
+    date = DATE_FORMAT(DATE(SUBSTRING(date, 1, 10)), '%Y-%m-%dT00:00:00.000Z'),
+    time = UNIX_TIMESTAMP(DATE(SUBSTRING(date, 1, 10))) * 1000
+WHERE date NOT LIKE '%T00:00:00.000Z'
+```

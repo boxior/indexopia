@@ -52,10 +52,7 @@ export function IndexChart({index}: IndexChartProps) {
             return history.filter(item => item.time >= startOfYearTimestamp);
         }
 
-        const cutoffDate = moment.utc().subtract(range.days as number, "days");
-        const cutoffTimestamp = cutoffDate.valueOf();
-
-        return history.filter(item => item.time >= cutoffTimestamp);
+        return history.slice((-range?.days as number) - 1);
     };
 
     const filteredData = getFilteredData();
@@ -74,7 +71,7 @@ export function IndexChart({index}: IndexChartProps) {
         const domainMax = maxValue + padding;
 
         return [domainMin, domainMax];
-    }, [filteredData]);
+    }, [JSON.stringify(filteredData)]);
 
     const formatDate = (timestamp: number | string) => {
         const date = moment.utc(timestamp).toDate();
@@ -143,8 +140,8 @@ export function IndexChart({index}: IndexChartProps) {
     }));
 
     // Calculate performance for the selected period
-    const currentValue = Number(filteredData[filteredData.length - 1]?.priceUsd) || 0;
-    const initialValue = Number(filteredData[0]?.priceUsd) || 0;
+    const currentValue = parseFloat(filteredData[filteredData.length - 1]?.priceUsd) || 0;
+    const initialValue = parseFloat(filteredData[0]?.priceUsd) || 0;
     const performance = initialValue > 0 ? ((currentValue - initialValue) / initialValue) * 100 : 0;
 
     // Determine gradient colors based on performance
@@ -167,6 +164,15 @@ export function IndexChart({index}: IndexChartProps) {
                             >
                                 {renderSafelyPercentage(performance)} ({currentRange?.label ?? selectedRange})
                             </div>
+                        </div>
+                        <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-full shadow-sm">
+                            <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                            <span className="text-xs font-medium text-blue-800 uppercase tracking-wide">
+                                {tIndex("chart.startingBalance")}
+                            </span>
+                            <span className="text-sm font-bold text-blue-900">
+                                ${renderSafelyNumber(index.startingBalance)}
+                            </span>
                         </div>
                     </div>
 

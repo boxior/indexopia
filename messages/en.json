@@ -368,6 +368,7 @@
     },
     "chart": {
       "title": "Performance Chart",
+      "startingBalance": "Starting Balance",
       "priceChart": "Price Chart",
       "timeRanges": {
         "7d": "7D",
@@ -414,28 +415,35 @@
       "create": {
         "title": "Create Custom Index",
         "action": "Create Index",
-        "namePlaceholder": "Enter index name"
+        "namePlaceholder": "Enter index name",
+        "startingBalancePlaceholder": "Enter index starting balance"
       },
       "edit": {
         "title": "Edit Index",
         "action": "Update Index",
-        "namePlaceholder": "Enter index name"
+        "namePlaceholder": "Enter index name",
+        "startingBalancePlaceholder": "Enter index starting balance"
       },
       "clone": {
         "title": "Clone Index",
         "action": "Clone Index",
         "namePlaceholder": "Enter new index name",
+        "startingBalancePlaceholder": "Enter index starting balance",
         "description": "Create a custom copy of this index with your own asset allocation and portfolio composition."
       },
       "default": {
         "title": "Index",
         "action": "Save",
-        "namePlaceholder": "Enter index name"
+        "namePlaceholder": "Enter index name",
+        "startingBalancePlaceholder": "Enter index starting balance"
       }
     },
     "fields": {
       "name": {
         "label": "Index Name"
+      },
+      "startingBalance": {
+        "label": "Index Starting Balance"
       },
       "assetsAllocation": {
         "label": "Assets & Allocation",
@@ -447,6 +455,11 @@
         "required": "Index name is required",
         "min": "Index name must be at least {count} characters",
         "max": "Index name must be less than {count} characters"
+      },
+      "startingBalance": {
+        "required": "Index starting balance is required",
+        "min": "Index starting balance must be at least {count}",
+        "max": "Index starting balance must be less than {count}"
       },
       "assets": {
         "atLeastOne": "At least one asset is required",

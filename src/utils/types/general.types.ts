@@ -50,6 +50,12 @@ export type AssetWithHistory = Asset & {history: AssetHistory[]};
 
 export type AssetWithHistoryAndOverview<A = Asset> = A & {history: AssetHistory[]; historyOverview: HistoryOverview};
 
+export type AssetWithHistoryOverviewAndPortion<A = Asset> = A & {
+    history: AssetHistory[];
+    historyOverview: HistoryOverview;
+    portion: number;
+};
+
 export type AssetWithHistoryOverviewPortionAndMaxDrawDown = Asset & {
     history: AssetHistory[];
     historyOverview: HistoryOverview;
@@ -84,6 +90,7 @@ export type NormalizedAssetHistory = Record<Asset["id"], AssetHistory[]>;
 export interface Index<A = Asset> {
     id: Id;
     name: string;
+    startingBalance: number;
     assets: A[];
     historyOverview: HistoryOverview;
     history: IndexHistory[];
@@ -98,7 +105,15 @@ export type IndexOverviewAsset = Pick<Required<Asset>, "id" | "name" | "symbol" 
 
 export type IndexOverview = Pick<
     Index,
-    "id" | "systemId" | "userId" | "name" | "historyOverview" | "maxDrawDown" | "startTime" | "endTime"
+    | "id"
+    | "systemId"
+    | "userId"
+    | "name"
+    | "historyOverview"
+    | "maxDrawDown"
+    | "startTime"
+    | "endTime"
+    | "startingBalance"
 > & {assets: IndexOverviewAsset[]};
 
 export type IndexOverviewWithHistory = IndexOverview & {history: IndexHistory[]};

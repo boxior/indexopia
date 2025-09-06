@@ -12,6 +12,7 @@ import {
 } from "@/utils/types/general.types";
 import {pick} from "lodash";
 import {getSystemIndexOverviewId} from "@/utils/heleprs/index/index.helpers";
+import {DEFAULT_INDEX_STARTING_BALANCE} from "@/utils/constants/general.constants";
 
 export const handleSaveSystemIndexOverview = async (props: SaveSystemIndexProps) => {
     return await dbPostIndexOverview(await handlePrepareToSaveSystemIndexOverview(props));
@@ -48,13 +49,20 @@ export const handlePrepareToSaveSystemIndexOverview = async (
         assetsCount: props.upToNumber ?? props.topAssetsCount,
     });
     const name = propName ?? `System Index ${generateUuid()}`;
+    const startingBalance = DEFAULT_INDEX_STARTING_BALANCE;
 
-    const indexHistory = getIndexHistory({id: systemId, name, assets: assetsWithHistories});
-    const historyOverview = await getIndexHistoryOverview({id: systemId, name, assets: assetsWithHistories});
+    const indexHistory = getIndexHistory({
+        id: systemId,
+        name,
+        assets: assetsWithHistories,
+        startingBalance,
+    });
+    const historyOverview = getIndexHistoryOverview(indexHistory);
     const maxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
     return {
         name,
+        startingBalance,
         assets: assets.map(asset => pick(asset, ["id", "name", "rank", "symbol", "portion"])),
         startTime: startTime ?? performance.now(),
         endTime: endTime ?? performance.now(),
