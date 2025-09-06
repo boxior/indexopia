@@ -168,7 +168,7 @@ export function IndexChart({index}: IndexChartProps) {
                         <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 rounded-full shadow-sm">
                             <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
                             <span className="text-xs font-medium text-blue-800 uppercase tracking-wide">
-                                Starting Balance
+                                {tIndex("chart.startingBalance")}
                             </span>
                             <span className="text-sm font-bold text-blue-900">
                                 ${renderSafelyNumber(index.startingBalance)}
