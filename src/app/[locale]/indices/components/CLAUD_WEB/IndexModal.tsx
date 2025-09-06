@@ -263,7 +263,7 @@ export function IndexModal({
                                     </div>
                                     <div className="space-y-2">
                                         <Label htmlFor="startingBalance">
-                                            {tIndexModalFields("startingBalance.label")}*
+                                            {tIndexModalFields("startingBalance.label")},$*
                                         </Label>
                                         <Field name="startingBalance">
                                             {({field, meta}: any) => (
