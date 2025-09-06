@@ -50,7 +50,7 @@ export const handlePrepareToSaveSystemIndexOverview = async (
     const name = propName ?? `System Index ${generateUuid()}`;
 
     const indexHistory = getIndexHistory({id: systemId, name, assets: assetsWithHistories});
-    const historyOverview = await getIndexHistoryOverview({id: systemId, name, assets: assetsWithHistories});
+    const historyOverview = getIndexHistoryOverview(indexHistory);
     const maxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
     return {

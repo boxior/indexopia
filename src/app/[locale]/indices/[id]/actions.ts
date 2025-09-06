@@ -34,7 +34,7 @@ export const actionUpdateIndexOverview = async (indexOverview: IndexOverview) =>
     };
 
     const history = getIndexHistory(index);
-    const historyOverview = await getIndexHistoryOverview(index);
+    const historyOverview = getIndexHistoryOverview(history);
     const maxDrawDown = getMaxDrawDownWithTimeRange(history);
 
     return await dbPutIndexOverview({...indexOverview, historyOverview, maxDrawDown, startTime, endTime});
@@ -69,7 +69,7 @@ export const actionCreateIndexOverview = async ({
     };
 
     const history = getIndexHistory(index);
-    const historyOverview = await getIndexHistoryOverview(index);
+    const historyOverview = getIndexHistoryOverview(history);
     const maxDrawDown = getMaxDrawDownWithTimeRange(history);
 
     return await dbPostIndexOverview({name, assets, historyOverview, maxDrawDown, startTime, endTime, userId});
