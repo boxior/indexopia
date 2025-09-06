@@ -27,7 +27,7 @@ export async function POST(req: NextRequest) {
                 }
             );
         } else {
-            const body = (await req.json()) as {name: string; assets: IndexOverviewAsset[]};
+            const body = (await req.json()) as {name: string; assets: IndexOverviewAsset[]; startingBalance: number};
             const indexOverview = await actionCreateIndexOverview(body);
 
             return NextResponse.json(
