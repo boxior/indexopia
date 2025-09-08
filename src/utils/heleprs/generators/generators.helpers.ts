@@ -1,5 +1,5 @@
 import {IndexOverviewAsset} from "@/utils/types/general.types";
-import {MAX_PORTION} from "@/utils/constants/general.constants";
+import {MAX_ASSET_PORTION, MAX_PORTION} from "@/utils/constants/general.constants";
 
 /**
  * Assets portion should be strictly equal MAX_PORTION
@@ -34,12 +34,27 @@ export const correctAssetPortions = (assets: IndexOverviewAsset[]): IndexOvervie
     if (restSumm < 0) {
         return correctAssetPortions(
             sortedFilteredAssets.map(r => {
-                if (r.portion > 1 && restSumm < 0) {
+                if (r.portion > 1 && r.portion < MAX_ASSET_PORTION && restSumm < 0) {
                     restSumm += 1;
 
                     return {
                         ...r,
                         portion: r.portion + 1,
+                    };
+                }
+
+                return r;
+            })
+        );
+    }
+
+    if (restSumm === 0 && sortedFilteredAssets.some(p => p.portion < 1)) {
+        return correctAssetPortions(
+            sortedFilteredAssets.map(r => {
+                if (r.portion < 1 && restSumm === 0) {
+                    return {
+                        ...r,
+                        portion: 1,
                     };
                 }
 

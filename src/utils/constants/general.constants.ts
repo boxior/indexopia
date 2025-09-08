@@ -10,6 +10,8 @@ export const DOMAIN_NAME = "indexopia";
 
 export const MAX_ASSETS_COUNT = 50;
 
+export const MAX_ASSET_PORTION = 50;
+
 export const DEV_AUTH_NAME = "dev-auth";
 
 export const DEV_AUTH_PATH = `/${DEV_AUTH_NAME}`;
