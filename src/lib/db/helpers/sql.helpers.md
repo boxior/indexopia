@@ -87,7 +87,6 @@ ALTER TABLE "Session" REPLICA IDENTITY FULL;
 ```sql
 SELECT ah.* FROM yulya777_indexopia.assets_history AS ah
 WHERE date NOT LIKE '%T00:00:00.000Z';
-ORDER BY ah.time
 ```
 ### Normalize not at time 00:00:00.000Z records:
 ```sql

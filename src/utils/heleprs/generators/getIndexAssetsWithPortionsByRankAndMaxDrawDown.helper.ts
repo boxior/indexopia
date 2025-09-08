@@ -1,7 +1,7 @@
 import {AssetWithMaxDrawDown, IndexOverviewAsset} from "@/utils/types/general.types";
 import {MAX_PORTION} from "@/utils/constants/general.constants";
-import {correctAssetPortions} from "@/utils/heleprs/generators/generators.helpers";
 import {pick} from "lodash";
+import {correctAssetPortions} from "@/utils/heleprs/generators/generators.helpers";
 
 export function getIndexAssetsWithPortionsByRankAndMaxDrawDown(assets: AssetWithMaxDrawDown[]): IndexOverviewAsset[] {
     if (assets.length === 0) {

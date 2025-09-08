@@ -64,6 +64,7 @@ export function handleGenerateSystemIndexOverviewAssets(props: {
                         return getIndexAssetsWithPortionsByRank(lessMaxDrawDownAssets);
                     case SystemIndexBy.EXTRA:
                         return getIndexAssetsWithPortionsByRankAndMaxDrawDown(lessMaxDrawDownAssets);
+
                     default:
                         return [];
                 }
@@ -94,6 +95,7 @@ export function handleGenerateSystemIndexOverviewAssets(props: {
                             assetsByProfit,
                             assetsByMaxDrawDown
                         );
+
                     default:
                         return [];
                 }
