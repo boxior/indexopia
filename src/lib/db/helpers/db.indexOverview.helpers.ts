@@ -30,7 +30,7 @@ const dbPostUserIndexOverview = async (data: Omit<IndexOverview, "id">): Promise
                 startTime,
                 endTime,
                 userId
-            ) VALUES (?, ?, ?, ?, ?, ?, ?)
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         const values = [
@@ -188,7 +188,10 @@ export const dbGetIndicesOverview = async (userId?: string): Promise<IndexOvervi
     }
 };
 
-export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOverview | null> => {
+export const dbPutIndexOverview = async (
+    data: IndexOverview,
+    revalidateTags: boolean | undefined = true
+): Promise<IndexOverview | null> => {
     await connection();
 
     try {
@@ -222,10 +225,12 @@ export const dbPutIndexOverview = async (data: IndexOverview): Promise<IndexOver
 
         await mySqlPool.execute(query, values);
 
-        // Revalidate cache to reflect updates
-        data.systemId && revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW);
-        data.userId && revalidateTag(CacheTag.USER_INDICES_OVERVIEW);
-        revalidateTag(combineCacheTags(CacheTag.INDICES_OVERVIEW, data.id));
+        if (revalidateTags) {
+            // Revalidate cache to reflect updates
+            data.systemId && revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW);
+            data.userId && revalidateTag(CacheTag.USER_INDICES_OVERVIEW);
+            revalidateTag(combineCacheTags(CacheTag.INDICES_OVERVIEW, data.id));
+        }
 
         return await dbGetIndexOverviewById(data.id);
     } catch (error) {

@@ -8,6 +8,10 @@ import {auth} from "@/auth";
 import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {actionGetIndicesWithHistoryOverview} from "@/app/[locale]/indices/actions";
 import {getTranslations} from "next-intl/server";
+import {IndexOverview} from "@/utils/types/general.types";
+import moment from "moment";
+import {actionUpdateIndexOverview} from "@/app/[locale]/indices/[id]/actions";
+import {chunk, flatten} from "lodash";
 
 export default async function IndicesPage() {
     const t = await getTranslations("indices");
@@ -40,8 +44,39 @@ const IndicesPageComponent = async () => {
         currentUserId ? dbGetIndicesOverview(currentUserId) : [],
     ]);
 
-    const indices = [...fetchedIndices[0], ...fetchedIndices[1]];
+    const systemIndices = fetchedIndices[0];
+    const userIndices = await handleUpdateUserIndicesToUpToDateHistory(fetchedIndices[1]);
+
+    const indices = [...systemIndices, ...userIndices];
     const fetchedProps = await Promise.all([dbGetAssets(), actionGetIndicesWithHistoryOverview(indices)]);
 
     return <IndexesPageClient assets={fetchedProps[0]} indices={fetchedProps[1]} />;
+};
+
+/**
+ * This function will update the user indices to up-to-date history.
+ */
+const handleUpdateUserIndicesToUpToDateHistory = async (indices: IndexOverview[]) => {
+    const upToDateStartOfTheDay = moment().utc().add(-1, "day").startOf("day").valueOf();
+
+    const chunks = chunk(indices, 10);
+
+    const upToDateIndices: IndexOverview[] = flatten(
+        await Promise.all(
+            chunks.map(ch =>
+                Promise.all(
+                    ch.map(async indexOverview => {
+                        if (!!indexOverview.endTime && indexOverview.endTime < upToDateStartOfTheDay) {
+                            // update index overview
+                            return (await actionUpdateIndexOverview(indexOverview, false)) ?? indexOverview;
+                        }
+
+                        return indexOverview;
+                    })
+                )
+            )
+        )
+    );
+
+    return upToDateIndices;
 };

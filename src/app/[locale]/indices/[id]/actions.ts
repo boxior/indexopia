@@ -9,7 +9,7 @@ import {
     dbPutIndexOverview,
 } from "@/lib/db/helpers/db.indexOverview.helpers";
 
-export const actionUpdateIndexOverview = async (indexOverview: IndexOverview) => {
+export const actionUpdateIndexOverview = async (indexOverview: IndexOverview, revalidateTags?: boolean) => {
     let assets = [];
 
     const {
@@ -38,7 +38,10 @@ export const actionUpdateIndexOverview = async (indexOverview: IndexOverview) =>
     const historyOverview = getIndexHistoryOverview(history);
     const maxDrawDown = getMaxDrawDownWithTimeRange(history);
 
-    return await dbPutIndexOverview({...indexOverview, historyOverview, maxDrawDown, startTime, endTime});
+    return await dbPutIndexOverview(
+        {...indexOverview, historyOverview, maxDrawDown, startTime, endTime},
+        revalidateTags
+    );
 };
 
 export const actionCreateIndexOverview = async ({
