@@ -203,6 +203,8 @@ export function IndexModal({
         {setSubmitting}: {setSubmitting: (isSubmitting: boolean) => void}
     ) => {
         try {
+            setSubmitting(true);
+
             await onSaveAction({
                 id: indexOverview?.id,
                 name: values.name,

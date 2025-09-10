@@ -1,5 +1,5 @@
 "use client";
-import {redirect, useRouter} from "next/navigation";
+import {useRouter} from "next/navigation";
 import {Button} from "@/components/ui/button";
 import {ArrowLeft} from "lucide-react";
 import {IndexOverview} from "@/app/[locale]/indices/[id]/components/CLAUD_WEB/IndexOverview";
@@ -48,7 +48,7 @@ export function IndexPageClient({
         const savedIndex = await onSave(index);
 
         if (indexMode === IndexMode.CLONE) {
-            savedIndex?.id && redirect(PAGES_URLS.index(savedIndex.id));
+            savedIndex?.id && router.push(PAGES_URLS.index(savedIndex.id));
         }
 
         return savedIndex;
@@ -56,7 +56,7 @@ export function IndexPageClient({
 
     const handleDeleteConfirm: UseIndexActionsReturns["onDeleteConfirm"] = async () => {
         await onDeleteConfirm();
-        redirect(PAGES_URLS.indices);
+        router.push(PAGES_URLS.indices);
     };
 
     if (!index) {
