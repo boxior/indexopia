@@ -34,149 +34,102 @@ export const {handlers, auth} = NextAuth({
                     subject: t("subject"), // e.g., "Access Your Crypto Portfolio Dashboard"
                     html: `
         <!DOCTYPE html>
-        <html>
-        <head>
-            <meta charset="utf-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>${t("subject")}</title>
-        </head>
-        <body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
-            <div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; margin-top: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
-                <!-- Header with gradient -->
-                <div style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); padding: 40px 30px; text-align: center;">
-                    <!-- Logo -->
-                    <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 25px;">
-                        <div style="width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%);  margin-right: 12px; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-                            <span style="color: white; font-weight: bold; font-size: 18px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; line-height: 40px;   width: 100%; height: 100%; text-align: center;">IX</span>
+<html lang="${locale}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>${t("subject")}</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #f8fafc; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;">
+<div style="max-width: 600px; margin: 0 auto; background-color: white; border-radius: 12px; overflow: hidden; margin-top: 20px; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);">
+    <!-- Compact Header -->
+    <div style="background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); padding: 25px 20px; text-align: center;">
+        <table style="width: 100%; margin-bottom: 15px;">
+            <tr>
+                <td style="text-align: left; vertical-align: middle;">
+                    <div style="display: inline-block; vertical-align: middle;">
+                        <div style="width: 40px; height: 40px; border-radius: 8px; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); display: inline-block; vertical-align: middle; margin-right: 10px; position: relative; text-align: center;">
+                            <span style="color: white; font-weight: bold; font-size: 18px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;  line-height: 40px;">IX</span>
                         </div>
-                        <span style="color: white; font-size: 24px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">${BRAND_NAME}</span>
+                        <span style="color: white; font-size: 24px; line-height: 40px; font-weight: bold; text-shadow: 0 2px 4px rgba(0,0,0,0.1); vertical-align: middle; display: inline-block;">${BRAND_NAME}</span>
                     </div>
-                    
-                    <h1 style="color: white; font-size: 28px; font-weight: bold; margin: 0; text-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                        ${t("welcome")}
-                    </h1>
-                    <p style="color: rgba(255, 255, 255, 0.9); font-size: 16px; margin: 10px 0 0; font-weight: 300;">
-                        ${t("tagline")} <!-- e.g., "Your Gateway to Professional Crypto Indices" -->
-                    </p>
-                </div>
+                </td>
+            </tr>
+        </table>
+        <h1 style="color: white; font-size: 22px; font-weight: 600; margin: 0;">
+            ${t("tagline")}
+        </h1>
+    </div>
 
-                <!-- Content -->
-                <div style="padding: 40px 30px;">
-                    <div style="text-align: center; margin-bottom: 30px;">
-                        <h2 style="color: #1e293b; font-size: 24px; font-weight: 600; margin: 0 0 15px;">
-                            ${t("signInTitle")} <!-- e.g., "Secure Sign-in Request" -->
-                        </h2>
-                        <p style="color: #64748b; font-size: 16px; line-height: 1.6; margin: 0 0 15px;">
-                            ${t("signInContext")} <!-- e.g., "We received a sign-in request for your account. This secure, passwordless authentication ensures your crypto data stays protected." -->
-                        </p>
-                        <p style="color: #64748b; font-size: 16px; line-height: 1.6; margin: 0;">
-                            ${t("clickLink")} <!-- e.g., "Click the button below to access your dashboard and continue managing your crypto indices." -->
-                        </p>
-                    </div>
+    <!-- Minimal Content -->
+    <div style="padding: 25px 20px;">
+        <div style="text-align: center; margin-bottom: 25px;">
+            <p style="color: #64748b; font-size: 15px; line-height: 1.5; margin: 0 0 20px;">
+                ${t("signInContext")}
+            </p>
 
-                    <!-- Device/Location info -->
-                    <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 20px; margin: 25px 0;">
-                        <h3 style="color: #374151; font-size: 16px; font-weight: 600; margin: 0 0 10px;">
-                            ${t("signInDetails")} <!-- e.g., "Sign-in Details:" -->
-                        </h3>
-                        <div style="color: #6b7280; font-size: 14px; line-height: 1.5;">
-                            <div style="margin-bottom: 5px;">
-                                <strong style="color: #374151;">${t("requestedAt")}:</strong> ${new Date().toLocaleString(
-                                    locale,
-                                    {
-                                        weekday: "long",
-                                        year: "numeric",
-                                        month: "long",
-                                        day: "numeric",
-                                        hour: "2-digit",
-                                        minute: "2-digit",
-                                    }
-                                )}
-                            </div>
-                            <div style="margin-bottom: 5px;">
-                                <strong style="color: #374151;">${t("emailAddress")}:</strong> ${email}
-                            </div>
-                            <div>
-                                <strong style="color: #374151;">${t("purpose")}:</strong> ${t("purposeText")} <!-- e.g., "Dashboard access & portfolio management" -->
-                            </div>
-                        </div>
-                    </div>
+            <!-- Sign-in Button - Prominent -->
+            <a href="${url}"
+               style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); color: white; padding: 16px 40px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); margin: 10px 0;">
+                ${t("signInButton")}
+            </a>
+        </div>
 
-                    <!-- Features preview -->
-                    <div style="background: linear-gradient(135deg, #f1f5f9 0%, #e2e8f0 100%); border-radius: 12px; padding: 25px; margin: 25px 0; border-left: 4px solid #3b82f6;">
-                        <div style="display: flex; align-items: center; margin-bottom: 15px;">
-                            <div style="width: 32px; height: 32px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-right: 12px;">
-                                <svg width="16" height="16" viewBox="0 0 24 24" fill="white">
-                                    <path d="M3 13l4 4L18 6"/>
-                                </svg>
-                            </div>
-                            <span style="color: #374151; font-weight: 600; font-size: 16px;">
-                                ${t("featuresTitle")} <!-- e.g., "What's waiting for you:" -->
-                            </span>
-                        </div>
-                        <ul style="margin: 0; padding: 0; list-style: none;">
-                            <li style="color: #4b5563; margin: 8px 0; padding-left: 20px; position: relative;">
-                                <span style="position: absolute; left: 0; color: #3b82f6;">•</span>
-                                ${t("feature1")} <!-- e.g., "Real-time crypto index performance tracking" -->
-                            </li>
-                            <li style="color: #4b5563; margin: 8px 0; padding-left: 20px; position: relative;">
-                                <span style="position: absolute; left: 0; color: #3b82f6;">•</span>
-                                ${t("feature2")} <!-- e.g., "Professional analytics and risk metrics" -->
-                            </li>
-                            <li style="color: #4b5563; margin: 8px 0; padding-left: 20px; position: relative;">
-                                <span style="position: absolute; left: 0; color: #3b82f6;">•</span>
-                                ${t("feature3")} <!-- e.g., "Custom portfolio creation and management" -->
-                            </li>
-                        </ul>
-                    </div>
+        <!-- Minimal Details -->
+        <div style="background-color: #f8fafc; border-radius: 6px; padding: 15px; margin: 20px 0; text-align: center;">
+            <p style="color: #6b7280; font-size: 13px; margin: 0;">
+                <strong style="color: #374151;">${t("emailAddress")}:</strong> ${email}
+            </p>
+            <p style="color: #6b7280; font-size: 13px; margin: 5px 0 0;">
+                <strong style="color: #374151;">${t("requestedAt")}:</strong> ${new Date().toLocaleString(locale, {
+                    month: "short",
+                    day: "numeric",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                })}
+            </p>
+        </div>
 
-                    <!-- CTA Button -->
-                    <div style="text-align: center; margin: 35px 0;">
-                        <a href="${url}" 
-                           style="display: inline-block; background: linear-gradient(135deg, #2563eb 0%, #7c3aed 100%); color: white; padding: 16px 32px; text-decoration: none; border-radius: 8px; font-weight: 600; font-size: 16px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3); transition: all 0.2s ease;">
-                            ${t("signInButton")} <!-- e.g., "Access My Dashboard" -->
-                        </a>
-                    </div>
+        <!-- Security & Footer -->
+        <div style="text-align: center; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+            <p style="color: #9ca3af; font-size: 12px; margin: 0;">
+                ${t("securityNote")} ${t("ignoreEmail")}
+            </p>
+        </div>
+    </div>
+</div>
 
-                    <!-- Security note -->
-                    <div style="background-color: #fef3c7; border: 1px solid #fbbf24; border-radius: 8px; padding: 16px; margin: 25px 0;">
-                        <div style="display: flex; align-items: flex-start;">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="#f59e0b" style="margin-right: 10px; margin-top: 2px; flex-shrink: 0;">
-                                <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 11 5.16-1.26 9-5.45 9-11V7l-10-5z"/>
-                            </svg>
-                            <div>
-                                <p style="color: #92400e; margin: 0; font-size: 14px; font-weight: 500;">
-                                    ${t("securityTitle")} <!-- e.g., "Security First" -->
-                                </p>
-                                <p style="color: #92400e; margin: 5px 0 0; font-size: 14px;">
-                                    ${t("securityNote")} <!-- e.g., "This link will expire in 24 hours for your security." -->
-                                </p>
-                            </div>
-                        </div>
-                    </div>
+<!-- Mobile Optimization -->
+<style>
+    @media only screen and (max-width: 600px) {
+        .container {
+            width: 100% !important;
+            margin: 10px !important;
+            border-radius: 8px !important;
+        }
+        .content {
+            padding: 20px 15px !important;
+        }
+        .header {
+            padding: 20px 15px !important;
+        }
+        .button {
+            padding: 14px 30px !important;
+            font-size: 15px !important;
+            width: auto !important;
+        }
+        h1 {
+            font-size: 20px !important;
+        }
+        .details {
+            padding: 12px !important;
+            font-size: 12px !important;
+        }
+    }
+</style>
+</body>
+</html>
 
-                    <!-- Footer text -->
-                    <div style="text-align: center; margin-top: 30px; padding-top: 25px; border-top: 1px solid #e5e7eb;">
-                        <p style="color: #6b7280; font-size: 14px; margin: 0;">
-                            ${t("ignoreEmail")} <!-- e.g., "If you didn't request this email, you can safely ignore it." -->
-                        </p>
-                        <p style="color: #9ca3af; font-size: 12px; margin: 10px 0 0;">
-                            ${t("footer")} <!-- e.g., "© 2025 CryptoIndices. Professional crypto portfolio management." -->
-                        </p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Email client compatibility styles -->
-            <style>
-                @media only screen and (max-width: 600px) {
-                    .container { width: 100% !important; margin: 0 !important; }
-                    .content { padding: 20px !important; }
-                    .button { padding: 14px 24px !important; font-size: 14px !important; }
-                }
-            </style>
-        </body>
-        </html>
         `,
                 });
             },
