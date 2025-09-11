@@ -181,7 +181,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                     ? "text-primary hover:text-primary/80"
                                     : "text-blue-600 hover:text-blue-800"
                             }`}
-                            href={`/src/app/%5Blocale%5D/indices/${index.id}`}
+                            href={PAGES_URLS.index(index.id)}
                         >
                             {index.name}
                         </Link>
@@ -415,7 +415,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                             </span>
                                         ) : (
                                             <LinkReferer
-                                                href={`/indices/${index.id}`}
+                                                href={PAGES_URLS.index(index.id)}
                                                 view={isUserIndex(index) ? "primary" : "secondary"}
                                                 children={index.name}
                                             />
