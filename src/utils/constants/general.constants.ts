@@ -73,3 +73,5 @@ export const INDEX_VALIDATION = {
 };
 
 export const DEFAULT_INDEX_STARTING_BALANCE = 10_000;
+
+export const CONTACT_EMAIL = "indexopia@gmail.com";

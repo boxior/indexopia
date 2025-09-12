@@ -3,7 +3,7 @@
 import {useTranslations} from "next-intl";
 import {Link} from "@/i18n/navigation";
 import {Twitter, Github, Youtube} from "lucide-react";
-import {PAGES_URLS} from "@/utils/constants/general.constants";
+import {CONTACT_EMAIL, PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default function Footer() {
     const t = useTranslations("footer");
@@ -56,7 +56,7 @@ export default function Footer() {
                             </li>
                             <li>
                                 <Link
-                                    href={PAGES_URLS.contact}
+                                    href={`mailto:${CONTACT_EMAIL}`}
                                     className="text-gray-400 hover:text-white transition-colors"
                                 >
                                     {t("sections.about.contact")}
