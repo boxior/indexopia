@@ -2,7 +2,6 @@ import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {manageAssets} from "@/app/api/api.helpers";
-export const dynamic = "force-dynamic";
 
 /**
  * Write `assets` to the DB.

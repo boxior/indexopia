@@ -4,8 +4,6 @@ import {handleSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSa
 import {IndexOverviewAsset, SaveSystemIndexProps} from "@/utils/types/general.types";
 import {actionCreateIndexOverview} from "@/app/[locale]/indices/[id]/actions";
 
-export const dynamic = "force-dynamic";
-
 /**
  * Generate Index
  */

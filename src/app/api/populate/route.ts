@@ -3,8 +3,6 @@ import {ENV_VARIABLES} from "@/env";
 import {manageAssets, manageAssetsHistory} from "@/app/api/api.helpers";
 import {manageSystemIndices} from "@/lib/db/helpers/db.indexOverview.helpers";
 
-export const dynamic = "force-dynamic";
-
 /**
  * Populate entities: Assets, History, and Indices
  */

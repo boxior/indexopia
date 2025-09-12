@@ -2,8 +2,6 @@ import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 import {manageSystemIndices} from "@/lib/db/helpers/db.indexOverview.helpers";
 
-export const dynamic = "force-dynamic";
-
 /**
  * Populate System Indices
  */
