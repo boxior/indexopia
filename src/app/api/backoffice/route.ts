@@ -3,8 +3,6 @@ import {ENV_VARIABLES} from "@/env";
 import {manageAssetHistory} from "@/app/api/api.helpers";
 import {writeJsonFile} from "@/utils/heleprs/fs.helpers";
 
-export const dynamic = "force-dynamic";
-
 /**
  * Populate entities: Assets, History, and Indices
  */

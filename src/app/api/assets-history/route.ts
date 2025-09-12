@@ -3,8 +3,6 @@ import {ENV_VARIABLES} from "@/env";
 import {manageAssetsHistory} from "@/app/api/api.helpers";
 import {dbGetAssetHistoryById} from "@/lib/db/helpers/db.assetsHistory.helpers";
 
-export const dynamic = "force-dynamic";
-
 /**
  * Write `assets_history` to the DB
  * The request should be GET to use free cron job https://console.cron-job.org/dashboard
