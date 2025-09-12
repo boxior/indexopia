@@ -23,7 +23,11 @@ export const actionGetIndexHistory = async (id: Id, propIndexOverview?: IndexOve
 
     const {assets: assetsWithHistories} = await getAssetsWithHistories<IndexOverviewAsset>({
         assets: indexOverview.assets,
-        startTime: moment().utc().startOf("d").add(-HISTORY_OVERVIEW_DAYS, "days").valueOf(),
+        startTime: moment()
+            .utc()
+            .startOf("d")
+            .add(-HISTORY_OVERVIEW_DAYS - 1, "days")
+            .valueOf(),
     });
 
     return getIndexHistory({...pick(indexOverview, ["id", "name", "startingBalance"]), assets: assetsWithHistories});
@@ -33,7 +37,7 @@ export const actionGetIndicesWithHistoryOverview = async (
     indices: IndexOverview[]
 ): Promise<IndexOverviewWithHistory[]> => {
     "use cache";
-    cacheTag(CacheTag.INDICES_OVERVIEW, CacheTag.SYSTEM_INDICES_OVERVIEW);
+    cacheTag(CacheTag.INDICES_OVERVIEW);
 
     const allUsedAssets = indices
         .reduce((acc, index) => {
