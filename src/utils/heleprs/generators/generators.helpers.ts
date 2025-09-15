@@ -46,7 +46,7 @@ export const correctAssetPortions = (assets: IndexOverviewAsset[]): IndexOvervie
     if (restSumm < 0) {
         return correctAssetPortions(
             sortedNormalizedAssets.map(r => {
-                if (r.portion > 1 && r.portion < MAX_ASSET_PORTION && restSumm < 0) {
+                if (r.portion < MAX_ASSET_PORTION && restSumm < 0) {
                     restSumm += 1;
 
                     return {

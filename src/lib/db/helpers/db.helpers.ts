@@ -38,30 +38,7 @@ export const getAssetHistoryOverview = async (
     const history = historyListProp ?? (await dbGetAssetHistoryById(id));
     const historyList = history ?? [];
 
-    const lastDayItem = historyList[historyList.length - 1];
-
-    const oneDayAgo = historyList.slice(-2)[0];
-    const sevenDaysAgo = historyList.slice(-8)[0];
-    const thirtyDaysAgo = historyList.slice(-31)[0];
-
-    const days1Profit = parseFloat(lastDayItem?.priceUsd) - parseFloat(oneDayAgo?.priceUsd);
-    const days1ProfitPercent = (days1Profit / parseFloat(oneDayAgo?.priceUsd)) * 100;
-
-    const days7Profit = parseFloat(lastDayItem?.priceUsd) - parseFloat(sevenDaysAgo?.priceUsd);
-    const days7ProfitPercent = (days7Profit / parseFloat(sevenDaysAgo?.priceUsd)) * 100;
-
-    const days30Profit = parseFloat(lastDayItem?.priceUsd) - parseFloat(thirtyDaysAgo?.priceUsd);
-    const days30ProfitPercent = (days30Profit / parseFloat(thirtyDaysAgo?.priceUsd)) * 100;
-
-    const totalProfit = parseFloat(lastDayItem?.priceUsd) - parseFloat(historyList[0]?.priceUsd);
-    const totalProfitPercent = (totalProfit / parseFloat(historyList[0]?.priceUsd)) * 100;
-
-    return {
-        days1: days1ProfitPercent,
-        days7: days7ProfitPercent,
-        days30: days30ProfitPercent,
-        total: totalProfitPercent,
-    };
+    return getHistoryOverview(historyList);
 };
 
 export const getCachedTopAssets = async (limit: number | undefined = MAX_ASSETS_COUNT): Promise<Asset[]> => {
@@ -131,7 +108,7 @@ export const getIndexHistoryOverviewByAssetsOverview = <A extends {id: string; p
     };
 };
 
-export const getIndexHistoryOverview = (historyList: IndexHistory[]): HistoryOverview => {
+export const getHistoryOverview = (historyList: IndexHistory[]): HistoryOverview => {
     const lastDayItem = historyList[historyList.length - 1];
 
     const oneDayAgo = historyList.slice(-2)[0];
@@ -461,7 +438,7 @@ export const getIndex = async ({
     };
 
     const indexHistory = getIndexHistory(index);
-    const indexHistoryOverview = getIndexHistoryOverview(indexHistory);
+    const indexHistoryOverview = getHistoryOverview(indexHistory);
     const indexMaxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
     return {

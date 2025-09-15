@@ -2,7 +2,7 @@ import {handleGenerateSystemIndexOverviewAssetsWithStartEndTimes} from "@/utils/
 import {dbPostIndexOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {generateUuid} from "@/utils/heleprs/generateUuid.helper";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
-import {getAssetsWithHistories, getIndexHistory, getIndexHistoryOverview} from "@/lib/db/helpers/db.helpers";
+import {getAssetsWithHistories, getIndexHistory, getHistoryOverview} from "@/lib/db/helpers/db.helpers";
 import {
     Asset,
     AssetHistory,
@@ -24,7 +24,6 @@ export const handlePrepareToSaveSystemIndexOverview = async (
     normalizedAssetsHistory?: Record<string, AssetHistory[]>
 ): Promise<Omit<IndexOverview, "id">> => {
     const {name: propName} = props;
-    //
 
     const {
         assets,
@@ -57,7 +56,7 @@ export const handlePrepareToSaveSystemIndexOverview = async (
         assets: assetsWithHistories,
         startingBalance,
     });
-    const historyOverview = getIndexHistoryOverview(indexHistory);
+    const historyOverview = getHistoryOverview(indexHistory);
     const maxDrawDown = getMaxDrawDownWithTimeRange(indexHistory);
 
     return {

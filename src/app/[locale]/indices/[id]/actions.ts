@@ -1,7 +1,7 @@
 "use server";
 
 import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Id, IndexOverview} from "@/utils/types/general.types";
-import {getAssetsWithHistories, getIndexHistory, getIndexHistoryOverview} from "@/lib/db/helpers/db.helpers";
+import {getAssetsWithHistories, getIndexHistory, getHistoryOverview} from "@/lib/db/helpers/db.helpers";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 import {
     dbDeleteIndexOverview,
@@ -35,7 +35,7 @@ export const actionUpdateIndexOverview = async (indexOverview: IndexOverview, re
     };
 
     const history = getIndexHistory(index);
-    const historyOverview = getIndexHistoryOverview(history);
+    const historyOverview = getHistoryOverview(history);
     const maxDrawDown = getMaxDrawDownWithTimeRange(history);
 
     return await dbPutIndexOverview(
@@ -75,7 +75,7 @@ export const actionCreateIndexOverview = async ({
     };
 
     const history = getIndexHistory(index);
-    const historyOverview = getIndexHistoryOverview(history);
+    const historyOverview = getHistoryOverview(history);
     const maxDrawDown = getMaxDrawDownWithTimeRange(history);
 
     return await dbPostIndexOverview({

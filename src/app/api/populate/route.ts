@@ -30,6 +30,7 @@ export async function POST(req: NextRequest) {
         const allAssetsHistory = await manageAssetsHistory();
 
         await manageSystemIndices(allAssets, allAssetsHistory);
+
         return NextResponse.json(
             {success: true},
             {

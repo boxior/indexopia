@@ -50,6 +50,7 @@ export const actionGetIndicesWithHistoryOverview = async (
         .startOf("d")
         .add(-HISTORY_OVERVIEW_DAYS - 1, "days")
         .valueOf();
+
     const normalizedAssetsHistory = await dbGetMultipleAssetHistoryByStartTime(
         allUsedAssets.map(a => a.id),
         startTime
@@ -71,7 +72,7 @@ export const actionGetIndicesWithHistoryOverview = async (
             };
         });
 
-        const indexHistory = getIndexHistory({
+        const history = getIndexHistory({
             id: index.id,
             name: index.name,
             startingBalance: index.startingBalance,
@@ -80,7 +81,7 @@ export const actionGetIndicesWithHistoryOverview = async (
 
         return {
             ...index,
-            history: indexHistory,
+            history,
         };
     });
 };

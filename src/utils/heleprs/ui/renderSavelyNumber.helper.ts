@@ -7,7 +7,16 @@ export const renderSafelyNumber = (
 ) => {
     try {
         const number = Number(numberStr);
-        return isNil(number) || isNaN(number) ? "N/A" : numeral(number).format(format);
+
+        if (isNil(number) || isNaN(number)) {
+            return "N/A";
+        }
+
+        if (number > 1_000_000) {
+            return numeral(number).format(NumeralFormat.HUGE);
+        }
+
+        return numeral(number).format(format);
     } catch {
         return numberStr;
     }
