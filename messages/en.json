@@ -500,5 +500,12 @@
       "ignoreEmail": "If you didn't request this sign-in, you can safely ignore this email - no action is required.",
       "footer": "© 2025 Indexopia. Professional crypto portfolio management."
     }
+  },
+  "seo": {
+    "siteName": "Indexopia",
+    "defaultTitle": "Indexopia — Institutional-Grade Crypto Indices",
+    "defaultDescription": "Indexopia provides transparent, institutional-grade cryptocurrency indices. Track market performance across curated digital asset baskets including Bitcoin, Ethereum, and sector-based indices.",
+    "homeTitle": "Explore Crypto Indices",
+    "homeDescription": "Discover top-performing crypto indices, compare performance, and dive into market insights with Indexopia."
   }
 }

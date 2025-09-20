@@ -15,6 +15,21 @@ const nextConfig: NextConfig = {
     experimental: {
         cacheComponents: true,
     },
+    // Alternative: use route configuration
+    async headers() {
+        return [
+            {
+                source: "/api/:path*",
+                headers: [
+                    {
+                        key: "Cache-Control",
+                        value: "no-store, must-revalidate",
+                    },
+                ],
+            },
+        ];
+    },
+
     compress: true,
 };
 
