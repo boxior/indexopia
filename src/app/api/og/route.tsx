@@ -2,7 +2,7 @@ import {ImageResponse} from "next/og";
 import {NextRequest, NextResponse} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 
-export async function GET(_req: NextRequest) {
+export async function POST(_req: NextRequest) {
     try {
         // Get the URL and search parameters
         const searchParams = _req.nextUrl.searchParams;
