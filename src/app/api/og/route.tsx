@@ -18,9 +18,10 @@ export async function POST(_req: NextRequest) {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
-        const title = searchParams.get("title") || "Institutional-Grade Crypto Indices";
+        const title = searchParams.get("title") || "The Ultimate Crypto Index Platform";
         const description =
-            searchParams.get("description") || "Transparent, rules-based baskets across BTC, ETH, and sectors";
+            searchParams.get("description") ||
+            "Professional-grade indices with real-time tracking and institutional tools";
 
         return new ImageResponse(
             (
@@ -32,9 +33,9 @@ export async function POST(_req: NextRequest) {
                         flexDirection: "column",
                         alignItems: "flex-start",
                         justifyContent: "space-between",
-                        background: "linear-gradient(135deg, #0B0B0F 0%, #1A1A2E 50%, #16213E 100%)",
+                        background: "linear-gradient(135deg, #f8fafc 0%, #e0e7ff 50%, #faf5ff 100%)",
                         padding: "60px",
-                        fontFamily: "Inter, system-ui, sans-serif",
+                        fontFamily: "system-ui, -apple-system, sans-serif",
                     }}
                 >
                     {/* Header */}
@@ -52,32 +53,35 @@ export async function POST(_req: NextRequest) {
                             style={{
                                 display: "flex",
                                 alignItems: "center",
-                                fontSize: "32px",
-                                fontWeight: "bold",
-                                color: "#FFFFFF",
+                                fontSize: "28px",
+                                fontWeight: "700",
+                                color: "#111827",
                             }}
                         >
                             <div
                                 style={{
-                                    width: "48px",
-                                    height: "48px",
-                                    background: "linear-gradient(45deg, #22C55E, #16A34A)",
-                                    borderRadius: "12px",
-                                    marginRight: "16px",
+                                    width: "40px",
+                                    height: "40px",
+                                    background: "linear-gradient(135deg, #2563eb, #9333ea)",
+                                    borderRadius: "8px",
+                                    marginRight: "12px",
                                     display: "flex",
                                     alignItems: "center",
                                     justifyContent: "center",
+                                    fontSize: "18px",
+                                    fontWeight: "700",
+                                    color: "#ffffff",
                                 }}
                             >
-                                📊
+                                IX
                             </div>
                             Indexopia
                         </div>
                         {/* Domain */}
                         <div
                             style={{
-                                fontSize: "24px",
-                                color: "#94A3B8",
+                                fontSize: "20px",
+                                color: "#6b7280",
                             }}
                         >
                             indexopia.com
@@ -98,12 +102,12 @@ export async function POST(_req: NextRequest) {
                         {/* Main Title */}
                         <h1
                             style={{
-                                fontSize: "76px",
-                                fontWeight: "bold",
-                                color: "#FFFFFF",
+                                fontSize: "64px",
+                                fontWeight: "700",
+                                color: "#111827",
                                 lineHeight: "1.1",
-                                marginBottom: "24px",
-                                maxWidth: "800px",
+                                marginBottom: "20px",
+                                maxWidth: "900px",
                             }}
                         >
                             {title}
@@ -112,59 +116,60 @@ export async function POST(_req: NextRequest) {
                         {/* Subtitle */}
                         <p
                             style={{
-                                fontSize: "42px",
-                                color: "#94A3B8",
-                                lineHeight: "1.3",
+                                fontSize: "32px",
+                                color: "#4b5563",
+                                lineHeight: "1.4",
                                 marginBottom: "40px",
-                                maxWidth: "900px",
+                                maxWidth: "800px",
                             }}
                         >
                             {description}
                         </p>
 
-                        {/* Mini Index Cards */}
+                        {/* Feature Cards */}
                         <div
                             style={{
                                 display: "flex",
-                                gap: "24px",
+                                gap: "20px",
                                 marginTop: "20px",
                             }}
                         >
                             {[
-                                {name: "BTC+ETH Balanced", change: "+2.4%", positive: true},
-                                {name: "Top 10 Index", change: "+5.1%", positive: true},
-                                {name: "DeFi Sector", change: "-1.2%", positive: false},
-                            ].map((index, i) => (
+                                {name: "Real-Time Tracking", icon: "📈", color: "#3b82f6"},
+                                {name: "Professional Tools", icon: "🛡️", color: "#9333ea"},
+                                {name: "Thousands of Assets", icon: "⚡", color: "#059669"},
+                            ].map((feature, i) => (
                                 <div
                                     key={i}
                                     style={{
-                                        background: "rgba(255, 255, 255, 0.1)",
+                                        background: "#ffffff",
+                                        border: "1px solid #e5e7eb",
                                         borderRadius: "12px",
-                                        padding: "16px 20px",
+                                        padding: "20px 24px",
                                         display: "flex",
                                         flexDirection: "column",
-                                        alignItems: "flex-start",
-                                        backdropFilter: "blur(10px)",
+                                        alignItems: "center",
+                                        minWidth: "180px",
+                                        boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.1)",
                                     }}
                                 >
                                     <div
                                         style={{
-                                            fontSize: "18px",
-                                            color: "#FFFFFF",
-                                            fontWeight: "600",
-                                            marginBottom: "4px",
+                                            fontSize: "24px",
+                                            marginBottom: "8px",
                                         }}
                                     >
-                                        {index.name}
+                                        {feature.icon}
                                     </div>
                                     <div
                                         style={{
-                                            fontSize: "20px",
-                                            color: index.positive ? "#22C55E" : "#EF4444",
-                                            fontWeight: "bold",
+                                            fontSize: "16px",
+                                            color: "#111827",
+                                            fontWeight: "600",
+                                            textAlign: "center",
                                         }}
                                     >
-                                        {index.change}
+                                        {feature.name}
                                     </div>
                                 </div>
                             ))}
@@ -183,19 +188,21 @@ export async function POST(_req: NextRequest) {
                     >
                         <div
                             style={{
-                                fontSize: "28px",
-                                color: "#64748B",
+                                fontSize: "18px",
+                                color: "#6b7280",
+                                fontWeight: "500",
                             }}
                         >
-                            Live Market Data
+                            Institutional-Grade Crypto Indices
                         </div>
                         <div
                             style={{
-                                fontSize: "28px",
-                                color: "#64748B",
+                                fontSize: "18px",
+                                color: "#6b7280",
+                                fontWeight: "500",
                             }}
                         >
-                            Updated Daily
+                            Start Building Today
                         </div>
                     </div>
 
@@ -203,22 +210,22 @@ export async function POST(_req: NextRequest) {
                     <div
                         style={{
                             position: "absolute",
-                            top: "0",
-                            right: "0",
-                            width: "300px",
-                            height: "300px",
-                            background: "radial-gradient(circle, rgba(34, 197, 94, 0.1) 0%, transparent 70%)",
+                            top: "-50px",
+                            right: "-50px",
+                            width: "200px",
+                            height: "200px",
+                            background: "radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%)",
                             borderRadius: "50%",
                         }}
                     />
                     <div
                         style={{
                             position: "absolute",
-                            bottom: "0",
-                            left: "0",
-                            width: "200px",
-                            height: "200px",
-                            background: "radial-gradient(circle, rgba(59, 130, 246, 0.1) 0%, transparent 70%)",
+                            bottom: "-50px",
+                            left: "-50px",
+                            width: "150px",
+                            height: "150px",
+                            background: "radial-gradient(circle, rgba(147, 51, 234, 0.1) 0%, transparent 70%)",
                             borderRadius: "50%",
                         }}
                     />
