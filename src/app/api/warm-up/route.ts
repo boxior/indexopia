@@ -43,9 +43,9 @@ const handleRequest = async (req: NextRequest) => {
  * It's necessary to have POST request if here is the GET request to avoid pre-render issue during build project.
  */
 export async function POST(req: NextRequest) {
-    await handleRequest(req);
+    return await handleRequest(req);
 }
 
 export async function GET(req: NextRequest) {
-    await handleRequest(req);
+    return await handleRequest(req);
 }
