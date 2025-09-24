@@ -1,17 +1,13 @@
 import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
-
 /**
  * It's necessary to warm up the Vercel server;
  */
 
-const handleRequest = async (req: NextRequest) => {
+const handleRequest = async (_req: NextRequest) => {
     try {
-        // Get the URL and search parameters
-        const {searchParams} = new URL(req.url);
-
-        // Retrieve the apiKey from the query string
-        const apiKey = searchParams.get("apiKey");
+        // Get search parameters from NextRequest's nextUrl property
+        const apiKey = _req.nextUrl.searchParams.get("apiKey");
 
         if (!apiKey) {
             return NextResponse.json({error: "API key is missing"}, {status: 401});
@@ -23,7 +19,7 @@ const handleRequest = async (req: NextRequest) => {
         }
 
         return NextResponse.json(
-            {success: true, date: new Date().toISOString()},
+            {success: true, date: performance.now()},
             {
                 status: 200,
             }

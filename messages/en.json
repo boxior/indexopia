@@ -14,6 +14,18 @@
     "noChangedDetected": "No changes detected",
     "noDataAvailable": "No data available"
   },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you're looking for doesn't exist or may have been moved.",
+    "actions": {
+      "backToHome": "Back to Home",
+      "exploreIndices": "Explore Indices"
+    },
+    "help": {
+      "text": "If you think this is a mistake, please",
+      "contact": "contact us"
+    }
+  },
   "header": {
     "brand": "Indexopia",
     "navigation": {
@@ -500,5 +512,20 @@
       "ignoreEmail": "If you didn't request this sign-in, you can safely ignore this email - no action is required.",
       "footer": "© 2025 Indexopia. Professional crypto portfolio management."
     }
+  },
+  "seo": {
+    "siteName": "Indexopia",
+    "defaultTitle": "Indexopia — Institutional-Grade Crypto Indices",
+    "defaultDescription": "Indexopia provides transparent, institutional-grade cryptocurrency indices. Track market performance across curated digital asset baskets including Bitcoin, Ethereum, and sector-based indices.",
+    "homeTitle": "Explore Crypto Indices",
+    "homeDescription": "Discover top-performing crypto indices, compare performance, and dive into market insights with Indexopia.",
+    "indicesTitle": "Crypto Indices",
+    "indicesDescription": "Top-performing crypto indices, system crypto indices, custom crypto indices, compare performance.",
+    "indexTitle": "Crypto Index",
+    "indexDescription": "Crypto Index overview, assets, performance, and more.",
+    "legalTitle": "Legal Indexopia",
+    "legalDescription": "Terms and Privacy of Indexopia",
+    "authTitle": "Authorization",
+    "authDescription": "Sign in to Indexopia with secure email authentication."
   }
 }

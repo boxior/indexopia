@@ -7,7 +7,7 @@ import {Alert, AlertDescription} from "@/components/ui/alert";
 import {AlertCircle, Home, RefreshCw} from "lucide-react";
 import Link from "next/link";
 import {useTranslations} from "next-intl";
-import {PAGES_URLS} from "@/utils/constants/general.constants";
+import {CONTACT_EMAIL, PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default function ErrorPage() {
     const t = useTranslations("error");
@@ -85,7 +85,7 @@ export default function ErrorPage() {
                     <div className="text-center text-sm text-gray-600">
                         <p>
                             {t("support.needHelp")}{" "}
-                            <Link href={PAGES_URLS.contact} className="text-blue-600 hover:text-blue-700">
+                            <Link href={`mailto:${CONTACT_EMAIL}`} className="text-blue-600 hover:text-blue-700">
                                 {tFooter("contact")}
                             </Link>
                         </p>

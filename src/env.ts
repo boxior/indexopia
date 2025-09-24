@@ -22,6 +22,8 @@ interface EnvVariables {
     SSL_ALGORITHM: string;
     SSL_CERT: string;
     AUTH_RESEND_KEY: string;
+    // Public
+    NEXT_PUBLIC_SITE_URL: string;
 }
 
 // Parse environment variables and ensure they have the correct types
@@ -54,6 +56,8 @@ export const ENV_VARIABLES: EnvVariables = {
     SSL_ALGORITHM: process.env.SSL_ALGORITHM ?? process.env.SSL_ALGORITHM ?? "",
     SSL_CERT: process.env.SSL_CERT ?? process.env.SSL_CERT ?? "",
     AUTH_RESEND_KEY: process.env.AUTH_RESEND_KEY ?? process.env.AUTH_RESEND_KEY ?? "",
+    // Public
+    NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "",
 };
 
 console.log("ENV_VARIABLES", ENV_VARIABLES);

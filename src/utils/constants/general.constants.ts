@@ -30,8 +30,6 @@ export const PAGES_URLS = {
     // legal
     privacy: "/legal/privacy",
     terms: "/legal/terms",
-    // contact
-    contact: "/contact",
     //
     devAuth: `/${DEV_AUTH_NAME}`,
 };

@@ -6,6 +6,10 @@ import * as React from "react";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {getTranslations} from "next-intl/server";
+import type {Metadata} from "next";
+import {hasLocale} from "next-intl";
+import {routing} from "@/i18n/routing";
+import {notFound} from "next/navigation";
 
 interface PageProps {
     params: Promise<{id: string}>;
@@ -44,3 +48,22 @@ const IndexPageComponent = async ({params}: PageProps) => {
     const assets = await dbGetAssets();
     return <IndexPageClient index={index} assets={assets} />;
 };
+
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
+    const {locale} = await params;
+
+    if (!hasLocale(routing.locales, locale)) {
+        // Ensure 404 metadata doesn’t leak a wrong locale
+        notFound();
+    }
+
+    const t = await getTranslations({locale, namespace: "seo"});
+
+    const title = t("indexTitle");
+    const description = t("indexDescription");
+
+    return {
+        title,
+        description,
+    };
+}
