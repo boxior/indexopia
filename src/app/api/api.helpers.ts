@@ -8,7 +8,8 @@ import momentTimeZone from "moment-timezone";
 import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
 import {ASSETS_FOLDER_PATH, filterAssetsByOmitIds} from "@/lib/db/helpers/db.helpers";
 import {chunk, flatten} from "lodash";
-import {dbGetUniqueIndicesOverviewsAssetIds} from "@/lib/db/helpers/db.indexOverview.helpers";
+import {dbGetUniqueIndicesOverviewsAssetIds, manageSystemIndices} from "@/lib/db/helpers/db.indexOverview.helpers";
+import {NextResponse} from "next/server";
 
 export const manageAssets = async () => {
     const limit = MAX_ASSETS_COUNT + OMIT_ASSETS_IDS.length;
@@ -91,4 +92,31 @@ export const manageAssetsHistory = async (): Promise<AssetHistory[]> => {
     );
 
     return flatten(flatten(result));
+};
+
+export const populateDb = async () => {
+    try {
+        // Assets
+        const allAssets = await manageAssets();
+
+        // Assets history
+        const allAssetsHistory = await manageAssetsHistory();
+
+        await manageSystemIndices(allAssets, allAssetsHistory);
+
+        return NextResponse.json(
+            {success: true},
+            {
+                status: 200,
+            }
+        );
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json(
+            {data: JSON.parse(JSON.stringify(error))},
+            {
+                status: 400,
+            }
+        );
+    }
 };

@@ -1,7 +1,6 @@
 import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
-import {manageAssets, manageAssetsHistory} from "@/app/api/api.helpers";
-import {manageSystemIndices} from "@/lib/db/helpers/db.indexOverview.helpers";
+import {populateDb} from "@/app/api/api.helpers";
 
 /**
  * Populate entities: Assets, History, and Indices
@@ -23,20 +22,7 @@ const handleRequest = async (req: NextRequest) => {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
-        // Assets
-        const allAssets = await manageAssets();
-
-        // Assets history
-        const allAssetsHistory = await manageAssetsHistory();
-
-        await manageSystemIndices(allAssets, allAssetsHistory);
-
-        return NextResponse.json(
-            {success: true},
-            {
-                status: 200,
-            }
-        );
+        return await populateDb();
     } catch (error) {
         console.error(error);
         return NextResponse.json(
