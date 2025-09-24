@@ -14,6 +14,18 @@
     "noChangedDetected": "No changes detected",
     "noDataAvailable": "No data available"
   },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you're looking for doesn't exist or may have been moved.",
+    "actions": {
+      "backToHome": "Back to Home",
+      "exploreIndices": "Explore Indices"
+    },
+    "help": {
+      "text": "If you think this is a mistake, please",
+      "contact": "contact us"
+    }
+  },
   "header": {
     "brand": "Indexopia",
     "navigation": {

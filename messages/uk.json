@@ -14,6 +14,18 @@
     "noChangedDetected": "Змін не виявлено",
     "noDataAvailable": "Дані відсутні"
   },
+  "notFound": {
+    "title": "Сторінку не знайдено",
+    "description": "Сторінка, яку ви шукаєте, не існує або могла бути переміщена.",
+    "actions": {
+      "backToHome": "Повернутися на головну",
+      "exploreIndices": "Дослідити індекси"
+    },
+    "help": {
+      "text": "Якщо ви вважаєте, що це помилка, будь ласка,",
+      "contact": "зв’яжіться з нами"
+    }
+  },
   "header": {
     "brand": "Indexopia",
     "navigation": {
