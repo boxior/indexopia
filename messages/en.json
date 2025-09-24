@@ -506,6 +506,14 @@
     "defaultTitle": "Indexopia — Institutional-Grade Crypto Indices",
     "defaultDescription": "Indexopia provides transparent, institutional-grade cryptocurrency indices. Track market performance across curated digital asset baskets including Bitcoin, Ethereum, and sector-based indices.",
     "homeTitle": "Explore Crypto Indices",
-    "homeDescription": "Discover top-performing crypto indices, compare performance, and dive into market insights with Indexopia."
+    "homeDescription": "Discover top-performing crypto indices, compare performance, and dive into market insights with Indexopia.",
+    "indicesTitle": "Crypto Indices",
+    "indicesDescription": "Top-performing crypto indices, system crypto indices, custom crypto indices, compare performance.",
+    "indexTitle": "Crypto Index",
+    "indexDescription": "Crypto Index overview, assets, performance, and more.",
+    "legalTitle": "Legal Indexopia",
+    "legalDescription": "Terms and Privacy of Indexopia",
+    "authTitle": "Authorization",
+    "authDescription": "Sign in to Indexopia with secure email authentication."
   }
 }

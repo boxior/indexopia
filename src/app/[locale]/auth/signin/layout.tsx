@@ -1,13 +1,7 @@
-import type {Metadata} from "next";
 import {auth} from "@/auth";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
 import {redirect} from "next/navigation";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
-
-export const metadata: Metadata = {
-    title: "Indices",
-    description: "Crypto indices",
-};
 
 export default async function SignInLayout({
     children,

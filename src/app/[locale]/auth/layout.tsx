@@ -2,11 +2,10 @@ import type {Metadata} from "next";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 import Footer from "@/app/components/Footer";
 import BasicHeader from "@/app/components/BasicHeader";
-
-export const metadata: Metadata = {
-    title: "Indices",
-    description: "Crypto indices",
-};
+import {hasLocale} from "next-intl";
+import {routing} from "@/i18n/routing";
+import {notFound} from "next/navigation";
+import {getTranslations} from "next-intl/server";
 
 export default async function SignInLayout({
     children,
@@ -33,3 +32,22 @@ const AuthLayoutComponent = async ({
         </div>
     );
 };
+
+export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {
+    const {locale} = await params;
+
+    if (!hasLocale(routing.locales, locale)) {
+        // Ensure 404 metadata doesn’t leak a wrong locale
+        notFound();
+    }
+
+    const t = await getTranslations({locale, namespace: "seo"});
+
+    const title = t("authTitle");
+    const description = t("authDescription");
+
+    return {
+        title,
+        description,
+    };
+}
