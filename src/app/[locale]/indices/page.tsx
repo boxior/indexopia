@@ -8,7 +8,7 @@ import {auth} from "@/auth";
 import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {actionGetIndicesWithHistoryOverview} from "@/app/[locale]/indices/actions";
 import {getTranslations} from "next-intl/server";
-import {Asset, IndexOverview, IndexOverviewWithHistory} from "@/utils/types/general.types";
+import {IndexOverview} from "@/utils/types/general.types";
 import moment from "moment";
 import {actionUpdateIndexOverview} from "@/app/[locale]/indices/[id]/actions";
 import {chunk, flatten} from "lodash";
@@ -54,22 +54,16 @@ const IndicesPageComponent = async () => {
     console.timeEnd("fetchedIndices");
 
     const systemIndices = fetchedIndices[0];
-    // const userIndices = await handleUpdateUserIndicesToUpToDateHistory(fetchedIndices[1]);
-    const userIndices = fetchedIndices[1];
+    const userIndices = await handleUpdateUserIndicesToUpToDateHistory(fetchedIndices[1]);
+    // const userIndices = fetchedIndices[1];
 
     const indices = [...systemIndices, ...userIndices];
     console.time("fetchedProps");
 
-    // const fetchedProps = await Promise.all([dbGetAssets(), actionGetIndicesWithHistoryOverview(indices)]);
-    const fetchedProps = [[], indices];
+    const fetchedProps = await Promise.all([dbGetAssets(), actionGetIndicesWithHistoryOverview(indices)]);
     console.timeEnd("fetchedProps");
 
-    return (
-        <IndexesPageClient
-            assets={fetchedProps[0] as unknown as Asset[]}
-            indices={fetchedProps[1] as unknown as IndexOverviewWithHistory[]}
-        />
-    );
+    return <IndexesPageClient assets={fetchedProps[0]} indices={fetchedProps[1]} />;
 };
 
 /**
