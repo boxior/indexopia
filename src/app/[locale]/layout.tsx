@@ -72,8 +72,11 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
         languages[l] = `${siteUrl}/${l}`;
     }
 
-    const isProd = process.env.NODE_ENV === "production";
-    const isPreview = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production";
+    // const isProd = process.env.NODE_ENV === "production";
+    // const isPreview = process.env.VERCEL_ENV && process.env.VERCEL_ENV !== "production";
+
+    const isProd = true;
+    const isPreview = false;
 
     return {
         metadataBase: new URL(siteUrl),
