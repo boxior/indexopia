@@ -34,21 +34,34 @@ export default async function IndicesPage() {
 }
 
 const IndicesPageComponent = async () => {
-    await connection();
+    console.time("connection");
 
+    await connection();
+    console.timeEnd("connection");
+
+    console.time("auth");
     const session = await auth();
+    console.timeEnd("auth");
+
     const currentUserId = session?.user?.id;
+
+    console.time("fetchedIndices");
 
     const fetchedIndices = await Promise.all([
         dbGetIndicesOverview(),
         currentUserId ? dbGetIndicesOverview(currentUserId) : [],
     ]);
+    console.timeEnd("fetchedIndices");
 
     const systemIndices = fetchedIndices[0];
     const userIndices = await handleUpdateUserIndicesToUpToDateHistory(fetchedIndices[1]);
+    // const userIndices = fetchedIndices[1];
 
     const indices = [...systemIndices, ...userIndices];
+    console.time("fetchedProps");
+
     const fetchedProps = await Promise.all([dbGetAssets(), actionGetIndicesWithHistoryOverview(indices)]);
+    console.timeEnd("fetchedProps");
 
     return <IndexesPageClient assets={fetchedProps[0]} indices={fetchedProps[1]} />;
 };
