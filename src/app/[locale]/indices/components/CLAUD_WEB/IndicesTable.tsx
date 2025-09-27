@@ -1,5 +1,5 @@
 "use client";
-import {useState, useMemo} from "react";
+import {useState, useMemo, useEffect} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
@@ -16,7 +16,7 @@ import {
     EyeOff,
     Eye,
 } from "lucide-react";
-import {EntityMode, Id, IndexOverviewWithHistory} from "@/utils/types/general.types";
+import {EntityMode, Id, IndexOverview, IndexOverviewWithHistory} from "@/utils/types/general.types";
 import {IndicesPagination} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesPagination";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {getIndexDurationLabel} from "@/app/[locale]/indices/helpers";
@@ -29,9 +29,10 @@ import {useSession} from "next-auth/react";
 import {LinkReferer} from "@/app/components/LinkReferer";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {useTranslations} from "next-intl";
+import {actionGetIndicesWithHistoryOverview} from "@/app/[locale]/indices/actions";
 
 interface IndicesTableProps {
-    indices: IndexOverviewWithHistory[];
+    indices: IndexOverview[];
     mode?: EntityMode;
     onEditAction?: (index: IndexOverviewWithHistory) => void;
     onDeleteAction?: (index: IndexOverviewWithHistory) => void;
@@ -44,9 +45,25 @@ type SortOrder = "asc" | "desc";
 export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneAction, mode}: IndicesTableProps) {
     const router = useRouter();
 
+    const [indicesWithHistory, setIndicesWithHistory] = useState<IndexOverviewWithHistory[]>([]);
+    const [isLoadingIndicesWithHistory, setIsLoadingIndicesWithHistory] = useState(true);
+
     const [sortField, setSortField] = useState<SortField>("total");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     const [expandedRows, setExpandedRows] = useState<Set<Id>>(new Set());
+
+    useEffect(() => {
+        (async () => {
+            try {
+                setIsLoadingIndicesWithHistory(true);
+
+                const fetchedIndicesWithHistory = await actionGetIndicesWithHistoryOverview(indices);
+                setIndicesWithHistory(fetchedIndicesWithHistory);
+            } finally {
+                setIsLoadingIndicesWithHistory(false);
+            }
+        })();
+    }, []);
 
     const {data} = useSession();
     const currentUserId = data?.user?.id;
@@ -145,7 +162,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
         setExpandedRows(newExpanded);
     };
 
-    const isUserIndex = (index: IndexOverviewWithHistory) => !!index.userId;
+    const isUserIndex = (index: IndexOverview) => !!index.userId;
 
     const handleSignInClick = () => {
         router.push(PAGES_URLS.authSignIn);
@@ -163,8 +180,10 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     );
 
     // Mobile Card Component
-    const MobileIndexCard = ({index}: {index: IndexOverviewWithHistory}) => {
+    const MobileIndexCard = ({index}: {index: IndexOverview}) => {
         const isExpanded = expandedRows.has(index.id);
+
+        const indexWithHistory = indicesWithHistory.find(i => i.id === index.id);
 
         return (
             <div
@@ -224,7 +243,11 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                     <div className="mt-4 pt-4 border-t space-y-3">
                         {/* Chart Preview */}
                         <div className="mb-4 relative">
-                            <IndexHistoryChartPreview indexOverview={index} className="h-64" />
+                            <IndexHistoryChartPreview
+                                indexOverview={indexWithHistory}
+                                className="h-64"
+                                isLoading={isLoadingIndicesWithHistory}
+                            />
                             {hiddenOption && <ProtectedOverlay />}
                         </div>
 
@@ -272,7 +295,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                             variant="outline"
                                             size="sm"
                                             className="h-8 w-8 p-0"
-                                            onClick={() => onCloneAction?.(index)}
+                                            onClick={() => indexWithHistory && onCloneAction?.(indexWithHistory)}
                                         >
                                             <Copy className="h-4 w-4" />
                                         </Button>
@@ -290,7 +313,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                                     variant="outline"
                                                     size="sm"
                                                     className="h-8 w-8 p-0"
-                                                    onClick={() => onEditAction?.(index)}
+                                                    onClick={() => indexWithHistory && onEditAction?.(indexWithHistory)}
                                                 >
                                                     <Edit className="h-4 w-4" />
                                                 </Button>
@@ -306,7 +329,9 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                                                     variant="outline"
                                                     size="sm"
                                                     className="h-8 w-8 p-0 text-red-600 hover:text-red-700 border-red-200 hover:border-red-300"
-                                                    onClick={() => onDeleteAction?.(index)}
+                                                    onClick={() =>
+                                                        indexWithHistory && onDeleteAction?.(indexWithHistory)
+                                                    }
                                                 >
                                                     <Trash2 className="h-4 w-4" />
                                                 </Button>
@@ -392,140 +417,154 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {paginatedIndices.map(index => (
-                                <TableRow
-                                    key={index.id}
-                                    className={
-                                        isUserIndex(index)
-                                            ? "bg-primary/5 hover:bg-primary/10 border-l-4 border-l-primary"
-                                            : ""
-                                    }
-                                >
-                                    <TableCell className={"font-medium"}>
-                                        {hiddenOption ? (
-                                            <span className="relative">
-                                                {index.name}
-                                                <span
-                                                    className={
-                                                        isUserIndex(index)
-                                                            ? "absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300 ease-out"
-                                                            : "absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300 ease-out"
-                                                    }
-                                                ></span>
-                                            </span>
-                                        ) : (
-                                            <LinkReferer
-                                                href={PAGES_URLS.index(index.id)}
-                                                view={isUserIndex(index) ? "primary" : "secondary"}
-                                                children={index.name}
-                                            />
-                                        )}
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="flex flex-wrap gap-1">
-                                            {index.assets.slice(0, 3).map(asset => (
-                                                <Badge key={asset.id} variant="outline" className="text-xs">
-                                                    {asset.symbol}
-                                                </Badge>
-                                            ))}
-                                            {index.assets.length > 3 && (
-                                                <Badge variant="outline" className="text-xs">
-                                                    +{index.assets.length - 3}
-                                                </Badge>
+                            {paginatedIndices.map(index => {
+                                const indexWithHistory = indicesWithHistory.find(i => i.id === index.id);
+
+                                return (
+                                    <TableRow
+                                        key={index.id}
+                                        className={
+                                            isUserIndex(index)
+                                                ? "bg-primary/5 hover:bg-primary/10 border-l-4 border-l-primary"
+                                                : ""
+                                        }
+                                    >
+                                        <TableCell className={"font-medium"}>
+                                            {hiddenOption ? (
+                                                <span className="relative">
+                                                    {index.name}
+                                                    <span
+                                                        className={
+                                                            isUserIndex(index)
+                                                                ? "absolute bottom-0 left-0 w-0 h-0.5 bg-primary group-hover:w-full transition-all duration-300 ease-out"
+                                                                : "absolute bottom-0 left-0 w-0 h-0.5 bg-blue-600 group-hover:w-full transition-all duration-300 ease-out"
+                                                        }
+                                                    ></span>
+                                                </span>
+                                            ) : (
+                                                <LinkReferer
+                                                    href={PAGES_URLS.index(index.id)}
+                                                    view={isUserIndex(index) ? "primary" : "secondary"}
+                                                    children={index.name}
+                                                />
                                             )}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="w-32 h-16 relative">
-                                            <IndexHistoryChartPreview
-                                                indexOverview={index}
-                                                className="h-full border-0 p-0 bg-transparent"
-                                            />
-                                            {hiddenOption && <ProtectedOverlay />}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>{renderSafelyPercentage(index.historyOverview.days7)}</TableCell>
-                                    <TableCell>{renderSafelyPercentage(index.historyOverview.days30)}</TableCell>
-                                    <TableCell>
-                                        <div className="relative">
-                                            {renderSafelyPercentage(index.historyOverview.total)}
-                                            {hiddenOption && <ProtectedOverlay />}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        <div className="relative">
-                                            <span className="text-red-600">
-                                                -{renderSafelyNumber(index.maxDrawDown.value)}%
-                                            </span>
-                                            {hiddenOption && <ProtectedOverlay />}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell>
-                                        {!!index.startTime && !!index.endTime ? (
-                                            <span className="text-sm text-gray-500">
-                                                {getIndexDurationLabel(index.startTime, index.endTime, tDuration)}
-                                            </span>
-                                        ) : (
-                                            <span className="text-sm text-gray-500">-</span>
-                                        )}
-                                    </TableCell>
-                                    {!isViewMode && (
-                                        <TableCell className="text-right">
-                                            <div className="flex items-center justify-end gap-1">
-                                                <Tooltip>
-                                                    <TooltipTrigger asChild>
-                                                        <Button
-                                                            variant="ghost"
-                                                            size="sm"
-                                                            className="h-8 w-8 p-0"
-                                                            onClick={() => onCloneAction?.(index)}
-                                                        >
-                                                            <Copy className="h-4 w-4" />
-                                                        </Button>
-                                                    </TooltipTrigger>
-                                                    <TooltipContent>
-                                                        <p>{tTable("tooltips.clone")}</p>
-                                                    </TooltipContent>
-                                                </Tooltip>
-                                                {isUserIndex(index) && index.userId === currentUserId && (
-                                                    <>
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    className="h-8 w-8 p-0"
-                                                                    onClick={() => onEditAction?.(index)}
-                                                                >
-                                                                    <Edit className="h-4 w-4" />
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                <p>{tTable("tooltips.edit")}</p>
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                        <Tooltip>
-                                                            <TooltipTrigger asChild>
-                                                                <Button
-                                                                    variant="ghost"
-                                                                    size="sm"
-                                                                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                                                                    onClick={() => onDeleteAction?.(index)}
-                                                                >
-                                                                    <Trash2 className="h-4 w-4" />
-                                                                </Button>
-                                                            </TooltipTrigger>
-                                                            <TooltipContent>
-                                                                <p>{tTable("tooltips.delete")}</p>
-                                                            </TooltipContent>
-                                                        </Tooltip>
-                                                    </>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="flex flex-wrap gap-1">
+                                                {index.assets.slice(0, 3).map(asset => (
+                                                    <Badge key={asset.id} variant="outline" className="text-xs">
+                                                        {asset.symbol}
+                                                    </Badge>
+                                                ))}
+                                                {index.assets.length > 3 && (
+                                                    <Badge variant="outline" className="text-xs">
+                                                        +{index.assets.length - 3}
+                                                    </Badge>
                                                 )}
                                             </div>
                                         </TableCell>
-                                    )}
-                                </TableRow>
-                            ))}
+                                        <TableCell>
+                                            <div className="w-32 h-16 relative">
+                                                <IndexHistoryChartPreview
+                                                    indexOverview={indexWithHistory}
+                                                    className="h-full border-0 p-0 bg-transparent"
+                                                    isLoading={isLoadingIndicesWithHistory}
+                                                />
+                                                {hiddenOption && <ProtectedOverlay />}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>{renderSafelyPercentage(index.historyOverview.days7)}</TableCell>
+                                        <TableCell>{renderSafelyPercentage(index.historyOverview.days30)}</TableCell>
+                                        <TableCell>
+                                            <div className="relative">
+                                                {renderSafelyPercentage(index.historyOverview.total)}
+                                                {hiddenOption && <ProtectedOverlay />}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            <div className="relative">
+                                                <span className="text-red-600">
+                                                    -{renderSafelyNumber(index.maxDrawDown.value)}%
+                                                </span>
+                                                {hiddenOption && <ProtectedOverlay />}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell>
+                                            {!!index.startTime && !!index.endTime ? (
+                                                <span className="text-sm text-gray-500">
+                                                    {getIndexDurationLabel(index.startTime, index.endTime, tDuration)}
+                                                </span>
+                                            ) : (
+                                                <span className="text-sm text-gray-500">-</span>
+                                            )}
+                                        </TableCell>
+                                        {!isViewMode && (
+                                            <TableCell className="text-right">
+                                                <div className="flex items-center justify-end gap-1">
+                                                    <Tooltip>
+                                                        <TooltipTrigger asChild>
+                                                            <Button
+                                                                variant="ghost"
+                                                                size="sm"
+                                                                className="h-8 w-8 p-0"
+                                                                onClick={() =>
+                                                                    indexWithHistory &&
+                                                                    onCloneAction?.(indexWithHistory)
+                                                                }
+                                                            >
+                                                                <Copy className="h-4 w-4" />
+                                                            </Button>
+                                                        </TooltipTrigger>
+                                                        <TooltipContent>
+                                                            <p>{tTable("tooltips.clone")}</p>
+                                                        </TooltipContent>
+                                                    </Tooltip>
+                                                    {isUserIndex(index) && index.userId === currentUserId && (
+                                                        <>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        className="h-8 w-8 p-0"
+                                                                        onClick={() =>
+                                                                            indexWithHistory &&
+                                                                            onEditAction?.(indexWithHistory)
+                                                                        }
+                                                                    >
+                                                                        <Edit className="h-4 w-4" />
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p>{tTable("tooltips.edit")}</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                            <Tooltip>
+                                                                <TooltipTrigger asChild>
+                                                                    <Button
+                                                                        variant="ghost"
+                                                                        size="sm"
+                                                                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                                                                        onClick={() =>
+                                                                            indexWithHistory &&
+                                                                            onDeleteAction?.(indexWithHistory)
+                                                                        }
+                                                                    >
+                                                                        <Trash2 className="h-4 w-4" />
+                                                                    </Button>
+                                                                </TooltipTrigger>
+                                                                <TooltipContent>
+                                                                    <p>{tTable("tooltips.delete")}</p>
+                                                                </TooltipContent>
+                                                            </Tooltip>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </TableCell>
+                                        )}
+                                    </TableRow>
+                                );
+                            })}
                         </TableBody>
                     </Table>
                 </div>

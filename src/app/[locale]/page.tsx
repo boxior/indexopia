@@ -28,7 +28,6 @@ const HomePageSuspended = async () => {
     const systemIndicesOverview = await dbGetIndicesOverview();
 
     const topIndices = filterTopPerformance(systemIndicesOverview, 3);
-    const indices = await actionGetIndicesWithHistoryOverview(topIndices);
     const t = await getTranslations("home");
 
     return (
@@ -38,7 +37,7 @@ const HomePageSuspended = async () => {
                 <HeroSection />
                 <section className="py-20 bg-white">
                     <div className="container mx-auto px-4">
-                        <IndicesTable indices={indices} mode={EntityMode.VIEW} />
+                        <IndicesTable indices={topIndices} mode={EntityMode.VIEW} />
                         <div className="text-center mt-8">
                             <Link href={PAGES_URLS.indices}>
                                 <Button size="lg" variant="outline">
