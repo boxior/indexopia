@@ -13,6 +13,9 @@ import {Asset, Id, IndexOverviewAsset, IndexOverviewForCreate} from "@/utils/typ
 import {UseIndexActionsReturns} from "@/app/[locale]/indices/[id]/hooks/useIndexActions.hook";
 import {useTranslations} from "next-intl";
 import {DEFAULT_INDEX_STARTING_BALANCE, INDEX_VALIDATION, MAX_PORTION} from "@/utils/constants/general.constants";
+import {useEffect, useState} from "react";
+import {actionGetAssets} from "@/app/[locale]/indices/[id]/actions";
+import ContentLoader from "@/components/Suspense/ContentLoader";
 
 export enum IndexMode {
     CREATE = "create",
@@ -23,7 +26,6 @@ interface CreateUpdateIndexModalProps {
     isOpen: boolean;
     onCancelAction: () => void;
     onSaveAction: UseIndexActionsReturns["onSave"];
-    availableAssets: Asset[];
     indexOverview?: IndexOverviewForCreate;
     mode?: IndexMode;
 }
@@ -44,7 +46,6 @@ export function IndexModal({
     isOpen,
     onCancelAction,
     onSaveAction,
-    availableAssets,
     indexOverview,
     mode = IndexMode.CREATE,
 }: CreateUpdateIndexModalProps) {
@@ -55,6 +56,21 @@ export function IndexModal({
     const tIndexModalModes = useTranslations("indexModal.modes");
     const tIndexModalFields = useTranslations("indexModal.fields");
     const tIndexModalValidation = useTranslations("indexModal.validation");
+
+    const [availableAssets, setAvailableAssets] = useState<Asset[]>([]);
+    const [isLoadingAvailableAssets, setIsLoadingAvailableAssets] = useState(true);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                setIsLoadingAvailableAssets(true);
+
+                setAvailableAssets(await actionGetAssets());
+            } finally {
+                setIsLoadingAvailableAssets(false);
+            }
+        })();
+    }, []);
 
     const validationSchema = Yup.object().shape({
         name: Yup.string()
@@ -218,6 +234,17 @@ export function IndexModal({
             setSubmitting(false);
         }
     };
+
+    if (isLoadingAvailableAssets) {
+        return (
+            <Dialog open={isOpen} onOpenChange={onCancelAction}>
+                <DialogContent className="sm:max-w-[600px]">
+                    <ContentLoader type={"card"} count={1} />
+                </DialogContent>
+            </Dialog>
+        );
+    }
+
     return (
         <Dialog open={isOpen} onOpenChange={onCancelAction}>
             <DialogContent className="sm:max-w-[600px]">

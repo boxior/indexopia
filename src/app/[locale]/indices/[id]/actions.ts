@@ -1,13 +1,17 @@
 "use server";
 
 import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Id, IndexOverview} from "@/utils/types/general.types";
-import {getAssetsWithHistories, getIndexHistory, getHistoryOverview} from "@/lib/db/helpers/db.helpers";
+import {getAssetsWithHistories, getHistoryOverview} from "@/lib/db/helpers/db.helpers";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 import {
     dbDeleteIndexOverview,
     dbPostIndexOverview,
     dbPutIndexOverview,
 } from "@/lib/db/helpers/db.indexOverview.helpers";
+import {getIndexHistory} from "@/utils/heleprs/index/index.helpers";
+import {unstable_cacheTag as cacheTag} from "next/cache";
+import {CacheTag} from "@/utils/cache/constants.cache";
+import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 
 export const actionUpdateIndexOverview = async (indexOverview: IndexOverview, revalidateTags?: boolean) => {
     let assets = [];
@@ -92,4 +96,11 @@ export const actionCreateIndexOverview = async ({
 
 export const actionDeleteIndexOverview = async (id: Id) => {
     await dbDeleteIndexOverview(id);
+};
+
+export const actionGetAssets = async () => {
+    "use cache";
+    cacheTag(CacheTag.ASSETS);
+
+    return dbGetAssets();
 };

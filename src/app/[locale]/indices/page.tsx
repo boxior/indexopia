@@ -5,8 +5,6 @@ import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 import ContentLoader from "@/components/Suspense/ContentLoader";
 import {IndexesPageClient} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesPageClient";
 import {auth} from "@/auth";
-import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
-import {actionGetIndicesWithHistoryOverview} from "@/app/[locale]/indices/actions";
 import {getTranslations} from "next-intl/server";
 import {IndexOverview} from "@/utils/types/general.types";
 import moment from "moment";
@@ -55,15 +53,10 @@ const IndicesPageComponent = async () => {
 
     const systemIndices = fetchedIndices[0];
     const userIndices = await handleUpdateUserIndicesToUpToDateHistory(fetchedIndices[1]);
-    // const userIndices = fetchedIndices[1];
 
     const indices = [...systemIndices, ...userIndices];
-    console.time("fetchedProps");
 
-    const fetchedProps = await Promise.all([dbGetAssets(), actionGetIndicesWithHistoryOverview(indices)]);
-    console.timeEnd("fetchedProps");
-
-    return <IndexesPageClient assets={fetchedProps[0]} indices={fetchedProps[1]} />;
+    return <IndexesPageClient indices={indices} />;
 };
 
 /**

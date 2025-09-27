@@ -11,7 +11,6 @@ import Link from "next/link";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
 import {Button} from "@/components/ui/button";
 import {filterTopPerformance} from "@/app/[locale]/indices/helpers";
-import {actionGetIndicesWithHistoryOverview} from "@/app/[locale]/indices/actions";
 import {getTranslations} from "next-intl/server";
 
 export default async function HomePage() {

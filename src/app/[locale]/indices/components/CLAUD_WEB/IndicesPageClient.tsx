@@ -7,7 +7,7 @@ import {BarChart, Plus, TrendingDown, TrendingUp} from "lucide-react";
 import {IndicesTable} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesTable";
 import {IndicesFilters} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesFilters";
 import {IndexModal} from "@/app/[locale]/indices/components/CLAUD_WEB/IndexModal";
-import {Asset, IndexOverview, IndexOverviewWithHistory} from "@/utils/types/general.types";
+import {Asset, IndexOverview} from "@/utils/types/general.types";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {NumeralFormat} from "@numeral";
 import {filterTopPerformance} from "@/app/[locale]/indices/helpers";
@@ -16,7 +16,7 @@ import {DeleteIndexConfirmModal} from "@/app/[locale]/indices/components/CLAUD_W
 import * as React from "react";
 import {useTranslations} from "next-intl";
 
-export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWithHistory[]; assets: Asset[]}) => {
+export const IndexesPageClient = ({indices}: {indices: IndexOverview[]}) => {
     const {
         onSave,
         onClone,
@@ -39,8 +39,6 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
     const [performanceFilter, setPerformanceFilter] = useState("all");
-
-    const availableAssets: Asset[] = assets;
 
     const preFilteredIndices = useMemo(() => {
         return indices.filter(index => {
@@ -329,7 +327,6 @@ export const IndexesPageClient = ({indices, assets}: {indices: IndexOverviewWith
                 isOpen={modalOpen}
                 onCancelAction={onCancel}
                 onSaveAction={onSave}
-                availableAssets={availableAssets}
                 indexOverview={modalIndex}
                 mode={indexMode}
             />

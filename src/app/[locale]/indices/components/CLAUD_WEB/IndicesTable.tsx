@@ -16,7 +16,15 @@ import {
     EyeOff,
     Eye,
 } from "lucide-react";
-import {EntityMode, Id, IndexOverview, IndexOverviewWithHistory} from "@/utils/types/general.types";
+import {
+    AssetHistory,
+    AssetWithHistoryAndOverview,
+    EntityMode,
+    Id,
+    IndexOverview,
+    IndexOverviewAsset,
+    IndexOverviewWithHistory,
+} from "@/utils/types/general.types";
 import {IndicesPagination} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesPagination";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {getIndexDurationLabel} from "@/app/[locale]/indices/helpers";
@@ -29,7 +37,10 @@ import {useSession} from "next-auth/react";
 import {LinkReferer} from "@/app/components/LinkReferer";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {useTranslations} from "next-intl";
-import {actionGetIndicesWithHistoryOverview} from "@/app/[locale]/indices/actions";
+import {actionGetAssetsWithHistory} from "@/app/[locale]/indices/actions";
+import {chunk, flatten, pick, uniqBy} from "lodash";
+import moment from "moment";
+import {getIndexHistory} from "@/utils/heleprs/index/index.helpers";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
@@ -57,7 +68,67 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
             try {
                 setIsLoadingIndicesWithHistory(true);
 
-                const fetchedIndicesWithHistory = await actionGetIndicesWithHistoryOverview(indices);
+                const allUsedAssets = indices
+                    .reduce((acc, index) => {
+                        return uniqBy([...acc, ...index.assets], "id");
+                    }, [] as IndexOverviewAsset[])
+                    .map(a => pick(a, ["id"]));
+
+                const startTime = moment()
+                    .utc()
+                    .startOf("d")
+                    .add(-HISTORY_OVERVIEW_DAYS - 1, "days")
+                    .valueOf();
+
+                const assetsChunks = chunk(
+                    allUsedAssets.map(a => ({id: a.id})),
+                    10
+                );
+
+                const normalizedAssetsHistory: Record<string, AssetHistory[]> = {};
+
+                const assetsChunksWithHistory = flatten(
+                    flatten(
+                        await Promise.all(
+                            assetsChunks.map(chunk => actionGetAssetsWithHistory({assets: chunk, startTime}))
+                        )
+                    )
+                );
+
+                for (const assetsChunkWithHistory of assetsChunksWithHistory) {
+                    for (const assetWithHistory of assetsChunkWithHistory.assets) {
+                        normalizedAssetsHistory[assetWithHistory.id] = assetWithHistory.history;
+                    }
+                }
+
+                const {assets: allUsedAssetsWithHistories} = await actionGetAssetsWithHistory({
+                    assets: allUsedAssets,
+                    startTime,
+                    normalizedAssetsHistory,
+                });
+
+                const fetchedIndicesWithHistory = indices.map(index => {
+                    const indexAssetsWithHistoryAndOverview = index.assets.map(a => {
+                        const usedAssetsWithHistory =
+                            allUsedAssetsWithHistories.find(usedAsset => usedAsset.id === a.id) ?? {};
+
+                        return {
+                            ...a,
+                            ...usedAssetsWithHistory,
+                        };
+                    });
+
+                    const history = getIndexHistory({
+                        ...index,
+                        assets: indexAssetsWithHistoryAndOverview as AssetWithHistoryAndOverview[],
+                    });
+
+                    return {
+                        ...index,
+                        history,
+                    };
+                });
+
                 setIndicesWithHistory(fetchedIndicesWithHistory);
             } finally {
                 setIsLoadingIndicesWithHistory(false);
