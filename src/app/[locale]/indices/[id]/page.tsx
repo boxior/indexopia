@@ -4,7 +4,6 @@ import {IndexPageClient} from "@/app/[locale]/indices/[id]/components/CLAUD_WEB/
 import ContentLoader from "@/components/Suspense/ContentLoader";
 import * as React from "react";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
-import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {getTranslations} from "next-intl/server";
 import type {Metadata} from "next";
 import {hasLocale} from "next-intl";
@@ -45,8 +44,7 @@ const IndexPageComponent = async ({params}: PageProps) => {
         id,
     });
 
-    const assets = await dbGetAssets();
-    return <IndexPageClient index={index} assets={assets} />;
+    return <IndexPageClient index={index} />;
 };
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {

@@ -6,7 +6,7 @@ import {IndexOverview} from "@/app/[locale]/indices/[id]/components/CLAUD_WEB/In
 import {IndexChart} from "@/app/[locale]/indices/[id]/components/CLAUD_WEB/IndexChart";
 import {AssetsTable} from "@/app/[locale]/indices/[id]/components/CLAUD_WEB/AssetsTable";
 import {IndexModal, IndexMode} from "@/app/[locale]/indices/components/CLAUD_WEB/IndexModal";
-import {Asset, AssetWithHistoryOverviewPortionAndMaxDrawDown, Index} from "@/utils/types/general.types";
+import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Index} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
 import {useIndexActions, UseIndexActionsReturns} from "@/app/[locale]/indices/[id]/hooks/useIndexActions.hook";
@@ -15,13 +15,7 @@ import * as React from "react";
 import {TooltipProvider} from "@/components/ui/tooltip";
 import {useTranslations} from "next-intl";
 
-export function IndexPageClient({
-    index,
-    assets: availableAssets,
-}: {
-    index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null;
-    assets: Asset[];
-}) {
+export function IndexPageClient({index}: {index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null}) {
     const router = useRouter();
     const session = useSession();
     const currentUserId = session.data?.user?.id;
@@ -111,7 +105,6 @@ export function IndexPageClient({
                 isOpen={modalOpen}
                 onCancelAction={onCancel}
                 onSaveAction={handleSave}
-                availableAssets={availableAssets}
                 indexOverview={modalIndex}
                 mode={indexMode}
             />
