@@ -1,5 +1,4 @@
 import {connection} from "next/server";
-import {getIndex} from "@/lib/db/helpers/db.helpers";
 import {IndexPageClient} from "@/app/[locale]/indices/[id]/components/CLAUD_WEB/IndexPageClient";
 import ContentLoader from "@/components/Suspense/ContentLoader";
 import * as React from "react";
@@ -9,6 +8,7 @@ import type {Metadata} from "next";
 import {hasLocale} from "next-intl";
 import {routing} from "@/i18n/routing";
 import {notFound} from "next/navigation";
+import {dbGetIndexOverviewById} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 interface PageProps {
     params: Promise<{id: string}>;
@@ -40,11 +40,10 @@ const IndexPageComponent = async ({params}: PageProps) => {
     await connection();
 
     const {id} = await params;
-    const index = await getIndex({
-        id,
-    });
 
-    return <IndexPageClient index={index} />;
+    const indexOverview = await dbGetIndexOverviewById(id);
+
+    return <IndexPageClient index={indexOverview} />;
 };
 
 export async function generateMetadata({params}: {params: Promise<{locale: string}>}): Promise<Metadata> {

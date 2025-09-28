@@ -3,7 +3,7 @@ import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {TrendingUp, TrendingDown, BarChart3, Calendar, Copy, Edit, Trash2, ChevronUp, ChevronDown} from "lucide-react";
-import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Index} from "@/utils/types/general.types";
+import {IndexOverview as IndexOverviewType} from "@/utils/types/general.types";
 import {getIndexDurationLabel} from "@/app/[locale]/indices/helpers";
 import {UseIndexActionsReturns} from "@/app/[locale]/indices/[id]/hooks/useIndexActions.hook";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
@@ -14,7 +14,7 @@ import {sortIndexAssetsByPortion} from "@/utils/heleprs/index/index.helpers";
 import {useTranslations} from "next-intl";
 
 interface IndexOverviewProps {
-    index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
+    index: IndexOverviewType;
     currentUserId?: string;
     onEditAction?: UseIndexActionsReturns["onEdit"];
     onDeleteAction?: UseIndexActionsReturns["onDeleteClick"];

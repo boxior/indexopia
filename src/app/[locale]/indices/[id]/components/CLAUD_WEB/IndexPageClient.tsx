@@ -6,7 +6,6 @@ import {IndexOverview} from "@/app/[locale]/indices/[id]/components/CLAUD_WEB/In
 import {IndexChart} from "@/app/[locale]/indices/[id]/components/CLAUD_WEB/IndexChart";
 import {AssetsTable} from "@/app/[locale]/indices/[id]/components/CLAUD_WEB/AssetsTable";
 import {IndexModal, IndexMode} from "@/app/[locale]/indices/components/CLAUD_WEB/IndexModal";
-import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Index} from "@/utils/types/general.types";
 import {useSession} from "next-auth/react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
 import {useIndexActions, UseIndexActionsReturns} from "@/app/[locale]/indices/[id]/hooks/useIndexActions.hook";
@@ -14,13 +13,45 @@ import {DeleteIndexConfirmModal} from "@/app/[locale]/indices/components/CLAUD_W
 import * as React from "react";
 import {TooltipProvider} from "@/components/ui/tooltip";
 import {useTranslations} from "next-intl";
+import {
+    AssetWithHistoryOverviewPortionAndMaxDrawDown,
+    Index,
+    IndexOverview as IndexOverviewType,
+} from "@/utils/types/general.types";
+import {useEffect, useState} from "react";
+import ContentLoader from "@/components/Suspense/ContentLoader";
+import {actionGetIndex} from "@/app/[locale]/indices/[id]/actions";
 
-export function IndexPageClient({index}: {index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null}) {
+export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
     const router = useRouter();
     const session = useSession();
     const currentUserId = session.data?.user?.id;
 
     const tIndex = useTranslations("index");
+
+    const [indexWithHistory, setIndexWithHistory] =
+        useState<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null>(null);
+    const [isLoadingIndexWithHistory, setIsLoadingIndexWithHistory] = useState(true);
+
+    useEffect(() => {
+        (async () => {
+            try {
+                if (!index) {
+                    return;
+                }
+
+                setIsLoadingIndexWithHistory(true);
+
+                const fetchedIndexWithHistory = await actionGetIndex({
+                    id: index.id,
+                });
+
+                setIndexWithHistory(fetchedIndexWithHistory);
+            } finally {
+                setIsLoadingIndexWithHistory(false);
+            }
+        })();
+    }, []);
 
     const {
         onSave,
@@ -68,6 +99,28 @@ export function IndexPageClient({index}: {index: Index<AssetWithHistoryOverviewP
         );
     }
 
+    const renderIndexChart = () => {
+        switch (true) {
+            case isLoadingIndexWithHistory:
+                return <ContentLoader type="chart" count={1} />;
+            case !!indexWithHistory:
+                return <IndexChart index={indexWithHistory} />;
+            default:
+                return null;
+        }
+    };
+
+    const renderIndexAssets = () => {
+        switch (true) {
+            case isLoadingIndexWithHistory:
+                return <ContentLoader type="table" count={10} />;
+            case !!indexWithHistory:
+                return <AssetsTable assets={indexWithHistory.assets} />;
+            default:
+                return null;
+        }
+    };
+
     return (
         <TooltipProvider>
             <div className="container mx-auto px-4 py-8">
@@ -91,14 +144,10 @@ export function IndexPageClient({index}: {index: Index<AssetWithHistoryOverviewP
                 </div>
 
                 {/* Chart */}
-                <div className="mb-8">
-                    <IndexChart index={index} />
-                </div>
+                <div className="mb-8">{renderIndexChart()}</div>
 
                 {/* Assets Table */}
-                <div className="mb-8">
-                    <AssetsTable assets={index.assets} />
-                </div>
+                <div className="mb-8">{renderIndexAssets()}</div>
             </div>
 
             <IndexModal
