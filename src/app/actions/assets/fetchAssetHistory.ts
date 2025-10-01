@@ -3,16 +3,17 @@ import {AssetHistory} from "@/utils/types/general.types";
 import {ENV_VARIABLES} from "@/env";
 import {omit} from "lodash";
 import {setQueryParams} from "@/utils/heleprs/setQueryParams.helper";
-import {secondsUntilNextMidnightUTC} from "@/utils/heleprs/axios/axios.helpers";
 import {populateMissingAssetHistory} from "@/app/[locale]/indices/helpers";
 import {YEAR_IN_MS} from "@/utils/constants/general.constants";
 import {normalizeAssetHistoryToStartOfTheDay} from "@/lib/db/helpers/db.helpers";
+import {secondsUntilNextMidnightUTC} from "@/utils/heleprs/axios/axios.helpers";
 
 export type FetchAssetHistoryParams = {
     interval: string; // point-in-time interval, e.g. m1, m5, m15, m30, h1, h2, h6, h12, d1
     id: string; // asset id, e.g. asset id
     start?: number; // UNIX time in milliseconds up to 11 years for d1, e.g. 1528470720000
     end?: number; // UNIX time in milliseconds up to 11 years for d1, e.g. 1528470720000
+    lastHistoryBefore?: AssetHistory;
 };
 
 // Helper function to split time range into 1-year chunks
@@ -44,7 +45,7 @@ async function fetchSingleRange(
     end: number
 ): Promise<Omit<AssetHistory, "assetId">[]> {
     const fetchParams = {
-        ...omit(params, "id"),
+        ...omit(params, ["id", "lastHistoryBefore"]),
         start,
         end,
     };
@@ -71,7 +72,7 @@ export default async function fetchAssetHistory(
         if (!params.start || !params.end) {
             const strUrl = setQueryParams(
                 `${ENV_VARIABLES.COINCAP_PRO_API_URL}/assets/${params.id}/history?apiKey=${ENV_VARIABLES.COINCAP_PRO_API_KEY}`,
-                omit(params, "id")
+                omit(params, ["id", "lastHistoryBefore"])
             );
 
             const history = await fetch(strUrl, {
@@ -81,7 +82,12 @@ export default async function fetchAssetHistory(
             const historyData = normalizeAssetHistoryToStartOfTheDay(history.data ?? []);
 
             await writeJsonFile("history_" + params.id, historyData, "/db/raw-history");
-            const populatedHistory = populateMissingAssetHistory<Omit<AssetHistory, "assetId">>(historyData);
+            const populatedHistory = populateMissingAssetHistory<Omit<AssetHistory, "assetId">>({
+                lastHistoryBefore: params.lastHistoryBefore,
+                histories: historyData,
+                startTime: params.start ?? 0,
+                endTime: params.end ?? 0,
+            });
             await writeJsonFile("history_" + params.id, populatedHistory, "/db/populated-history");
 
             return {data: populatedHistory};
@@ -94,7 +100,12 @@ export default async function fetchAssetHistory(
             const data = await fetchSingleRange(params, params.start, params.end);
 
             await writeJsonFile("history_" + params.id, data, "/db/raw-history");
-            const populatedHistory = populateMissingAssetHistory<Omit<AssetHistory, "assetId">>(data);
+            const populatedHistory = populateMissingAssetHistory<Omit<AssetHistory, "assetId">>({
+                histories: data,
+                lastHistoryBefore: params.lastHistoryBefore,
+                endTime: params.end,
+                startTime: params.start,
+            });
             await writeJsonFile("history_" + params.id, populatedHistory, "/db/populated-history");
 
             return {data: populatedHistory};
@@ -115,7 +126,12 @@ export default async function fetchAssetHistory(
         mergedData.sort((a, b) => a.time - b.time);
 
         await writeJsonFile("history_" + params.id, mergedData, "/db/raw-history");
-        const populatedHistory = populateMissingAssetHistory<Omit<AssetHistory, "assetId">>(mergedData);
+        const populatedHistory = populateMissingAssetHistory<Omit<AssetHistory, "assetId">>({
+            histories: mergedData,
+            lastHistoryBefore: params.lastHistoryBefore,
+            endTime: params.end,
+            startTime: params.start,
+        });
         await writeJsonFile("history_" + params.id, populatedHistory, "/db/populated-history");
 
         return {data: populatedHistory};

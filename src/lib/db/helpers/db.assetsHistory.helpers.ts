@@ -13,16 +13,23 @@ export const dbPostAssetHistory = async (data: AssetHistory[]) => {
     try {
         // Prepare the SQL query with multiple VALUES clauses
         const sql = `
-            INSERT INTO ${TABLE_NAME_ASSET_HISTORY} (assetId, priceUsd, time, date)
-            VALUES ${data.map(() => "(?, ?, ?, ?)").join(", ")}
+            INSERT INTO ${TABLE_NAME_ASSET_HISTORY} (assetId, priceUsd, time, date, clonedFrom)
+            VALUES ${data.map(() => "(?, ?, ?, ?, ?)").join(", ")}
             ON DUPLICATE KEY UPDATE
               priceUsd = VALUES(priceUsd), 
               time = VALUES(time), 
-              date = VALUES(date);
+              date = VALUES(date),
+              clonedFrom = VALUES(clonedFrom);
         `;
 
         // Flatten the data array into a single set of values
-        const values = data.flatMap(item => [item.assetId, item.priceUsd, item.time, item.date]);
+        const values = data.flatMap(item => [
+            item.assetId,
+            item.priceUsd,
+            item.time,
+            item.date,
+            item.clonedFrom || null,
+        ]);
 
         // Execute the query once with the entire batch of data
         await mySqlPool.execute(sql, values);

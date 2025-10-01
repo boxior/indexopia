@@ -18,19 +18,24 @@ export function getIndexAssetsWithPortionsByRank(assets: Asset[]): IndexOverview
 
     // Assign portions proportionally based on the rank weight
     let remainingPortion = 100;
-    return correctAssetPortions(
-        assets.map((asset, index) => {
-            const rank = parseInt(asset.rank, 10);
-            const weight = 1 / rank;
-            const portion = Math.round((weight / totalWeight) * 100);
+    const localAssets = assets.map((asset, index) => {
+        const rank = parseInt(asset.rank, 10);
+        const weight = 1 / rank;
+        const portion = Math.round((weight / totalWeight) * 100);
 
-            // Ensure the last asset gets exactly the remaining portion to avoid rounding issues
-            if (index === assets.length - 1) {
-                return {...asset, portion: remainingPortion};
-            }
+        // Ensure the last asset gets exactly the remaining portion to avoid rounding issues
+        if (index === assets.length - 1) {
+            return {...asset, portion: remainingPortion};
+        }
 
-            remainingPortion -= portion;
-            return {...asset, portion};
-        })
+        remainingPortion -= portion;
+        return {...asset, portion};
+    });
+
+    console.log(
+        "getIndexAssetsWithPortionsByRank localAssets",
+        localAssets.reduce((a, b) => a + b.portion, 0)
     );
+
+    return correctAssetPortions(localAssets);
 }

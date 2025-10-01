@@ -68,6 +68,7 @@ export interface AssetHistory {
     priceUsd: string; // "priceUsd": "0.52126034102192210769",
     time: number; // "time": 1531180800000,
     date: string; // "date": "2018-07-10T00:00:00.000Z"
+    clonedFrom?: string; // snapshot from "date": "2018-07-10T00:00:00.000Z". It might be if the history does not exist in data provider.
 }
 
 export type IndexHistory = Pick<AssetHistory, "priceUsd" | "time" | "date">;

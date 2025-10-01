@@ -1,6 +1,5 @@
-import {AssetHistory, IndexOverview, MomentFormat} from "@/utils/types/general.types";
+import {AssetHistory, IndexOverview} from "@/utils/types/general.types";
 import moment from "moment/moment";
-import {convertToUTC} from "@/utils/heleprs/convertToUTC.helper";
 import {TOP_PERFORMANCE_COUNT} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesFilters";
 
 export type DurationUnit = "years" | "months" | "days" | "zero";
@@ -43,50 +42,79 @@ export const getIndexDurationLabel = (startTime: number, endTime: number, t?: Du
 /**
  * Function to populate absent records for a list of assets
  * @param histories - Array of asset records sorted by date (ascending).
- * @returns Array with missing records populated.
+ * @param lastHistoryBefore - Asset history to clone from if no records exist for a specific day
+ * @param startTime - Start time filter (Unix timestamp in milliseconds)
+ * @param endTime - End time filter (Unix timestamp in milliseconds)
+ * @returns Array with missing records populated within the specified time range.
  */
-export function populateMissingAssetHistory<D extends Omit<AssetHistory, "assetId"> = AssetHistory>(
-    histories: D[]
-): D[] {
-    if (histories.length === 0) return [];
+export function populateMissingAssetHistory<D extends Omit<AssetHistory, "assetId"> = AssetHistory>({
+    histories,
+    lastHistoryBefore,
+    endTime,
+    startTime,
+}: {
+    histories: D[];
+    startTime: number;
+    endTime: number;
+    lastHistoryBefore?: D;
+}): D[] {
+    const assetStartTime = lastHistoryBefore ? startTime : histories[0]?.time;
+    if (!assetStartTime) {
+        return [];
+    }
+    const times = getDaysArray(assetStartTime, endTime);
+
+    const filteredHistories = histories.filter(h => times.includes(h.time));
 
     const filledRecords: D[] = [];
-    let previousRecord = histories[0];
 
-    // Iterate over each record
-    for (let i = 1; i < histories.length; i++) {
-        const currentRecord = histories[i];
+    for (const time of times) {
+        const existedHistory = filteredHistories.find(h => h.time === time);
 
-        // Add the previous record to the result
-        filledRecords.push(previousRecord);
-
-        // Convert dates to UTC for comparison
-        const previousDate = convertToUTC(previousRecord.date);
-        const currentDate = convertToUTC(currentRecord.date);
-
-        // Calculate days between the current and previous records
-        const daysGap = currentDate.diff(previousDate, "days");
-
-        // Fill in missing records for days in between
-        for (let day = 1; day < daysGap; day++) {
-            const missingDate = previousDate.clone().add(day, "days"); // Generate missing date in UTC
-
-            filledRecords.push({
-                ...previousRecord,
-                time: missingDate.valueOf(), // Unix timestamp in milliseconds
-                date: missingDate.toISOString(), // ISO string in UTC
-            });
+        if (existedHistory) {
+            filledRecords.push(existedHistory);
+            continue;
         }
 
-        // Update the previous record to the current one
-        previousRecord = currentRecord;
-    }
+        const prevTime = moment(time).utc().startOf("day").subtract(1, "day").valueOf();
+        const prevHistory = filledRecords.find(h => h.time === prevTime) ?? lastHistoryBefore;
 
-    // Push the final record
-    filledRecords.push(previousRecord);
+        const date = moment(time).utc().toISOString();
+
+        prevHistory &&
+            filledRecords.push({
+                ...prevHistory,
+                time,
+                date,
+                clonedFrom: prevHistory.date,
+            });
+    }
 
     return filledRecords;
 }
+
+/**
+ * Generate an array of days between startTime and endTime
+ * @param startTime - Start time (Unix timestamp in milliseconds)
+ * @param endTime - End time (Unix timestamp in milliseconds)
+ * @returns Array of Unix timestamps representing start of each day in UTC
+ */
+export const getDaysArray = (startTime: number, endTime: number): number[] => {
+    const days: number[] = [];
+
+    // Convert to UTC and get start of day for both times
+    const start = moment(startTime).utc().startOf("day");
+    const end = moment(endTime).utc().startOf("day");
+
+    // Iterate through each day from start to end (inclusive)
+    const current = start.clone();
+    while (current.isBefore(end)) {
+        days.push(current.valueOf()); // Unix timestamp in milliseconds
+        current.add(1, "day");
+    }
+
+    return days;
+};
 
 export const filterTopPerformance = (indices: IndexOverview[], count: number | undefined = TOP_PERFORMANCE_COUNT) => {
     return indices.toSorted((a, b) => b.historyOverview.total - a.historyOverview.total).slice(0, count);

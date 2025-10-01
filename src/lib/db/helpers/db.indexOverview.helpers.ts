@@ -116,7 +116,6 @@ export const dbPostIndexOverview = async (data: Omit<IndexOverview, "id">): Prom
 
 export const dbGetIndicesOverview = async (userId?: string): Promise<IndexOverview[]> => {
     "use cache";
-
     if (userId) {
         cacheTag(
             CacheTag.INDICES_OVERVIEW,
@@ -448,17 +447,19 @@ export const manageSystemIndices = async (
 
 export async function dbGetUniqueIndicesOverviewsAssetIds(): Promise<string[]> {
     const query = `
-        SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(assets, '$[*].id')) AS assetId
+        SELECT DISTINCT JSON_UNQUOTE(JSON_EXTRACT(assets, '$[*].id')) AS assetIds
         FROM ${TABLE_NAME_INDICES_OVERVIEW};
     `;
 
-    const [rows] = (await mySqlPool.execute(query)) as unknown as [{assetId: string}[]];
+    const [rows] = (await mySqlPool.execute(query)) as unknown as [{assetIds: string}[]]; // e.g. assetIds: "["bitcoin", "ethereum","]"
 
     // Flatten results in case JSON_EXTRACT returns a list for each row
     const uniqueAssetIds = new Set<string>();
     rows.forEach(row => {
-        const assetIds = row?.assetId ? row.assetId.split(",") : [];
-        assetIds.forEach(assetId => uniqueAssetIds.add(assetId.trim()));
+        try {
+            const assetIds = JSON.parse(row.assetIds ?? "[]") as string[];
+            assetIds.forEach(assetId => uniqueAssetIds.add(assetId));
+        } catch {}
     });
 
     return Array.from(uniqueAssetIds);
