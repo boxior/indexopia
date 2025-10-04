@@ -19,10 +19,5 @@ export function getIndexAssetsWithPortionsByRankAndMaxDrawDown(assets: AssetWith
         portion: Math.max(Math.round((1 / a.maxDrawDown.value) * portionPerUnit), 1),
     }));
 
-    console.log(
-        "getIndexAssetsWithPortionsByRankAndMaxDrawDown localAssets",
-        localAssets.reduce((a, b) => a + b.portion, 0)
-    );
-
     return correctAssetPortions(localAssets);
 }

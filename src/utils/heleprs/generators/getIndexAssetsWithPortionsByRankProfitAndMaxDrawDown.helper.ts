@@ -39,10 +39,5 @@ export function getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown(
         return {...data.asset, portion: middlePortion};
     });
 
-    console.log(
-        "getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown localAssets",
-        localAssets.reduce((a, b) => a + b.portion, 0)
-    );
-
     return correctAssetPortions(localAssets);
 }

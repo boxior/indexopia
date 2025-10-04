@@ -32,10 +32,5 @@ export function getIndexAssetsWithPortionsByRank(assets: Asset[]): IndexOverview
         return {...asset, portion};
     });
 
-    console.log(
-        "getIndexAssetsWithPortionsByRank localAssets",
-        localAssets.reduce((a, b) => a + b.portion, 0)
-    );
-
     return correctAssetPortions(localAssets);
 }
