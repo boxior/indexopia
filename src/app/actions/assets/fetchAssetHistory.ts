@@ -6,7 +6,7 @@ import {setQueryParams} from "@/utils/heleprs/setQueryParams.helper";
 import {populateMissingAssetHistory} from "@/app/[locale]/indices/helpers";
 import {YEAR_IN_MS} from "@/utils/constants/general.constants";
 import {normalizeAssetHistoryToStartOfTheDay} from "@/lib/db/helpers/db.helpers";
-import {secondsUntilNextMidnightUTC} from "@/utils/heleprs/axios/axios.helpers";
+import {secondsUntilNextMidnightUTC} from "@/utils/heleprs/fetch/fetch.helpers";
 
 export type FetchAssetHistoryParams = {
     interval: string; // point-in-time interval, e.g. m1, m5, m15, m30, h1, h2, h6, h12, d1
