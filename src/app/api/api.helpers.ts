@@ -2,7 +2,7 @@ import {MAX_ASSETS_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.const
 import fetchAssets from "@/app/actions/assets/fetchAssets";
 import {dbGetAssets, dbGetAssetsByIds, dbPostAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {writeJsonFile} from "@/utils/heleprs/fs.helpers";
-import {AssetHistory} from "@/utils/types/general.types";
+import {Asset, AssetHistory} from "@/utils/types/general.types";
 import {dbGetAssetHistoryById, dbPostAssetHistory} from "@/lib/db/helpers/db.assetsHistory.helpers";
 import momentTimeZone from "moment-timezone";
 import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
@@ -48,6 +48,7 @@ export const manageAssetHistory = async ({id}: {id: string}): Promise<AssetHisto
     }
 
     const {data: newData} = await fetchAssetHistory({
+        lastHistoryBefore: oldList.slice(-1)[0],
         interval: "d1",
         start,
         end,
@@ -65,8 +66,8 @@ export const manageAssetHistory = async ({id}: {id: string}): Promise<AssetHisto
     return [...oldList, ...newList];
 };
 
-export const manageAssetsHistory = async (): Promise<AssetHistory[]> => {
-    const assets = await dbGetAssets();
+export const manageAssetsHistory = async (propAssets?: Asset[]): Promise<AssetHistory[]> => {
+    const assets = propAssets ?? (await dbGetAssets());
 
     const chunks = chunk(assets, 10);
 
@@ -100,7 +101,7 @@ export const populateDb = async () => {
         const allAssets = await manageAssets();
 
         // Assets history
-        const allAssetsHistory = await manageAssetsHistory();
+        const allAssetsHistory = await manageAssetsHistory(allAssets);
 
         await manageSystemIndices(allAssets, allAssetsHistory);
 

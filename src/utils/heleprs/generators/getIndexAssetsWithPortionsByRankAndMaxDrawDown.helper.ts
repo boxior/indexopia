@@ -14,10 +14,10 @@ export function getIndexAssetsWithPortionsByRankAndMaxDrawDown(assets: AssetWith
     // Determine the proportional portion based on the inverse of maxDrawDown
     const portionPerUnit = MAX_PORTION / totalInverseDrawDown;
 
-    return correctAssetPortions(
-        assets.map(a => ({
-            ...pick(a, ["id", "symbol", "name", "rank"]),
-            portion: Math.max(Math.round((1 / a.maxDrawDown.value) * portionPerUnit), 1),
-        }))
-    );
+    const localAssets = assets.map(a => ({
+        ...pick(a, ["id", "symbol", "name", "rank"]),
+        portion: Math.max(Math.round((1 / a.maxDrawDown.value) * portionPerUnit), 1),
+    }));
+
+    return correctAssetPortions(localAssets);
 }

@@ -32,8 +32,11 @@ CREATE TABLE index_overview (
     userId VARCHAR(255), -- Optional userId field for querying by user
     PRIMARY KEY (id) -- Setting id as the primary key
 );
+```
 
-
+## Add column to assets_history table:
+```sql
+ALTER TABLE yulya777_indexopia.assets_history ADD clonedFrom varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_general_ci NOT NULL;
 ```
 
 /**

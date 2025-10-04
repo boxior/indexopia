@@ -34,10 +34,10 @@ export function getIndexAssetsWithPortionsByRankProfitAndMaxDrawDown(
     }
 
     // Calculate middle portion for each asset
-    const result: IndexOverviewAsset[] = Object.entries(assetMap).map(([_id, data]) => {
+    const localAssets: IndexOverviewAsset[] = Object.entries(assetMap).map(([_id, data]) => {
         const middlePortion = Math.round(data.sumPortion); // Weighted average
         return {...data.asset, portion: middlePortion};
     });
 
-    return correctAssetPortions(result);
+    return correctAssetPortions(localAssets);
 }

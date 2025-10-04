@@ -1,6 +1,6 @@
 import {setQueryParams} from "@/utils/heleprs/setQueryParams.helper";
 import {ENV_VARIABLES} from "@/env";
-import {secondsUntilNextMidnightUTC} from "@/utils/heleprs/axios/axios.helpers";
+import {secondsUntilNextMidnightUTC} from "@/utils/heleprs/fetch/fetch.helpers";
 
 export type FetchAssetsParameters = {
     search?: string; // DEFAULT: bitcoin; Search by asset id (bitcoin) or symbol (BTC)

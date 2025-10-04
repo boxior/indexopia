@@ -12,10 +12,10 @@ export function getIndexAssetsWithPortionsByRankAndProfit(assets: AssetWithProfi
 
     const profitPerPercent = allProfit / MAX_PORTION;
 
-    return correctAssetPortions(
-        assets.map(a => ({
-            ...pick(a, ["id", "symbol", "name", "rank"]),
-            portion: Math.max(Math.round(a.profit / profitPerPercent), 1),
-        }))
-    );
+    const localAssets = assets.map(a => ({
+        ...pick(a, ["id", "symbol", "name", "rank"]),
+        portion: Math.max(Math.round(a.profit / profitPerPercent), 1),
+    }));
+
+    return correctAssetPortions(localAssets);
 }

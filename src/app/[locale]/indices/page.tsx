@@ -32,24 +32,16 @@ export default async function IndicesPage() {
 }
 
 const IndicesPageComponent = async () => {
-    console.time("connection");
-
     await connection();
-    console.timeEnd("connection");
 
-    console.time("auth");
     const session = await auth();
-    console.timeEnd("auth");
 
     const currentUserId = session?.user?.id;
-
-    console.time("fetchedIndices");
 
     const fetchedIndices = await Promise.all([
         dbGetIndicesOverview(),
         currentUserId ? dbGetIndicesOverview(currentUserId) : [],
     ]);
-    console.timeEnd("fetchedIndices");
 
     const systemIndices = fetchedIndices[0];
     const userIndices = await handleUpdateUserIndicesToUpToDateHistory(fetchedIndices[1]);
