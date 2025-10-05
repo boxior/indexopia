@@ -15,13 +15,12 @@ import {TooltipProvider} from "@/components/ui/tooltip";
 import {useTranslations} from "next-intl";
 import {
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
-    Id,
     Index,
     IndexOverview as IndexOverviewType,
 } from "@/utils/types/general.types";
-import {useEffect, useState} from "react";
 import ContentLoader from "@/components/Suspense/ContentLoader";
-import {actionGetIndex} from "@/app/[locale]/indices/[id]/actions";
+import useSWR from "swr";
+import {fetcher} from "@/lib/fetcher";
 
 export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
     const router = useRouter();
@@ -30,33 +29,16 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
 
     const tIndex = useTranslations("index");
 
-    const [indexWithHistory, setIndexWithHistory] =
-        useState<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null>(null);
-    const [isLoadingIndexWithHistory, setIsLoadingIndexWithHistory] = useState(true);
-
-    const handleGetIndexWithHistory = async (id?: Id) => {
-        try {
-            if (!id) {
-                return;
-            }
-
-            setIsLoadingIndexWithHistory(true);
-
-            const fetchedIndexWithHistory = await actionGetIndex({
-                id,
-            });
-
-            setIndexWithHistory(fetchedIndexWithHistory);
-        } finally {
-            setIsLoadingIndexWithHistory(false);
-        }
-    };
-
-    useEffect(() => {
-        (async () => {
-            await handleGetIndexWithHistory(index?.id);
-        })();
-    }, []);
+    // caching is managed by `actions` inside the `/api/indices` route vie `use cache` directive.`
+    const indexId = index?.id;
+    const {
+        data: indexWithHistory,
+        isLoading: isLoadingIndexWithHistory,
+        mutate,
+    } = useSWR<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null>(
+        indexId ? () => `/api/indices/${index?.id ?? ""}` : null,
+        fetcher
+    );
 
     const {
         onSave,
@@ -81,7 +63,7 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
             savedIndex?.id && router.push(PAGES_URLS.index(savedIndex.id));
         }
 
-        await handleGetIndexWithHistory(savedIndex?.id);
+        await mutate();
         return savedIndex;
     };
 

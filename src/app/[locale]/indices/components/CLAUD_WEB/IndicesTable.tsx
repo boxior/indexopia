@@ -1,5 +1,5 @@
 "use client";
-import {useState, useMemo, useEffect} from "react";
+import {useState, useMemo} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
@@ -16,15 +16,7 @@ import {
     EyeOff,
     Eye,
 } from "lucide-react";
-import {
-    AssetHistory,
-    AssetWithHistoryAndOverview,
-    EntityMode,
-    Id,
-    IndexOverview,
-    IndexOverviewAsset,
-    IndexOverviewWithHistory,
-} from "@/utils/types/general.types";
+import {EntityMode, Id, IndexOverview, IndexOverviewWithHistory} from "@/utils/types/general.types";
 import {IndicesPagination} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesPagination";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {getIndexDurationLabel} from "@/app/[locale]/indices/helpers";
@@ -37,10 +29,9 @@ import {useSession} from "next-auth/react";
 import {LinkReferer} from "@/app/components/LinkReferer";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {useTranslations} from "next-intl";
-import {actionGetAssetHistory, actionGetAssetsWithHistory} from "@/app/[locale]/indices/actions";
-import {chunk, flatten, pick, uniqBy} from "lodash";
-import moment from "moment";
-import {getIndexHistory} from "@/utils/heleprs/index/index.helpers";
+import useSWR from "swr";
+import {isEmpty} from "lodash";
+import {fetcher} from "@/lib/fetcher";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
@@ -53,82 +44,24 @@ interface IndicesTableProps {
 type SortField = "name" | "total" | "days7" | "days30" | "maxDrawDown";
 type SortOrder = "asc" | "desc";
 
+type IndexWithOnlyHistory = Pick<IndexOverviewWithHistory, "id" | "history">;
+
 export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneAction, mode}: IndicesTableProps) {
     const router = useRouter();
-
-    const [indicesWithHistory, setIndicesWithHistory] = useState<IndexOverviewWithHistory[]>([]);
-    const [isLoadingIndicesWithHistory, setIsLoadingIndicesWithHistory] = useState(true);
 
     const [sortField, setSortField] = useState<SortField>("total");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     const [expandedRows, setExpandedRows] = useState<Set<Id>>(new Set());
 
-    useEffect(() => {
-        (async () => {
-            try {
-                setIsLoadingIndicesWithHistory(true);
+    const doFetch = !isEmpty(indices);
+    const {data: indicesWithOnlyHistoryData, isLoading: isLoadingIndicesWithHistory} = useSWR<{
+        indices: IndexWithOnlyHistory[];
+    }>(doFetch ? () => `/api/indices?ids=${indices.map(index => index.id).join(",")}` : null, fetcher);
 
-                const allUsedAssets = indices
-                    .reduce((acc, index) => {
-                        return uniqBy([...acc, ...index.assets], "id");
-                    }, [] as IndexOverviewAsset[])
-                    .map(a => pick(a, ["id"]));
+    const indicesWithOnlyHistory = indicesWithOnlyHistoryData?.indices ?? [];
 
-                const startTime = moment()
-                    .utc()
-                    .startOf("d")
-                    .add(-HISTORY_OVERVIEW_DAYS - 1, "days")
-                    .valueOf();
-
-                const assetsChunks = chunk(
-                    allUsedAssets.map(a => ({id: a.id})),
-                    10
-                );
-
-                const normalizedAssetsHistory: Record<string, AssetHistory[]> = {};
-
-                const assetsHistory = flatten(
-                    await Promise.all(
-                        assetsChunks.map(
-                            async chunk => await Promise.all(chunk.map(ch => actionGetAssetHistory(ch.id, startTime)))
-                        )
-                    )
-                );
-
-                for (const [index, usedAsset] of allUsedAssets.entries()) {
-                    normalizedAssetsHistory[usedAsset.id] = assetsHistory[index] ?? [];
-                }
-
-                const fetchedIndicesWithHistory = await Promise.all(
-                    indices.map(async index => {
-                        const {assets: indexAssetsWithHistories} = await actionGetAssetsWithHistory({
-                            assets: index.assets,
-                            startTime,
-                            normalizedAssetsHistory,
-                        });
-
-                        const history = getIndexHistory({
-                            ...index,
-                            assets: indexAssetsWithHistories as AssetWithHistoryAndOverview[],
-                        });
-
-                        return {
-                            ...index,
-                            history,
-                        };
-                    })
-                );
-                debugger;
-
-                setIndicesWithHistory(fetchedIndicesWithHistory);
-            } finally {
-                setIsLoadingIndicesWithHistory(false);
-            }
-        })();
-    }, []);
-
-    const {data} = useSession();
-    const currentUserId = data?.user?.id;
+    const {data: sessionData} = useSession();
+    const currentUserId = sessionData?.user?.id;
 
     const isViewMode = mode === EntityMode.VIEW;
     const hiddenOption = isViewMode && !currentUserId;
@@ -245,7 +178,8 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     const MobileIndexCard = ({index}: {index: IndexOverview}) => {
         const isExpanded = expandedRows.has(index.id);
 
-        const indexWithHistory = indicesWithHistory.find(i => i.id === index.id);
+        const indexWithOnlyHistory = indicesWithOnlyHistory.find(i => i.id === index.id);
+        const indexWithHistory = {...index, ...indexWithOnlyHistory} as IndexOverviewWithHistory;
 
         return (
             <div
@@ -306,7 +240,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                         {/* Chart Preview */}
                         <div className="mb-4 relative">
                             <IndexHistoryChartPreview
-                                indexOverview={indexWithHistory}
+                                indexOverview={indexWithOnlyHistory ? indexWithHistory : undefined}
                                 className="h-64"
                                 isLoading={isLoadingIndicesWithHistory}
                             />
@@ -480,7 +414,11 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                         </TableHeader>
                         <TableBody>
                             {paginatedIndices.map(index => {
-                                const indexWithHistory = indicesWithHistory.find(i => i.id === index.id);
+                                const indexWithOnlyHistory = indicesWithOnlyHistory.find(i => i.id === index.id);
+                                const indexWithHistory = {
+                                    ...index,
+                                    ...indexWithOnlyHistory,
+                                } as IndexOverviewWithHistory;
 
                                 return (
                                     <TableRow
