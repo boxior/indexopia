@@ -4,20 +4,24 @@ import {
     AssetWithHistoryAndOverview,
     IndexOverview,
     IndexOverviewAsset,
+    IndexOverviewWithHistory,
 } from "@/utils/types/general.types";
 import {chunk, flatten, pick, uniqBy} from "lodash";
 import moment from "moment/moment";
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 import {actionGetAssetHistory, actionGetAssetsWithHistory} from "@/app/[locale]/indices/actions";
 import {getIndexHistory} from "@/utils/heleprs/index/index.helpers";
+import {dbGetIndexOverviewById} from "@/lib/db/helpers/db.indexOverview.helpers";
 
 /**
  * Get all indices with history overview
  */
-export async function POST(req: NextRequest) {
+export async function GET(req: NextRequest) {
     try {
-        const body = await req.json();
-        const {indices = []} = body as {indices: IndexOverview[]}; // adjust the type as needed
+        const ids = (req.nextUrl.searchParams.get("ids") ?? "").split(",") as string[];
+        const indices = (await Promise.all(ids.map(id => dbGetIndexOverviewById(id)))).filter(
+            Boolean
+        ) as IndexOverview[];
 
         const allUsedAssets = indices
             .reduce((acc, index) => {
@@ -50,7 +54,7 @@ export async function POST(req: NextRequest) {
             normalizedAssetsHistory[usedAsset.id] = assetsHistory[index] ?? [];
         }
 
-        const fetchedIndicesWithHistory = await Promise.all(
+        const fetchedIndicesWithHistory: Pick<IndexOverviewWithHistory, "id" | "history">[] = await Promise.all(
             indices.map(async index => {
                 const {assets: indexAssetsWithHistories} = await actionGetAssetsWithHistory({
                     assets: index.assets,
@@ -64,7 +68,7 @@ export async function POST(req: NextRequest) {
                 });
 
                 return {
-                    ...index,
+                    id: index.id,
                     history,
                 };
             })

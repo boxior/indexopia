@@ -1,5 +1,5 @@
 "use client";
-import {useState, useMemo, useEffect} from "react";
+import {useState, useMemo} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
@@ -29,7 +29,9 @@ import {useSession} from "next-auth/react";
 import {LinkReferer} from "@/app/components/LinkReferer";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {useTranslations} from "next-intl";
-import useSWRMutation from "swr/mutation";
+import useSWR from "swr";
+import {isEmpty} from "lodash";
+import {fetcher} from "@/lib/fetcher";
 
 interface IndicesTableProps {
     indices: IndexOverview[];
@@ -42,40 +44,21 @@ interface IndicesTableProps {
 type SortField = "name" | "total" | "days7" | "days30" | "maxDrawDown";
 type SortOrder = "asc" | "desc";
 
-async function getIndicesWithHistory(url: string, {arg}: {arg: {indices: IndexOverview[]}}) {
-    return fetch(url, {
-        method: "POST",
-        body: JSON.stringify(arg),
-    }).then(res => res.json());
-}
+type IndexWithOnlyHistory = Pick<IndexOverviewWithHistory, "id" | "history">;
 
 export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneAction, mode}: IndicesTableProps) {
     const router = useRouter();
-
-    const [isLoadingIndicesWithHistory, setIsLoadingIndicesWithHistory] = useState(true);
 
     const [sortField, setSortField] = useState<SortField>("total");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     const [expandedRows, setExpandedRows] = useState<Set<Id>>(new Set());
 
-    // caching is managed by `actions` inside the `/api/indices` route vie `use cache` directive.`
-    const {trigger, data: {indices: indicesWithHistory} = {indices: []}} = useSWRMutation<
-        {indices: IndexOverviewWithHistory[]},
-        unknown,
-        "/api/indices",
-        {indices: IndexOverview[]}
-    >(`/api/indices`, getIndicesWithHistory);
+    const doFetch = !isEmpty(indices);
+    const {data: indicesWithOnlyHistoryData, isLoading: isLoadingIndicesWithHistory} = useSWR<{
+        indices: IndexWithOnlyHistory[];
+    }>(doFetch ? () => `/api/indices?ids=${indices.map(index => index.id).join(",")}` : null, fetcher);
 
-    useEffect(() => {
-        (async () => {
-            try {
-                setIsLoadingIndicesWithHistory(true);
-                await trigger({indices});
-            } finally {
-                setIsLoadingIndicesWithHistory(false);
-            }
-        })();
-    }, []);
+    const indicesWithOnlyHistory = indicesWithOnlyHistoryData?.indices ?? [];
 
     const {data: sessionData} = useSession();
     const currentUserId = sessionData?.user?.id;
@@ -195,7 +178,8 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
     const MobileIndexCard = ({index}: {index: IndexOverview}) => {
         const isExpanded = expandedRows.has(index.id);
 
-        const indexWithHistory = indicesWithHistory.find(i => i.id === index.id);
+        const indexWithOnlyHistory = indicesWithOnlyHistory.find(i => i.id === index.id);
+        const indexWithHistory = {...index, ...indexWithOnlyHistory} as IndexOverviewWithHistory;
 
         return (
             <div
@@ -256,7 +240,7 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                         {/* Chart Preview */}
                         <div className="mb-4 relative">
                             <IndexHistoryChartPreview
-                                indexOverview={indexWithHistory}
+                                indexOverview={indexWithOnlyHistory ? indexWithHistory : undefined}
                                 className="h-64"
                                 isLoading={isLoadingIndicesWithHistory}
                             />
@@ -430,7 +414,11 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
                         </TableHeader>
                         <TableBody>
                             {paginatedIndices.map(index => {
-                                const indexWithHistory = indicesWithHistory.find(i => i.id === index.id);
+                                const indexWithOnlyHistory = indicesWithOnlyHistory.find(i => i.id === index.id);
+                                const indexWithHistory = {
+                                    ...index,
+                                    ...indexWithOnlyHistory,
+                                } as IndexOverviewWithHistory;
 
                                 return (
                                     <TableRow
