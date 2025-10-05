@@ -24,6 +24,7 @@ interface EnvVariables {
     AUTH_RESEND_KEY: string;
     // Public
     NEXT_PUBLIC_SITE_URL: string;
+    NEXT_PUBLIC_GA_MEASUREMENT_ID: string;
 }
 
 // Parse environment variables and ensure they have the correct types
@@ -58,6 +59,8 @@ export const ENV_VARIABLES: EnvVariables = {
     AUTH_RESEND_KEY: process.env.AUTH_RESEND_KEY ?? process.env.AUTH_RESEND_KEY ?? "",
     // Public
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "",
+    NEXT_PUBLIC_GA_MEASUREMENT_ID:
+        process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "",
 };
 
 console.log("ENV_VARIABLES", ENV_VARIABLES);
