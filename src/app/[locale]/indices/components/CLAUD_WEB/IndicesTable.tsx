@@ -37,7 +37,7 @@ import {useSession} from "next-auth/react";
 import {LinkReferer} from "@/app/components/LinkReferer";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {useTranslations} from "next-intl";
-import {actionGetAssetsWithHistory} from "@/app/[locale]/indices/actions";
+import {actionGetAssetHistory, actionGetAssetsWithHistory} from "@/app/[locale]/indices/actions";
 import {chunk, flatten, pick, uniqBy} from "lodash";
 import moment from "moment";
 import {getIndexHistory} from "@/utils/heleprs/index/index.helpers";
@@ -87,47 +87,38 @@ export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneActi
 
                 const normalizedAssetsHistory: Record<string, AssetHistory[]> = {};
 
-                const assetsChunksWithHistory = flatten(
-                    flatten(
-                        await Promise.all(
-                            assetsChunks.map(chunk => actionGetAssetsWithHistory({assets: chunk, startTime}))
+                const assetsHistory = flatten(
+                    await Promise.all(
+                        assetsChunks.map(
+                            async chunk => await Promise.all(chunk.map(ch => actionGetAssetHistory(ch.id, startTime)))
                         )
                     )
                 );
 
-                for (const assetsChunkWithHistory of assetsChunksWithHistory) {
-                    for (const assetWithHistory of assetsChunkWithHistory.assets) {
-                        normalizedAssetsHistory[assetWithHistory.id] = assetWithHistory.history;
-                    }
+                for (const [index, usedAsset] of allUsedAssets.entries()) {
+                    normalizedAssetsHistory[usedAsset.id] = assetsHistory[index] ?? [];
                 }
 
-                const {assets: allUsedAssetsWithHistories} = await actionGetAssetsWithHistory({
-                    assets: allUsedAssets,
-                    startTime,
-                    normalizedAssetsHistory,
-                });
+                const fetchedIndicesWithHistory = await Promise.all(
+                    indices.map(async index => {
+                        const {assets: indexAssetsWithHistories} = await actionGetAssetsWithHistory({
+                            assets: index.assets,
+                            startTime,
+                            normalizedAssetsHistory,
+                        });
 
-                const fetchedIndicesWithHistory = indices.map(index => {
-                    const indexAssetsWithHistoryAndOverview = index.assets.map(a => {
-                        const usedAssetsWithHistory =
-                            allUsedAssetsWithHistories.find(usedAsset => usedAsset.id === a.id) ?? {};
+                        const history = getIndexHistory({
+                            ...index,
+                            assets: indexAssetsWithHistories as AssetWithHistoryAndOverview[],
+                        });
 
                         return {
-                            ...a,
-                            ...usedAssetsWithHistory,
+                            ...index,
+                            history,
                         };
-                    });
-
-                    const history = getIndexHistory({
-                        ...index,
-                        assets: indexAssetsWithHistoryAndOverview as AssetWithHistoryAndOverview[],
-                    });
-
-                    return {
-                        ...index,
-                        history,
-                    };
-                });
+                    })
+                );
+                debugger;
 
                 setIndicesWithHistory(fetchedIndicesWithHistory);
             } finally {

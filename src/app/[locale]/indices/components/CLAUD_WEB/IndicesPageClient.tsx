@@ -7,7 +7,7 @@ import {BarChart, Plus, TrendingDown, TrendingUp} from "lucide-react";
 import {IndicesTable} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesTable";
 import {IndicesFilters} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesFilters";
 import {IndexModal} from "@/app/[locale]/indices/components/CLAUD_WEB/IndexModal";
-import {Asset, IndexOverview} from "@/utils/types/general.types";
+import {IndexOverview} from "@/utils/types/general.types";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {NumeralFormat} from "@numeral";
 import {filterTopPerformance} from "@/app/[locale]/indices/helpers";
@@ -16,7 +16,7 @@ import {DeleteIndexConfirmModal} from "@/app/[locale]/indices/components/CLAUD_W
 import * as React from "react";
 import {useTranslations} from "next-intl";
 
-export const IndexesPageClient = ({indices}: {indices: IndexOverview[]}) => {
+export const IndicesPageClient = ({indices}: {indices: IndexOverview[]}) => {
     const {
         onSave,
         onClone,

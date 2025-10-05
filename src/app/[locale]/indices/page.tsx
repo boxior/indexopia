@@ -3,7 +3,7 @@ import {dbGetIndicesOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {connection} from "next/server";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 import ContentLoader from "@/components/Suspense/ContentLoader";
-import {IndexesPageClient} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesPageClient";
+import {IndicesPageClient} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesPageClient";
 import {auth} from "@/auth";
 import {getTranslations} from "next-intl/server";
 import {IndexOverview} from "@/utils/types/general.types";
@@ -48,7 +48,7 @@ const IndicesPageComponent = async () => {
 
     const indices = [...systemIndices, ...userIndices];
 
-    return <IndexesPageClient indices={indices} />;
+    return <IndicesPageClient indices={indices} />;
 };
 
 /**

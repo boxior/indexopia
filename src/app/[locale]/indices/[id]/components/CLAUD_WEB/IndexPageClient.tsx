@@ -15,6 +15,7 @@ import {TooltipProvider} from "@/components/ui/tooltip";
 import {useTranslations} from "next-intl";
 import {
     AssetWithHistoryOverviewPortionAndMaxDrawDown,
+    Id,
     Index,
     IndexOverview as IndexOverviewType,
 } from "@/utils/types/general.types";
@@ -33,23 +34,27 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
         useState<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null>(null);
     const [isLoadingIndexWithHistory, setIsLoadingIndexWithHistory] = useState(true);
 
+    const handleGetIndexWithHistory = async (id?: Id) => {
+        try {
+            if (!id) {
+                return;
+            }
+
+            setIsLoadingIndexWithHistory(true);
+
+            const fetchedIndexWithHistory = await actionGetIndex({
+                id,
+            });
+
+            setIndexWithHistory(fetchedIndexWithHistory);
+        } finally {
+            setIsLoadingIndexWithHistory(false);
+        }
+    };
+
     useEffect(() => {
         (async () => {
-            try {
-                if (!index) {
-                    return;
-                }
-
-                setIsLoadingIndexWithHistory(true);
-
-                const fetchedIndexWithHistory = await actionGetIndex({
-                    id: index.id,
-                });
-
-                setIndexWithHistory(fetchedIndexWithHistory);
-            } finally {
-                setIsLoadingIndexWithHistory(false);
-            }
+            await handleGetIndexWithHistory(index?.id);
         })();
     }, []);
 
@@ -76,6 +81,7 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
             savedIndex?.id && router.push(PAGES_URLS.index(savedIndex.id));
         }
 
+        await handleGetIndexWithHistory(savedIndex?.id);
         return savedIndex;
     };
 
