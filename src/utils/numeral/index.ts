@@ -25,7 +25,7 @@ export enum NumeralFormat {
     NUMBER = "0,0.00",
     PERCENT = "0,0.00%",
     CURRENCY_$ = "$0,0.00",
-    HUGE = "$0.00a",
+    HUGE = "0.00a",
 }
 
 // Register the locale in numeral

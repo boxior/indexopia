@@ -197,6 +197,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                             </div>
                             <div className="text-center">
                                 <div className="text-sm font-medium">
+                                    $
                                     {(renderSafelyNumber(asset.marketCapUsd, NumeralFormat.HUGE) ?? "")
                                         .toString()
                                         .toUpperCase()}
@@ -374,6 +375,7 @@ export function AssetsTable({assets}: AssetsTableProps) {
                                         </TableCell>
                                         <TableCell>
                                             <div className="font-medium">
+                                                $
                                                 {(renderSafelyNumber(asset.marketCapUsd, NumeralFormat.HUGE) ?? "")
                                                     .toString()
                                                     .toUpperCase()}
