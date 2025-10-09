@@ -23,6 +23,7 @@ export default function RootLayout({children}: Props) {
           gtag('js', new Date());
           gtag('config', '${ENV_VARIABLES.NEXT_PUBLIC_GA_MEASUREMENT_ID}');
         `}</Script>
+
             <Analytics />
             {children}
         </Suspense>

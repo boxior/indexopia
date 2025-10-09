@@ -527,5 +527,8 @@
     "legalDescription": "Terms and Privacy of Indexopia",
     "authTitle": "Authorization",
     "authDescription": "Sign in to Indexopia with secure email authentication."
+  },
+  "captcha": {
+    "error": "Captcha verification failed. Please try again."
   }
 }
