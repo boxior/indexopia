@@ -40,7 +40,7 @@ export default function SignInPage() {
             const verify = await fetch("/api/re-captcha", {
                 method: "POST",
                 headers: {"Content-Type": "application/json"},
-                body: JSON.stringify({token: token.substring(0, 5)}),
+                body: JSON.stringify({token}),
             });
 
             const verifyResult = await verify.json();
