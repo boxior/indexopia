@@ -76,6 +76,7 @@
         "@types/numeral": "^2.0.5",
         "@types/react": "^19",
         "@types/react-dom": "^19",
+        "@types/react-google-recaptcha": "^2.1.9",
         "eslint": "^9.20.1",
         "eslint-config-next": "15.1.7",
         "eslint-config-prettier": "^10.0.1",

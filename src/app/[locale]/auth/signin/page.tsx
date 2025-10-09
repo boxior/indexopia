@@ -11,9 +11,12 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/compo
 import {Alert, AlertDescription} from "@/components/ui/alert";
 import {Loader2, Mail, ArrowLeft, CheckCircle} from "lucide-react";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
+import {ENV_VARIABLES} from "@/env";
+import {useReCaptcha} from "@/app/[locale]/auth/signin/useReCaptcha";
 
 export default function SignInPage() {
     const t = useTranslations("signIn");
+    const tCaptcha = useTranslations("captcha");
     const tFooter = useTranslations("footer.sections.about");
 
     const [email, setEmail] = useState("");
@@ -21,12 +24,31 @@ export default function SignInPage() {
     const [isEmailSent, setIsEmailSent] = useState(false);
     const [error, setError] = useState("");
 
+    useReCaptcha();
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsLoading(true);
         setError("");
 
         try {
+            // Execute Google reCAPTCHA v3
+            const token = await grecaptcha.execute(ENV_VARIABLES.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, {action: "signin"});
+            // Verify it server-side
+            const verify = await fetch("/api/re-captcha", {
+                method: "POST",
+                headers: {"Content-Type": "application/json"},
+                body: JSON.stringify({token: token.substring(0, 5)}),
+            });
+
+            const verifyResult = await verify.json();
+            if (!verify.ok || !verifyResult.success) {
+                setError(tCaptcha("error"));
+                setIsLoading(false);
+                return;
+            }
+
+            // Proceed with sign-in if captcha passes
             const result = await signIn("resend", {redirect: false, email});
 
             if (result?.error) {

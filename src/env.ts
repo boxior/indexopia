@@ -25,6 +25,9 @@ interface EnvVariables {
     // Public
     NEXT_PUBLIC_SITE_URL: string;
     NEXT_PUBLIC_GA_MEASUREMENT_ID: string;
+    // ReCaptcha
+    NEXT_PUBLIC_RECAPTCHA_SITE_KEY: string;
+    RECAPTCHA_SECRET_KEY: string;
 }
 
 // Parse environment variables and ensure they have the correct types
@@ -61,6 +64,10 @@ export const ENV_VARIABLES: EnvVariables = {
     NEXT_PUBLIC_SITE_URL: process.env.NEXT_PUBLIC_SITE_URL ?? process.env.NEXT_PUBLIC_SITE_URL ?? "",
     NEXT_PUBLIC_GA_MEASUREMENT_ID:
         process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? process.env.NEXT_PUBLIC_GA_MEASUREMENT_ID ?? "",
+    // ReCaptcha
+    NEXT_PUBLIC_RECAPTCHA_SITE_KEY:
+        process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? "",
+    RECAPTCHA_SECRET_KEY: process.env.RECAPTCHA_SECRET_KEY ?? process.env.RECAPTCHA_SECRET_KEY ?? "",
 };
 
 console.log("ENV_VARIABLES", ENV_VARIABLES);
