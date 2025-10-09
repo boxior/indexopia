@@ -33,7 +33,9 @@ export default function SignInPage() {
 
         try {
             // Execute Google reCAPTCHA v3
-            const token = await grecaptcha.execute(ENV_VARIABLES.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, {action: "signin"});
+            const token = await window.grecaptcha.execute(ENV_VARIABLES.NEXT_PUBLIC_RECAPTCHA_SITE_KEY, {
+                action: "signin",
+            });
             // Verify it server-side
             const verify = await fetch("/api/re-captcha", {
                 method: "POST",
