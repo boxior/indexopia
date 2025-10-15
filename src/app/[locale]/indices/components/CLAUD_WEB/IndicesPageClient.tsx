@@ -15,6 +15,9 @@ import {useIndexActions} from "@/app/[locale]/indices/[id]/hooks/useIndexActions
 import {DeleteIndexConfirmModal} from "@/app/[locale]/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import * as React from "react";
 import {useTranslations} from "next-intl";
+import {FaTelegram} from "react-icons/fa";
+import {Link} from "@/i18n/navigation";
+import {Tooltip, TooltipContent, TooltipProvider, TooltipTrigger} from "@/components/ui/tooltip";
 
 export const IndicesPageClient = ({indices}: {indices: IndexOverview[]}) => {
     const {
@@ -35,6 +38,7 @@ export const IndicesPageClient = ({indices}: {indices: IndexOverview[]}) => {
     } = useIndexActions();
 
     const t = useTranslations("indices");
+    const tCommunity = useTranslations("footer.sections.community");
 
     const [searchTerm, setSearchTerm] = useState("");
     const [typeFilter, setTypeFilter] = useState("all");
@@ -290,10 +294,27 @@ export const IndicesPageClient = ({indices}: {indices: IndexOverview[]}) => {
                     </div>
 
                     {/* Results Info */}
-                    <div className="mb-4">
+                    {/* Results Info */}
+                    <div className="mb-4 flex items-center justify-between">
                         <p className="text-sm text-gray-600">
                             {t("results.showing", {count: filteredIndices.length, total: indices.length})}
                         </p>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Link
+                                        target={"_blank"}
+                                        href="https://t.me/indexopia"
+                                        className="text-gray-400 hover:text-blue-500 transition-colors duration-200 hover:scale-110 transform"
+                                    >
+                                        <FaTelegram className="h-5 w-5" />
+                                    </Link>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>{tCommunity("title")}</p>
+                                </TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
                     </div>
 
                     {/* Indices Table */}

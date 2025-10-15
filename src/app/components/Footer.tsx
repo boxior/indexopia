@@ -2,7 +2,8 @@
 
 import {useTranslations} from "next-intl";
 import {Link} from "@/i18n/navigation";
-import {Twitter, Github, Youtube} from "lucide-react";
+import {FaTelegram} from "react-icons/fa";
+
 import {CONTACT_EMAIL, PAGES_URLS} from "@/utils/constants/general.constants";
 
 export default function Footer() {
@@ -106,14 +107,12 @@ export default function Footer() {
                     <div>
                         <h3 className="font-semibold mb-4">{t("sections.community.title")}</h3>
                         <div className="flex space-x-4">
-                            <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                                <Twitter className="h-5 w-5" />
-                            </Link>
-                            <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                                <Youtube className="h-5 w-5" />
-                            </Link>
-                            <Link href="#" className="text-gray-400 hover:text-white transition-colors">
-                                <Github className="h-5 w-5" />
+                            <Link
+                                target={"_blank"}
+                                href="https://t.me/indexopia"
+                                className="text-gray-400 hover:text-white transition-colors"
+                            >
+                                <FaTelegram className="h-5 w-5" />
                             </Link>
                         </div>
                     </div>
