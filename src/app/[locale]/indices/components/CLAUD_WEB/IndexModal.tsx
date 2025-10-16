@@ -21,6 +21,8 @@ export enum IndexMode {
     CREATE = "create",
     EDIT = "edit",
     CLONE = "clone",
+    CLONE_TO_SYSTEM = "cloneToSystem",
+    EDIT_SYSTEM = "editSystem",
 }
 interface CreateUpdateIndexModalProps {
     isOpen: boolean;
@@ -30,10 +32,11 @@ interface CreateUpdateIndexModalProps {
     mode?: IndexMode;
 }
 export interface ModalIndexData {
-    id?: Id;
     name: string;
     startingBalance: number;
     assets: IndexOverviewAsset[];
+    id?: Id;
+    systemId?: string;
 }
 interface FormValues {
     name: string;
@@ -130,12 +133,26 @@ export function IndexModal({
                     namePlaceholder: tIndexModalModes("edit.namePlaceholder"),
                     startingBalancePlaceholder: tIndexModalModes("edit.startingBalancePlaceholder"),
                 };
+            case IndexMode.EDIT_SYSTEM:
+                return {
+                    title: tIndexModalModes("editSystem.title"),
+                    action: tIndexModalModes("editSystem.action"),
+                    namePlaceholder: tIndexModalModes("editSystem.namePlaceholder"),
+                    startingBalancePlaceholder: tIndexModalModes("editSystem.startingBalancePlaceholder"),
+                };
             case IndexMode.CLONE:
                 return {
                     title: tIndexModalModes("clone.title"),
                     action: tIndexModalModes("clone.action"),
                     namePlaceholder: tIndexModalModes("clone.namePlaceholder"),
                     startingBalancePlaceholder: tIndexModalModes("clone.startingBalancePlaceholder"),
+                };
+            case IndexMode.CLONE_TO_SYSTEM:
+                return {
+                    title: tIndexModalModes("cloneToSystem.title"),
+                    action: tIndexModalModes("cloneToSystem.action"),
+                    namePlaceholder: tIndexModalModes("cloneToSystem.namePlaceholder"),
+                    startingBalancePlaceholder: tIndexModalModes("cloneToSystem.startingBalancePlaceholder"),
                 };
             default:
                 return {
@@ -149,7 +166,13 @@ export function IndexModal({
 
     const labels = getLabels();
     const getInitialValues = (): FormValues => {
-        if (indexOverview && (mode === IndexMode.EDIT || mode === IndexMode.CLONE)) {
+        if (
+            indexOverview &&
+            (mode === IndexMode.EDIT ||
+                mode === IndexMode.EDIT_SYSTEM ||
+                mode === IndexMode.CLONE ||
+                mode === IndexMode.CLONE_TO_SYSTEM)
+        ) {
             return {
                 name: indexOverview.name,
                 startingBalance: indexOverview.startingBalance,
@@ -167,7 +190,7 @@ export function IndexModal({
 
     // Function to check if there are changes in edit mode
     const hasChanges = (currentValues: FormValues): boolean => {
-        if (mode !== IndexMode.EDIT || !indexOverview) {
+        if ((mode !== IndexMode.EDIT && mode !== IndexMode.EDIT_SYSTEM) || !indexOverview) {
             return true; // Always allow submit for non-edit modes
         }
 
@@ -226,6 +249,10 @@ export function IndexModal({
                 name: values.name,
                 startingBalance: values.startingBalance,
                 assets: values.assets,
+                systemId:
+                    mode === IndexMode.CLONE_TO_SYSTEM || mode === IndexMode.EDIT_SYSTEM
+                        ? indexOverview?.systemId
+                        : undefined,
             });
             onCancelAction();
         } catch (error) {
@@ -257,7 +284,9 @@ export function IndexModal({
                     {formik => {
                         const totalPortion = getTotalPortion(formik.values.assets);
                         const formHasChanges = hasChanges(formik.values);
-                        const isSubmitDisabled = formik.isSubmitting || (mode === IndexMode.EDIT && !formHasChanges);
+                        const isSubmitDisabled =
+                            formik.isSubmitting ||
+                            ((mode === IndexMode.EDIT || mode === IndexMode.EDIT_SYSTEM) && !formHasChanges);
 
                         return (
                             <Form>
@@ -266,6 +295,11 @@ export function IndexModal({
                                     {mode === IndexMode.CLONE && (
                                         <p className="text-sm text-gray-600 mt-2">
                                             {tIndexModalModes("clone.description")}
+                                        </p>
+                                    )}
+                                    {mode === IndexMode.CLONE_TO_SYSTEM && (
+                                        <p className="text-sm text-gray-600 mt-2">
+                                            {tIndexModalModes("cloneToSystem.description")}
                                         </p>
                                     )}
                                 </DialogHeader>
@@ -492,14 +526,16 @@ export function IndexModal({
                                                                 <span className="hidden xs:inline">
                                                                     {mode === IndexMode.CREATE
                                                                         ? `${tCommon("creating")}...`
-                                                                        : mode === IndexMode.EDIT
+                                                                        : mode === IndexMode.EDIT ||
+                                                                            mode === IndexMode.EDIT_SYSTEM
                                                                           ? `${tCommon("updating")}...`
                                                                           : `${tCommon("cloning")}...`}
                                                                 </span>
                                                                 <span className="xs:hidden">
                                                                     {mode === IndexMode.CREATE
                                                                         ? tCommon("creating")
-                                                                        : mode === IndexMode.EDIT
+                                                                        : mode === IndexMode.EDIT ||
+                                                                            mode === IndexMode.EDIT_SYSTEM
                                                                           ? tCommon("updating")
                                                                           : tCommon("cloning")}
                                                                 </span>
@@ -512,7 +548,8 @@ export function IndexModal({
                                                                 <span className="xs:hidden">
                                                                     {mode === IndexMode.CREATE
                                                                         ? tCommon("create")
-                                                                        : mode === IndexMode.EDIT
+                                                                        : mode === IndexMode.EDIT ||
+                                                                            mode === IndexMode.EDIT_SYSTEM
                                                                           ? tCommon("update")
                                                                           : tCommon("clone")}
                                                                 </span>
@@ -521,11 +558,13 @@ export function IndexModal({
                                                     </Button>
                                                 </span>
                                             </TooltipTrigger>
-                                            {mode === IndexMode.EDIT && !formHasChanges && !formik.isSubmitting && (
-                                                <TooltipContent>
-                                                    <p>{tCommon("noChangedDetected")}</p>
-                                                </TooltipContent>
-                                            )}
+                                            {(mode === IndexMode.EDIT || mode === IndexMode.EDIT_SYSTEM) &&
+                                                !formHasChanges &&
+                                                !formik.isSubmitting && (
+                                                    <TooltipContent>
+                                                        <p>{tCommon("noChangedDetected")}</p>
+                                                    </TooltipContent>
+                                                )}
                                         </Tooltip>
                                     </TooltipProvider>
                                 </DialogFooter>

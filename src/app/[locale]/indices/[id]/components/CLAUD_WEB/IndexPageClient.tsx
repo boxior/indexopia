@@ -21,11 +21,12 @@ import {
 import ContentLoader from "@/components/Suspense/ContentLoader";
 import useSWR from "swr";
 import {fetcher} from "@/lib/fetcher";
+import {User} from "@prisma/client";
 
 export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
     const router = useRouter();
     const session = useSession();
-    const currentUserId = session.data?.user?.id;
+    const currentUser = session.data?.user as User;
 
     const tIndex = useTranslations("index");
 
@@ -43,6 +44,8 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
     const {
         onSave,
         onClone,
+        onCloneToSystem,
+        onEditSystem,
         onEdit,
         onDeleteClick,
         modalOpen,
@@ -59,7 +62,7 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
     const handleSave: UseIndexActionsReturns["onSave"] = async index => {
         const savedIndex = await onSave(index);
 
-        if (indexMode === IndexMode.CLONE) {
+        if (indexMode === IndexMode.CLONE || indexMode === IndexMode.CLONE_TO_SYSTEM) {
             savedIndex?.id && router.push(PAGES_URLS.index(savedIndex.id));
         }
 
@@ -124,10 +127,12 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
                 <div className="mb-8">
                     <IndexOverview
                         index={index}
-                        currentUserId={currentUserId}
+                        currentUser={currentUser}
                         onEditAction={onEdit}
                         onDeleteAction={onDeleteClick}
                         onCloneAction={onClone}
+                        onCloneToSystemAction={onCloneToSystem}
+                        onEditSystemAction={onEditSystem}
                     />
                 </div>
 

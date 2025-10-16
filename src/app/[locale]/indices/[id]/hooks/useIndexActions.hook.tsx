@@ -15,7 +15,9 @@ import {useState} from "react";
 export type UseIndexActionsReturns = {
     // Action handlers
     onClone: (index: IndexOverview) => void;
+    onCloneToSystem: (index: IndexOverview) => void;
     onEdit: (editIndex: IndexOverview) => void;
+    onEditSystem: (editIndex: IndexOverview) => void;
     onCreate: () => void;
     onSave: (indexData: ModalIndexData) => Promise<IndexOverview | null>;
     onCancel: () => void;
@@ -58,6 +60,21 @@ export const useIndexActions = (): UseIndexActionsReturns => {
             });
         }
 
+        if (indexMode === IndexMode.EDIT_SYSTEM) {
+            return await actionUpdateIndexOverview({
+                ...(modalIndex as IndexOverview),
+                ...indexData,
+                assets: indexData.assets.map(getIndexOverviewAsset),
+            });
+        }
+
+        if (indexMode === IndexMode.CLONE_TO_SYSTEM) {
+            return await actionCreateIndexOverview({
+                ...indexData,
+                assets: indexData.assets.map(getIndexOverviewAsset),
+            });
+        }
+
         return await actionCreateIndexOverview({
             ...indexData,
             assets: indexData.assets.map(getIndexOverviewAsset),
@@ -95,6 +112,25 @@ export const useIndexActions = (): UseIndexActionsReturns => {
         setIndexMode(IndexMode.CLONE);
     };
 
+    const handleCloneToSystemIndex = (index: IndexOverview) => {
+        setModalOpen(true);
+
+        const clonedIndex: IndexOverviewForCreate = {
+            systemId: index.id.toString(),
+            ...omit(index, "id"),
+            name: `${index.name} (Clone)`,
+        };
+
+        setModalIndex(clonedIndex);
+        setIndexMode(IndexMode.CLONE_TO_SYSTEM);
+    };
+
+    const handleEditSystemIndex = (editIndex: IndexOverview) => {
+        setModalOpen(true);
+        setModalIndex(omit(editIndex, "userId"));
+        setIndexMode(IndexMode.EDIT_SYSTEM);
+    };
+
     const handleDeleteClick = (index: IndexOverview) => {
         setIndexToDelete(index);
         setDeleteModalOpen(true);
@@ -120,7 +156,9 @@ export const useIndexActions = (): UseIndexActionsReturns => {
 
     return {
         onClone: handleCloneIndex,
+        onCloneToSystem: handleCloneToSystemIndex,
         onEdit: handleEditIndex,
+        onEditSystem: handleEditSystemIndex,
         onCreate: handleCreateIndex,
         onSave: handleSaveAction,
         onCancel: handleCancelAction,

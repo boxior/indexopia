@@ -343,6 +343,9 @@
       },
       "actions": {
         "clone": "Clone",
+        "cloneToSystem": "Clone to System",
+        "deleteFromSystem": "Delete from System",
+        "editSystem": "Edit System",
         "edit": "Edit",
         "delete": "Delete"
       },
@@ -436,12 +439,25 @@
         "namePlaceholder": "Enter index name",
         "startingBalancePlaceholder": "Enter index starting balance"
       },
+      "editSystem": {
+        "title": "Edit System index",
+        "action": "Update System index",
+        "namePlaceholder": "Enter System index name",
+        "startingBalancePlaceholder": "Enter System index starting balance"
+      },
       "clone": {
         "title": "Clone Index",
         "action": "Clone Index",
         "namePlaceholder": "Enter new index name",
         "startingBalancePlaceholder": "Enter index starting balance",
         "description": "Create a custom copy of this index with your own asset allocation and portfolio composition."
+      },
+      "cloneToSystem": {
+        "title": "Clone to System index",
+        "action": "Clone to System index",
+        "namePlaceholder": "Enter new System index name",
+        "startingBalancePlaceholder": "Enter System index starting balance",
+        "description": "Create a System index copy of this index with your own asset allocation and portfolio composition."
       },
       "default": {
         "title": "Index",
