@@ -22,6 +22,7 @@ interface IndexOverviewProps {
     onDeleteAction?: UseIndexActionsReturns["onDeleteClick"];
     onCloneAction?: UseIndexActionsReturns["onClone"];
     onCloneToSystemAction?: UseIndexActionsReturns["onCloneToSystem"];
+    onEditSystemAction?: UseIndexActionsReturns["onEditSystem"];
 }
 
 export function IndexOverview({
@@ -31,6 +32,7 @@ export function IndexOverview({
     onDeleteAction,
     onCloneAction,
     onCloneToSystemAction,
+    onEditSystemAction,
 }: IndexOverviewProps) {
     const isUserIndex = !!index.userId && index.userId === currentUser?.id;
     const isSystemIndex = !!index.systemId;
@@ -112,15 +114,26 @@ export function IndexOverview({
                     {tIndex("overview.actions.cloneToSystem")}
                 </Button>
                 {isSystemIndex && (
-                    <Button
-                        variant="outline"
-                        className="bg-secondary"
-                        size="sm"
-                        onClick={() => onDeleteAction?.(index)}
-                    >
-                        <Trash2 className="h-4 w-4 mr-2" />
-                        {tIndex("overview.actions.deleteFromSystem")}
-                    </Button>
+                    <>
+                        <Button
+                            variant="outline"
+                            className="bg-secondary"
+                            size="sm"
+                            onClick={() => onEditSystemAction?.(index)}
+                        >
+                            <Edit className="h-4 w-4 mr-2" />
+                            {tIndex("overview.actions.editSystem")}
+                        </Button>
+                        <Button
+                            variant="outline"
+                            className="bg-secondary"
+                            size="sm"
+                            onClick={() => onDeleteAction?.(index)}
+                        >
+                            <Trash2 className="h-4 w-4 mr-2" />
+                            {tIndex("overview.actions.deleteFromSystem")}
+                        </Button>
+                    </>
                 )}
             </>
         );
@@ -143,7 +156,7 @@ export function IndexOverview({
                     {/* Action Buttons */}
                     <div className="flex items-center gap-2">
                         {/* Desktop Actions */}
-                        <div className="hidden sm:flex items-center gap-2">
+                        <div className="hidden sm:flex items-center gap-2 flex-wrap">
                             {renderGlobalAdminActions()}
                             <Button variant="outline" size="sm" onClick={() => onCloneAction?.(index)}>
                                 <Copy className="h-4 w-4 mr-2" />
@@ -166,6 +179,7 @@ export function IndexOverview({
                         {/* Mobile Actions - Dropdown */}
                         <div className="sm:hidden flex flex-1">
                             <div className="flex flex-1 flex-wrap items-center justify-end gap-2">
+                                {renderGlobalAdminActions()}
                                 <Button variant="outline" size="sm" onClick={() => onCloneAction?.(index)}>
                                     <Copy className="h-4 w-4 mr-2" />
                                     {tIndex("overview.actions.clone")}

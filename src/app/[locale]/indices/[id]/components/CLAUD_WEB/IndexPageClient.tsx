@@ -45,6 +45,7 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
         onSave,
         onClone,
         onCloneToSystem,
+        onEditSystem,
         onEdit,
         onDeleteClick,
         modalOpen,
@@ -131,6 +132,7 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
                         onDeleteAction={onDeleteClick}
                         onCloneAction={onClone}
                         onCloneToSystemAction={onCloneToSystem}
+                        onEditSystemAction={onEditSystem}
                     />
                 </div>
 

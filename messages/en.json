@@ -345,6 +345,7 @@
         "clone": "Clone",
         "cloneToSystem": "Clone to System",
         "deleteFromSystem": "Delete from System",
+        "editSystem": "Edit System",
         "edit": "Edit",
         "delete": "Delete"
       },
@@ -437,6 +438,12 @@
         "action": "Update Index",
         "namePlaceholder": "Enter index name",
         "startingBalancePlaceholder": "Enter index starting balance"
+      },
+      "editSystem": {
+        "title": "Edit System index",
+        "action": "Update System index",
+        "namePlaceholder": "Enter System index name",
+        "startingBalancePlaceholder": "Enter System index starting balance"
       },
       "clone": {
         "title": "Clone Index",
