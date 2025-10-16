@@ -56,7 +56,8 @@ export const actionCreateIndexOverview = async ({
     startingBalance,
     assets: propAssets,
     userId,
-}: Pick<IndexOverview, "name" | "assets" | "userId" | "startingBalance">) => {
+    systemId,
+}: Pick<IndexOverview, "name" | "assets" | "userId" | "systemId" | "startingBalance">) => {
     let assets = [];
 
     const {
@@ -93,6 +94,7 @@ export const actionCreateIndexOverview = async ({
         startTime,
         endTime,
         userId,
+        systemId,
         startingBalance,
     });
 };

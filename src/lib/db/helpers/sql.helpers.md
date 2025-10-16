@@ -99,3 +99,9 @@ SET
     time = UNIX_TIMESTAMP(DATE(SUBSTRING(date, 1, 10))) * 1000
 WHERE date NOT LIKE '%T00:00:00.000Z'
 ```
+### Update Postgres user
+```sql
+UPDATE "User" 
+SET role = 'globalAdmin' 
+WHERE email = 'irinfo@ukr.net';
+```

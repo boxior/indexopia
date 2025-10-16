@@ -21,6 +21,7 @@ export enum IndexMode {
     CREATE = "create",
     EDIT = "edit",
     CLONE = "clone",
+    CLONE_TO_SYSTEM = "cloneToSystem",
 }
 interface CreateUpdateIndexModalProps {
     isOpen: boolean;
@@ -30,10 +31,11 @@ interface CreateUpdateIndexModalProps {
     mode?: IndexMode;
 }
 export interface ModalIndexData {
-    id?: Id;
     name: string;
     startingBalance: number;
     assets: IndexOverviewAsset[];
+    id?: Id;
+    systemId?: string;
 }
 interface FormValues {
     name: string;
@@ -137,6 +139,13 @@ export function IndexModal({
                     namePlaceholder: tIndexModalModes("clone.namePlaceholder"),
                     startingBalancePlaceholder: tIndexModalModes("clone.startingBalancePlaceholder"),
                 };
+            case IndexMode.CLONE_TO_SYSTEM:
+                return {
+                    title: tIndexModalModes("cloneToSystem.title"),
+                    action: tIndexModalModes("cloneToSystem.action"),
+                    namePlaceholder: tIndexModalModes("cloneToSystem.namePlaceholder"),
+                    startingBalancePlaceholder: tIndexModalModes("cloneToSystem.startingBalancePlaceholder"),
+                };
             default:
                 return {
                     title: tIndexModalModes("default.title"),
@@ -149,7 +158,10 @@ export function IndexModal({
 
     const labels = getLabels();
     const getInitialValues = (): FormValues => {
-        if (indexOverview && (mode === IndexMode.EDIT || mode === IndexMode.CLONE)) {
+        if (
+            indexOverview &&
+            (mode === IndexMode.EDIT || mode === IndexMode.CLONE || mode === IndexMode.CLONE_TO_SYSTEM)
+        ) {
             return {
                 name: indexOverview.name,
                 startingBalance: indexOverview.startingBalance,
@@ -226,6 +238,7 @@ export function IndexModal({
                 name: values.name,
                 startingBalance: values.startingBalance,
                 assets: values.assets,
+                systemId: mode === IndexMode.CLONE_TO_SYSTEM ? indexOverview?.systemId : undefined,
             });
             onCancelAction();
         } catch (error) {
@@ -266,6 +279,11 @@ export function IndexModal({
                                     {mode === IndexMode.CLONE && (
                                         <p className="text-sm text-gray-600 mt-2">
                                             {tIndexModalModes("clone.description")}
+                                        </p>
+                                    )}
+                                    {mode === IndexMode.CLONE_TO_SYSTEM && (
+                                        <p className="text-sm text-gray-600 mt-2">
+                                            {tIndexModalModes("cloneToSystem.description")}
                                         </p>
                                     )}
                                 </DialogHeader>

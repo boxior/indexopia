@@ -12,17 +12,28 @@ import {useState} from "react";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {sortIndexAssetsByPortion} from "@/utils/heleprs/index/index.helpers";
 import {useTranslations} from "next-intl";
+import {getIsGlobalAdmin} from "@/utils/heleprs/getIsGlobalAdmin.helper";
+import {User} from "@prisma/client";
 
 interface IndexOverviewProps {
     index: IndexOverviewType;
-    currentUserId?: string;
+    currentUser?: User;
     onEditAction?: UseIndexActionsReturns["onEdit"];
     onDeleteAction?: UseIndexActionsReturns["onDeleteClick"];
     onCloneAction?: UseIndexActionsReturns["onClone"];
+    onCloneToSystemAction?: UseIndexActionsReturns["onCloneToSystem"];
 }
 
-export function IndexOverview({index, currentUserId, onEditAction, onDeleteAction, onCloneAction}: IndexOverviewProps) {
-    const isUserIndex = !!index.userId && index.userId === currentUserId;
+export function IndexOverview({
+    index,
+    currentUser,
+    onEditAction,
+    onDeleteAction,
+    onCloneAction,
+    onCloneToSystemAction,
+}: IndexOverviewProps) {
+    const isUserIndex = !!index.userId && index.userId === currentUser?.id;
+    const isSystemIndex = !!index.systemId;
 
     const [isAssetsExpanded, setIsAssetsExpanded] = useState(false);
 
@@ -84,6 +95,37 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
 
     const sortedAssetsByPortion = sortIndexAssetsByPortion(index.assets);
 
+    const isGlobalAdmin = getIsGlobalAdmin(currentUser);
+
+    const renderGlobalAdminActions = () => {
+        if (!isGlobalAdmin) return null;
+
+        return (
+            <>
+                <Button
+                    variant="outline"
+                    className="bg-secondary"
+                    size="sm"
+                    onClick={() => onCloneToSystemAction?.(index)}
+                >
+                    <Copy className="h-4 w-4 mr-2" />
+                    {tIndex("overview.actions.cloneToSystem")}
+                </Button>
+                {isSystemIndex && (
+                    <Button
+                        variant="outline"
+                        className="bg-secondary"
+                        size="sm"
+                        onClick={() => onDeleteAction?.(index)}
+                    >
+                        <Trash2 className="h-4 w-4 mr-2" />
+                        {tIndex("overview.actions.deleteFromSystem")}
+                    </Button>
+                )}
+            </>
+        );
+    };
+
     return (
         <Card className="mb-6">
             <CardHeader className="pb-4">
@@ -102,6 +144,7 @@ export function IndexOverview({index, currentUserId, onEditAction, onDeleteActio
                     <div className="flex items-center gap-2">
                         {/* Desktop Actions */}
                         <div className="hidden sm:flex items-center gap-2">
+                            {renderGlobalAdminActions()}
                             <Button variant="outline" size="sm" onClick={() => onCloneAction?.(index)}>
                                 <Copy className="h-4 w-4 mr-2" />
                                 {tIndex("overview.actions.clone")}

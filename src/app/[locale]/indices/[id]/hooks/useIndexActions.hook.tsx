@@ -15,6 +15,7 @@ import {useState} from "react";
 export type UseIndexActionsReturns = {
     // Action handlers
     onClone: (index: IndexOverview) => void;
+    onCloneToSystem: (index: IndexOverview) => void;
     onEdit: (editIndex: IndexOverview) => void;
     onCreate: () => void;
     onSave: (indexData: ModalIndexData) => Promise<IndexOverview | null>;
@@ -58,6 +59,13 @@ export const useIndexActions = (): UseIndexActionsReturns => {
             });
         }
 
+        if (indexMode === IndexMode.CLONE_TO_SYSTEM) {
+            return await actionCreateIndexOverview({
+                ...indexData,
+                assets: indexData.assets.map(getIndexOverviewAsset),
+            });
+        }
+
         return await actionCreateIndexOverview({
             ...indexData,
             assets: indexData.assets.map(getIndexOverviewAsset),
@@ -95,6 +103,19 @@ export const useIndexActions = (): UseIndexActionsReturns => {
         setIndexMode(IndexMode.CLONE);
     };
 
+    const handleCloneToSystemIndex = (index: IndexOverview) => {
+        setModalOpen(true);
+
+        const clonedIndex: IndexOverviewForCreate = {
+            systemId: index.id.toString(),
+            ...omit(index, "id"),
+            name: `${index.name} (Clone)`,
+        };
+
+        setModalIndex(clonedIndex);
+        setIndexMode(IndexMode.CLONE_TO_SYSTEM);
+    };
+
     const handleDeleteClick = (index: IndexOverview) => {
         setIndexToDelete(index);
         setDeleteModalOpen(true);
@@ -120,6 +141,7 @@ export const useIndexActions = (): UseIndexActionsReturns => {
 
     return {
         onClone: handleCloneIndex,
+        onCloneToSystem: handleCloneToSystemIndex,
         onEdit: handleEditIndex,
         onCreate: handleCreateIndex,
         onSave: handleSaveAction,
