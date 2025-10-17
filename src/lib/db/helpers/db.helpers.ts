@@ -41,11 +41,6 @@ export const getCachedTopAssets = async (limit: number | undefined = MAX_ASSETS_
     return filterAssetsByOmitIds(assets ?? [], limit);
 };
 
-export const getCachedAssets = async (ids: string[]): Promise<Asset[]> => {
-    const assets = await dbGetAssets();
-    return (assets ?? []).filter(asset => ids.includes(asset.id));
-};
-
 // previous logic. It was inconsistency with the Index overview by assets overview.
 export const getIndexHistoryOverviewByAssetsOverview = <A extends {id: string; portion?: number} = Asset>({
     id,
