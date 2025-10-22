@@ -1,6 +1,6 @@
 import {readJsonFile, writeJsonFile} from "@/utils/heleprs/fs.helpers";
 import {DbItems} from "@/lib/db/db.types";
-import {Asset, AssetHistory} from "@/utils/types/general.types";
+import {Asset, RawAssetHistory} from "@/utils/types/general.types";
 import {MAX_ASSETS_COUNT} from "@/utils/constants/general.constants";
 import {dbPostAssetHistory} from "@/lib/db/helpers/db.assetsHistory.helpers";
 import {ASSETS_FOLDER_PATH, ASSETS_HISTORY_FOLDER_PATH, filterAssetsByOmitIds} from "@/lib/db/helpers/db.helpers";
@@ -15,7 +15,7 @@ export const migrateAssetsHistoriesFromJsonToDb = async () => {
                 `asset_${asset.id}_history`,
                 {},
                 ASSETS_HISTORY_FOLDER_PATH
-            )) as DbItems<Omit<AssetHistory, "assetId">>;
+            )) as DbItems<RawAssetHistory>;
             const normalizedAssetHistory = assetHistory.data.map(history => ({assetId: asset.id, ...history}));
 
             await dbPostAssetHistory(normalizedAssetHistory);

@@ -77,7 +77,6 @@ function mergeAssetHistoriesFromInitial<A = Asset>(
 
     // Ensure all histories have the same length
     if (!histories.every(history => history.length === arrayLength)) {
-        // void writeJsonFile("histories[][]", histories, "/db/debug");
         console.error("All histories must have the same length");
         return [];
     }

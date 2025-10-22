@@ -10,6 +10,7 @@ import {
     IndexHistory,
     NormalizedAssetHistory,
     NormalizedAssets,
+    RawAssetHistory,
 } from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
 import {MAX_ASSETS_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
@@ -425,7 +426,9 @@ export const normalizeAssetsHistory = async (): Promise<NormalizedAssetHistory> 
     return normalizedAssetHistory;
 };
 
-export const normalizeAssetHistoryToStartOfTheDay = (history: AssetHistory[] | undefined = []) => {
+export const normalizeAssetHistoryToStartOfTheDay = (
+    history: RawAssetHistory[] | undefined = []
+): RawAssetHistory[] => {
     return history.map(item => {
         const normalizedItem = momentTimeZone.tz(item.time, "UTC").startOf("day");
 

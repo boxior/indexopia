@@ -63,6 +63,25 @@ export const dbGetAssetHistoryById = async (assetId: string): Promise<AssetHisto
     }
 };
 
+// Helper function: Remove all asset histories by assetId
+export const dbDeleteAssetHistoryById = async (assetId: string): Promise<void> => {
+    try {
+        const sql = `
+            DELETE FROM ${TABLE_NAME_ASSET_HISTORY} 
+            WHERE assetId = ?;
+        `;
+
+        await mySqlPool.execute(sql, [assetId]);
+
+        // Invalidate cache after successful deletion
+        revalidateTag(combineCacheTags(CacheTag.ASSETS_HISTORY, assetId));
+        console.log(`Asset histories for assetId ${assetId} deleted successfully!`);
+    } catch (error) {
+        console.error(`Error deleting asset histories for assetId ${assetId}:`, error);
+        throw error;
+    }
+};
+
 // Helper function: Fetch all history for a specific asset by `assetId` with optional `startTime`
 export const dbGetAssetHistoryByIdAndStartTime = async (
     assetId: string,

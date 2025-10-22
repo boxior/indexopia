@@ -105,3 +105,11 @@ UPDATE "User"
 SET role = 'globalAdmin' 
 WHERE email = 'irinfo@ukr.net';
 ```
+
+### Select count of records with clonedFrom not null:
+```sql
+SELECT COUNT(*) FROM yulya777_indexopia.assets_history 
+WHERE clonedFrom IS NOT NULL 
+AND clonedFrom != '' 
+AND clonedFrom != 'null';
+```

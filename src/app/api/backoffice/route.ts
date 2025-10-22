@@ -1,7 +1,5 @@
 import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
-import {writeJsonFile} from "@/utils/heleprs/fs.helpers";
-import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
 import moment from "moment";
 import {AssetHistory} from "@/utils/types/general.types";
 
@@ -25,22 +23,32 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
-        const ID = "polygon";
-        // const ID = "bitcoin";
-        const start = moment().utc().startOf("day").add(-5, "days").valueOf();
-        const end = moment().utc().startOf("day").valueOf();
+        const id = "cardano";
+        const start = moment("2023-10-17T00:00:00.000Z").utc().startOf("day").valueOf();
+        const end = moment("2025-10-18T00:00:00.000Z").utc().startOf("day").valueOf();
         const lastHistoryBefore: AssetHistory = {
-            assetId: ID,
+            assetId: id,
             priceUsd: "0.52126034102192210769",
             time: 1531180800000,
             date: "2018-07-10T00:00:00.000Z",
         };
-        const history = await fetchAssetHistory({lastHistoryBefore, id: ID, interval: "d1", start, end});
-        // const history = await manageAssetHistory({id: ID});
-        await writeJsonFile(ID, history, "/db/raw-history");
+
+        // const timeRanges = splitTimeRangeByYear(start, end);
+        // const history = await fetchAssetHistory({lastHistoryBefore, id, interval: "d1", start, end});
+        // const history = await manageAssetHistory({id, fromScratch: true});
+        // const assets = await dbGetAssets();
+
+        // const history = await manageAssetsHistory(assets);
 
         return NextResponse.json(
-            {data: history},
+            {
+                data: [],
+                // data: timeRanges.map(range => ({
+                //     start: moment(range.start).toISOString(),
+                //     end: moment(range.end).toISOString(),
+                //     days: getDaysArray(range.start, range.end).length,
+                // })),
+            },
             {
                 status: 200,
             }
