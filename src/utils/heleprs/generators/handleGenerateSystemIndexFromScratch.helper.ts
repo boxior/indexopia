@@ -1,7 +1,7 @@
 import {handleGetAssetsWithHistory} from "@/utils/heleprs/generators/handleGetAssetsForIndex.helper";
 import {handleGenerateSystemIndexOverviewAssets} from "@/utils/heleprs/generators/handleGenerateSystemIndex.helper";
 import {Asset, AssetHistory, IndexOverviewAsset, SystemIndexBy, SystemIndexSortBy} from "@/utils/types/general.types";
-import {MAX_ASSETS_COUNT} from "@/utils/constants/general.constants";
+import {MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES} from "@/utils/constants/general.constants";
 
 export const handleGenerateSystemIndexOverviewAssetsWithStartEndTimes = async (
     {
@@ -34,7 +34,7 @@ export const handleGenerateSystemIndexOverviewAssetsWithStartEndTimes = async (
 
     const generatedAssets = handleGenerateSystemIndexOverviewAssets({
         assets,
-        upToNumber: upToNumber ?? topAssetsCount ?? MAX_ASSETS_COUNT,
+        upToNumber: upToNumber ?? topAssetsCount ?? MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES,
         systemIndexBy,
         systemIndexSortBy,
         equalPortions,

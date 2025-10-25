@@ -8,7 +8,9 @@ export const BRAND_NAME = "Indexopia";
 
 export const DOMAIN_NAME = "indexopia";
 
-export const MAX_ASSETS_COUNT = 50;
+export const MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES = 50; // for built-in system indices.
+
+export const MAX_ASSETS_COUNT = 500; // overall assets count in DB.
 
 export const MAX_ASSET_PORTION = 50;
 

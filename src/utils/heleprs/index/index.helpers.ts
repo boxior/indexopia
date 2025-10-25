@@ -9,7 +9,7 @@ import {
     SystemIndexSortBy,
 } from "@/utils/types/general.types";
 import {pick} from "lodash";
-import {MAX_ASSETS_COUNT} from "@/utils/constants/general.constants";
+import {MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES} from "@/utils/constants/general.constants";
 
 export const getIndexOverviewAsset = <A extends IndexOverviewAsset = Asset & {portion: number}>(
     asset: A
@@ -20,7 +20,7 @@ export const getIndexOverviewAsset = <A extends IndexOverviewAsset = Asset & {po
 export const getSystemIndexOverviewId = ({
     systemIndexBy = SystemIndexBy.RANK,
     systemIndexSortBy = SystemIndexSortBy.PROFIT,
-    assetsCount = MAX_ASSETS_COUNT,
+    assetsCount = MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES,
     equalPortions = false,
 }: {
     systemIndexBy?: SystemIndexBy;

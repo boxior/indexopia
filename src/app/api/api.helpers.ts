@@ -9,7 +9,7 @@ import {
 } from "@/lib/db/helpers/db.assetsHistory.helpers";
 import momentTimeZone from "moment-timezone";
 import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
-import {ASSETS_FOLDER_PATH, filterAssetsByOmitIds} from "@/lib/db/helpers/db.helpers";
+import {ASSETS_FOLDER_PATH, filterAssetsByOmitIds, filterDuplicateAssetsBySymbol} from "@/lib/db/helpers/db.helpers";
 import {chunk, flatten} from "lodash";
 import {dbGetUniqueIndicesOverviewsAssetIds, manageSystemIndices} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {NextResponse} from "next/server";
@@ -19,7 +19,7 @@ export const manageAssets = async () => {
     const limit = MAX_ASSETS_COUNT + OMIT_ASSETS_IDS.length;
 
     const {data, timestamp} = await fetchAssets({limit});
-    const assets = filterAssetsByOmitIds(data);
+    const assets = filterDuplicateAssetsBySymbol(filterAssetsByOmitIds(data)).assets;
 
     const indicesOverviewsAssetsIds = await dbGetUniqueIndicesOverviewsAssetIds();
     const assetsIdsToFetchMore = indicesOverviewsAssetsIds.filter(id => !assets.some(asset => asset.id === id));

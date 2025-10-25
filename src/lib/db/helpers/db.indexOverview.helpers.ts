@@ -7,7 +7,7 @@ import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineCacheTags} from "@/utils/cache/helpers.cache";
 import {revalidateTag} from "next/cache";
 import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
-import {MAX_ASSETS_COUNT} from "@/utils/constants/general.constants";
+import {MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES} from "@/utils/constants/general.constants";
 import {chunk} from "lodash";
 import {SYSTEM_INDICES_PROPS} from "@/app/api/populate/populate.constants";
 import {handlePrepareToSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
@@ -404,7 +404,7 @@ export const manageSystemIndices = async (
     allAssetsHistory: AssetHistory[] | undefined = []
 ) => {
     try {
-        const allTopAssets = sortRankIndexAssets(allAssets).slice(0, MAX_ASSETS_COUNT);
+        const allTopAssets = sortRankIndexAssets(allAssets).slice(0, MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES);
         const normalizedAssetsHistory = allAssetsHistory.reduce(
             (acc, assetHistory) => {
                 const hasNeededHistory = allTopAssets.some(item => item.id === assetHistory.assetId);
