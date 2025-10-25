@@ -2,6 +2,7 @@
 import {useState, useRef, useEffect} from "react";
 import {Asset} from "@/utils/types/general.types";
 import {Input} from "@/components/ui/input";
+import {useTranslations} from "next-intl";
 
 // Add this new Autocomplete component before the IndexModal function
 interface AutocompleteProps {
@@ -14,19 +15,13 @@ interface AutocompleteProps {
     excludeIds: string[];
 }
 
-export function Autocomplete({
-    value,
-    onChange,
-    onSelect,
-    placeholder,
-    disabled,
-    options,
-    excludeIds,
-}: AutocompleteProps) {
+export function Autocomplete({onChange, onSelect, placeholder, disabled, options, excludeIds}: AutocompleteProps) {
     const [isOpen, setIsOpen] = useState(false);
     const [searchTerm, setSearchTerm] = useState("");
     const inputRef = useRef<HTMLInputElement>(null);
     const dropdownRef = useRef<HTMLDivElement>(null);
+
+    const tIndexModal = useTranslations("indexModal");
 
     // Filter and sort options based on search term
     const filteredOptions = options
@@ -122,7 +117,9 @@ export function Autocomplete({
 
             {isOpen && filteredOptions.length === 0 && searchTerm && (
                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg">
-                    <div className="p-3 text-sm text-gray-500 text-center">No assets found matching "{searchTerm}"</div>
+                    <div className="p-3 text-sm text-gray-500 text-center">
+                        {tIndexModal("autocomplete.notFound", {searchTerm})}
+                    </div>
                 </div>
             )}
         </div>

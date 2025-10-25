@@ -426,6 +426,9 @@
     }
   },
   "indexModal": {
+    "autocomplete": {
+      "notFound": "Не найдено активов, соответствующих запросу \"{searchTerm}\""
+    },
     "modes": {
       "create": {
         "title": "Создать пользовательский индекс",
