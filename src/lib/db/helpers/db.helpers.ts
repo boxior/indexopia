@@ -13,7 +13,7 @@ import {
     RawAssetHistory,
 } from "@/utils/types/general.types";
 import momentTimeZone from "moment-timezone";
-import {MAX_ASSETS_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
+import {MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
 import {cloneDeep, flatten, get, set} from "lodash";
 
 import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
@@ -39,7 +39,9 @@ export const getAssetHistoryOverview = async (
     return getHistoryOverview(historyList);
 };
 
-export const getCachedTopAssets = async (limit: number | undefined = MAX_ASSETS_COUNT): Promise<Asset[]> => {
+export const getCachedTopAssets = async (
+    limit: number | undefined = MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES
+): Promise<Asset[]> => {
     const assets = await dbGetAssets();
     return filterAssetsByOmitIds(assets ?? [], limit);
 };
@@ -344,6 +346,71 @@ export function filterAssetsByOmitIds(assets: Asset[], limit: number | undefined
         .slice(0, limit + OMIT_ASSETS_IDS.length)
         .filter(a => !OMIT_ASSETS_IDS.includes(a.id))
         .slice(0, limit);
+}
+
+// Helper function to compare prices with configurable precision in percentage
+export function arePricesSimilar(
+    price1: Asset["priceUsd"] | null,
+    price2: Asset["priceUsd"] | null,
+    precisionPercent: number = 5 // default 5% precision
+): boolean {
+    if (!price1 || !price2) return false;
+
+    const numPrice1 = parseFloat(price1);
+    const numPrice2 = parseFloat(price2);
+
+    if (isNaN(numPrice1) || isNaN(numPrice2)) return false;
+
+    // Avoid division by zero
+    if (numPrice1 === 0 && numPrice2 === 0) return true;
+    if (numPrice1 === 0 || numPrice2 === 0) return false;
+
+    // Calculate percentage difference relative to the higher price
+    const maxPrice = Math.max(numPrice1, numPrice2);
+    const priceDifference = Math.abs(numPrice1 - numPrice2);
+    const percentageDifference = (priceDifference / maxPrice) * 100;
+
+    return percentageDifference <= precisionPercent;
+}
+
+// New function to filter out duplicate symbols, keeping only the first occurrence
+export function filterDuplicateAssetsBySymbol(propAssets: Asset[]): {
+    assets: Asset[];
+    duplicates: Record<string, string[]>;
+} {
+    const seenAssets: Asset[] = [];
+
+    const duplicates: Record<string, string[]> = {};
+
+    const assets = propAssets.filter(asset => {
+        let duplicatedSymbol: Asset["symbol"] | null = null;
+
+        seenAssets.forEach(seenAsset => {
+            if (
+                seenAsset.symbol.length > 1 &&
+                asset.symbol.includes(seenAsset.symbol) &&
+                arePricesSimilar(asset.priceUsd, seenAsset.priceUsd)
+            ) {
+                duplicatedSymbol = seenAsset.symbol;
+            }
+        });
+
+        if (duplicatedSymbol) {
+            duplicates[duplicatedSymbol] = [...(duplicates[duplicatedSymbol] ?? []), asset.symbol];
+            return false;
+        }
+
+        seenAssets.push(asset);
+        return true;
+    });
+
+    console.log("seenSymbols", seenAssets);
+    // console.log("duplicates", duplicates);
+
+    return {
+        assets,
+        duplicates,
+    };
 }
 
 export const normalizeDbBoolean = <Input extends Record<string, unknown>, Output>(

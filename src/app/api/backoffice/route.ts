@@ -3,7 +3,6 @@ import {ENV_VARIABLES} from "@/env";
 import moment from "moment";
 import {AssetHistory} from "@/utils/types/general.types";
 import {writeJsonFile} from "@/utils/heleprs/fs.helpers";
-import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 
 /**
  * Populate entities: Assets, History, and Indices
@@ -38,9 +37,16 @@ export async function POST(req: NextRequest) {
         // const timeRanges = splitTimeRangeByYear(start, end);
         // const history = await fetchAssetHistory({lastHistoryBefore, id, interval: "d1", start, end});
         // const history = await manageAssetHistory({id, fromScratch: true});
-        const assets = await dbGetAssets();
+        // const assets = await dbGetAssets();
 
         // const history = await manageAssetsHistory(assets);
+
+        // const assetIdsToRemove = ["BTCB", "RBTC", "RENBTC", "BTTOLD"];
+        //
+        // for (const assetId of assetIdsToRemove) {
+        //     await dbDeleteAssetById(assetId);
+        //     await dbDeleteAssetHistoryById(assetId);
+        // }
 
         let missedHistory: Record<string, unknown> = {};
         //
@@ -108,9 +114,12 @@ export async function POST(req: NextRequest) {
         //     await manageAssetHistory({id: assetId, fromScratch: true});
         // }
 
+        // const {duplicates, assets: filteredAssets} = filterDuplicateAssetsBySymbol(assets);
+        // await writeJsonFile(`filteredAssets`, filteredAssets, "/db/filteredAssets");
+        // await writeJsonFile(`duplicates`, duplicates, "/db/filteredAssets");
         return NextResponse.json(
             {
-                data: missedHistory,
+                // data: {duplicates, filteredAssets},
                 // data: timeRanges.map(range => ({
                 //     start: moment(range.start).toISOString(),
                 //     end: moment(range.end).toISOString(),
