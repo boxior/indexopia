@@ -2,6 +2,8 @@ import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 import moment from "moment";
 import {AssetHistory} from "@/utils/types/general.types";
+import {writeJsonFile} from "@/utils/heleprs/fs.helpers";
+import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 
 /**
  * Populate entities: Assets, History, and Indices
@@ -23,7 +25,7 @@ export async function POST(req: NextRequest) {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
-        const id = "cardano";
+        const id = "terra-virtua-kolect";
         const start = moment("2023-10-17T00:00:00.000Z").utc().startOf("day").valueOf();
         const end = moment("2025-10-18T00:00:00.000Z").utc().startOf("day").valueOf();
         const lastHistoryBefore: AssetHistory = {
@@ -36,13 +38,79 @@ export async function POST(req: NextRequest) {
         // const timeRanges = splitTimeRangeByYear(start, end);
         // const history = await fetchAssetHistory({lastHistoryBefore, id, interval: "d1", start, end});
         // const history = await manageAssetHistory({id, fromScratch: true});
-        // const assets = await dbGetAssets();
+        const assets = await dbGetAssets();
 
         // const history = await manageAssetsHistory(assets);
 
+        let missedHistory: Record<string, unknown> = {};
+        //
+
+        // await Promise.all(
+        //     assets.slice(-10).map(async asset => {
+        //         const history = await dbGetMissedAssetHistoryRangesById({assetId: asset.id});
+        //
+        //         if (history.ranges.length) {
+        //             missedHistory[asset.id] = history;
+        //             await writeJsonFile(`${asset.id}_${history.ranges.length}`, history, "/db/missedHistory");
+        //         }
+        //     })
+        // );
+        // const chunks = chunk(assets, 10);
+        //
+        // for (const chunk of chunks) {
+        //     await Promise.all(
+        //         chunk.map(async asset => {
+        //             const history = await dbGetMissedAssetHistoryRangesById({assetId: asset.id});
+        //
+        //             if (history.ranges.length) {
+        //                 missedHistory[asset.id] = history;
+        //                 await writeJsonFile(`${asset.id}_${history.ranges.length}`, history, "/db/missedHistory");
+        //             }
+        //         })
+        //     );
+        // }
+        // for (const asset of assets.slice(-10)) {
+        //     const history = await dbGetMissedAssetHistoryRangesById({assetId: asset.id});
+        //
+        //     if (history.ranges.length) {
+        //         missedHistory[asset.id] = history;
+        //         await writeJsonFile(`${asset.id}_${history.ranges.length}`, history, "/db/missedHistory");
+        //     }
+        // }
+
+        const keys = Object.keys(missedHistory);
+        await writeJsonFile(`keys`, {keys}, "/db/missedHistory");
+
+        // TODO: Script to:
+        // Get all missed ranges per asset
+        // Populate missed ranges
+        // const history = await dbGetMissedAssetHistoryRangesById({assetId: id});
+        //
+        // if (history.ranges.length) {
+        //     missedHistory[id] = history;
+        //     await writeJsonFile(`${id}_${history.ranges.length}`, history, "/db/missedHistory");
+        // }
+
+        // const assetsIds = [
+        //     "unus-sed-leo",
+        //     "terra-luna",
+        //     "storj",
+        //     "power-ledger",
+        //     "ardor",
+        //     "orbs",
+        //     "aragon",
+        //     "neblio",
+        //     "dusk-network",
+        //     "babyswap",
+        // ];
+        //
+        // for (const assetId of assetsIds) {
+        //     await manageAssetHistory({id: assetId, fromScratch: true});
+        // }
+
         return NextResponse.json(
             {
-                data: [],
+                data: missedHistory,
                 // data: timeRanges.map(range => ({
                 //     start: moment(range.start).toISOString(),
                 //     end: moment(range.end).toISOString(),

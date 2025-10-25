@@ -18,6 +18,8 @@ import {cloneDeep, flatten, get, set} from "lodash";
 
 import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {dbGetAssetHistoryById, dbGetAssetHistoryByIdAndStartTime} from "@/lib/db/helpers/db.assetsHistory.helpers";
+import moment from "moment";
+import {generateUuid} from "@/utils/heleprs/generateUuid.helper";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDICES_FOLDER_PATH = "/db/indices";
@@ -140,7 +142,10 @@ export const getAssetHistoriesWithSmallestRange = async ({
     const histories: Record<string, AssetHistory[]> = {};
 
     let minStartTime: number | null = startTime ?? null;
+    let minStartTimeAssetId: string | null = null;
+
     let maxEndTime: number | null = endTime ?? null;
+    let maxEndTimeAssetId: string | null = null;
 
     const historyRecord =
         normalizedAssetsHistory ??
@@ -187,9 +192,10 @@ export const getAssetHistoriesWithSmallestRange = async ({
 
             // Update the global minimum for start time, taking the latest overlapping start time
             minStartTime = minStartTime === null ? assetStartTime : Math.max(minStartTime, assetStartTime);
-
+            minStartTimeAssetId = minStartTime === assetStartTime ? assetId : minStartTimeAssetId;
             // Update the global maximum for end time, taking the earliest overlapping end time
             maxEndTime = maxEndTime === null ? assetEndTime : Math.min(maxEndTime, assetEndTime);
+            maxEndTimeAssetId = maxEndTime === assetEndTime ? assetId : maxEndTimeAssetId;
 
             histories[assetId] = historyList;
         } catch (error) {
@@ -207,6 +213,16 @@ export const getAssetHistoriesWithSmallestRange = async ({
         });
     }
 
+    void writeJsonFile(
+        `${assetIds.length}_${moment(maxEndTime).diff(moment(minStartTime), "d")}_${generateUuid()}`,
+        {
+            minStartTimeAssetId,
+            maxEndTimeAssetId,
+            minStartTime: moment(minStartTime).utc().toISOString(),
+            maxEndTime: moment(maxEndTime).utc().toISOString(),
+        },
+        "/db/asset_history_with_smallest_range"
+    );
     return {histories, startTime: minStartTime ?? undefined, endTime: maxEndTime ?? undefined};
 };
 
