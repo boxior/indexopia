@@ -1,4 +1,4 @@
-import {AssetHistory, IndexOverview} from "@/utils/types/general.types";
+import {AssetHistory, IndexOverview, RawAssetHistory} from "@/utils/types/general.types";
 import moment from "moment/moment";
 import {TOP_PERFORMANCE_COUNT} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesFilters";
 
@@ -45,18 +45,21 @@ export const getIndexDurationLabel = (startTime: number, endTime: number, t?: Du
  * @param lastHistoryBefore - Asset history to clone from if no records exist for a specific day
  * @param startTime - Start time filter (Unix timestamp in milliseconds)
  * @param endTime - End time filter (Unix timestamp in milliseconds)
+ * @param assetId - Asset id
  * @returns Array with missing records populated within the specified time range.
  */
-export function populateMissingAssetHistory<D extends Omit<AssetHistory, "assetId"> = AssetHistory>({
+export function populateMissingAssetHistory<D extends RawAssetHistory = AssetHistory>({
     histories,
     lastHistoryBefore,
     endTime,
     startTime,
+    assetId,
 }: {
     histories: D[];
     startTime: number;
     endTime: number;
     lastHistoryBefore?: D;
+    assetId?: string;
 }): D[] {
     const assetStartTime = lastHistoryBefore ? startTime : histories[0]?.time;
     if (!assetStartTime) {

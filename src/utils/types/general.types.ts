@@ -71,6 +71,8 @@ export interface AssetHistory {
     clonedFrom?: string; // snapshot from "date": "2018-07-10T00:00:00.000Z". It might be if the history does not exist in data provider.
 }
 
+export type RawAssetHistory = Omit<AssetHistory, "assetId">;
+
 export type IndexHistory = Pick<AssetHistory, "priceUsd" | "time" | "date">;
 
 export interface MaxDrawDown {
@@ -78,11 +80,6 @@ export interface MaxDrawDown {
     startTime: string;
     endTime: string;
 }
-
-export type ChartData = {
-    date: string;
-    price: number;
-};
 
 export type NormalizedAssets = Record<Asset["id"], Asset>;
 

@@ -1,15 +1,19 @@
 import {MAX_ASSETS_COUNT, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
-import fetchAssets from "@/app/actions/assets/fetchAssets";
 import {dbGetAssets, dbGetAssetsByIds, dbPostAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {writeJsonFile} from "@/utils/heleprs/fs.helpers";
 import {Asset, AssetHistory} from "@/utils/types/general.types";
-import {dbGetAssetHistoryById, dbPostAssetHistory} from "@/lib/db/helpers/db.assetsHistory.helpers";
+import {
+    dbDeleteAssetHistoryById,
+    dbGetAssetHistoryById,
+    dbPostAssetHistory,
+} from "@/lib/db/helpers/db.assetsHistory.helpers";
 import momentTimeZone from "moment-timezone";
 import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
 import {ASSETS_FOLDER_PATH, filterAssetsByOmitIds} from "@/lib/db/helpers/db.helpers";
 import {chunk, flatten} from "lodash";
 import {dbGetUniqueIndicesOverviewsAssetIds, manageSystemIndices} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {NextResponse} from "next/server";
+import fetchAssets from "@/app/actions/assets/fetchAssets";
 
 export const manageAssets = async () => {
     const limit = MAX_ASSETS_COUNT + OMIT_ASSETS_IDS.length;
@@ -28,8 +32,19 @@ export const manageAssets = async () => {
 
     return allAssets;
 };
-export const manageAssetHistory = async ({id}: {id: string}): Promise<AssetHistory[]> => {
-    const oldList = await dbGetAssetHistoryById(id);
+
+export const manageAssetHistory = async ({
+    id,
+    fromScratch = false,
+}: {
+    id: string;
+    fromScratch?: boolean;
+}): Promise<AssetHistory[]> => {
+    if (fromScratch) {
+        await dbDeleteAssetHistoryById(id);
+    }
+
+    const oldList = fromScratch ? [] : await dbGetAssetHistoryById(id);
 
     let start = momentTimeZone.tz("UTC").startOf("day").add(-11, "year").add(1, "day").valueOf();
 
@@ -41,7 +56,7 @@ export const manageAssetHistory = async ({id}: {id: string}): Promise<AssetHisto
             .valueOf();
     }
 
-    const end = momentTimeZone.tz("UTC").startOf("day").valueOf();
+    const end = momentTimeZone.tz("UTC").startOf("day").add(1, "day").valueOf();
 
     if (start === end) {
         return oldList;
@@ -60,37 +75,36 @@ export const manageAssetHistory = async ({id}: {id: string}): Promise<AssetHisto
     if (newList.length === 0) {
         return oldList;
     }
+
     await writeJsonFile(`history_${id}`, newList, "/db/debug");
     await dbPostAssetHistory(newList);
 
     return [...oldList, ...newList];
 };
 
-export const manageAssetsHistory = async (propAssets?: Asset[]): Promise<AssetHistory[]> => {
+export const manageAssetsHistory = async (propAssets?: Asset[], fromScratch?: boolean): Promise<AssetHistory[]> => {
     const assets = propAssets ?? (await dbGetAssets());
 
     const chunks = chunk(assets, 10);
 
-    const result = await Promise.all(
-        chunks.map(async chunk => {
-            return Promise.all(
-                chunk.map(async asset => {
-                    try {
-                        return manageAssetHistory({id: asset.id});
-                    } catch (err) {
-                        console.error(err);
-                        await writeJsonFile(
-                            `error_${(err as Error).name}`,
-                            JSON.parse(JSON.stringify(err)),
-                            `/db/errors`
-                        );
+    const result = [];
 
-                        return [];
-                    }
-                })
-            );
-        })
-    );
+    for (const chunk of chunks) {
+        const res = await Promise.all(
+            chunk.map(async asset => {
+                try {
+                    return await manageAssetHistory({id: asset.id, fromScratch});
+                } catch (err) {
+                    console.error(err);
+                    await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
+
+                    return [];
+                }
+            })
+        );
+
+        result.push(res);
+    }
 
     return flatten(flatten(result));
 };

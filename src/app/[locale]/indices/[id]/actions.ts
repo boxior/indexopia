@@ -1,7 +1,7 @@
 "use server";
 
 import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Id, Index, IndexOverview} from "@/utils/types/general.types";
-import {getAssetsWithHistories, getCachedAssets, getHistoryOverview} from "@/lib/db/helpers/db.helpers";
+import {getAssetsWithHistories, getHistoryOverview} from "@/lib/db/helpers/db.helpers";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 import {
     dbDeleteIndexOverview,
@@ -12,7 +12,7 @@ import {
 import {getIndexHistory} from "@/utils/heleprs/index/index.helpers";
 import {unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
-import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
+import {dbGetAssets, dbGetAssetsByIds} from "@/lib/db/helpers/db.assets.helpers";
 import {pick} from "lodash";
 import {combineCacheTags} from "@/utils/cache/helpers.cache";
 
@@ -126,7 +126,7 @@ export const actionGetIndex = async ({
         return null;
     }
 
-    let assets = await getCachedAssets(indexOverview.assets.map(asset => asset.id));
+    let assets = await dbGetAssetsByIds(indexOverview.assets.map(asset => asset.id));
 
     const {
         assets: assetsWithHistories,
