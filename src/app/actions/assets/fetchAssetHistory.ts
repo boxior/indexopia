@@ -94,31 +94,6 @@ export function splitTimeRangeByYear(start: number, end: number, numberOfDays: n
     return ranges;
 }
 
-// Helper function to split time range into 1-year chunks
-// export function splitTimeRangeByYear(
-//     start: number,
-//     end: number,
-//     upToRange: number | undefined = YEAR_IN_MS
-// ): Array<{start: number; end: number}> {
-//     const ranges: Array<{start: number; end: number}> = [];
-//
-//     const propStart = moment(start).utc().startOf("day").valueOf();
-//     const propEnd = moment(end).utc().startOf("day").valueOf();
-//
-//     let currentStart = propStart;
-//
-//     while (currentStart < propEnd) {
-//         const currentEnd = Math.min(currentStart + upToRange, propEnd);
-//         ranges.push({
-//             start: currentStart,
-//             end: currentEnd,
-//         });
-//         currentStart = currentEnd;
-//     }
-//
-//     return ranges;
-// }
-
 export type RawHistoryResponse = {
     data: RawAssetHistory[];
     shouldPopulate: boolean;
