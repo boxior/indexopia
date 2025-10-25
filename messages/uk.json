@@ -426,6 +426,9 @@
     }
   },
   "indexModal": {
+    "autocomplete": {
+      "notFound": "Не знайдено активів, що відповідають запиту \"{searchTerm}\""
+    },
     "modes": {
       "create": {
         "title": "Створити користувацький індекс",

@@ -16,6 +16,7 @@ import {DEFAULT_INDEX_STARTING_BALANCE, INDEX_VALIDATION, MAX_PORTION} from "@/u
 import {useEffect, useState} from "react";
 import {actionGetAssets} from "@/app/[locale]/indices/[id]/actions";
 import ContentLoader from "@/components/Suspense/ContentLoader";
+import {Autocomplete} from "@/app/components/Autocomplete";
 
 export enum IndexMode {
     CREATE = "create",
@@ -347,6 +348,7 @@ export function IndexModal({
                                             )}
                                         </Field>
                                     </div>
+
                                     {/* Assets & Allocation */}
                                     <div className="space-y-4">
                                         <Label>{tIndexModalFields("assetsAllocation.label")}*</Label>
@@ -354,9 +356,12 @@ export function IndexModal({
                                         <div className="flex gap-2">
                                             <Field name="selectedAssetId">
                                                 {({field}: any) => (
-                                                    <Select
+                                                    <Autocomplete
                                                         value={field.value}
-                                                        onValueChange={value => {
+                                                        onChange={value =>
+                                                            formik.setFieldValue("selectedAssetId", value)
+                                                        }
+                                                        onSelect={value => {
                                                             formik.setFieldValue("selectedAssetId", value);
                                                             // Immediately add the asset when selected
                                                             if (value) {
@@ -380,44 +385,17 @@ export function IndexModal({
                                                                 }
                                                             }
                                                         }}
+                                                        placeholder={tIndexModalFields(
+                                                            "assetsAllocation.selectPlaceholder"
+                                                        )}
                                                         disabled={formik.isSubmitting}
-                                                    >
-                                                        <SelectTrigger className="flex-1">
-                                                            <SelectValue
-                                                                placeholder={tIndexModalFields(
-                                                                    "assetsAllocation.selectPlaceholder"
-                                                                )}
-                                                            />
-                                                        </SelectTrigger>
-                                                        <SelectContent>
-                                                            {availableAssets
-                                                                .filter(
-                                                                    asset =>
-                                                                        !formik.values.assets.some(
-                                                                            selected => selected.id === asset.id
-                                                                        )
-                                                                )
-                                                                .sort((a, b) => Number(a.rank) - Number(b.rank)) // Sort by rank ascending with type safety
-                                                                .map(asset => (
-                                                                    <SelectItem key={asset.id} value={asset.id}>
-                                                                        <div className="flex items-center gap-2">
-                                                                            <span className="text-xs text-gray-400 min-w-[2rem]">
-                                                                                #{asset.rank}
-                                                                            </span>
-                                                                            <span className="font-medium">
-                                                                                {asset.symbol}
-                                                                            </span>
-                                                                            <span className="text-sm text-gray-500">
-                                                                                {asset.name}
-                                                                            </span>
-                                                                        </div>
-                                                                    </SelectItem>
-                                                                ))}
-                                                        </SelectContent>
-                                                    </Select>
+                                                        options={availableAssets}
+                                                        excludeIds={formik.values.assets.map(a => a.id)}
+                                                    />
                                                 )}
                                             </Field>
                                         </div>
+
                                         {/* Selected Assets */}
                                         <FieldArray name="assets">
                                             {() => (

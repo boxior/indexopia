@@ -426,6 +426,9 @@
     }
   },
   "indexModal": {
+    "autocomplete": {
+      "notFound": "No assets found matching \"{searchTerm}\""
+    },
     "modes": {
       "create": {
         "title": "Create Custom Index",
