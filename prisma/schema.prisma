@@ -4,6 +4,14 @@
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 
+/**
+ * serhii.lyzun.indexopia@gmail.com login in Prisma site
+ * To set up a new env:
+ * - create new env in Resend
+ * - create new DB in Prisma
+ * - run `yarn prisma:env` inside ./prisma folder
+ */
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
