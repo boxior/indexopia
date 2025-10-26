@@ -404,9 +404,6 @@ export function filterDuplicateAssetsBySymbol(propAssets: Asset[]): {
         return true;
     });
 
-    console.log("seenSymbols", seenAssets);
-    // console.log("duplicates", duplicates);
-
     return {
         assets,
         duplicates,

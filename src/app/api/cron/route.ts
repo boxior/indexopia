@@ -6,5 +6,5 @@ export async function GET(req: NextRequest) {
         return NextResponse.json("Unauthorized", {status: 401});
     }
 
-    return await populateDb();
+    return await populateDb({start: 0});
 }

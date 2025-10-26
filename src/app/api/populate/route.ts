@@ -22,7 +22,11 @@ const handleRequest = async (req: NextRequest) => {
             return NextResponse.json({error: "Invalid API key"}, {status: 403});
         }
 
-        return await populateDb();
+        const start = Number(searchParams.get("start")) || 0;
+
+        const end = Number(searchParams.get("end")) || undefined;
+
+        return await populateDb({start, end});
     } catch (error) {
         console.error(error);
         return NextResponse.json(
