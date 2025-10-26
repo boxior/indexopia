@@ -43,6 +43,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - Copy past env variables from .env.local
 
 ### MySQL in AWS (crypto DB)
+- Login to AWS: serhii.lyzun.indexopia@gmail.com
 - Create `MYSQL_...` env variables suitable for the env DB: Create simple MySQL DB in [AWS](/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.env.local)
 - Use DBeaver to dumb and restore in a new one(restore data without userId records)
 - - In the dumb before restore:
@@ -51,6 +52,7 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 - Add new DB to the DBeaver
 
 ### Prisma (Auth db)
+- Login to Prisma: serhii.lyzun.indexopia@gmail.com
 - Create a new [DB](https://console.prisma.io/cmcq1krs6016gym0vuxrxzvbf/cmcq1s3sp026z2s0v6cpfkw7i/cmcq1s3sp02702s0vqilnezkn/dashboard)
 - Create a new Resend [Api key](https://resend.com/api-keys)
 - Set up DB: run `yarn prisma:env`
