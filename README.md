@@ -59,3 +59,6 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ### Vercel (Env vars)
 - Add env variables to the [env](https://vercel.com/boxiors-projects/indexopia/settings/environment-variables)
 
+### Cron jobs (Populate DB + System indices)
+- [QStash](https://console.upstash.com/qstash/schedules?teamid=0)
+
