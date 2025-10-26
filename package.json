@@ -14,6 +14,7 @@
         "lint": "next lint",
         "format": "prettier --write .",
         "mysql:connect": "mysql -h $MYSQL_HOST -P 3306 -u $MYSQL_USER -p",
+        "prisma:env": "npx prisma migrate dev",
         "prisma:tunnel": "npx @prisma/ppg-tunnel --port=7777",
         "prisma:seed": "tsx prisma/seed.ts"
     },
