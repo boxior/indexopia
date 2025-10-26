@@ -38,3 +38,24 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+
+## Create a new env
+- Copy past env variables from .env.local
+
+### MySQL in AWS (crypto DB)
+- Create `MYSQL_...` env variables suitable for the env DB: Create simple MySQL DB in [AWS](/Users/serhiilyzun/Documents/Sturtaps/Crypto/cryptoindex/.env.local)
+- Use DBeaver to dumb and restore in a new one(restore data without userId records)
+- - In the dumb before restore:
+- - - -- Comment out or remove these types of lines:
+      -- SET @@GLOBAL.GTID_PURGED=...
+- Add new DB to the DBeaver
+
+### Prisma (Auth db)
+- Create a new [DB](https://console.prisma.io/cmcq1krs6016gym0vuxrxzvbf/cmcq1s3sp026z2s0v6cpfkw7i/cmcq1s3sp02702s0vqilnezkn/dashboard)
+- Create a new Resend [Api key](https://resend.com/api-keys)
+- Set up DB: run `yarn prisma:env`
+- To check in DBeaver: run `yarn prisma:tunnel`
+
+### Vercel (Env vars)
+- Add env variables to the [env](https://vercel.com/boxiors-projects/indexopia/settings/environment-variables)
+
