@@ -3,7 +3,7 @@ import {
     MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES,
     OMIT_ASSETS_IDS,
 } from "@/utils/constants/general.constants";
-import {dbGetAssets, dbGetAssetsByIds, dbPostAssets} from "@/lib/db/helpers/db.assets.helpers";
+import {dbGetAssetsByIds, dbPostAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {writeJsonFile} from "@/utils/heleprs/fs.helpers";
 import {Asset, AssetHistory} from "@/utils/types/general.types";
 import {
@@ -13,17 +13,18 @@ import {
 } from "@/lib/db/helpers/db.assetsHistory.helpers";
 import momentTimeZone from "moment-timezone";
 import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
-import {ASSETS_FOLDER_PATH, filterAssetsByOmitIds, filterDuplicateAssetsBySymbol} from "@/lib/db/helpers/db.helpers";
+import {ASSETS_FOLDER_PATH, filterAssets} from "@/lib/db/helpers/db.helpers";
 import {chunk, flatten} from "lodash";
 import {dbGetUniqueIndicesOverviewsAssetIds, manageSystemIndices} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {NextResponse} from "next/server";
 import fetchAssets from "@/app/actions/assets/fetchAssets";
+import {actionGetAssets} from "@/app/[locale]/indices/[id]/actions";
 
 export const manageAssets = async () => {
     const limit = MAX_ASSETS_COUNT + OMIT_ASSETS_IDS.length;
 
     const {data, timestamp} = await fetchAssets({limit});
-    const assets = filterDuplicateAssetsBySymbol(filterAssetsByOmitIds(data)).assets;
+    const assets = filterAssets(data);
 
     const indicesOverviewsAssetsIds = await dbGetUniqueIndicesOverviewsAssetIds();
     const assetsIdsToFetchMore = indicesOverviewsAssetsIds.filter(id => !assets.some(asset => asset.id === id));
@@ -91,7 +92,7 @@ export const manageAssetHistory = async ({
 };
 
 export const manageAssetsHistory = async (propAssets?: Asset[], fromScratch?: boolean): Promise<AssetHistory[]> => {
-    const assets = propAssets ?? (await dbGetAssets());
+    const assets = propAssets ?? (await actionGetAssets());
 
     const chunks = chunk(assets, 10);
 

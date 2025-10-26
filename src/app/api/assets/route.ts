@@ -2,6 +2,7 @@ import {NextResponse, NextRequest} from "next/server";
 import {ENV_VARIABLES} from "@/env";
 import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {manageAssets} from "@/app/api/api.helpers";
+import {actionGetAssets} from "@/app/[locale]/indices/[id]/actions";
 
 /**
  * Write `assets` to the DB.
@@ -45,7 +46,7 @@ export async function POST(_req: NextRequest) {
 
 export async function GET(_req: NextRequest) {
     try {
-        const assets = await dbGetAssets();
+        const assets = await actionGetAssets();
 
         return NextResponse.json(
             {assets},

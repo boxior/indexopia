@@ -16,10 +16,10 @@ import momentTimeZone from "moment-timezone";
 import {MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES, OMIT_ASSETS_IDS} from "@/utils/constants/general.constants";
 import {cloneDeep, flatten, get, set} from "lodash";
 
-import {dbGetAssets} from "@/lib/db/helpers/db.assets.helpers";
 import {dbGetAssetHistoryById, dbGetAssetHistoryByIdAndStartTime} from "@/lib/db/helpers/db.assetsHistory.helpers";
 import moment from "moment";
 import {generateUuid} from "@/utils/heleprs/generateUuid.helper";
+import {actionGetAssets} from "@/app/[locale]/indices/[id]/actions";
 
 export const ASSETS_FOLDER_PATH = "/db/assets";
 export const INDICES_FOLDER_PATH = "/db/indices";
@@ -42,8 +42,7 @@ export const getAssetHistoryOverview = async (
 export const getCachedTopAssets = async (
     limit: number | undefined = MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES
 ): Promise<Asset[]> => {
-    const assets = await dbGetAssets();
-    return filterAssetsByOmitIds(assets ?? [], limit);
+    return actionGetAssets(limit);
 };
 
 // previous logic. It was inconsistency with the Index overview by assets overview.
@@ -341,11 +340,8 @@ export async function getAssetsWithHistories<A extends {id: string} = Asset>({
     };
 }
 
-export function filterAssetsByOmitIds(assets: Asset[], limit: number | undefined = assets.length): Asset[] {
-    return assets
-        .slice(0, limit + OMIT_ASSETS_IDS.length)
-        .filter(a => !OMIT_ASSETS_IDS.includes(a.id))
-        .slice(0, limit);
+export function filterAssetsByOmitIds(assets: Asset[]): Asset[] {
+    return assets.filter(a => !OMIT_ASSETS_IDS.includes(a.id));
 }
 
 // Helper function to compare prices with configurable precision in percentage
@@ -409,6 +405,22 @@ export function filterDuplicateAssetsBySymbol(propAssets: Asset[]): {
         duplicates,
     };
 }
+
+/**
+ * Like `usd`
+ * @param assets
+ * @param part
+ */
+export function filterAssetsBySymbolPart(assets: Asset[], part: string | undefined = "usd"): Asset[] {
+    return assets.filter(asset => !asset.symbol.toLowerCase().includes(part.toLowerCase()));
+}
+
+export const filterAssets = (assets: Asset[], limit: number | undefined = assets.length) => {
+    return filterDuplicateAssetsBySymbol(filterAssetsBySymbolPart(filterAssetsByOmitIds(assets))).assets.slice(
+        0,
+        limit
+    );
+};
 
 export const normalizeDbBoolean = <Input extends Record<string, unknown>, Output>(
     entity: Input,

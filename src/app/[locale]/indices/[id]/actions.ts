@@ -1,7 +1,7 @@
 "use server";
 
 import {AssetWithHistoryOverviewPortionAndMaxDrawDown, Id, Index, IndexOverview} from "@/utils/types/general.types";
-import {getAssetsWithHistories, getHistoryOverview} from "@/lib/db/helpers/db.helpers";
+import {filterAssets, getAssetsWithHistories, getHistoryOverview} from "@/lib/db/helpers/db.helpers";
 import {getMaxDrawDownWithTimeRange} from "@/utils/heleprs/generators/drawdown/sortLessDrawDownIndexAssets.helper";
 import {
     dbDeleteIndexOverview,
@@ -103,11 +103,12 @@ export const actionDeleteIndexOverview = async (id: Id) => {
     await dbDeleteIndexOverview(id);
 };
 
-export const actionGetAssets = async () => {
+export const actionGetAssets = async (limit?: number | undefined) => {
     "use cache";
     cacheTag(CacheTag.ASSETS);
 
-    return dbGetAssets();
+    const assets = await dbGetAssets();
+    return filterAssets(assets, limit);
 };
 
 export const actionGetIndex = async ({
