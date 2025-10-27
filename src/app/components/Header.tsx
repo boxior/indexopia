@@ -4,17 +4,27 @@ import {useState} from "react";
 import {useTranslations} from "next-intl";
 import {Button} from "@/components/ui/button";
 import {Avatar, AvatarFallback} from "@/components/ui/avatar";
-import {DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger} from "@/components/ui/dropdown-menu";
-import {LogOut, Menu, X} from "lucide-react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {LogOut, Mail, Menu, X} from "lucide-react";
 import {useSession} from "next-auth/react";
 import {signOut} from "next-auth/react";
-import {PAGES_URLS} from "@/utils/constants/general.constants";
+import {CONTACT_EMAIL, PAGES_URLS} from "@/utils/constants/general.constants";
 import {Link} from "@/i18n/navigation";
 import LanguageSwitcher from "@/app/components/LanguageSwitcher";
+import {FaTelegram} from "react-icons/fa";
 
 export default function Header() {
     const t = useTranslations("header");
     const tCommon = useTranslations("common");
+
+    const tHelp = useTranslations("help");
+    const tCommunity = useTranslations("footer.sections.community");
 
     const {data, status, update} = useSession();
     const {user} = data ?? {};
@@ -24,6 +34,14 @@ export default function Header() {
     const handleSignOut = async () => {
         await signOut({redirectTo: PAGES_URLS.home});
         await update();
+    };
+
+    const handleOpenTelegram = () => {
+        window.open("https://t.me/indexopia", "_blank");
+    };
+
+    const handleContactSupport = () => {
+        window.open(`mailto:${CONTACT_EMAIL}`, "_blank");
     };
 
     return (
@@ -77,6 +95,15 @@ export default function Header() {
                                         <p className="text-sm font-medium">{user.name || tCommon("user")}</p>
                                         <p className="text-xs text-gray-500">{user.email}</p>
                                     </div>
+                                    <DropdownMenuItem className={"hover:cursor-pointer"} onClick={handleContactSupport}>
+                                        <Mail className="mr-2 h-4 w-4" />
+                                        {tHelp("contactSupport")}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem className={"hover:cursor-pointer"} onClick={handleOpenTelegram}>
+                                        <FaTelegram className="mr-2 h-4 w-4" />
+                                        {tCommunity("title")}
+                                    </DropdownMenuItem>
+                                    <DropdownMenuSeparator />
                                     <DropdownMenuItem
                                         className={"hover:cursor-pointer"}
                                         onClick={handleSignOut}
