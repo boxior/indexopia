@@ -49,9 +49,7 @@ export const manageAssetHistory = async ({
         await dbDeleteAssetHistoryById(id);
     }
 
-    console.time(`dbGetAssetHistoryById${id}`);
     const oldList = fromScratch ? [] : await dbGetAssetHistoryById(id);
-    console.timeEnd(`dbGetAssetHistoryById${id}`);
 
     let start = momentTimeZone.tz("UTC").startOf("day").add(-11, "year").add(1, "day").valueOf();
 
@@ -69,7 +67,6 @@ export const manageAssetHistory = async ({
         return oldList;
     }
 
-    console.time(`fetchAssetHistory${id}`);
     const {data: newData} = await fetchAssetHistory({
         lastHistoryBefore: oldList.slice(-1)[0],
         interval: "d1",
@@ -77,7 +74,6 @@ export const manageAssetHistory = async ({
         end,
         id,
     });
-    console.timeEnd(`fetchAssetHistory${id}`);
 
     const newList = (newData ?? []).map(history => ({...history, assetId: id}));
 
@@ -102,11 +98,7 @@ export const manageAssetsHistory = async (propAssets?: Asset[], fromScratch?: bo
         const res = await Promise.all(
             chunk.map(async asset => {
                 try {
-                    console.time(`manageAssetHistory_${asset.id}`);
-                    const h = await manageAssetHistory({id: asset.id, fromScratch});
-                    console.timeEnd(`manageAssetHistory_${asset.id}`);
-
-                    return h;
+                    return await manageAssetHistory({id: asset.id, fromScratch});
                 } catch (err) {
                     console.error(err);
                     await writeJsonFile(`error_${(err as Error).name}`, JSON.parse(JSON.stringify(err)), `/db/errors`);
@@ -148,24 +140,18 @@ export type AssetCursor = {start: number; end?: number};
 export const populateDb = async (assetCursor: AssetCursor) => {
     try {
         // Assets
-        console.time("manageAssets");
         const allAssets = await manageAssets();
-        console.timeEnd("manageAssets");
 
         const assetsToPopulate = allAssets.slice(assetCursor.start, assetCursor.end);
 
         // Assets history
-        console.time("manageAssetsHistory");
         const allAssetsHistory = await manageAssetsHistory(assetsToPopulate);
-        console.timeEnd("manageAssetsHistory");
 
         const doManageSystemIndices =
             assetCursor.start === 0 && (assetCursor.end ?? 0) >= MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES;
 
         if (doManageSystemIndices) {
-            console.time("manageSystemIndices");
             await manageSystemIndices(assetsToPopulate, allAssetsHistory);
-            console.timeEnd("manageSystemIndices");
         }
 
         return NextResponse.json(
