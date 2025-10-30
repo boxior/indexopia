@@ -36,7 +36,7 @@ const HomePageSuspended = async () => {
                 <HeroSection />
                 <section className="py-20 bg-white">
                     <div className="container mx-auto px-4">
-                        <IndicesTable indices={topIndices} mode={EntityMode.VIEW} />
+                        <IndicesTable allIndices={topIndices} indices={topIndices} mode={EntityMode.VIEW} />
                         <div className="text-center mt-8">
                             <Link href={PAGES_URLS.indices}>
                                 <Button size="lg" variant="outline">

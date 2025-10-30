@@ -29,11 +29,7 @@ export async function GET(req: NextRequest) {
             }, [] as IndexOverviewAsset[])
             .map(a => pick(a, ["id"]));
 
-        const startTime = moment()
-            .utc()
-            .startOf("d")
-            .add(-HISTORY_OVERVIEW_DAYS - 1, "days")
-            .valueOf();
+        const startTime = moment().utc().startOf("d").add(-HISTORY_OVERVIEW_DAYS, "days").valueOf();
 
         const assetsChunks = chunk(
             allUsedAssets.map(a => ({id: a.id})),

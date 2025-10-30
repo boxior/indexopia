@@ -320,6 +320,7 @@ export const IndicesPageClient = ({indices}: {indices: IndexOverview[]}) => {
                     {/* Indices Table */}
                     <div className="bg-white rounded-lg shadow">
                         <IndicesTable
+                            allIndices={indices}
                             indices={filteredIndices}
                             onEditAction={onEdit}
                             onDeleteAction={onDeleteClick}
