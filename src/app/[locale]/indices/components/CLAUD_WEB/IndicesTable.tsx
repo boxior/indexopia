@@ -34,6 +34,7 @@ import {isEmpty} from "lodash";
 import {fetcher} from "@/lib/fetcher";
 
 interface IndicesTableProps {
+    allIndices: IndexOverview[];
     indices: IndexOverview[];
     mode?: EntityMode;
     onEditAction?: (index: IndexOverviewWithHistory) => void;
@@ -46,17 +47,24 @@ type SortOrder = "asc" | "desc";
 
 type IndexWithOnlyHistory = Pick<IndexOverviewWithHistory, "id" | "history">;
 
-export function IndicesTable({indices, onEditAction, onDeleteAction, onCloneAction, mode}: IndicesTableProps) {
+export function IndicesTable({
+    indices,
+    allIndices,
+    onEditAction,
+    onDeleteAction,
+    onCloneAction,
+    mode,
+}: IndicesTableProps) {
     const router = useRouter();
 
     const [sortField, setSortField] = useState<SortField>("total");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     const [expandedRows, setExpandedRows] = useState<Set<Id>>(new Set());
 
-    const doFetch = !isEmpty(indices);
+    const doFetch = !isEmpty(allIndices);
     const {data: indicesWithOnlyHistoryData, isLoading: isLoadingIndicesWithHistory} = useSWR<{
         indices: IndexWithOnlyHistory[];
-    }>(doFetch ? () => `/api/indices?ids=${indices.map(index => index.id).join(",")}` : null, fetcher);
+    }>(doFetch ? () => `/api/indices?ids=${allIndices.map(index => index.id).join(",")}` : null, fetcher);
 
     const indicesWithOnlyHistory = indicesWithOnlyHistoryData?.indices ?? [];
 
