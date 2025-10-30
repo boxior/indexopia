@@ -7,7 +7,7 @@ import {IndexChart} from "@/app/[locale]/indices/[id]/components/CLAUD_WEB/Index
 import {AssetsTable} from "@/app/[locale]/indices/[id]/components/CLAUD_WEB/AssetsTable";
 import {IndexModal, IndexMode} from "@/app/[locale]/indices/components/CLAUD_WEB/IndexModal";
 import {useSession} from "next-auth/react";
-import {PAGES_URLS} from "@/utils/constants/general.constants";
+import {HISTORY_OVERVIEW_DAYS, PAGES_URLS} from "@/utils/constants/general.constants";
 import {useIndexActions, UseIndexActionsReturns} from "@/app/[locale]/indices/[id]/hooks/useIndexActions.hook";
 import {DeleteIndexConfirmModal} from "@/app/[locale]/indices/components/CLAUD_WEB/DeleteIndexConfirmModal";
 import * as React from "react";
@@ -22,6 +22,8 @@ import ContentLoader from "@/components/Suspense/ContentLoader";
 import useSWR from "swr";
 import {fetcher} from "@/lib/fetcher";
 import {User} from "@prisma/client";
+import moment from "moment/moment";
+import merge from "lodash/merge";
 
 export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
     const router = useRouter();
@@ -30,16 +32,25 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
 
     const tIndex = useTranslations("index");
 
+    const overviewStartTimeTest = moment().utc().startOf("d").add(-HISTORY_OVERVIEW_DAYS, "days").valueOf();
     // caching is managed by `actions` inside the `/api/indices` route vie `use cache` directive.`
     const indexId = index?.id;
+    const {data: indexWithOverviewHistory, isLoading: isLoadingIndexWithOverviewHistory} =
+        useSWR<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null>(
+            indexId ? () => `/api/indices/${index?.id ?? ""}&startTime=${overviewStartTimeTest}` : null,
+            fetcher
+        );
+    // caching is managed by `actions` inside the `/api/indices` route vie `use cache` directive.`
     const {
-        data: indexWithHistory,
-        isLoading: isLoadingIndexWithHistory,
-        mutate,
+        data: indexWithFullHistory,
+        isLoading: isLoadingIndexWithFullHistory,
+        mutate: mutateIndexWithFullHistory,
     } = useSWR<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null>(
-        indexId ? () => `/api/indices/${index?.id ?? ""}` : null,
+        indexId && !!indexWithOverviewHistory ? () => `/api/indices/${index?.id ?? ""}` : null,
         fetcher
     );
+
+    const indexWithHistory = merge(indexWithOverviewHistory, indexWithFullHistory);
 
     const {
         onSave,
@@ -66,7 +77,7 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
             savedIndex?.id && router.push(PAGES_URLS.index(savedIndex.id));
         }
 
-        await mutate();
+        await mutateIndexWithFullHistory();
         return savedIndex;
     };
 
@@ -92,10 +103,10 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
 
     const renderIndexChart = () => {
         switch (true) {
-            case isLoadingIndexWithHistory:
+            case isLoadingIndexWithOverviewHistory:
                 return <ContentLoader type="chart" count={1} />;
             case !!indexWithHistory:
-                return <IndexChart index={indexWithHistory} />;
+                return <IndexChart index={indexWithHistory} isLoadingFullHistory={isLoadingIndexWithFullHistory} />;
             default:
                 return null;
         }
@@ -103,10 +114,15 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
 
     const renderIndexAssets = () => {
         switch (true) {
-            case isLoadingIndexWithHistory:
+            case isLoadingIndexWithOverviewHistory:
                 return <ContentLoader type="table" count={10} />;
             case !!indexWithHistory:
-                return <AssetsTable assets={indexWithHistory.assets} />;
+                return (
+                    <AssetsTable
+                        assets={indexWithHistory.assets}
+                        isLoadingFullHistory={isLoadingIndexWithFullHistory}
+                    />
+                );
             default:
                 return null;
         }

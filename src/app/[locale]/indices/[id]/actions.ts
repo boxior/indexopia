@@ -13,7 +13,6 @@ import {getIndexHistory} from "@/utils/heleprs/index/index.helpers";
 import {unstable_cacheTag as cacheTag} from "next/cache";
 import {CacheTag} from "@/utils/cache/constants.cache";
 import {dbGetAssets, dbGetAssetsByIds} from "@/lib/db/helpers/db.assets.helpers";
-import {pick} from "lodash";
 import {combineCacheTags} from "@/utils/cache/helpers.cache";
 
 export const actionUpdateIndexOverview = async (indexOverview: IndexOverview, revalidateTags?: boolean) => {
@@ -113,10 +112,12 @@ export const actionGetAssets = async (limit?: number | undefined) => {
 
 export const actionGetIndex = async ({
     id,
+    startTime: propStartTime,
     indexOverview: propIndexOverview,
 }: {
     id: Id;
     indexOverview?: IndexOverview;
+    startTime?: number;
 }): Promise<Index<AssetWithHistoryOverviewPortionAndMaxDrawDown> | null> => {
     "use cache";
     cacheTag(CacheTag.INDICES_OVERVIEW, combineCacheTags(CacheTag.INDICES_OVERVIEW, id));
@@ -129,13 +130,15 @@ export const actionGetIndex = async ({
 
     let assets = await dbGetAssetsByIds(indexOverview.assets.map(asset => asset.id));
 
+    const startTimeToUse = propStartTime ?? indexOverview.startTime;
+
     const {
         assets: assetsWithHistories,
         startTime,
         endTime,
     } = await getAssetsWithHistories({
         assets,
-        ...pick(indexOverview, ["startTime"]),
+        startTime: startTimeToUse,
     });
 
     assets = assetsWithHistories.map(asset => ({

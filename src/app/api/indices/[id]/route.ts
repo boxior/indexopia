@@ -4,10 +4,10 @@ import {actionGetIndex} from "@/app/[locale]/indices/[id]/actions";
 /**
  * Get index with history overview.
  */
-export async function GET(_req: NextRequest, {params}: {params: Promise<{id: string}>}) {
+export async function GET(_req: NextRequest, {params}: {params: Promise<{id: string; startTime?: number}>}) {
     try {
-        const {id} = await params; // 👈 Extracted directly from the URL: /posts/{id}
-        const fetchedIndexWithHistory = await actionGetIndex({id});
+        const {id, startTime} = await params; // 👈 Extracted directly from the URL: /posts/{id}
+        const fetchedIndexWithHistory = await actionGetIndex({id, startTime});
 
         return NextResponse.json(fetchedIndexWithHistory, {status: 200});
     } catch (error) {
