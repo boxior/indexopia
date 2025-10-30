@@ -15,11 +15,9 @@ import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper
 import {HISTORY_OVERVIEW_DAYS} from "@/utils/constants/general.constants";
 import {ChartPreview} from "@/app/[locale]/indices/components/CLAUD_WEB/ChartPreview";
 import {useTranslations} from "next-intl";
-import {Skeleton} from "@/components/ui/skeleton";
 
 interface AssetsTableProps {
     assets: AssetWithHistoryOverviewPortionAndMaxDrawDown[];
-    isLoadingFullHistory: boolean;
 }
 
 type SortField =
@@ -34,7 +32,7 @@ type SortField =
     | "marketCapUsd";
 type SortOrder = "asc" | "desc";
 
-export function AssetsTable({assets, isLoadingFullHistory}: AssetsTableProps) {
+export function AssetsTable({assets}: AssetsTableProps) {
     const [sortField, setSortField] = useState<SortField>("portion");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
@@ -119,13 +117,7 @@ export function AssetsTable({assets, isLoadingFullHistory}: AssetsTableProps) {
         });
     }, [assets, sortField, sortOrder]);
     // Mobile Card Component
-    const MobileAssetCard = ({
-        asset,
-        isLoadingFullHistory,
-    }: {
-        asset: AssetWithHistoryOverviewPortionAndMaxDrawDown;
-        isLoadingFullHistory: boolean;
-    }) => {
+    const MobileAssetCard = ({asset}: {asset: AssetWithHistoryOverviewPortionAndMaxDrawDown}) => {
         const isExpanded = expandedRows.has(asset.id);
 
         return (
@@ -151,11 +143,7 @@ export function AssetsTable({assets, isLoadingFullHistory}: AssetsTableProps) {
                     <div className="flex items-center gap-2 ml-2">
                         <div className="text-right">
                             <div className="text-sm font-medium">
-                                {isLoadingFullHistory ? (
-                                    <Skeleton className="h-4 w-full" />
-                                ) : (
-                                    renderSafelyPercentage(asset.historyOverview.total)
-                                )}
+                                {renderSafelyPercentage(asset.historyOverview.total)}
                             </div>
                             <div className="text-xs text-gray-500">{tIndex("assetsTable.mobile.total")}</div>
                         </div>
@@ -177,7 +165,10 @@ export function AssetsTable({assets, isLoadingFullHistory}: AssetsTableProps) {
                         {/* Chart Preview */}
                         <div className="mb-4">
                             <div className="text-xs text-gray-500 mb-2">{tIndex("assetsTable.mobile.chart30d")}</div>
-                            <ChartPreview data={asset.history.slice(-HISTORY_OVERVIEW_DAYS)} className="w-full h-32" />
+                            <ChartPreview
+                                data={asset.history.slice(-HISTORY_OVERVIEW_DAYS - 1)}
+                                className="w-full h-32"
+                            />
                         </div>
 
                         {/* Performance metrics */}
@@ -200,11 +191,7 @@ export function AssetsTable({assets, isLoadingFullHistory}: AssetsTableProps) {
                         <div className="grid grid-cols-2 gap-4">
                             <div className="text-center">
                                 <div className="text-sm font-medium text-red-600">
-                                    {isLoadingFullHistory ? (
-                                        <Skeleton className="h-4 w-full" />
-                                    ) : (
-                                        <>-{Math.abs(asset.maxDrawDown.value).toFixed(2)}%</>
-                                    )}
+                                    -{Math.abs(asset.maxDrawDown.value).toFixed(2)}%
                                 </div>
                                 <div className="text-xs text-gray-500">{tIndex("assetsTable.mobile.maxDrawdown")}</div>
                             </div>
@@ -380,21 +367,11 @@ export function AssetsTable({assets, isLoadingFullHistory}: AssetsTableProps) {
                                         </TableCell>
                                         <TableCell>{renderSafelyPercentage(asset.historyOverview.days7)}</TableCell>
                                         <TableCell>{renderSafelyPercentage(asset.historyOverview.days30)}</TableCell>
+                                        <TableCell>{renderSafelyPercentage(asset.historyOverview.total)}</TableCell>
                                         <TableCell>
-                                            {isLoadingFullHistory ? (
-                                                <Skeleton className="h-4 w-full" />
-                                            ) : (
-                                                renderSafelyPercentage(asset.historyOverview.total)
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            {isLoadingFullHistory ? (
-                                                <Skeleton className="h-4 w-full" />
-                                            ) : (
-                                                <span className="text-red-600">
-                                                    {renderSafelyPercentage(-asset.maxDrawDown.value)}
-                                                </span>
-                                            )}
+                                            <span className="text-red-600">
+                                                {renderSafelyPercentage(-asset.maxDrawDown.value)}
+                                            </span>
                                         </TableCell>
                                         <TableCell>
                                             <div className="font-medium">
@@ -415,7 +392,7 @@ export function AssetsTable({assets, isLoadingFullHistory}: AssetsTableProps) {
                 <div className="lg:hidden">
                     <div className="space-y-4">
                         {sortedAssets.map(asset => (
-                            <MobileAssetCard key={asset.id} asset={asset} isLoadingFullHistory={isLoadingFullHistory} />
+                            <MobileAssetCard key={asset.id} asset={asset} />
                         ))}
                     </div>
                 </div>

@@ -10,11 +10,9 @@ import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
 import {NumeralFormat} from "@numeral";
 import {useLocale, useTranslations} from "next-intl";
-import {Skeleton} from "@/components/ui/skeleton";
 
 interface IndexChartProps {
     index: Index<AssetWithHistoryOverviewPortionAndMaxDrawDown>;
-    isLoadingFullHistory: boolean;
 }
 
 interface CustomTooltipProps extends TooltipProps<number, string> {
@@ -23,7 +21,7 @@ interface CustomTooltipProps extends TooltipProps<number, string> {
     label?: string;
 }
 
-export function IndexChart({index, isLoadingFullHistory}: IndexChartProps) {
+export function IndexChart({index}: IndexChartProps) {
     const locale = useLocale();
 
     const {history, id} = index;
@@ -34,11 +32,11 @@ export function IndexChart({index, isLoadingFullHistory}: IndexChartProps) {
     const timeRanges = [
         {value: "7D", days: 7, label: tIndex("chart.timeRanges.7d")},
         {value: "1M", days: 30, label: tIndex("chart.timeRanges.1m")},
-        {value: "3M", days: 90, label: tIndex("chart.timeRanges.3m"), isLoading: isLoadingFullHistory},
-        {value: "6M", days: 180, label: tIndex("chart.timeRanges.6m"), isLoading: isLoadingFullHistory},
-        {value: "YTD", days: "ytd", label: tIndex("chart.timeRanges.ytd"), isLoading: isLoadingFullHistory},
-        {value: "1Y", days: 365, label: tIndex("chart.timeRanges.1y"), isLoading: isLoadingFullHistory},
-        {value: "All", days: null, label: tIndex("chart.timeRanges.all"), isLoading: isLoadingFullHistory},
+        {value: "3M", days: 90, label: tIndex("chart.timeRanges.3m")},
+        {value: "6M", days: 180, label: tIndex("chart.timeRanges.6m")},
+        {value: "YTD", days: "ytd", label: tIndex("chart.timeRanges.ytd")},
+        {value: "1Y", days: 365, label: tIndex("chart.timeRanges.1y")},
+        {value: "All", days: null, label: tIndex("chart.timeRanges.all")},
     ];
 
     const getFilteredData = () => {
@@ -189,9 +187,8 @@ export function IndexChart({index, isLoadingFullHistory}: IndexChartProps) {
                                     size="sm"
                                     className="h-8 px-2 text-xs flex-1 min-w-0"
                                     onClick={() => setSelectedRange(range.value)}
-                                    disabled={range.isLoading}
                                 >
-                                    {range.isLoading ? <Skeleton className="h-4 w-full" /> : range.label}
+                                    {range.label}
                                 </Button>
                             ))}
                         </div>
@@ -204,9 +201,8 @@ export function IndexChart({index, isLoadingFullHistory}: IndexChartProps) {
                                     variant={selectedRange === range.value ? "default" : "outline"}
                                     size="sm"
                                     onClick={() => setSelectedRange(range.value)}
-                                    disabled={range.isLoading}
                                 >
-                                    {range.isLoading ? <Skeleton className="h-4 w-full min-w-3" /> : range.label}
+                                    {range.label}
                                 </Button>
                             ))}
                         </div>
