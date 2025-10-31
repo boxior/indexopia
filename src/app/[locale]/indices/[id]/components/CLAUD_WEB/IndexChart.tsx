@@ -74,14 +74,12 @@ export function IndexChart({index}: IndexChartProps) {
     }, [JSON.stringify(filteredData)]);
 
     const formatDate = (timestamp: number | string) => {
-        const date = moment.utc(timestamp).toDate();
-        const isYTDRange = selectedRange === "YTD";
+        const momentDate = moment.utc(timestamp);
 
-        return date.toLocaleDateString(locale, {
-            month: "short",
-            day: "numeric",
-            year: selectedRange === "All" || selectedRange === "1Y" || isYTDRange ? "numeric" : undefined,
-        });
+        // Force UTC interpretation by using moment's locale formatting
+        return momentDate
+            .locale(locale)
+            .format(selectedRange === "All" || selectedRange === "1Y" ? "MMM D, YYYY" : "MMM D");
     };
 
     const formatTooltipDate = (timestamp: number) => {
