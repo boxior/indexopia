@@ -14,7 +14,7 @@ import {
 import momentTimeZone from "moment-timezone";
 import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
 import {ASSETS_FOLDER_PATH, filterAssets} from "@/lib/db/helpers/db.helpers";
-import {chunk, flatten} from "lodash";
+import {chunk, flatten, isNil} from "lodash";
 import {dbGetUniqueIndicesOverviewsAssetIds, manageSystemIndices} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {NextResponse} from "next/server";
 import fetchAssets from "@/app/actions/assets/fetchAssets";
@@ -111,27 +111,6 @@ export const manageAssetsHistory = async (propAssets?: Asset[], fromScratch?: bo
         result.push(res);
     }
 
-    // const result = await Promise.all(
-    //     chunks.map(async chunk => {
-    //         return await Promise.all(
-    //             chunk.map(async asset => {
-    //                 try {
-    //                     return await manageAssetHistory({id: asset.id, fromScratch});
-    //                 } catch (err) {
-    //                     console.error(err);
-    //                     await writeJsonFile(
-    //                         `error_${(err as Error).name}`,
-    //                         JSON.parse(JSON.stringify(err)),
-    //                         `/db/errors`
-    //                     );
-    //
-    //                     return [];
-    //                 }
-    //             })
-    //         );
-    //     })
-    // );
-
     return flatten(flatten(result));
 };
 
@@ -148,7 +127,8 @@ export const populateDb = async (assetCursor: AssetCursor) => {
         const allAssetsHistory = await manageAssetsHistory(assetsToPopulate);
 
         const doManageSystemIndices =
-            assetCursor.start === 0 && (assetCursor.end ?? 0) >= MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES;
+            assetCursor.start === 0 &&
+            (isNil(assetCursor.end) || assetCursor.end >= MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES);
 
         if (doManageSystemIndices) {
             await manageSystemIndices(assetsToPopulate, allAssetsHistory);
