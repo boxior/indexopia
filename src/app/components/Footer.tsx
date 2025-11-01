@@ -111,8 +111,10 @@ export default function Footer() {
                                 target={"_blank"}
                                 href="https://t.me/indexopia"
                                 className="text-gray-400 hover:text-white transition-colors"
+                                rel="noopener noreferrer"
+                                aria-label={`${t("sections.community.title")} - Telegram (opens in new tab)`}
                             >
-                                <FaTelegram className="h-5 w-5" />
+                                <FaTelegram className="h-5 w-5" aria-hidden="true" />
                             </Link>
                         </div>
                     </div>
