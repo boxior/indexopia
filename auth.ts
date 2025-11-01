@@ -21,7 +21,7 @@ export const {handlers, auth} = NextAuth({
         Resend({
             // If your environment variable is named differently than default
             apiKey: ENV_VARIABLES.AUTH_RESEND_KEY,
-            from: `no-reply@${DOMAIN_NAME}.com`,
+            from: `${BRAND_NAME} <noreply@${DOMAIN_NAME}.com>`,
             async sendVerificationRequest({identifier: email, url, request}) {
                 // Extract locale from the request or URL
                 const locale = extractLocaleFromRequest(request, url);
