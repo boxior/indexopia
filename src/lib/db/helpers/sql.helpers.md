@@ -113,3 +113,12 @@ WHERE clonedFrom IS NOT NULL
 AND clonedFrom != '' 
 AND clonedFrom != 'null';
 ```
+
+### Create DB indices
+```sql
+CREATE INDEX idx_rank ON yulya777_indexopia.assets (`rank`);
+CREATE INDEX idx_assetId_time ON yulya777_indexopia.assets_history (assetId, time);
+CREATE INDEX idx_userId ON yulya777_indexopia.indices_overview (userId);
+CREATE INDEX idx_systemId ON yulya777_indexopia.indices_overview (systemId);
+CREATE INDEX idx_system_user ON yulya777_indexopia.indices_overview (systemId, userId);
+```
