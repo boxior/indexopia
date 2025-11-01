@@ -1,0 +1,556 @@
+{
+  "common": {
+    "user": "User",
+    "loading": "Loading...",
+    "cancel": "Cancel",
+    "creating": "Creating",
+    "updating": "Updating",
+    "cloning": "Cloning",
+    "create": "Create",
+    "update": "Update",
+    "clone": "Clone",
+    "delete": "Delete",
+    "deleting": "Deleting...",
+    "noChangedDetected": "No changes detected",
+    "noDataAvailable": "No data available"
+  },
+  "help": {
+    "contactSupport": "Contact Support"
+  },
+  "notFound": {
+    "title": "Page Not Found",
+    "description": "The page you're looking for doesn't exist or may have been moved.",
+    "actions": {
+      "backToHome": "Back to Home",
+      "exploreIndices": "Explore Indices"
+    },
+    "help": {
+      "text": "If you think this is a mistake, please",
+      "contact": "contact us"
+    }
+  },
+  "header": {
+    "brand": "Indexopia",
+    "navigation": {
+      "home": "Home",
+      "indices": "Indices",
+      "about": "About",
+      "blog": "Blog"
+    },
+    "language": {
+      "current": "EN",
+      "english": "English",
+      "ukrainian": "Ukrainian",
+      "russian": "Russian"
+    },
+    "auth": {
+      "signIn": "Sign In",
+      "signOut": "Sign out"
+    }
+  },
+  "footer": {
+    "brand": "Indexopia",
+    "tagline": "Indexopia is a platform for creating and tracking crypto indices and crypto portfolios.",
+    "sections": {
+      "about": {
+        "title": "About",
+        "termsOfService": "Terms of Use",
+        "privacyPolicy": "Privacy Policy",
+        "contact": "Contact"
+      },
+      "explore": {
+        "title": "Explore",
+        "freeCryptoIndices": "Free Crypto Indices"
+      },
+      "community": {
+        "title": "Join Our Community"
+      }
+    },
+    "copyright": "© 2025 Indexopia. All Rights Reserved."
+  },
+  "signIn": {
+    "title": "Sign in to Indexopia",
+    "description": "Enter your email to receive a secure sign-in link",
+    "backToHome": "Back to Home",
+    "form": {
+      "emailLabel": "Email Address",
+      "emailPlaceholder": "name@example.com",
+      "sendButton": "Send Sign-in Link",
+      "sending": "Sending..."
+    },
+    "errors": {
+      "sendEmailFailed": "Failed to send sign-in email. Please try again.",
+      "unexpectedError": "An unexpected error occurred. Please try again."
+    },
+    "emailSent": {
+      "title": "Check Your Email",
+      "description": "We've sent a sign-in link to",
+      "instructions": "Click the link in your email to sign in to your account. The link will expire in 24 hours.",
+      "troubleshooting": {
+        "title": "Didn't receive the email?",
+        "checkSpam": "Check your spam folder",
+        "checkEmail": "Make sure {email} is correct",
+        "tryAgain": "Try signing in again"
+      },
+      "tryDifferentEmail": "Try Different Email"
+    },
+    "legal": {
+      "agreement": "By signing in, you agree to our",
+      "and": "and"
+    },
+    "benefits": {
+      "title": "Why Sign In?",
+      "fullData": "Access full profit data and analytics",
+      "createPortfolios": "Create and track your own portfolios",
+      "personalizedInsights": "Get personalized investment insights",
+      "premiumIndices": "Access premium crypto indices"
+    }
+  },
+  "verifyRequest": {
+    "title": "Check Your Email",
+    "description": "A sign-in link has been sent to your email address",
+    "instructions": "Click the link in your email to sign in to your account.",
+    "backToHome": "Back to Home"
+  },
+  "error": {
+    "types": {
+      "verification": {
+        "title": "Link Expired",
+        "description": "The sign-in link has expired or has already been used.",
+        "suggestion": "Please request a new sign-in link."
+      },
+      "configuration": {
+        "title": "Server Error",
+        "description": "There is a problem with the server configuration.",
+        "suggestion": "Please contact support if this problem persists."
+      },
+      "accessDenied": {
+        "title": "Access Denied",
+        "description": "You do not have permission to access this resource.",
+        "suggestion": "Please check your email and try again."
+      },
+      "emailSignin": {
+        "title": "Email Error",
+        "description": "The email could not be sent.",
+        "suggestion": "Please check your email address and try again."
+      },
+      "default": {
+        "title": "Authentication Error",
+        "description": "An unexpected error occurred during sign-in.",
+        "suggestion": "Please try again or contact support if the problem persists."
+      }
+    },
+    "actions": {
+      "tryAgain": "Try signing in again",
+      "backToHomepage": "Back to homepage"
+    },
+    "support": {
+      "needHelp": "Need help?"
+    }
+  },
+  "hero": {
+    "title": {
+      "the": "The",
+      "ultimate": "Ultimate",
+      "cryptoIndexPlatform": "Crypto Index Platform"
+    },
+    "subtitle": "Track your crypto like a pro with real-time data, professional portfolio management, and access to thousands of curated crypto indices.",
+    "cta": {
+      "exploreIndices": "Explore Indices",
+      "signUpFree": "Sign Up Free"
+    },
+    "features": {
+      "realTime": {
+        "title": "Real-time Data",
+        "description": "Get instant access to live crypto prices and market data"
+      },
+      "professionalTools": {
+        "title": "Professional Tools",
+        "description": "Advanced portfolio tracking and P&L analysis"
+      },
+      "thousands": {
+        "title": "Thousands of Portfolios",
+        "description": "Access curated indices from crypto experts"
+      }
+    }
+  },
+  "benefits": {
+    "title": "Why Choose Indexopia?",
+    "subtitle": "Everything you need to build and manage a successful crypto portfolio",
+    "items": {
+      "analytics": {
+        "title": "Professional Analytics",
+        "description": "Advanced charts, metrics, and performance analysis tools used by professional traders."
+      },
+      "risk": {
+        "title": "Risk Management",
+        "description": "Built-in risk assessment tools and portfolio optimization to protect your investments."
+      },
+      "global": {
+        "title": "Global Markets",
+        "description": "Access to worldwide crypto markets with real-time data from major exchanges."
+      },
+      "community": {
+        "title": "Community Driven",
+        "description": "Learn from experienced traders and share strategies with our growing community."
+      },
+      "execution": {
+        "title": "Fast Execution",
+        "description": "Lightning-fast data processing and real-time portfolio updates."
+      },
+      "strategies": {
+        "title": "Proven Strategies",
+        "description": "Access to time-tested investment strategies with documented performance."
+      }
+    }
+  },
+  "cta": {
+    "title": "Ready to Start Your Crypto Journey?",
+    "subtitle": "Join thousands of investors who trust Indexopia for their crypto portfolio management. Start with our free tier and upgrade as you grow.",
+    "getStartedFree": "Get Started Free",
+    "exploreIndices": "Explore Indices"
+  },
+  "home": {
+    "loading": "Loading Indexopia...",
+    "viewAllIndices": "View All Indices"
+  },
+  "indices": {
+    "loading": "Loading crypto indices...",
+    "title": "Crypto Indices",
+    "subtitle": "Explore and manage your crypto investment indices",
+    "cards": {
+      "total": {
+        "title": "Total Indices",
+        "breakdown": "{system} system, {custom} custom"
+      },
+      "system": {
+        "title": "System Indices",
+        "subtitle": "Professional strategies"
+      },
+      "custom": {
+        "title": "Custom Indices",
+        "subtitle": "Your personal strategies"
+      },
+      "avgReturn": {
+        "title": "Avg. Return",
+        "subtitle": "Across all filtered indices"
+      }
+    },
+    "mobile": {
+      "total": "Total",
+      "system": "System",
+      "custom": "Custom",
+      "return": "Return"
+    },
+    "actions": {
+      "createCustom": "Create Custom Index",
+      "create": "Create Index"
+    },
+    "results": {
+      "showing": "Showing {count} of {total} indices"
+    },
+    "empty": {
+      "title": "No indices found",
+      "adjustFilters": "Try adjusting your filters or search terms",
+      "createFirst": "Create your first custom index to get started"
+    },
+    "pagination": {
+      "showing": "Showing",
+      "results": "results",
+      "range": "{start}-{end} of {total}",
+      "itemsPerPageLabel": "Items per page:",
+      "itemsPerPageShort": "Per page:",
+      "previous": "Previous",
+      "next": "Next",
+      "pageInfo": "{current} / {totalPages}"
+    },
+    "filters": {
+      "searchPlaceholder": "Search indices...",
+      "type": {
+        "placeholder": "Type",
+        "all": "All Types",
+        "system": "System",
+        "custom": "Custom"
+      },
+      "performance": {
+        "placeholder": "Performance",
+        "all": "All Performance",
+        "positiveDays": "Positive {days}d",
+        "negativeDays": "Negative {days}d",
+        "topPerformersCount": "Top {count} Performers"
+      }
+    },
+    "table": {
+      "headers": {
+        "name": "Name",
+        "assets": "Assets",
+        "chart": "{days}d Chart",
+        "days7": "7d",
+        "days30": "30d",
+        "total": "Total",
+        "maxDrawDown": "Max Drawdown",
+        "duration": "Duration",
+        "actions": "Actions"
+      },
+      "badges": {
+        "system": "System",
+        "custom": "Custom",
+        "public": "Public",
+        "private": "Private"
+      },
+      "tooltips": {
+        "expand": "Expand",
+        "collapse": "Collapse",
+        "showChart": "Show chart",
+        "hideChart": "Hide chart",
+        "copyLink": "Copy link",
+        "view": "View",
+        "edit": "Edit",
+        "delete": "Delete",
+        "clone": "Clone",
+        "show": "Show",
+        "hide": "Hide",
+        "sortBy": "Sort by {field}"
+      },
+      "copy": {
+        "success": "Link copied"
+      },
+      "labels": {
+        "total": "Total",
+        "days7Full": "7 days",
+        "days30Full": "30 days",
+        "maxDrawDown": "Max Drawdown",
+        "duration": "Duration"
+      }
+    },
+    "duration": {
+      "years": "{count, plural, one {# year} other {# years}}",
+      "months": "{count, plural, one {# month} other {# months}}",
+      "days": "{count, plural, one {# day} other {# days}}",
+      "zero": "0 days"
+    }
+  },
+  "index": {
+    "loading": "Loading index details...",
+    "notFound": {
+      "title": "Index not found",
+      "description": "The index you're looking for doesn't exist."
+    },
+    "navigation": {
+      "backToIndices": "Back to Indices"
+    },
+    "overview": {
+      "badges": {
+        "customIndex": "Custom Index",
+        "systemIndex": "System Index"
+      },
+      "actions": {
+        "clone": "Clone",
+        "cloneToSystem": "Clone to System",
+        "deleteFromSystem": "Delete from System",
+        "editSystem": "Edit System",
+        "edit": "Edit",
+        "delete": "Delete"
+      },
+      "performance": {
+        "24h": {
+          "short": "24h",
+          "full": "24h Performance"
+        },
+        "7d": {
+          "short": "7d",
+          "full": "7d Performance"
+        },
+        "30d": {
+          "short": "30d",
+          "full": "30d Performance"
+        },
+        "total": {
+          "short": "Total",
+          "full": "Total Return"
+        },
+        "maxDrawdown": {
+          "short": "Max DD",
+          "full": "Max Drawdown"
+        },
+        "duration": {
+          "short": "Duration",
+          "full": "Duration"
+        }
+      },
+      "assets": {
+        "title": "Assets ({count})",
+        "showLess": "Show Less",
+        "showMore": "Show {count} More"
+      }
+    },
+    "chart": {
+      "title": "Performance Chart",
+      "startingBalance": "Starting Balance",
+      "priceChart": "Price Chart",
+      "timeRanges": {
+        "7d": "7D",
+        "1m": "1M",
+        "3m": "3M",
+        "6m": "6M",
+        "ytd": "YTD",
+        "1y": "1Y",
+        "all": "All"
+      },
+      "tooltip": {
+        "indexValue": "Index Value",
+        "change": "Change"
+      },
+      "noDataDescription": "No historical data available for the selected time range."
+    },
+    "assetsTable": {
+      "title": "Assets Breakdown",
+      "headers": {
+        "rank": "Rank",
+        "asset": "Asset",
+        "allocation": "Allocation",
+        "price": "Price",
+        "chart30d": "30d Chart",
+        "days7": "7d",
+        "days30": "30d",
+        "totalReturn": "Total Return",
+        "maxDrawdown": "Max Drawdown",
+        "marketCap": "Market Cap"
+      },
+      "mobile": {
+        "total": "Total",
+        "chart30d": "30d Chart",
+        "days7": "7 days",
+        "days30": "30 days",
+        "maxDrawdown": "Max Drawdown",
+        "marketCap": "Market Cap",
+        "viewOnExplorer": "View on Explorer"
+      }
+    }
+  },
+  "indexModal": {
+    "autocomplete": {
+      "notFound": "No assets found matching \"{searchTerm}\""
+    },
+    "modes": {
+      "create": {
+        "title": "Create Custom Index",
+        "action": "Create Index",
+        "namePlaceholder": "Enter index name",
+        "startingBalancePlaceholder": "Enter index starting balance"
+      },
+      "edit": {
+        "title": "Edit Index",
+        "action": "Update Index",
+        "namePlaceholder": "Enter index name",
+        "startingBalancePlaceholder": "Enter index starting balance"
+      },
+      "editSystem": {
+        "title": "Edit System index",
+        "action": "Update System index",
+        "namePlaceholder": "Enter System index name",
+        "startingBalancePlaceholder": "Enter System index starting balance"
+      },
+      "clone": {
+        "title": "Clone Index",
+        "action": "Clone Index",
+        "namePlaceholder": "Enter new index name",
+        "startingBalancePlaceholder": "Enter index starting balance",
+        "description": "Create a custom copy of this index with your own asset allocation and portfolio composition."
+      },
+      "cloneToSystem": {
+        "title": "Clone to System index",
+        "action": "Clone to System index",
+        "namePlaceholder": "Enter new System index name",
+        "startingBalancePlaceholder": "Enter System index starting balance",
+        "description": "Create a System index copy of this index with your own asset allocation and portfolio composition."
+      },
+      "default": {
+        "title": "Index",
+        "action": "Save",
+        "namePlaceholder": "Enter index name",
+        "startingBalancePlaceholder": "Enter index starting balance"
+      }
+    },
+    "fields": {
+      "name": {
+        "label": "Index Name"
+      },
+      "startingBalance": {
+        "label": "Index Starting Balance"
+      },
+      "assetsAllocation": {
+        "label": "Assets & Allocation",
+        "selectPlaceholder": "Select asset to add"
+      }
+    },
+    "validation": {
+      "name": {
+        "required": "Index name is required",
+        "min": "Index name must be at least {count} characters",
+        "max": "Index name must be less than {count} characters"
+      },
+      "startingBalance": {
+        "required": "Index starting balance is required",
+        "min": "Index starting balance must be at least {count}",
+        "max": "Index starting balance must be less than {count}"
+      },
+      "assets": {
+        "atLeastOne": "At least one asset is required",
+        "portion": {
+          "min": "Portion must be at least {count}%",
+          "max": "Portion cannot exceed {count}%",
+          "required": "Portion is required"
+        },
+        "totalAllocation": "Total allocation must equal {count}%"
+      }
+    },
+    "totalAllocation": "Total allocation"
+  },
+  "deleteIndexModal": {
+    "title": "Delete Index",
+    "description": "Are you sure you want to delete the index \"{indexName}\"? This action cannot be undone."
+  },
+  "email": {
+    "signin": {
+      "subject": "Sign-in to Indexopia",
+      "welcome": "Welcome Back!",
+      "tagline": "Professional Crypto Index Management",
+      "signInTitle": "Sign-in Request",
+      "signInContext": "We received a sign-in request for your account. This secure, passwordless authentication ensures your crypto data stays protected.",
+      "clickLink": "Click the button below to access your dashboard and continue managing your crypto indices.",
+      "signInDetails": "Sign-in Details:",
+      "requestedAt": "Requested at",
+      "emailAddress": "Email address",
+      "purpose": "Purpose",
+      "purposeText": "Dashboard access & portfolio management",
+      "featuresTitle": "What's waiting for you:",
+      "feature1": "Real-time crypto index performance tracking",
+      "feature2": "Professional analytics and risk metrics",
+      "feature3": "Custom portfolio creation and management",
+      "signInButton": "Sign-in",
+      "securityTitle": "Security First",
+      "securityNote": "This link will expire in 24 hours for your security. If you didn't request this, please ignore this email.",
+      "ignoreEmail": "If you didn't request this sign-in, you can safely ignore this email - no action is required.",
+      "footer": "© 2025 Indexopia. Professional crypto portfolio management."
+    }
+  },
+  "seo": {
+    "siteName": "Indexopia",
+    "defaultTitle": "Indexopia — Institutional-Grade Crypto Indices",
+    "defaultDescription": "Indexopia provides transparent, institutional-grade cryptocurrency indices. Track market performance across curated digital asset baskets including Bitcoin, Ethereum, and sector-based indices.",
+    "homeTitle": "Explore Crypto Indices",
+    "homeDescription": "Discover top-performing crypto indices, compare performance, and dive into market insights with Indexopia.",
+    "indicesTitle": "Crypto Indices",
+    "indicesDescription": "Top-performing crypto indices, system crypto indices, custom crypto indices, compare performance.",
+    "indexTitle": "Crypto Index",
+    "indexDescription": "Crypto Index overview, assets, performance, and more.",
+    "legalTitle": "Legal Indexopia",
+    "legalDescription": "Terms and Privacy of Indexopia",
+    "authTitle": "Authorization",
+    "authDescription": "Sign in to Indexopia with secure email authentication."
+  },
+  "captcha": {
+    "error": "Captcha verification failed. Please try again."
+  }
+}

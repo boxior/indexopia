@@ -1,0 +1,50 @@
+import {NextResponse, NextRequest} from "next/server";
+import {ENV_VARIABLES} from "@/env";
+import {populateDb} from "@/app/api/api.helpers";
+
+/**
+ * Populate entities: Assets, History, and Indices
+ */
+const handleRequest = async (req: NextRequest) => {
+    try {
+        // Get the URL and search parameters
+        const {searchParams} = new URL(req.url);
+
+        // Retrieve the apiKey from the query string
+        const apiKey = searchParams.get("apiKey");
+
+        if (!apiKey) {
+            return NextResponse.json({error: "API key is missing"}, {status: 401});
+        }
+
+        // Validate the API key
+        if (apiKey !== ENV_VARIABLES.API_KEY) {
+            return NextResponse.json({error: "Invalid API key"}, {status: 403});
+        }
+
+        const start = Number(searchParams.get("start")) || 0;
+
+        const end = Number(searchParams.get("end")) || undefined;
+
+        return await populateDb({start, end});
+    } catch (error) {
+        console.error(error);
+        return NextResponse.json(
+            {data: JSON.parse(JSON.stringify(error))},
+            {
+                status: 400,
+            }
+        );
+    }
+};
+
+/**
+ * It's necessary to have POST request if here is the GET request to avoid pre-render issue during build project.
+ */
+export async function POST(req: NextRequest) {
+    return await handleRequest(req);
+}
+
+export async function GET(req: NextRequest) {
+    return await handleRequest(req);
+}
