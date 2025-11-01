@@ -306,8 +306,10 @@ export const IndicesPageClient = ({indices}: {indices: IndexOverview[]}) => {
                                         target={"_blank"}
                                         href="https://t.me/indexopia"
                                         className="text-gray-400 hover:text-blue-500 transition-colors duration-200 hover:scale-110 transform"
+                                        rel="noopener noreferrer"
+                                        aria-label={`${t("sections.community.title")} - Telegram (opens in new tab)`}
                                     >
-                                        <FaTelegram className="h-5 w-5" />
+                                        <FaTelegram className="h-5 w-5" aria-hidden="true" />
                                     </Link>
                                 </TooltipTrigger>
                                 <TooltipContent>
