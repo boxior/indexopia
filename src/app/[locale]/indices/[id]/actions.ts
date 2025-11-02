@@ -16,7 +16,10 @@ import {dbGetAssets, dbGetAssetsByIds} from "@/lib/db/helpers/db.assets.helpers"
 import {pick} from "lodash";
 import {combineCacheTags} from "@/utils/cache/helpers.cache";
 
-export const actionUpdateIndexOverview = async (indexOverview: IndexOverview, revalidateTags?: boolean) => {
+export const actionUpdateIndexOverview = async (
+    indexOverview: IndexOverview,
+    revalidateTags: boolean | undefined = false
+) => {
     let assets = [];
 
     const {

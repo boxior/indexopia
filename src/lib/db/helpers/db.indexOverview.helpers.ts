@@ -8,9 +8,11 @@ import {combineCacheTags} from "@/utils/cache/helpers.cache";
 import {revalidateTag} from "next/cache";
 import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
 import {MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES} from "@/utils/constants/general.constants";
-import {chunk} from "lodash";
+import {chunk, flatten} from "lodash";
 import {SYSTEM_INDICES_PROPS} from "@/app/api/populate/populate.constants";
 import {handlePrepareToSaveSystemIndexOverview} from "@/utils/heleprs/generators/handleSaveSystemIndexOverview.helper";
+import moment from "moment/moment";
+import {actionUpdateIndexOverview} from "@/app/[locale]/indices/[id]/actions";
 
 const TABLE_NAME_INDICES_OVERVIEW = ENV_VARIABLES.MYSQL_TABLE_NAME_INDICES_OVERVIEW; // Ensure your database table exists
 
@@ -464,3 +466,30 @@ export async function dbGetUniqueIndicesOverviewsAssetIds(): Promise<string[]> {
 
     return Array.from(uniqueAssetIds);
 }
+/**
+ * This function will update the user indices to up-to-date history.
+ */
+export const handleUpdateIndicesToUpToDateHistory = async (indices: IndexOverview[], revalidateTags?: boolean) => {
+    const upToDateStartOfTheDay = moment().utc().add(-1, "day").startOf("day").valueOf();
+
+    const chunks = chunk(indices, 10);
+
+    const upToDateIndices: IndexOverview[] = flatten(
+        await Promise.all(
+            chunks.map(ch =>
+                Promise.all(
+                    ch.map(async indexOverview => {
+                        if (!!indexOverview.endTime && indexOverview.endTime <= upToDateStartOfTheDay) {
+                            // update index overview
+                            return (await actionUpdateIndexOverview(indexOverview, revalidateTags)) ?? indexOverview;
+                        }
+
+                        return indexOverview;
+                    })
+                )
+            )
+        )
+    );
+
+    return upToDateIndices;
+};

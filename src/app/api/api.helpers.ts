@@ -15,7 +15,12 @@ import momentTimeZone from "moment-timezone";
 import fetchAssetHistory from "@/app/actions/assets/fetchAssetHistory";
 import {ASSETS_FOLDER_PATH, filterAssets} from "@/lib/db/helpers/db.helpers";
 import {chunk, flatten, isNil} from "lodash";
-import {dbGetUniqueIndicesOverviewsAssetIds, manageSystemIndices} from "@/lib/db/helpers/db.indexOverview.helpers";
+import {
+    dbGetIndicesOverview,
+    dbGetUniqueIndicesOverviewsAssetIds,
+    handleUpdateIndicesToUpToDateHistory,
+    manageSystemIndices,
+} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {NextResponse} from "next/server";
 import fetchAssets from "@/app/actions/assets/fetchAssets";
 import {actionGetAssets} from "@/app/[locale]/indices/[id]/actions";
@@ -133,6 +138,10 @@ export const populateDb = async (assetCursor: AssetCursor) => {
         if (doManageSystemIndices) {
             await manageSystemIndices(assetsToPopulate, allAssetsHistory);
         }
+
+        // Manage system indices migrated from the custom once by `globalAdmin` role.
+        const systemIndices = await dbGetIndicesOverview();
+        await handleUpdateIndicesToUpToDateHistory(systemIndices, true);
 
         return NextResponse.json(
             {success: true},
