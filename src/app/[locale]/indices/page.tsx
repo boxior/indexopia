@@ -1,15 +1,11 @@
 import * as React from "react";
-import {dbGetIndicesOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
+import {dbGetIndicesOverview, handleUpdateIndicesToUpToDateHistory} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {connection} from "next/server";
 import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 import ContentLoader from "@/components/Suspense/ContentLoader";
 import {IndicesPageClient} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesPageClient";
 import {auth} from "@/auth";
 import {getTranslations} from "next-intl/server";
-import {IndexOverview} from "@/utils/types/general.types";
-import moment from "moment";
-import {actionUpdateIndexOverview} from "@/app/[locale]/indices/[id]/actions";
-import {chunk, flatten} from "lodash";
 
 export default async function IndicesPage() {
     const t = await getTranslations("indices");
@@ -44,37 +40,9 @@ const IndicesPageComponent = async () => {
     ]);
 
     const systemIndices = fetchedIndices[0];
-    const userIndices = await handleUpdateUserIndicesToUpToDateHistory(fetchedIndices[1]);
+    const userIndices = await handleUpdateIndicesToUpToDateHistory(fetchedIndices[1]);
 
     const indices = [...systemIndices, ...userIndices];
 
     return <IndicesPageClient indices={indices} />;
-};
-
-/**
- * This function will update the user indices to up-to-date history.
- */
-const handleUpdateUserIndicesToUpToDateHistory = async (indices: IndexOverview[]) => {
-    const upToDateStartOfTheDay = moment().utc().add(-1, "day").startOf("day").valueOf();
-
-    const chunks = chunk(indices, 10);
-
-    const upToDateIndices: IndexOverview[] = flatten(
-        await Promise.all(
-            chunks.map(ch =>
-                Promise.all(
-                    ch.map(async indexOverview => {
-                        if (!!indexOverview.endTime && indexOverview.endTime < upToDateStartOfTheDay) {
-                            // update index overview
-                            return (await actionUpdateIndexOverview(indexOverview, false)) ?? indexOverview;
-                        }
-
-                        return indexOverview;
-                    })
-                )
-            )
-        )
-    );
-
-    return upToDateIndices;
 };
