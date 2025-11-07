@@ -4,18 +4,7 @@ import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/c
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
-import {
-    Copy,
-    Edit,
-    Trash2,
-    ArrowUpDown,
-    ArrowUp,
-    ArrowDown,
-    ChevronDown,
-    ChevronRight,
-    EyeOff,
-    Eye,
-} from "lucide-react";
+import {Copy, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight} from "lucide-react";
 import {EntityMode, Id, IndexOverview, IndexOverviewWithHistory} from "@/utils/types/general.types";
 import {IndicesPagination} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesPagination";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
@@ -72,7 +61,6 @@ export function IndicesTable({
     const currentUserId = sessionData?.user?.id;
 
     const isViewMode = mode === EntityMode.VIEW;
-    const hiddenOption = isViewMode && !currentUserId;
 
     // i18n
     const tTable = useTranslations("indices.table");
@@ -167,21 +155,6 @@ export function IndicesTable({
 
     const isUserIndex = (index: IndexOverview) => !!index.userId;
 
-    const handleSignInClick = () => {
-        router.push(PAGES_URLS.authSignIn);
-    };
-
-    // Overlay component for protected cells
-    const ProtectedOverlay = () => (
-        <div
-            className="absolute inset-0 bg-gray-300 rounded flex items-center justify-center cursor-pointer transition-colors z-10 group"
-            onClick={handleSignInClick}
-        >
-            <EyeOff className="h-4 w-4 text-gray-500 group-hover:hidden" />
-            <Eye className="h-4 w-4 text-gray-500 hidden group-hover:block" />
-        </div>
-    );
-
     // Mobile Card Component
     const MobileIndexCard = ({index}: {index: IndexOverview}) => {
         const isExpanded = expandedRows.has(index.id);
@@ -228,7 +201,6 @@ export function IndicesTable({
                                 {renderSafelyPercentage(index.historyOverview.total)}
                             </div>
                             <div className="text-xs text-gray-500">{tTable("labels.total")}</div>
-                            {hiddenOption && <ProtectedOverlay />}
                         </div>
 
                         <Button
@@ -252,7 +224,6 @@ export function IndicesTable({
                                 className="h-64"
                                 isLoading={isLoadingIndicesWithHistory}
                             />
-                            {hiddenOption && <ProtectedOverlay />}
                         </div>
 
                         {/* Performance metrics */}
@@ -278,7 +249,6 @@ export function IndicesTable({
                                     -{Math.abs(index.maxDrawDown.value).toFixed(2)}%
                                 </div>
                                 <div className="text-xs text-gray-500">{tTable("labels.maxDrawDown")}</div>
-                                {hiddenOption && <ProtectedOverlay />}
                             </div>
                             <div className="text-center">
                                 <div className="text-sm font-medium text-gray-600">
@@ -438,7 +408,7 @@ export function IndicesTable({
                                         }
                                     >
                                         <TableCell className={"font-medium"}>
-                                            {hiddenOption ? (
+                                            {!currentUserId ? (
                                                 <span className="relative">
                                                     {index.name}
                                                     <span
@@ -478,7 +448,6 @@ export function IndicesTable({
                                                     className="h-full border-0 p-0 bg-transparent"
                                                     isLoading={isLoadingIndicesWithHistory}
                                                 />
-                                                {hiddenOption && <ProtectedOverlay />}
                                             </div>
                                         </TableCell>
                                         <TableCell>{renderSafelyPercentage(index.historyOverview.days7)}</TableCell>
@@ -486,7 +455,6 @@ export function IndicesTable({
                                         <TableCell>
                                             <div className="relative">
                                                 {renderSafelyPercentage(index.historyOverview.total)}
-                                                {hiddenOption && <ProtectedOverlay />}
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -494,7 +462,6 @@ export function IndicesTable({
                                                 <span className="text-red-600">
                                                     -{renderSafelyNumber(index.maxDrawDown.value)}%
                                                 </span>
-                                                {hiddenOption && <ProtectedOverlay />}
                                             </div>
                                         </TableCell>
                                         <TableCell>
