@@ -1,21 +1,10 @@
 "use client";
-import {useState, useMemo} from "react";
+import {useState, useMemo, SyntheticEvent} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
 import {Tooltip, TooltipContent, TooltipTrigger} from "@/components/ui/tooltip";
-import {
-    Copy,
-    Edit,
-    Trash2,
-    ArrowUpDown,
-    ArrowUp,
-    ArrowDown,
-    ChevronDown,
-    ChevronRight,
-    EyeOff,
-    Eye,
-} from "lucide-react";
+import {Copy, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown, ChevronDown, ChevronRight} from "lucide-react";
 import {EntityMode, Id, IndexOverview, IndexOverviewWithHistory} from "@/utils/types/general.types";
 import {IndicesPagination} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesPagination";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
@@ -24,7 +13,6 @@ import Link from "next/link";
 import * as React from "react";
 import {IndexHistoryChartPreview} from "@/app/[locale]/indices/components/CLAUD_WEB/IndexHistoryChartPreview";
 import {HISTORY_OVERVIEW_DAYS, PAGES_URLS} from "@/utils/constants/general.constants";
-import {useRouter} from "next/navigation";
 import {useSession} from "next-auth/react";
 import {LinkReferer} from "@/app/components/LinkReferer";
 import {renderSafelyPercentage} from "@/utils/heleprs/ui/formatPercentage.helper";
@@ -55,8 +43,6 @@ export function IndicesTable({
     onCloneAction,
     mode,
 }: IndicesTableProps) {
-    const router = useRouter();
-
     const [sortField, setSortField] = useState<SortField>("total");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     const [expandedRows, setExpandedRows] = useState<Set<Id>>(new Set());
@@ -72,7 +58,6 @@ export function IndicesTable({
     const currentUserId = sessionData?.user?.id;
 
     const isViewMode = mode === EntityMode.VIEW;
-    const hiddenOption = isViewMode && !currentUserId;
 
     // i18n
     const tTable = useTranslations("indices.table");
@@ -167,27 +152,22 @@ export function IndicesTable({
 
     const isUserIndex = (index: IndexOverview) => !!index.userId;
 
-    const handleSignInClick = () => {
-        router.push(PAGES_URLS.authSignIn);
-    };
-
-    // Overlay component for protected cells
-    const ProtectedOverlay = () => (
-        <div
-            className="absolute inset-0 bg-gray-300 rounded flex items-center justify-center cursor-pointer transition-colors z-10 group"
-            onClick={handleSignInClick}
-        >
-            <EyeOff className="h-4 w-4 text-gray-500 group-hover:hidden" />
-            <Eye className="h-4 w-4 text-gray-500 hidden group-hover:block" />
-        </div>
-    );
-
     // Mobile Card Component
     const MobileIndexCard = ({index}: {index: IndexOverview}) => {
         const isExpanded = expandedRows.has(index.id);
 
         const indexWithOnlyHistory = indicesWithOnlyHistory.find(i => i.id === index.id);
         const indexWithHistory = {...index, ...indexWithOnlyHistory} as IndexOverviewWithHistory;
+
+        const handleExpand = (e: SyntheticEvent) => {
+            e.stopPropagation();
+            e.preventDefault();
+            toggleRowExpansion(index.id);
+        };
+
+        const handleClickLink = (e: SyntheticEvent) => {
+            e.stopPropagation();
+        };
 
         return (
             <div
@@ -196,15 +176,16 @@ export function IndicesTable({
                 }`}
             >
                 {/* Main row - always visible */}
-                <div className="flex items-center justify-between">
+                <div className="flex items-center justify-between" onClick={handleExpand}>
                     <div className="flex-1 min-w-0">
                         <Link
-                            className={`block font-semibold text-sm truncate ${
+                            className={`inline-block font-semibold text-sm truncate ${
                                 isUserIndex(index)
                                     ? "text-primary hover:text-primary/80"
                                     : "text-blue-600 hover:text-blue-800"
                             }`}
                             href={PAGES_URLS.index(index.id)}
+                            onClick={handleClickLink}
                         >
                             {index.name}
                         </Link>
@@ -228,7 +209,6 @@ export function IndicesTable({
                                 {renderSafelyPercentage(index.historyOverview.total)}
                             </div>
                             <div className="text-xs text-gray-500">{tTable("labels.total")}</div>
-                            {hiddenOption && <ProtectedOverlay />}
                         </div>
 
                         <Button
@@ -252,7 +232,6 @@ export function IndicesTable({
                                 className="h-64"
                                 isLoading={isLoadingIndicesWithHistory}
                             />
-                            {hiddenOption && <ProtectedOverlay />}
                         </div>
 
                         {/* Performance metrics */}
@@ -278,7 +257,6 @@ export function IndicesTable({
                                     -{Math.abs(index.maxDrawDown.value).toFixed(2)}%
                                 </div>
                                 <div className="text-xs text-gray-500">{tTable("labels.maxDrawDown")}</div>
-                                {hiddenOption && <ProtectedOverlay />}
                             </div>
                             <div className="text-center">
                                 <div className="text-sm font-medium text-gray-600">
@@ -438,7 +416,7 @@ export function IndicesTable({
                                         }
                                     >
                                         <TableCell className={"font-medium"}>
-                                            {hiddenOption ? (
+                                            {!currentUserId ? (
                                                 <span className="relative">
                                                     {index.name}
                                                     <span
@@ -478,7 +456,6 @@ export function IndicesTable({
                                                     className="h-full border-0 p-0 bg-transparent"
                                                     isLoading={isLoadingIndicesWithHistory}
                                                 />
-                                                {hiddenOption && <ProtectedOverlay />}
                                             </div>
                                         </TableCell>
                                         <TableCell>{renderSafelyPercentage(index.historyOverview.days7)}</TableCell>
@@ -486,7 +463,6 @@ export function IndicesTable({
                                         <TableCell>
                                             <div className="relative">
                                                 {renderSafelyPercentage(index.historyOverview.total)}
-                                                {hiddenOption && <ProtectedOverlay />}
                                             </div>
                                         </TableCell>
                                         <TableCell>
@@ -494,7 +470,6 @@ export function IndicesTable({
                                                 <span className="text-red-600">
                                                     -{renderSafelyNumber(index.maxDrawDown.value)}%
                                                 </span>
-                                                {hiddenOption && <ProtectedOverlay />}
                                             </div>
                                         </TableCell>
                                         <TableCell>
