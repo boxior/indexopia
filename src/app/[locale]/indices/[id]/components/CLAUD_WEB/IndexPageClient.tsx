@@ -22,6 +22,7 @@ import ContentLoader from "@/components/Suspense/ContentLoader";
 import useSWR from "swr";
 import {fetcher} from "@/lib/fetcher";
 import {User} from "@prisma/client";
+import Link from "next/link";
 
 export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
     const router = useRouter();
@@ -81,10 +82,12 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
                 <div className="text-center py-12">
                     <h1 className="text-2xl font-bold text-gray-900 mb-4">{tIndex("notFound.title")}</h1>
                     <p className="text-gray-600 mb-8">{tIndex("notFound.description")}</p>
-                    <Button onClick={() => router.push(PAGES_URLS.indices)}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        {tIndex("navigation.backToIndices")}
-                    </Button>
+                    <Link href={PAGES_URLS.indices}>
+                        <Button>
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            {tIndex("navigation.backToIndices")}
+                        </Button>
+                    </Link>
                 </div>
             </div>
         );
@@ -117,10 +120,12 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
             <div className="container mx-auto px-4 py-8">
                 {/* Back Navigation */}
                 <div className="mb-6">
-                    <Button variant="outline" onClick={() => router.push(PAGES_URLS.indices)} className="mb-4">
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        {tIndex("navigation.backToIndices")}
-                    </Button>
+                    <Link href={PAGES_URLS.indices}>
+                        <Button variant="outline" className="mb-4">
+                            <ArrowLeft className="h-4 w-4 mr-2" />
+                            {tIndex("navigation.backToIndices")}
+                        </Button>
+                    </Link>
                 </div>
 
                 {/* Index Overview */}
