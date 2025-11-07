@@ -5,6 +5,7 @@ import {EyeOff, Eye} from "lucide-react";
  * @param onClick
  * @constructor
  */
+// @ts-ignore
 export const ProtectedOverlay = (onClick: () => void) => (
     <div
         className="absolute inset-0 bg-gray-300 rounded flex items-center justify-center cursor-pointer transition-colors z-10 group"
