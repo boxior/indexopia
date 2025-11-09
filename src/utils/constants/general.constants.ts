@@ -57,6 +57,8 @@ export const COLORS = {
     positive: "#10b981",
 };
 
+export const MIN_PORTION = 0;
+
 export const MAX_PORTION = 100;
 
 export const YEAR_IN_MS = 365.25 * 24 * 60 * 60 * 1000; // Account for leap years
