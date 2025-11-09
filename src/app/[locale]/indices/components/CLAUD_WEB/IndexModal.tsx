@@ -291,7 +291,7 @@ export function IndexModal({
 
                         return (
                             <Form>
-                                <DialogHeader className={"pt-3 pb-3"}>
+                                <DialogHeader className={"pt-3 pb-4"}>
                                     <DialogTitle>{labels.title}</DialogTitle>
                                     {mode === IndexMode.CLONE && (
                                         <p className="text-sm text-gray-600">{tIndexModalModes("clone.description")}</p>
