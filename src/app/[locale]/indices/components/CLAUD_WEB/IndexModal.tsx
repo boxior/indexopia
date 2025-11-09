@@ -6,13 +6,17 @@ import {Button} from "@/components/ui/button";
 import {Input} from "@/components/ui/input";
 import {Label} from "@/components/ui/label";
 import {Badge} from "@/components/ui/badge";
-import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select";
 import {Tooltip, TooltipContent, TooltipTrigger, TooltipProvider} from "@/components/ui/tooltip";
 import {Loader2, X} from "lucide-react";
 import {Asset, Id, IndexOverviewAsset, IndexOverviewForCreate} from "@/utils/types/general.types";
 import {UseIndexActionsReturns} from "@/app/[locale]/indices/[id]/hooks/useIndexActions.hook";
 import {useTranslations} from "next-intl";
-import {DEFAULT_INDEX_STARTING_BALANCE, INDEX_VALIDATION, MAX_PORTION} from "@/utils/constants/general.constants";
+import {
+    DEFAULT_INDEX_STARTING_BALANCE,
+    INDEX_VALIDATION,
+    MAX_PORTION,
+    MIN_PORTION,
+} from "@/utils/constants/general.constants";
 import {useEffect, useState} from "react";
 import {actionGetAssets} from "@/app/[locale]/indices/[id]/actions";
 import ContentLoader from "@/components/Suspense/ContentLoader";
@@ -100,7 +104,7 @@ export function IndexModal({
                     name: Yup.string().required(),
                     rank: Yup.number().required(),
                     portion: Yup.number()
-                        .min(0, tIndexModalValidation("assets.portion.min", {count: 0}))
+                        .min(MIN_PORTION, tIndexModalValidation("assets.portion.min", {count: MIN_PORTION}))
                         .max(MAX_PORTION, tIndexModalValidation("assets.portion.max", {count: MAX_PORTION}))
                         .required(tIndexModalValidation("assets.portion.required")),
                 })
@@ -108,10 +112,10 @@ export function IndexModal({
             .min(1, tIndexModalValidation("assets.atLeastOne"))
             .test(
                 "total-allocation",
-                tIndexModalValidation("assets.portion.min", {count: MAX_PORTION}),
+                tIndexModalValidation("assets.totalAllocation", {count: MAX_PORTION}),
                 function (assets) {
                     if (!assets || assets.length === 0) return true;
-                    const total = assets.reduce((sum, asset) => sum + (asset.portion || 0), 0);
+                    const total = assets.reduce((sum, asset) => sum + (asset.portion || MIN_PORTION), 0);
                     return Math.abs(total - MAX_PORTION) < 0.01; // Allow for small floating point differences
                 }
             ),
@@ -266,7 +270,7 @@ export function IndexModal({
     if (isLoadingAvailableAssets) {
         return (
             <Dialog open={isOpen} onOpenChange={onCancelAction}>
-                <DialogContent className="sm:max-w-[600px]">
+                <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                     <ContentLoader type={"card"} count={1} />
                 </DialogContent>
             </Dialog>
@@ -275,7 +279,7 @@ export function IndexModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onCancelAction}>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                 <Formik
                     initialValues={getInitialValues()}
                     validationSchema={validationSchema}
@@ -291,15 +295,13 @@ export function IndexModal({
 
                         return (
                             <Form>
-                                <DialogHeader>
+                                <DialogHeader className={"pt-3 pb-4"}>
                                     <DialogTitle>{labels.title}</DialogTitle>
                                     {mode === IndexMode.CLONE && (
-                                        <p className="text-sm text-gray-600 mt-2">
-                                            {tIndexModalModes("clone.description")}
-                                        </p>
+                                        <p className="text-sm text-gray-600">{tIndexModalModes("clone.description")}</p>
                                     )}
                                     {mode === IndexMode.CLONE_TO_SYSTEM && (
-                                        <p className="text-sm text-gray-600 mt-2">
+                                        <p className="text-sm text-gray-600">
                                             {tIndexModalModes("cloneToSystem.description")}
                                         </p>
                                     )}
@@ -479,7 +481,7 @@ export function IndexModal({
                                             )}
                                     </div>
                                 </div>
-                                <DialogFooter className="flex-col-reverse sm:flex-row gap-2 sm:gap-0">
+                                <DialogFooter className="flex-col-reverse sm:flex-row gap-2 sm:gap-0 mt-3">
                                     <Button
                                         type="button"
                                         variant="outline"
