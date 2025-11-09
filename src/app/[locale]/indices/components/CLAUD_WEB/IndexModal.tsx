@@ -266,7 +266,7 @@ export function IndexModal({
     if (isLoadingAvailableAssets) {
         return (
             <Dialog open={isOpen} onOpenChange={onCancelAction}>
-                <DialogContent className="sm:max-w-[600px]">
+                <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto overflow-x-clip">
                     <ContentLoader type={"card"} count={1} />
                 </DialogContent>
             </Dialog>
@@ -275,7 +275,7 @@ export function IndexModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onCancelAction}>
-            <DialogContent className="sm:max-w-[600px]">
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto overflow-x-clip">
                 <Formik
                     initialValues={getInitialValues()}
                     validationSchema={validationSchema}
