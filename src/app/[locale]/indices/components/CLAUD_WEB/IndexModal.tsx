@@ -266,7 +266,7 @@ export function IndexModal({
     if (isLoadingAvailableAssets) {
         return (
             <Dialog open={isOpen} onOpenChange={onCancelAction}>
-                <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto overflow-x-clip">
+                <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                     <ContentLoader type={"card"} count={1} />
                 </DialogContent>
             </Dialog>
@@ -275,7 +275,7 @@ export function IndexModal({
 
     return (
         <Dialog open={isOpen} onOpenChange={onCancelAction}>
-            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto overflow-x-clip">
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
                 <Formik
                     initialValues={getInitialValues()}
                     validationSchema={validationSchema}
@@ -291,15 +291,13 @@ export function IndexModal({
 
                         return (
                             <Form>
-                                <DialogHeader>
+                                <DialogHeader className={"pt-3 pb-3"}>
                                     <DialogTitle>{labels.title}</DialogTitle>
                                     {mode === IndexMode.CLONE && (
-                                        <p className="text-sm text-gray-600 mt-2">
-                                            {tIndexModalModes("clone.description")}
-                                        </p>
+                                        <p className="text-sm text-gray-600">{tIndexModalModes("clone.description")}</p>
                                     )}
                                     {mode === IndexMode.CLONE_TO_SYSTEM && (
-                                        <p className="text-sm text-gray-600 mt-2">
+                                        <p className="text-sm text-gray-600">
                                             {tIndexModalModes("cloneToSystem.description")}
                                         </p>
                                     )}
@@ -479,7 +477,7 @@ export function IndexModal({
                                             )}
                                     </div>
                                 </div>
-                                <DialogFooter className="flex-col-reverse sm:flex-row gap-2 sm:gap-0">
+                                <DialogFooter className="flex-col-reverse sm:flex-row gap-2 sm:gap-0 mt-3">
                                     <Button
                                         type="button"
                                         variant="outline"
