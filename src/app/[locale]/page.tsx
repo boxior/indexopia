@@ -7,7 +7,7 @@ import SuspenseWrapper from "@/components/Suspense/SuspenseWrapper";
 import {dbGetIndicesOverview} from "@/lib/db/helpers/db.indexOverview.helpers";
 import {IndicesTable} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesTable";
 import {EntityMode} from "@/utils/types/general.types";
-import Link from "next/link";
+import {Link} from "@/i18n/navigation";
 import {PAGES_URLS} from "@/utils/constants/general.constants";
 import {Button} from "@/components/ui/button";
 import {filterTopPerformance} from "@/app/[locale]/indices/helpers";

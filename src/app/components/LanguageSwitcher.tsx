@@ -25,6 +25,7 @@ export default function LanguageSwitcher() {
 
     const handleLanguageChange = (nextLocale: SupportedLocale) => {
         if (nextLocale === locale || isLoadingTransition) return;
+
         startTransition(() => {
             router.replace(
                 // @ts-expect-error -- Params are consistent with the current route.
