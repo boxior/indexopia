@@ -9,7 +9,7 @@ import {EntityMode, Id, IndexOverview, IndexOverviewWithHistory} from "@/utils/t
 import {IndicesPagination} from "@/app/[locale]/indices/components/CLAUD_WEB/IndicesPagination";
 import {renderSafelyNumber} from "@/utils/heleprs/ui/renderSavelyNumber.helper";
 import {getIndexDurationLabel} from "@/app/[locale]/indices/helpers";
-import Link from "next/link";
+import {Link} from "@/i18n/navigation";
 import * as React from "react";
 import {IndexHistoryChartPreview} from "@/app/[locale]/indices/components/CLAUD_WEB/IndexHistoryChartPreview";
 import {HISTORY_OVERVIEW_DAYS, PAGES_URLS} from "@/utils/constants/general.constants";
