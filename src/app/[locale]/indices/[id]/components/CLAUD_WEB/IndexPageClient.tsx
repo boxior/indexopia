@@ -1,5 +1,5 @@
 "use client";
-import {useRouter} from "next/navigation";
+import {useRouter, Link} from "@/i18n/navigation";
 import {Button} from "@/components/ui/button";
 import {ArrowLeft} from "lucide-react";
 import {IndexOverview} from "@/app/[locale]/indices/[id]/components/CLAUD_WEB/IndexOverview";
@@ -22,7 +22,6 @@ import ContentLoader from "@/components/Suspense/ContentLoader";
 import useSWR from "swr";
 import {fetcher} from "@/lib/fetcher";
 import {User} from "@prisma/client";
-import Link from "next/link";
 
 export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
     const router = useRouter();

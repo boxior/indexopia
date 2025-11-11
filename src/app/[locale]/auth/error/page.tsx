@@ -5,7 +5,7 @@ import {Card, CardContent, CardDescription, CardHeader, CardTitle} from "@/compo
 import {Button} from "@/components/ui/button";
 import {Alert, AlertDescription} from "@/components/ui/alert";
 import {AlertCircle, Home, RefreshCw} from "lucide-react";
-import Link from "next/link";
+import {Link} from "@/i18n/navigation";
 import {useTranslations} from "next-intl";
 import {CONTACT_EMAIL, PAGES_URLS} from "@/utils/constants/general.constants";
 
