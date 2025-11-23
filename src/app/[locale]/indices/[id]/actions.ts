@@ -18,7 +18,7 @@ import {combineCacheTags} from "@/utils/cache/helpers.cache";
 
 export const actionUpdateIndexOverview = async (
     indexOverview: IndexOverview,
-    revalidateTags: boolean | undefined = false
+    revalidateTags: boolean | undefined = true
 ) => {
     let assets = [];
 

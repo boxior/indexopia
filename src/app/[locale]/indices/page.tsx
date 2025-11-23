@@ -40,7 +40,7 @@ const IndicesPageComponent = async () => {
     ]);
 
     const systemIndices = fetchedIndices[0];
-    const userIndices = await handleUpdateIndicesToUpToDateHistory(fetchedIndices[1]);
+    const userIndices = await handleUpdateIndicesToUpToDateHistory(fetchedIndices[1], false);
 
     const indices = [...systemIndices, ...userIndices];
 
