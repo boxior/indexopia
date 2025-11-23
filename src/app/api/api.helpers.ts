@@ -141,7 +141,7 @@ export const populateDb = async (assetCursor: AssetCursor) => {
 
         // Manage system indices migrated from the custom once by `globalAdmin` role.
         const systemIndices = await dbGetIndicesOverview();
-        await handleUpdateIndicesToUpToDateHistory(systemIndices, true);
+        await handleUpdateIndicesToUpToDateHistory(systemIndices);
 
         return NextResponse.json(
             {success: true},
