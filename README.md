@@ -64,3 +64,12 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 ### Cron jobs (Populate DB + System indices)
 - [QStash](https://console.upstash.com/qstash/schedules?teamid=0)
 
+### Release
+- 'dev' branch is alwasy rebased to `main`
+- We merge /features or any simple commits continiously to `dev` branch
+- When we are ready to release we create the `/release/{package version}-{description}` branch from 'dev'
+- Merge `/release...` branch to the `main`
+- Tag `main` branch like `git tag -a v{package version} -m "{description}"`
+- Push to `main`
+- Rebase `dev` on `main` and force push to origin
+
