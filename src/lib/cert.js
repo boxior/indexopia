@@ -46,7 +46,7 @@ export function decodeSsl(encoded) {
 }
 
 // Define the path to the file
-const pemFilePath = path.resolve("./certs/eu-central-1-bundle.pem");
+const pemFilePath = path.resolve("./certs/aiven-ca-prd.pem");
 
 // Function to read the original PEM file
 function readPemFile(filePath) {
