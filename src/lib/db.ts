@@ -5,6 +5,7 @@ import {decodeSsl} from "./cert";
 // Set up the MySQL connection with optimized pool settings
 export const mySqlPool = mysql.createPool({
     host: ENV_VARIABLES.MYSQL_HOST, // Replace with your MySQL host
+    port: ENV_VARIABLES.MYSQL_PORT, // Replace with your MySQL port
     user: ENV_VARIABLES.MYSQL_USER, // Replace with your MySQL username
     password: ENV_VARIABLES.MYSQL_PASSWORD, // Replace with your MySQL password
     database: ENV_VARIABLES.MYSQL_DATABASE, // Replace with your MySQL database name

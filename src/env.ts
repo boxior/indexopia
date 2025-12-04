@@ -10,6 +10,7 @@ interface EnvVariables {
     DEV_API_KEY: string;
     // MYSQL
     MYSQL_HOST: string;
+    MYSQL_PORT: number;
     MYSQL_USER: string;
     MYSQL_PASSWORD: string;
     MYSQL_DATABASE: string;
@@ -44,6 +45,7 @@ export const ENV_VARIABLES: EnvVariables = {
     DEV_API_KEY: process.env.DEV_API_KEY ?? process.env.NEXT_PUBLIC_DEV_API_KEY ?? "",
     // MYSQL
     MYSQL_HOST: process.env.MYSQL_HOST ?? process.env.NEXT_PUBLIC_MYSQL_HOST ?? "",
+    MYSQL_PORT: Number(process.env.MYSQL_PORT) || Number(process.env.NEXT_PUBLIC_MYSQL_PORT) || 3306,
     MYSQL_USER: process.env.MYSQL_USER ?? process.env.NEXT_PUBLIC_MYSQL_USER ?? "",
     MYSQL_PASSWORD: process.env.MYSQL_PASSWORD ?? process.env.NEXT_PUBLIC_MYSQL_PASSWORD ?? "",
     MYSQL_DATABASE: process.env.MYSQL_DATABASE ?? process.env.NEXT_PUBLIC_MYSQL_DATABASE ?? "",
