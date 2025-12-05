@@ -1,5 +1,5 @@
 "use client";
-import {useState, useMemo, SyntheticEvent} from "react";
+import {useState, useMemo, SyntheticEvent, useEffect, useRef} from "react";
 import {Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/components/ui/table";
 import {Badge} from "@/components/ui/badge";
 import {Button} from "@/components/ui/button";
@@ -46,11 +46,30 @@ export function IndicesTable({
     const [sortField, setSortField] = useState<SortField>("total");
     const [sortOrder, setSortOrder] = useState<SortOrder>("desc");
     const [expandedRows, setExpandedRows] = useState<Set<Id>>(new Set());
+    const isInitialMount = useRef(true);
 
-    const doFetch = !isEmpty(allIndices);
-    const {data: indicesWithOnlyHistoryData, isLoading: isLoadingIndicesWithHistory} = useSWR<{
+    const doFetchIndices = !isEmpty(allIndices);
+
+    const {
+        data: indicesWithOnlyHistoryData,
+        isLoading: isLoadingIndicesWithHistory,
+        mutate,
+    } = useSWR<{
         indices: IndexWithOnlyHistory[];
-    }>(doFetch ? () => `/api/indices?ids=${allIndices.map(index => index.id).join(",")}` : null, fetcher);
+    }>(doFetchIndices ? () => `/api/indices?ids=${allIndices.map(index => index.id).join(",")}` : null, fetcher);
+
+    useEffect(() => {
+        // Skip mutate on initial mount - let useSWR handle the initial fetch
+        if (isInitialMount.current) {
+            isInitialMount.current = false;
+            return;
+        }
+
+        // Only mutate if not currently loading
+        if (!isLoadingIndicesWithHistory) {
+            void mutate();
+        }
+    }, [JSON.stringify(indices)]);
 
     const indicesWithOnlyHistory = indicesWithOnlyHistoryData?.indices ?? [];
 
@@ -122,14 +141,14 @@ export function IndicesTable({
                 return aValue > bValue ? -1 : aValue < bValue ? 1 : 0;
             }
         });
-    }, [indices, sortField, sortOrder]);
+    }, [JSON.stringify(indices), sortField, sortOrder]);
 
     // Paginated data
     const paginatedIndices = useMemo(() => {
         const startIndex = (currentPage - 1) * itemsPerPage;
         const endIndex = startIndex + itemsPerPage;
         return sortedIndices.slice(startIndex, endIndex);
-    }, [sortedIndices, currentPage, itemsPerPage]);
+    }, [JSON.stringify(sortedIndices), currentPage, itemsPerPage]);
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
