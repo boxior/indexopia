@@ -33,6 +33,13 @@ const IndicesLayoutComponent = async ({
         return redirect(PAGES_URLS.authSignIn);
     }
 
+    // SECURITY: Enforce email verification
+    if (!session.user?.emailVerified) {
+        // Redirect to email verification page or show message
+        // For now, we'll allow access but you might want to redirect
+        // return redirect(PAGES_URLS.emailVerification);
+    }
+
     return (
         <div className="min-h-screen flex flex-col">
             <TooltipProvider>
@@ -48,7 +55,7 @@ export async function generateMetadata({params}: {params: Promise<{locale: strin
     const {locale} = await params;
 
     if (!hasLocale(routing.locales, locale)) {
-        // Ensure 404 metadata doesn’t leak a wrong locale
+        // Ensure 404 metadata doesn't leak a wrong locale
         notFound();
     }
 

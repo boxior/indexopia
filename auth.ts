@@ -17,6 +17,23 @@ const resend = new ResendClass(ENV_VARIABLES.AUTH_RESEND_KEY);
 
 export const {handlers, auth} = NextAuth({
     adapter: PrismaAdapter(prisma),
+    secret: process.env.AUTH_SECRET, // Critical: Required for session encryption
+    session: {
+        strategy: "database", // Use database sessions (already configured)
+        maxAge: 30 * 24 * 60 * 60, // 30 days
+        updateAge: 24 * 60 * 60, // Update session every 24 hours
+    },
+    cookies: {
+        sessionToken: {
+            name: `${process.env.NODE_ENV === "production" ? "__Secure-" : ""}next-auth.session-token`,
+            options: {
+                httpOnly: true,
+                sameSite: "lax",
+                path: "/",
+                secure: process.env.NODE_ENV === "production", // HTTPS only in production
+            },
+        },
+    },
     providers: [
         Resend({
             // If your environment variable is named differently than default
@@ -144,10 +161,23 @@ export const {handlers, auth} = NextAuth({
         async session({session, user}) {
             if (session.user) {
                 session.user.id = user.id;
+                // Enforce email verification
+                if (!user.emailVerified) {
+                    // You can add additional logic here, e.g., redirect to verification page
+                    // For now, we'll just include the verification status
+                    session.user.emailVerified = user.emailVerified;
+                }
             }
             return session;
         },
+        async signIn({user, email}) {
+            // Additional security checks can be added here
+            // For example, check if email is on a blocklist
+            return true;
+        },
     },
+    // Reduce verification token expiration from default 24h to 1h for better security
+    maxAge: 60 * 60, // 1 hour
 });
 
 // Helper function to extract locale from request

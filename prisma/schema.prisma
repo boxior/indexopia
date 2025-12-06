@@ -96,3 +96,43 @@ model Authenticator {
 
   @@id([userId, credentialID])
 }
+
+// Security tables
+model RateLimit {
+  id         String   @id @default(cuid())
+  identifier String
+  type       String   // "email" or "ip"
+  createdAt  DateTime @default(now())
+
+  @@index([identifier, type, createdAt])
+}
+
+model FailedLoginAttempt {
+  id        String   @id @default(cuid())
+  email     String
+  ipAddress String
+  createdAt DateTime @default(now())
+
+  @@index([email, createdAt])
+  @@index([ipAddress, createdAt])
+}
+
+model AccountLockout {
+  email      String   @id
+  lockedUntil DateTime
+  lockedAt   DateTime @default(now())
+}
+
+model SecurityEvent {
+  id        String   @id @default(cuid())
+  type      String
+  email     String?
+  ipAddress String
+  userAgent String?
+  metadata  String?  // JSON string
+  createdAt DateTime @default(now())
+
+  @@index([type, createdAt])
+  @@index([email, createdAt])
+  @@index([ipAddress, createdAt])
+}
