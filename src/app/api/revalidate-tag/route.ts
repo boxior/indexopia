@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
         const {tag} = (await req.json()) as {tag: string};
 
         // Assets
-        revalidateTag(tag, "max");
+        revalidateTag(tag, {expire: 0});
 
         return NextResponse.json(
             {success: true, tag},

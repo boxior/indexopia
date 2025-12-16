@@ -5,7 +5,7 @@ import {connection} from "next/server";
 import {cacheTag} from "next/dist/server/use-cache/cache-tag";
 import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineCacheTags} from "@/utils/cache/helpers.cache";
-import {revalidateTag, revalidatePath} from "next/cache";
+import {revalidateTag} from "next/cache";
 import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
 import {MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES} from "@/utils/constants/general.constants";
 import {chunk, flatten} from "lodash";
@@ -49,7 +49,7 @@ const dbPostUserIndexOverview = async (data: Omit<IndexOverview, "id">): Promise
         const [result] = await mySqlPool.execute(query, values);
         const insertId = (result as any).insertId; // Extract the auto-generated ID
 
-        revalidateTag(combineCacheTags(CacheTag.USER_INDICES_OVERVIEW, data.userId), "max");
+        revalidateTag(combineCacheTags(CacheTag.USER_INDICES_OVERVIEW, data.userId), {expire: 0});
 
         return await dbGetIndexOverviewById(insertId);
     } catch (error) {
@@ -96,7 +96,7 @@ const dbPostSystemIndexOverview = async (data: Omit<IndexOverview, "id">): Promi
         const [result] = await mySqlPool.execute(query, values);
         const insertId = (result as any).insertId; // Extract the auto-generated ID
 
-        revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW, "max");
+        revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW, {expire: 0});
 
         return await dbGetIndexOverviewById(insertId);
     } catch (error) {
@@ -228,9 +228,9 @@ export const dbPutIndexOverview = async (
 
         if (revalidateTags) {
             // Revalidate cache to reflect updates
-            data.systemId && revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW, "max");
-            data.userId && revalidateTag(CacheTag.USER_INDICES_OVERVIEW, "max");
-            revalidateTag(combineCacheTags(CacheTag.INDICES_OVERVIEW, data.id), "max");
+            data.systemId && revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW, {expire: 0});
+            data.userId && revalidateTag(CacheTag.USER_INDICES_OVERVIEW, {expire: 0});
+            revalidateTag(combineCacheTags(CacheTag.INDICES_OVERVIEW, data.id), {expire: 0});
         }
 
         return await dbGetIndexOverviewById(data.id);
@@ -254,7 +254,7 @@ export const dbDeleteSystemIndices = async (): Promise<boolean> => {
         // Check if rows were affected by the query
         const affectedRows = (result as any).affectedRows;
 
-        revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW, "max");
+        revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW, {expire: 0});
 
         return affectedRows > 0; // Return true if records were deleted, false otherwise
     } catch (error) {
@@ -280,9 +280,9 @@ export const dbDeleteIndexOverview = async (id: Id): Promise<boolean> => {
         // Check if rows were affected by the query
         const affectedRows = (result as any).affectedRows;
 
-        existedIndexOverview?.systemId && revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW, "max");
-        existedIndexOverview?.userId && revalidateTag(CacheTag.USER_INDICES_OVERVIEW, "max");
-        revalidateTag(combineCacheTags(CacheTag.INDICES_OVERVIEW, existedIndexOverview?.id), "max");
+        existedIndexOverview?.systemId && revalidateTag(CacheTag.SYSTEM_INDICES_OVERVIEW, {expire: 0});
+        existedIndexOverview?.userId && revalidateTag(CacheTag.USER_INDICES_OVERVIEW, {expire: 0});
+        revalidateTag(combineCacheTags(CacheTag.INDICES_OVERVIEW, existedIndexOverview?.id), {expire: 0});
 
         return affectedRows > 0; // Return true if the record was deleted, false otherwise
     } catch (error) {
