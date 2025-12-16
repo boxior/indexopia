@@ -7,6 +7,7 @@ import {getLocale} from "next-intl/server";
 import {DEFAULT_LOCALE} from "@/utils/constants/general.constants";
 
 const window = new JSDOM("").window as unknown as Window & typeof globalThis;
+
 const DOMPurify = createDOMPurify(window);
 
 export interface LegalDocument {
