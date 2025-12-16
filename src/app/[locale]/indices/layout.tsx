@@ -29,7 +29,7 @@ const IndicesLayoutComponent = async ({
 }>) => {
     const session = await auth();
 
-    if (!session) {
+    if (!session?.user) {
         return redirect(PAGES_URLS.authSignIn);
     }
 

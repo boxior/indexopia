@@ -22,7 +22,7 @@ const SignInLayoutComponent = async ({
 }>) => {
     const session = await auth();
 
-    if (session) {
+    if (session?.user) {
         return redirect(PAGES_URLS.indices);
     }
 
