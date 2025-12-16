@@ -5,7 +5,7 @@ import {connection} from "next/server";
 import {cacheTag} from "next/dist/server/use-cache/cache-tag";
 import {CacheTag} from "@/utils/cache/constants.cache";
 import {combineCacheTags} from "@/utils/cache/helpers.cache";
-import {revalidateTag} from "next/cache";
+import {revalidateTag, revalidatePath} from "next/cache";
 import {sortRankIndexAssets} from "@/utils/heleprs/generators/rank/sortRankIndexAssets.helper";
 import {MAX_ASSETS_COUNT_FOR_SYSTEM_INDICES} from "@/utils/constants/general.constants";
 import {chunk, flatten} from "lodash";

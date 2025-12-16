@@ -17,6 +17,7 @@ const resend = new ResendClass(ENV_VARIABLES.AUTH_RESEND_KEY);
 
 export const {handlers, auth} = NextAuth({
     adapter: PrismaAdapter(prisma),
+    trustHost: true, // Allows localhost:3000 and localhost:3001 in development
     providers: [
         Resend({
             // If your environment variable is named differently than default

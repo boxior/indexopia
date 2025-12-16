@@ -59,8 +59,8 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
         onDeleteCancel,
     } = useIndexActions();
 
-    const handleSave: UseIndexActionsReturns["onSave"] = async index => {
-        const savedIndex = await onSave(index);
+    const handleSave: UseIndexActionsReturns["onSave"] = async indexData => {
+        const savedIndex = await onSave(indexData);
 
         if (indexMode === IndexMode.CLONE || indexMode === IndexMode.CLONE_TO_SYSTEM) {
             savedIndex?.id && router.push(PAGES_URLS.index(savedIndex.id));
@@ -113,7 +113,8 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
                 return null;
         }
     };
-
+    console.log("index", index);
+    console.log("indexWithHistory", indexWithHistory);
     return (
         <TooltipProvider>
             <div className="container mx-auto px-4 py-8">
@@ -130,7 +131,7 @@ export function IndexPageClient({index}: {index: IndexOverviewType | null}) {
                 {/* Index Overview */}
                 <div className="mb-8">
                     <IndexOverview
-                        index={index}
+                        index={indexWithHistory ?? index}
                         currentUser={currentUser}
                         onEditAction={onEdit}
                         onDeleteAction={onDeleteClick}
