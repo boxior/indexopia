@@ -44,7 +44,7 @@ export const dbPostAssets = async (data: Asset[]) => {
         // Execute the query once with the entire batch of data
         await mySqlPool.execute(sql, values);
         // Invalidate the cache after inserting/updating the data
-        revalidateTag(CacheTag.ASSETS);
+        revalidateTag(CacheTag.ASSETS, "max");
         console.log("Data inserted/updated successfully!");
     } catch (error) {
         console.error("Error inserting data:", error);
@@ -91,8 +91,8 @@ export const dbDeleteAssetById = async (id: string): Promise<void> => {
         await mySqlPool.execute(sql, [id]);
 
         // Invalidate the cache after deleting the data
-        revalidateTag(CacheTag.ASSETS);
-        revalidateTag(combineCacheTags(CacheTag.ASSETS, id));
+        revalidateTag(CacheTag.ASSETS, "max");
+        revalidateTag(combineCacheTags(CacheTag.ASSETS, id), "max");
         console.log(`Asset with id ${id} deleted successfully!`);
     } catch (error) {
         console.error(`Error deleting asset with id ${id}:`, error);

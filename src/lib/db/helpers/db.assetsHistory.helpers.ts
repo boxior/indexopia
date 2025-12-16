@@ -37,7 +37,7 @@ export const dbPostAssetHistory = async (data: AssetHistory[]) => {
         await mySqlPool.execute(sql, values);
 
         // Invalidate cache after successful insertion/update
-        revalidateTag(combineCacheTags(CacheTag.ASSETS_HISTORY, data[0].assetId));
+        revalidateTag(combineCacheTags(CacheTag.ASSETS_HISTORY, data[0].assetId), "max");
         console.log("Asset histories inserted/updated successfully!");
     } catch (error) {
         console.error("Error inserting asset histories:", error);
@@ -252,7 +252,7 @@ export const dbDeleteAssetHistoryById = async (assetId: string): Promise<void> =
         await mySqlPool.execute(sql, [assetId]);
 
         // Invalidate cache after successful deletion
-        revalidateTag(combineCacheTags(CacheTag.ASSETS_HISTORY, assetId));
+        revalidateTag(combineCacheTags(CacheTag.ASSETS_HISTORY, assetId), "max");
         console.log(`Asset histories for assetId ${assetId} deleted successfully!`);
     } catch (error) {
         console.error(`Error deleting asset histories for assetId ${assetId}:`, error);
