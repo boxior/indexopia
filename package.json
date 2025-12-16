@@ -52,7 +52,7 @@
         "moment": "^2.30.1",
         "moment-timezone": "^0.5.47",
         "mysql2": "^3.14.0",
-        "next": "^15.6.0-canary.2",
+        "next": "^15.6.0-canary.60",
         "next-auth": "^5.0.0-beta.29",
         "next-intl": "^4.3.4",
         "numeral": "^2.0.6",
